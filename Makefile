@@ -5,7 +5,7 @@ deploy: deploy-candb deploy-zon_pst deploy-zon_backend deploy-zon_frontend
 
 .PHONY: deploy-candb
 deploy-candb:
-	cd CanDB/examples/multiCanister/simpleMultiCanister/ && dfx deploy index --network http://localhost:46429
+	cd CanDB/examples/multiCanister/simpleMultiCanister && dfx deploy index --network http://localhost:46429
 
 .PHONY: deploy-zon_pst
 deploy-zon_pst:
