@@ -1,0 +1,29 @@
+{
+  "canisters": {
+    "zon_backend": {
+      "main": "src/zon_backend/main.mo",
+      "type": "motoko"
+    },
+    "zon_frontend": {
+      "dependencies": [
+        "zon_backend"
+      ],
+      "frontend": {
+        "entrypoint": "src/zon_frontend/src/index.html"
+      },
+      "source": [
+        "src/zon_frontend/assets",
+        "dist/zon_frontend/"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
