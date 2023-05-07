@@ -1,5 +1,10 @@
 {
   "canisters": {
+    "pst": {
+      "main": "src/zon_pst/main.mo",
+      "type": "motoko",
+      "args": "( record { name = \"Zon Directory PST Token\"; symbol = \"ZDPST\"; decimals = 6; fee = 100_000; max_supply = 1_000_000_000; initial_balances = vec { record { record { owner = principal \"ruuoz-anyad-jumcs-huq7s-3eh7h-ja6j2-cmp2n-elv23-tghui-mve6f-xqe\"; subaccount = null; }; 1_000_000_000 } }; min_burn_amount = 100_000; minting_account = null; advanced_settings = null; })"
+    },
     "zon_backend": {
       "main": "src/zon_backend/main.mo",
       "type": "motoko"
@@ -21,7 +26,7 @@
   "defaults": {
     "build": {
       "args": "",
-      "packtool": ""
+      "packtool": "mops sources"
     }
   },
   "output_env_file": ".env",
