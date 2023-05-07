@@ -1,9 +1,5 @@
 {
   "canisters": {
-    "candb": {
-      "main": "CanDB/src/CanDB.mo",
-      "type": "motoko"
-    },
     "zon_pst": {
       "main": "src/zon_pst/main.mo",
       "type": "motoko"
