@@ -1,0 +1,3 @@
+[submodule "CanDB"]
+	url = git@github.com:vporton/CanDB.git
+	path = CanDB
