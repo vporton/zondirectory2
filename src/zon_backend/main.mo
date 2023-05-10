@@ -9,6 +9,8 @@ import Prelude "mo:base/Prelude";
 import Entity "mo:candb/Entity";
 import RBT "mo:stable-rbtree/StableRBTree";
 import Text "mo:base/Text";
+import Nat "mo:base/Nat";
+import xNat "mo:xtendedNumbers/NatX";
 
 // TODO: Also make the founder's account an owner?
 actor ZonBackend {
@@ -205,17 +207,19 @@ actor ZonBackend {
     };    
   };
 
-  // FIXME
-  // public shared({caller = caller}) func setItemData(_itemId: Nat64, _data: Item) {
-  //   var db = getItemsDB();
-  //   var item = db.get({sk: _itemId});
-  //   if (onlyItemOwner(item)) {
-  //     db.put({sk = _itemId; attributes = []});
-  //   }
-  //   require(_owner != address(0), "Zero address.");
-  //   itemOwners[_itemId] = _owner;
-  //   emit SetItemOwner(_itemId, _owner);
-  // }
+  public shared({caller = caller}) func setItemData(_itemId: Nat64, _item: Item) {
+    var db = getItemsDB();
+    let key = Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
+    switch (await db.get({sk = key})) {
+      case (?oldItemRepr) {
+        let oldItem = deserializeItem(oldItemRepr);
+        if (onlyItemOwner(caller, oldItem)) {
+          db.put({sk = key; attributes = serializeItem(_item)});
+        };
+      };
+      case _ { Debug.trap("no item") };
+    }
+  }
 
 
 };

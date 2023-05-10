@@ -49,8 +49,13 @@ let
       { name = "array"
       , version = "v0.2.1"
       , repo = "https://github.com/aviate-labs/array.mo"
-      , dependencies = [ "base" ] : List Text
+      , dependencies = [ "base" ]
       },
+      { name = "xtendedNumbers"
+      , version = "v1.1.0"
+      , repo = "https://github.com/edjCase/motoko_numbers"
+      , dependencies = [ "base" ]
+      }
     ] : List Package
 
 let
