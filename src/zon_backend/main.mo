@@ -7,6 +7,8 @@ import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
 import Prelude "mo:base/Prelude";
 import Entity "mo:candb/Entity";
+import RBT "mo:stable-rbtree/StableRBTree";
+import Text "mo:base/Text";
 
 // TODO: Also make the founder's account an owner?
 actor ZonBackend {
@@ -126,6 +128,7 @@ actor ZonBackend {
     };
   };
 
+  // TODO: Serialization format.
   func serializeItem(item: Item): Entity.AttributeValue {
     #tuple (switch (item.details) {
       case (#link v) { ([
@@ -142,6 +145,12 @@ actor ZonBackend {
         #text (item.description),
       ]) };
     });
+  };
+
+  func serializeItemFull(item: Item): Entity.AttributeMap {
+    var t = RBT.init<Text, Entity.AttributeValue>();
+    t := RBT.put(t, Text.compare, "v", serializeItem(item));
+    t;
   };
 
   func deserializeItem(attr: Entity.AttributeValue): Item {
@@ -186,7 +195,16 @@ actor ZonBackend {
       case (?value) { value };
       case _ { Debug.trap("wrong item format"); }
     };
-  }
+  };
+
+  func deserializeItemFull(map: Entity.AttributeMap): Item {
+    let v = RBT.get(map, Text.compare, "v");
+    switch (v) {
+      case (?v) { deserializeItem(v) };
+      case _ { Debug.trap("map not found") };
+    }
+    
+  };
 
   // FIXME
   // public shared({caller = caller}) func setItemData(_itemId: Nat64, _data: Item) {
