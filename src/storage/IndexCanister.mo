@@ -99,7 +99,7 @@ shared actor class IndexCanister(
       primaryKey = pk;
       scalingOptions = {
         autoScalingHook = autoScaleCanister;
-        sizeLimit = #heapSize(475_000_000); // Scale out at 475MB
+        sizeLimit = #heapSize(900_000_000); // Scale out at 900MB
       };
       initialOwners = controllers;
     });
