@@ -149,10 +149,8 @@ actor ZonBackend {
     });
   };
 
-  func serializeItem(item: Item): Entity.AttributeMap {
-    var t = RBT.init<Text, Entity.AttributeValue>();
-    t := RBT.put(t, Text.compare, "v", serializeItemAttr(item));
-    t;
+  func serializeItem(item: Item): [(Entity.AttributeKey, Entity.AttributeValue)] {
+    [("v", serializeItemAttr(item))];
   };
 
   func deserializeItemAttr(attr: Entity.AttributeValue): Item {
@@ -212,7 +210,7 @@ actor ZonBackend {
     let key = Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
-        let oldItem = deserializeItem(oldItemRepr);
+        let oldItem = deserializeItem(oldItemRepr.attributes);
         if (onlyItemOwner(caller, oldItem)) {
           db.put({sk = key; attributes = serializeItem(_item)});
         };
