@@ -89,12 +89,8 @@ shared actor class DBPartition({
     };
   };
 
-  public shared({caller = caller}) func scan(options: CanDB.ScanOptions): async CanDB.ScanResult {
-    if (checkCaller(caller)) {
-      CanDB.scan(db, options);
-    } else {
-      { entities = []; nextKey = null; };
-    };
+  public query func scan(options: CanDB.ScanOptions): async CanDB.ScanResult {
+    CanDB.scan(db, options);
   };
 
   /// @required public API (Do not delete or change)
