@@ -1,28 +1,39 @@
 import IndexCanister "../storage/IndexCanister";
 import PST "../zon_pst";
+import DBPartition "../storage/DBPartition";
 import Principal "mo:base/Principal";
 import Float "mo:base/Float";
 import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
 import Prelude "mo:base/Prelude";
+import Entity "mo:candb/Entity";
 
 // TODO: Also make the founder's account an owner?
 actor ZonBackend {
   type EntryKind = { #NONE; #DOWNLOADS; #LINK; #CATEGORY; }; // TODO: letter case
   type LinkKind = { #Link; #Message };
 
-  stable var index: ?Principal = null;
-  stable var pst: ?Principal = null;
+  stable var index: ?IndexCanister.IndexCanister = null;
+  stable var pst: ?PST.PST = null;
+  stable var itemsDB: ?DBPartition.DBPartition = null;
 
   public shared({ caller }) func init() {
     founder := ?caller;
-    if (index == null) {
-      index := ?Principal.fromActor(await IndexCanister.IndexCanister([Principal.fromActor(ZonBackend)]));
-    };
     if (pst == null) {
       // FIXME: `null` subaccount?
-      pst := ?Principal.fromActor(await PST.PST({ owner = Principal.fromActor(ZonBackend); subaccount = null }));
+      pst := ?(await PST.PST({ owner = Principal.fromActor(ZonBackend); subaccount = null }));
     };
+    if (index == null) {
+      index := ?(await IndexCanister.IndexCanister([Principal.fromActor(ZonBackend)]));
+    };
+    if (itemsDB == null) {
+      switch (index) {
+        case (?index) {
+          itemsDB := await index.createDBPartition("items");
+        };
+        case (null) {}
+      }
+    }
   };
 
   stable var salesOwnersShare = 0.1;
@@ -49,7 +60,7 @@ actor ZonBackend {
     description: Text;
     details: {
       #link : Text;
-      #post : Text;
+      #post : ();
     };
   };
 
@@ -102,4 +113,48 @@ actor ZonBackend {
       sellerAffiliateShare := _share;
     };
   };
+
+  func getItemsDB(): DBPartition.DBPartition {
+    actor("itemsDB");
+  };
+
+  func onlyItemOwner(caller: Principal, _item: Item): Bool {
+    if (caller == _item.owner) {
+      true;
+    } else {
+      Debug.trap("not the item owner");
+    };
+  };
+
+  func serializeItem(item: Item): Entity.AttributeValue {
+    #tuple (switch (item.details) {
+      case (#link v) { ([
+        #text (Principal.toText(item.owner)),
+        #int (item.price),
+        #text (item.title),
+        #text (item.description),
+        #text v,
+      ]) };
+      case (#post v) { ([
+        #text (Principal.toText(item.owner)),
+        #int (item.price),
+        #text (item.title),
+        #text (item.description),
+      ]) };
+    });
+  };
+
+  // FIXME
+  // public shared({caller = caller}) func setItemData(_itemId: Nat64, _data: Item) {
+  //   var db = getItemsDB();
+  //   var item = db.get({sk: _itemId});
+  //   if (onlyItemOwner(item)) {
+  //     db.put({sk = _itemId; attributes = []});
+  //   }
+  //   require(_owner != address(0), "Zero address.");
+  //   itemOwners[_itemId] = _owner;
+  //   emit SetItemOwner(_itemId, _owner);
+  // }
+
+
 };

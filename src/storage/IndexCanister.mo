@@ -61,17 +61,24 @@ shared actor class IndexCanister(
 
   public shared({caller = caller}) func autoScaleCanister(pk: Text): async Text {
     if (Utils.callingCanisterOwnsPK(caller, pkToCanisterMap, pk)) {
-      await createSalariesStorageCanister(pk, owners);
+      await createStorageCanister(pk, owners);
     } else {
       Debug.trap("error, called by non-controller=" # debug_show(caller));
     };
   };
 
-  public shared({caller = caller}) func createDBPartition(pk: Text): async ?Text {
+  public shared({caller = caller}) func createDBPartition(pk: Text): async ?DBPartition.DBPartition {
+    switch (await createDBPartitionImpl(pk)) {
+      case (?canisterId) { ?actor(canisterId) };
+      case (null) { null };
+    }
+  };
+
+  public shared({caller = caller}) func createDBPartitionImpl(pk: Text): async ?Text {
     if (checkCaller(caller)) {
       let canisterIds = getCanisterIdsIfExists(pk);
       if (canisterIds == []) {
-        ?(await createSalariesStorageCanister(pk, owners)); // FIXME
+        ?(await createStorageCanister(pk, owners)); // FIXME
       // the partition already exists, so don't create a new canister
       } else {
         Debug.print(pk # " already exists");
@@ -82,7 +89,7 @@ shared actor class IndexCanister(
     }
   };
 
-  func createSalariesStorageCanister(pk: Text, controllers: [Principal]): async Text {
+  func createStorageCanister(pk: Text, controllers: [Principal]): async Text {
     Debug.print("creating new storage canister with pk=" # pk);
     // Pre-load 300 billion cycles for the creation of a new storage canister
     // Note that canister creation costs 100 billion cycles, meaning there are 200 billion
