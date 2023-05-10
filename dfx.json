@@ -1,13 +1,5 @@
 {
   "canisters": {
-    "IndexCanister": {
-      "main": "src/storage/IndexCanister.mo",
-      "type": "motoko"
-    },
-    "zon_pst": {
-      "main": "src/zon_pst/main.mo",
-      "type": "motoko"
-    },
     "zon_backend": {
       "main": "src/zon_backend/main.mo",
       "type": "motoko"

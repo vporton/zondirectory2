@@ -9,13 +9,14 @@ import CanisterMap "mo:candb/CanisterMap";
 import Buffer "mo:stable-buffer/StableBuffer";
 import DBPartition "DBPartition";
 import Principal "mo:base/Principal";
+import Hash "mo:base/Hash";
 
 shared actor class IndexCanister(owner: Principal) = this {
   stable var allowedCallers: TrieSet.Set<Principal> = TrieSet.empty<Principal>();
 
   public shared({caller = caller}) func addAllowedCaller(allowed: Principal) {
     if (Principal.equal(owner, caller)) {
-      // allowedCallers.add(allowed); // FIXME
+      allowedCallers := TrieSet.put(allowedCallers, allowed, Principal.hash(allowed), Principal.equal);
     } else {
       Debug.trap("only owner can add allowed callers")
     };
