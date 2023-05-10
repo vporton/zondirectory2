@@ -1,5 +1,9 @@
 {
   "canisters": {
+    "IndexCanister": {
+      "main": "src/storage/IndexCanister.mo",
+      "type": "motoko"
+    },
     "zon_pst": {
       "main": "src/zon_pst/main.mo",
       "type": "motoko"
@@ -25,7 +29,7 @@
   "defaults": {
     "build": {
       "args": "",
-      "packtool": "mops sources"
+      "packtool": "vessel sources"
     }
   },
   "output_env_file": ".env",
