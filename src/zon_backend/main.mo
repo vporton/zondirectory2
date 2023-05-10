@@ -202,8 +202,7 @@ actor ZonBackend {
     switch (v) {
       case (?v) { deserializeItemAttr(v) };
       case _ { Debug.trap("map not found") };
-    }
-    
+    };    
   };
 
   // FIXME
