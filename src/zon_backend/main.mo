@@ -206,19 +206,20 @@ actor ZonBackend {
     };    
   };
 
-  public shared({caller = caller}) func setItemData(_itemId: Nat64, _item: Item) {
-    var db = getItemsDB();
+  // We don't check owner: If a user lost his/her item, that's his/her problem, not ours.
+  public shared({caller = caller}) func setItemData(canisterId: Principal, _itemId: Nat64, _item: Item) {
+    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
         let oldItem = deserializeItem(oldItemRepr.attributes);
         if (onlyItemOwner(caller, oldItem)) {
-          db.put({sk = key; attributes = serializeItem(_item)}); // FIXME: Puts to a wrong canister!
+          db.put({sk = key; attributes = serializeItem(_item)});
         };
       };
       case _ { Debug.trap("no item") };
-    }
-  }
+    };
+  };
 
   // TODO: `removeItemOwner`
 
