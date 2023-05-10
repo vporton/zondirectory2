@@ -20,6 +20,7 @@ actor ZonBackend {
   stable var index: ?IndexCanister.IndexCanister = null;
   stable var pst: ?PST.PST = null;
   stable var itemsDB: ?DBPartition.DBPartition = null;
+  stable var authorsDB: ?DBPartition.DBPartition = null;
 
   public shared({ caller }) func init() {
     founder := ?caller;
@@ -30,10 +31,10 @@ actor ZonBackend {
     if (index == null) {
       index := ?(await IndexCanister.IndexCanister([Principal.fromActor(ZonBackend)]));
     };
-    if (itemsDB == null) {
+    if (authorsDB == null) {
       switch (index) {
         case (?index) {
-          itemsDB := await index.createDBPartition("items");
+          authorsDB := await index.createDBPartition("authors");
         };
         case (null) {}
       }
@@ -212,12 +213,13 @@ actor ZonBackend {
       case (?oldItemRepr) {
         let oldItem = deserializeItem(oldItemRepr.attributes);
         if (onlyItemOwner(caller, oldItem)) {
-          db.put({sk = key; attributes = serializeItem(_item)});
+          db.put({sk = key; attributes = serializeItem(_item)}); // FIXME: Puts to a wrong canister!
         };
       };
       case _ { Debug.trap("no item") };
     }
   }
 
+  // TODO: `removeItemOwner`
 
 };
