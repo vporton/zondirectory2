@@ -7,11 +7,11 @@ actor ZonBackend {
   stable var pst: ?Principal = null;
   public shared({ caller }) func init() {
     if (index == null) {
-      index := ?Principal.fromActor(await IndexCanister.IndexCanister(Principal.fromActor(ZonBackend)));
+      index := ?Principal.fromActor(await IndexCanister.IndexCanister([Principal.fromActor(ZonBackend)]));
     };
     if (pst == null) {
       // FIXME: `null` subaccount?
-      pst := ?Principal.fromActor(await PST.PST({ owner = Principal.fromActor(ZonBackend); subaccount = null}));
+      pst := ?Principal.fromActor(await PST.PST({ owner = Principal.fromActor(ZonBackend); subaccount = null }));
     };
   }
 };

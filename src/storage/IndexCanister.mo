@@ -11,20 +11,28 @@ import DBPartition "DBPartition";
 import Principal "mo:base/Principal";
 import Hash "mo:base/Hash";
 import PeekableIter "mo:itertools/PeekableIter";
+import Array "mo:base/Array";
 
-shared actor class IndexCanister(owner: Principal) = this {
-  stable var allowedCallers: TrieSet.Set<Principal> = TrieSet.empty<Principal>();
+shared actor class IndexCanister(
+    initialOwners: [Principal]
+) = this {
+  stable var owners = initialOwners;
 
-  // FIXME: Use this.
-  // TODO: Also `removeAllowedCanister`.
-  // TODO: Use just an array of owners, not set.
-  public shared({caller = caller}) func addAllowedCaller(allowed: Principal) {
-    if (Principal.equal(owner, caller)) {
-      allowedCallers := TrieSet.put(allowedCallers, allowed, Principal.hash(allowed), Principal.equal);
+  func checkCaller(caller: Principal): Bool {
+    if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
+      true;
     } else {
-      Debug.trap("only owner can add allowed callers")
+      Debug.trap("not allowed");
+    }
+  };
+
+  public shared({caller = caller}) func setOwners(_owners: [Principal]) {
+    if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
+      owners := _owners;
     };
   };
+
+  public query func getOwners(): async [Principal] { owners };
 
   /// @required stable variable (Do not delete or change)
   ///
@@ -53,18 +61,17 @@ shared actor class IndexCanister(owner: Principal) = this {
 
   public shared({caller = caller}) func autoScaleCanister(pk: Text): async Text {
     if (Utils.callingCanisterOwnsPK(caller, pkToCanisterMap, pk)) {
-      await createSalariesStorageCanister(pk, [owner, Principal.fromActor(this)]);
+      await createSalariesStorageCanister(pk, owners);
     } else {
       Debug.trap("error, called by non-controller=" # debug_show(caller));
     };
   };
 
-  // FIXME
-  public shared({caller = caller}) func createDBPartitionCanisterByGroup(pk: Text): async ?Text {
-    if (TrieSet.mem(allowedCallers, caller, Principal.hash(caller), Principal.equal)) {
+  public shared({caller = caller}) func createDBPartition(pk: Text): async ?Text {
+    if (checkCaller(caller)) {
       let canisterIds = getCanisterIdsIfExists(pk);
       if (canisterIds == []) {
-        ?(await createSalariesStorageCanister(pk, [owner, Principal.fromActor(this)])); // FIXME
+        ?(await createSalariesStorageCanister(pk, owners)); // FIXME
       // the partition already exists, so don't create a new canister
       } else {
         Debug.print(pk # " already exists");
@@ -75,8 +82,6 @@ shared actor class IndexCanister(owner: Principal) = this {
     }
   };
 
-  // FIXME: We need big single canister for storing dependencies.
-  // Spins up a new HelloService canister with the provided pk and controllers
   func createSalariesStorageCanister(pk: Text, controllers: [Principal]): async Text {
     Debug.print("creating new storage canister with pk=" # pk);
     // Pre-load 300 billion cycles for the creation of a new storage canister
