@@ -2,6 +2,7 @@ import IndexCanister "../storage/IndexCanister";
 import PST "../zon_pst";
 import Principal "mo:base/Principal";
 
+// TODO: Also make the founder's account an owner?
 actor ZonBackend {
   stable var index: ?Principal = null;
   stable var pst: ?Principal = null;
