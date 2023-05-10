@@ -144,6 +144,50 @@ actor ZonBackend {
     });
   };
 
+  func deserializeItem(attr: Entity.AttributeValue): Item {
+    let value = label r: ?Item ?(switch (attr) {
+      case (#tuple arr) {
+        if (arr.size() == 4 or arr.size() == 5) {
+          {
+            owner = switch (arr[0]) {
+              case (#text (owner)) { Principal.fromText(owner) };
+              case _ { break r null; };
+            };
+            price = switch (arr[1]) {
+              case (#int (price)) { 0/*price*/ }; // FIXME: Convert using https://github.com/edjCase/motoko_numbers ?
+              case _ { break r null; };
+            };
+            title = switch (arr[2]) {
+              case (#text (title)) { title };
+              case _ { break r null; };
+            };
+            description = switch (arr[3]) {
+              case (#text (description)) { description };
+              case _ { break r null; };
+            };
+            details = if (arr.size() == 4) {
+              #post
+            } else { // arr.size() == 5
+              switch (arr[4]) {
+                case (#text (link)) { #link (link) };
+                case _ {
+                  break r null;
+                };
+              };
+            };
+          }
+        } else {
+          break r null;
+        };
+      };
+      case _ { break r null; }
+    });
+    switch (value) {
+      case (?value) { value };
+      case _ { Debug.trap("wrong item format"); }
+    };
+  }
+
   // FIXME
   // public shared({caller = caller}) func setItemData(_itemId: Nat64, _data: Item) {
   //   var db = getItemsDB();
