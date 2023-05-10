@@ -129,7 +129,7 @@ actor ZonBackend {
   };
 
   // TODO: Serialization format.
-  func serializeItem(item: Item): Entity.AttributeValue {
+  func serializeItemAttr(item: Item): Entity.AttributeValue {
     #tuple (switch (item.details) {
       case (#link v) { ([
         #text (Principal.toText(item.owner)),
@@ -147,13 +147,13 @@ actor ZonBackend {
     });
   };
 
-  func serializeItemFull(item: Item): Entity.AttributeMap {
+  func serializeItem(item: Item): Entity.AttributeMap {
     var t = RBT.init<Text, Entity.AttributeValue>();
-    t := RBT.put(t, Text.compare, "v", serializeItem(item));
+    t := RBT.put(t, Text.compare, "v", serializeItemAttr(item));
     t;
   };
 
-  func deserializeItem(attr: Entity.AttributeValue): Item {
+  func deserializeItemAttr(attr: Entity.AttributeValue): Item {
     let value = label r: ?Item ?(switch (attr) {
       case (#tuple arr) {
         if (arr.size() == 4 or arr.size() == 5) {
@@ -197,10 +197,10 @@ actor ZonBackend {
     };
   };
 
-  func deserializeItemFull(map: Entity.AttributeMap): Item {
+  func deserializeItem(map: Entity.AttributeMap): Item {
     let v = RBT.get(map, Text.compare, "v");
     switch (v) {
-      case (?v) { deserializeItem(v) };
+      case (?v) { deserializeItemAttr(v) };
       case _ { Debug.trap("map not found") };
     }
     
