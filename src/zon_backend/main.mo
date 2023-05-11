@@ -15,9 +15,6 @@ import Buffer "mo:base/Buffer";
 
 // TODO: Also make the founder's account an owner?
 actor ZonBackend {
-  // type EntryKind = { #NONE; #DOWNLOADS; #LINK; #CATEGORY; }; // TODO: letter case
-  // type LinkKind = { #Link; #Message };
-
   stable var index: ?IndexCanister.IndexCanister = null;
   stable var pst: ?PST.PST = null;
   stable var itemsDB: ?DBPartition.DBPartition = null;
@@ -59,9 +56,15 @@ actor ZonBackend {
   // TODO: Here and below: subaccount?
   stable var founder: ?Principal = null;
 
+  // TODO: Add `license` field?
+  // TODO: Affiliates.
+  // TODO: Images.
+  // TODO: Upload files.
+  // TODO: Item version.
   type Item = {
     owner: ?Principal;
     price: Nat;
+    locale: Text;
     title: Text;
     description: Text;
     details: {
@@ -69,6 +72,14 @@ actor ZonBackend {
       #post : ();
       #category : ();
     };
+  };
+
+  type User = {
+    locale: Text;
+    nick: Text;
+    title: Text;
+    description: Text;
+    link : Text;
   };
 
   func onlyMainOwner(caller: Principal): Bool {
@@ -154,6 +165,8 @@ actor ZonBackend {
       };
     };
     buf.add(#int (item.price));
+    buf.add(#text (item.locale));
+    buf.add(#text (item.nick));
     buf.add(#text (item.title));
     buf.add(#text (item.description));
     switch (item.details) {
@@ -169,11 +182,12 @@ actor ZonBackend {
     [("v", serializeItemAttr(item))];
   };
 
-  // FIXME:
   func deserializeItemAttr(attr: Entity.AttributeValue): Item {
     var kind: Int = 0;
     var owner: ?Principal = null;
     var price = 0;
+    var locale = "";
+    var nick = "";
     var title = "";
     var description = "";
     var details: {#none; #category; #link; #post} = #none;
@@ -223,7 +237,7 @@ actor ZonBackend {
             case (3) {
               switch (arr[pos]) {
                 case (#text v) {
-                  title := v;
+                  locale := v;
                 };
                 case _ { break r false; };
               };
@@ -232,13 +246,31 @@ actor ZonBackend {
             case (4) {
               switch (arr[pos]) {
                 case (#text v) {
+                  nick := v;
+                };
+                case _ { break r false; };
+              };
+              pos += 1;
+            };
+            case (5) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  title := v;
+                };
+                case _ { break r false; };
+              };
+              pos += 1;
+            };
+            case (6) {
+              switch (arr[pos]) {
+                case (#text v) {
                   description := v;
                 };
                 case _ { break r false; }
               };
               pos += 1;
             };
-            case (5) {
+            case (7) {
               switch (arr[pos]) {
                 case (#text v) {
                   link := v;
@@ -263,6 +295,8 @@ actor ZonBackend {
     {
       owner = owner;
       price = price;
+      locale = locale;
+      nick = nick;
       title = title;
       description = description;
       details = switch (kind) {
@@ -307,6 +341,127 @@ actor ZonBackend {
     };
   };
 
+  // TODO: Also remove voting data.
+  public shared({caller = caller}) func removeItem(canisterId: Principal, _itemId: Nat64) {
+    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
+    let key = Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
+    switch (await db.get({sk = key})) {
+      case (?oldItemRepr) {
+        let oldItem = deserializeItem(oldItemRepr.attributes);
+        if (onlyItemOwner(caller, oldItem)) {
+          db.delete({sk = key});
+        };
+      };
+      case _ { Debug.trap("no item") };
+    };
+  };
+
+  // TODO: Should I set maximum lengths on user nick, chirp length, etc.
+
+  func serializeUserAttr(user: User): Entity.AttributeValue {
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
+    buf.add(#text (user.locale));
+    buf.add(#text (user.title));
+    buf.add(#text (user.description));
+    buf.add(#text (user.link));
+    #tuple (buf.toArray());
+  };
+
+  func serializeUser(user: User): [(Entity.AttributeKey, Entity.AttributeValue)] {
+    [("v", serializeUserAttr(user))];
+  };
+
+  func deserializeUserAttr(attr: Entity.AttributeValue): User {
+    var locale = "";
+    var nick = "";
+    var title = "";
+    var description = "";
+    var link = "";
+    let res = label r: Bool switch (attr) {
+      case (#tuple arr) {
+        var pos = 0;
+        while (pos < arr.size()) {
+          switch (pos) {
+            case (0) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  locale := v;
+                };
+                case _ { break r false };
+              };
+              pos += 1;
+            };
+            case (1) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  title := v;
+                };
+                case _ { break r false };
+              };
+              pos += 1;
+            };
+            case (2) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  description := v;
+                };
+                case _ { break r false };
+              };
+              pos += 1;
+            };
+            case (3) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  link := v;
+                };
+                case _ { break r false };
+              };
+              pos += 1;
+            };
+            case _ { break r false; };
+          };
+          num += 1;
+        };
+        true;
+      };
+      case _ {
+        false;
+      };
+    };
+    if (not res) {
+      Debug.trap("wrong user format");
+    };
+    {
+      locale = locale;
+      nick = nick;
+      title = title;
+      description = description;
+      link = link;
+    };    
+  };
+
+  func deserializeUser(map: Entity.AttributeMap): User {
+    let v = RBT.get(map, Text.compare, "v");
+    switch (v) {
+      case (?v) { deserializeUserAttr(v) };
+      case _ { Debug.trap("map not found") };
+    };    
+  };
+
   // TODO: `removeItemOwner`
+
+  public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User) {
+    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
+    let key = Principal.toText(caller); // TODO: Should use binary encoding.
+    db.put({sk = key; attributes = serializeUser(_user)});
+  };
+
+  // FIXME
+  // TODO: Should also remove all his/her items?
+  public shared({caller = caller}) func removeUser(canisterId: Principal) {
+    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
+    let key = Principal.toText(caller);
+    db.delete({sk = key});
+  };
 
 };
