@@ -11,11 +11,12 @@ import RBT "mo:stable-rbtree/StableRBTree";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import xNat "mo:xtendedNumbers/NatX";
+import Buffer "mo:base/Buffer";
 
 // TODO: Also make the founder's account an owner?
 actor ZonBackend {
-  type EntryKind = { #NONE; #DOWNLOADS; #LINK; #CATEGORY; }; // TODO: letter case
-  type LinkKind = { #Link; #Message };
+  // type EntryKind = { #NONE; #DOWNLOADS; #LINK; #CATEGORY; }; // TODO: letter case
+  // type LinkKind = { #Link; #Message };
 
   stable var index: ?IndexCanister.IndexCanister = null;
   stable var pst: ?PST.PST = null;
@@ -66,7 +67,7 @@ actor ZonBackend {
     details: {
       #link : Text;
       #post : ();
-      #category : (); // FIXME: (se)serializing
+      #category : ();
     };
   };
 
@@ -132,81 +133,145 @@ actor ZonBackend {
     };
   };
 
-  // TODO: Serialization format.
-  // FIXME: #int ([012])
+  let SER_LINK = 0;
+  let SER_POST = 1;
+  let SER_CATEGORY = 2;
+
   func serializeItemAttr(item: Item): Entity.AttributeValue {
-    #tuple (switch (item.details) {
-      case (#link v) { ([
-        #int (0),
-        #text (Principal.toText(item.owner)),
-        #int (item.price),
-        #text (item.title),
-        #text (item.description),
-        #text v,
-      ]) };
-      case (#post) { ([
-        #int (1),
-        #text (Principal.toText(item.owner)),
-        #int (item.price),
-        #text (item.title),
-        #text (item.description),
-      ]) };
-      case (#category) { ([
-        #int (2),
-        #text (Principal.toText(item.owner)),
-        #int (item.price),
-        #text (item.title),
-        #text (item.description),
-      ]) };
-    });
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
+    buf.add(#int (switch (item.details) {
+      case (#link v) { SER_LINK };
+      case (#post) { SER_POST };
+      case (#category) { SER_CATEGORY };
+    }));
+    switch (item.owner) {
+      case (?owner) {
+        buf.add(#bool (true));
+        buf.add(#text (Principal.toText(owner)));
+      };
+      case (null) {
+        buf.add(#bool (false));
+      };
+    };
+    buf.add(#int (item.price));
+    buf.add(#text (item.title));
+    buf.add(#text (item.description));
+    switch (item.details) {
+      case (#link v) {
+        buf.add(#text v);
+      };
+      case _ {};
+    };
+    #tuple (buf.toArray());
   };
 
   func serializeItem(item: Item): [(Entity.AttributeKey, Entity.AttributeValue)] {
     [("v", serializeItemAttr(item))];
   };
 
+  // FIXME:
   func deserializeItemAttr(attr: Entity.AttributeValue): Item {
-    let value = label r: ?Item ?(switch (attr) {
+    var kind: Int = 0;
+    var owner: ?Principal = null;
+    var price = 0;
+    var title = "";
+    var description = "";
+    var details: {#none; #category; #link; #post} = #none;
+    var link = "";
+    let res = label r: Bool switch (attr) {
       case (#tuple arr) {
-        if (arr.size() == 4 or arr.size() == 5) {
-          {
-            owner = switch (arr[0]) {
-              case (#text (owner)) { Principal.fromText(owner) };
-              case _ { break r null; };
-            };
-            price = switch (arr[1]) {
-              case (#int (price)) { 0/*price*/ }; // FIXME: Convert using https://github.com/edjCase/motoko_numbers ?
-              case _ { break r null; };
-            };
-            title = switch (arr[2]) {
-              case (#text (title)) { title };
-              case _ { break r null; };
-            };
-            description = switch (arr[3]) {
-              case (#text (description)) { description };
-              case _ { break r null; };
-            };
-            details = if (arr.size() == 4) {
-              #post
-            } else { // arr.size() == 5
-              switch (arr[4]) {
-                case (#text (link)) { #link (link) };
-                case _ {
-                  break r null;
+        var pos = 0;
+        var num = 0;
+        while (pos < arr.size()) {
+          switch (num) {
+            case (0) {
+              switch (arr[pos]) {
+                case (#int v) {
+                  kind := v;
                 };
+                case _ { break r false };
+              };
+              pos += 1;
+            };
+            case (1) {
+              switch (arr[pos]) {
+                case (#bool true) {
+                  switch (arr[pos+1]) {
+                    case (#text v) {
+                      owner := ?Principal.fromText(v);
+                    };
+                    case _ { break r false; };
+                  };
+                  pos += 2;
+                };
+                case (#bool false) {
+                  owner := null;
+                  pos += 1;
+                };
+                case _ { break r false; }
               };
             };
-          }
-        } else {
-          break r null;
+            case (2) {
+              switch (arr[pos]) {
+                case (#int v) {
+                  price := 0; // FIXME: Use `v` instead.
+                };
+                case _ { break r false; };
+              };
+              pos += 1;
+            };
+            case (3) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  title := v;
+                };
+                case _ { break r false; };
+              };
+              pos += 1;
+            };
+            case (4) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  description := v;
+                };
+                case _ { break r false; }
+              };
+              pos += 1;
+            };
+            case (5) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  link := v;
+                };
+                case _ { break r false; };
+              };
+              pos += 1;
+            };
+            case _ { break r false; };
+          };
+          num += 1;
         };
+        true;
       };
-      case _ { break r null; }
-    });
-    switch (value) {
-      case (?value) { value };
-      case _ { Debug.trap("wrong item format"); }
+      case _ {
+        false;
+      };
     };
+    if (not res) {
+      Debug.trap("wrong item format");
+    };
+    {
+      owner = owner;
+      price = price;
+      title = title;
+      description = description;
+      details = switch (kind) {
+        case (0) { #link link };
+        case (1) { #post };
+        case (2) { #category };
+        case _ { Debug.trap("wrong item format"); }
+      };
+    };    
   };
 
   func deserializeItem(map: Entity.AttributeMap): Item {
