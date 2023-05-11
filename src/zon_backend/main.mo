@@ -55,17 +55,18 @@ actor ZonBackend {
 
   stable var maxId: Nat64 = 0;
 
-  // TODO: Here an below: subaccount?
+  // TODO: Here and below: subaccount?
   stable var founder: ?Principal = null;
 
   type Item = {
-    owner: Principal;
+    owner: ?Principal;
     price: Nat;
     title: Text;
     description: Text;
     details: {
       #link : Text;
       #post : ();
+      #category : (); // FIXME: (se)serializing
     };
   };
 
@@ -124,7 +125,7 @@ actor ZonBackend {
   };
 
   func onlyItemOwner(caller: Principal, _item: Item): Bool {
-    if (caller == _item.owner) {
+    if (?caller == _item.owner) {
       true;
     } else {
       Debug.trap("not the item owner");
@@ -132,16 +133,26 @@ actor ZonBackend {
   };
 
   // TODO: Serialization format.
+  // FIXME: #int ([012])
   func serializeItemAttr(item: Item): Entity.AttributeValue {
     #tuple (switch (item.details) {
       case (#link v) { ([
+        #int (0),
         #text (Principal.toText(item.owner)),
         #int (item.price),
         #text (item.title),
         #text (item.description),
         #text v,
       ]) };
-      case (#post v) { ([
+      case (#post) { ([
+        #int (1),
+        #text (Principal.toText(item.owner)),
+        #int (item.price),
+        #text (item.title),
+        #text (item.description),
+      ]) };
+      case (#category) { ([
+        #int (2),
         #text (Principal.toText(item.owner)),
         #int (item.price),
         #text (item.title),
@@ -204,6 +215,16 @@ actor ZonBackend {
       case (?v) { deserializeItemAttr(v) };
       case _ { Debug.trap("map not found") };
     };    
+  };
+
+  // FIXME: This allows items with foreign user attribution.
+  // We don't check owner: If a user lost his/her item, that's his/her problem, not ours.
+  public shared({caller = caller}) func createItemData(canisterId: Principal, _item: Item) {
+    let _itemId = maxId;
+    maxId += 1;
+    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
+    let key = Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
+    db.put({sk = key; attributes = serializeItem(_item)});
   };
 
   // We don't check owner: If a user lost his/her item, that's his/her problem, not ours.
