@@ -464,7 +464,6 @@ actor ZonBackend {
     db.delete({sk = key});
   };
 
-  // 
   let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs
 
 };
