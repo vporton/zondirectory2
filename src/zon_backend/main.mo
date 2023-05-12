@@ -283,7 +283,9 @@ actor ZonBackend {
     description: Text;
     details: {
       #link : Text;
+      #message : ();
       #post : ();
+      #download : ();
       #category : ();
     };
   };
@@ -301,14 +303,18 @@ actor ZonBackend {
   };
 
   let SER_LINK = 0;
-  let SER_POST = 1;
-  let SER_CATEGORY = 2;
+  let SER_MESSAGE = 1;
+  let SER_POST = 2;
+  let SER_DOWNLOAD = 3;
+  let SER_CATEGORY = 4;
 
   func serializeItemAttr(item: Item): Entity.AttributeValue {
     var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
     buf.add(#int (switch (item.details) {
       case (#link v) { SER_LINK };
+      case (#message) { SER_MESSAGE };
       case (#post) { SER_POST };
+      case (#download) { SER_DOWNLOAD };
       case (#category) { SER_CATEGORY };
     }));
     switch (item.owner) {
@@ -345,7 +351,7 @@ actor ZonBackend {
     var nick = "";
     var title = "";
     var description = "";
-    var details: {#none; #category; #link; #post} = #none;
+    var details: {#none; #link; #message; #post; #download; #category} = #none;
     var link = "";
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
@@ -456,8 +462,10 @@ actor ZonBackend {
       description = description;
       details = switch (kind) {
         case (0) { #link link };
-        case (1) { #post };
-        case (2) { #category };
+        case (1) { #message };
+        case (2) { #post };
+        case (3) { #download };
+        case (4) { #category };
         case _ { Debug.trap("wrong item format"); }
       };
     };    
@@ -525,8 +533,10 @@ actor ZonBackend {
   // Also consider using https://github.com/dfinity/examples/tree/master/motoko/invoice-canister
   // or https://github.com/research-ag/motoko-lib/blob/main/src/TokenHandler.mo
 
-
+  type Payment = {
+    
+  };
 
   public shared({caller = caller}) func pay(canisterId: Principal) {
-  }
+  };
 };
