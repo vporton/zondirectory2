@@ -166,7 +166,7 @@ actor ZonBackend {
     buf.add(#text (user.title));
     buf.add(#text (user.description));
     buf.add(#text (user.link));
-    #tuple (buf.toArray());
+    #tuple (Buffer.toArray(buf));
   };
 
   func serializeUser(user: User): [(Entity.AttributeKey, Entity.AttributeValue)] {
@@ -340,7 +340,7 @@ actor ZonBackend {
       };
       case _ {};
     };
-    #tuple (buf.toArray());
+    #tuple (Buffer.toArray(buf));
   };
 
   func serializeItem(item: Item): [(Entity.AttributeKey, Entity.AttributeValue)] {
@@ -540,7 +540,22 @@ actor ZonBackend {
   type Payment = {
     kind: { #payment; #donation };
     itemId: Int; // TODO: Enough `Nat64`.
-    amount: Nat; // TODO: Enough `Nat`
+    amount: Nat;
+  };
+
+  func serializePaymentAttr(payment: Payment): Entity.AttributeValue {
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(3);
+    buf.add(#int (switch (payment.kind) {
+      case (#payment) { 0 };
+      case (#donation) { 1 };
+    }));
+    buf.add(#int (payment.itemId));
+    buf.add(#int (payment.amount));
+    #tuple (Buffer.toArray(buf));
+  };
+
+  func serializePayment(payment: Payment): [(Entity.AttributeKey, Entity.AttributeValue)] {
+    [("v", serializePaymentAttr(payment))];
   };
 
   func deserializePaymentAttr(attr: Entity.AttributeValue): async Payment {
@@ -624,10 +639,23 @@ actor ZonBackend {
             let toAuthor = payment.amount - _shareholdersShare;
             switch (author) {
               case (?author) {
-                // ledger.transfer({memo = 0; amount = toAuthor; fee = 10000; from_subaccount = null; to = author});
+                // ledger.transfer({memo = 0; amount = toAuthor; fee = 10000; from_subaccount = ?Principal.toBlob(userId); to = author});
                 // TODO: author's subaccount
-                let _ = await ledger.icrc1_transfer({from_subaccount = null; to = {owner = author; subaccount = null}; amount = Int.abs(toAuthor); fee = null; memo = null; created_at_time = null});
-                // TODO: process error returned by `icrc1_transfer`.
+                // FIXME: Due to the transfer fee, the amount on account may be not enough for transfer.
+                let transferResult = await ledger.icrc1_transfer({
+                  from_subaccount = ?Principal.toBlob(userId);
+                  to = { owner = author; subaccount = null};
+                  amount = Int.abs(toAuthor);
+                  fee = null;
+                  memo = null;
+                  created_at_time = null;
+                });
+                switch (transferResult) {
+                  case (#Err err) {
+                    Debug.trap("can't pay author");
+                  };
+                  case (#Ok _) {}
+                }
               };
               case (null) {
                 // TODO: Give the money to the other parties, not leave it in canister.
@@ -641,6 +669,7 @@ actor ZonBackend {
     }
   };
 
-  public shared({caller = caller}) func pay(canisterId: Principal) {
+  public shared({caller = caller}) func pay(canisterId: Principal, payment: Payment) {
+    actor(Principal.toText(canisterId))
   };
 };

@@ -6,4 +6,4 @@
 
 - `canister_inspect_message`: https://internetcomputer.org/docs/current/motoko/main/message-inspection.
 
-- managing identity: https://nfid.one - allows to verify phone number.
+- The current code allows to write to an "alien" canister. Possible solution is to use one CanDB with key prefixes.
