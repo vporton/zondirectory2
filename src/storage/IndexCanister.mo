@@ -1,6 +1,5 @@
 import Cycles "mo:base/ExperimentalCycles";
 import Debug "mo:base/Debug";
-import Error "mo:base/Error";
 import Text "mo:base/Text";
 import TrieSet "mo:base/TrieSet";
 import CA "mo:candb/CanisterActions";
@@ -22,7 +21,7 @@ shared actor class IndexCanister(
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
       true;
     } else {
-      throw Error.reject("not allowed");
+      Debug.trap("not allowed");
     }
   };
 
@@ -63,7 +62,7 @@ shared actor class IndexCanister(
     if (Utils.callingCanisterOwnsPK(caller, pkToCanisterMap, pk)) {
       await createStorageCanister(pk, owners);
     } else {
-      throw Error.reject("error, called by non-controller=" # debug_show(caller));
+      Debug.trap("error, called by non-controller=" # debug_show(caller));
     };
   };
 
@@ -85,7 +84,7 @@ shared actor class IndexCanister(
         null 
       };
     } else {
-      throw Error.reject("caller not allowed to create partition");
+      Debug.trap("caller not allowed to create partition");
     }
   };
 

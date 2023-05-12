@@ -5,7 +5,7 @@ import CanDB "mo:candb/CanDB";
 import Principal "mo:base/Principal";
 import Bool "mo:base/Bool";
 import PeekableIter "mo:itertools/PeekableIter";
-import Error "mo:base/Error";
+import Debug "mo:base/Debug";
 
 shared actor class DBPartition({
   // the primary key of this canister
@@ -28,7 +28,7 @@ shared actor class DBPartition({
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
       true;
     } else {
-      throw Error.reject("not allowed");
+      Debug.trap("not allowed");
       false;
     }
   };
@@ -98,6 +98,12 @@ shared actor class DBPartition({
   public shared({ caller = caller }) func transferCycles(): async () {
     if (await checkCaller(caller)) {
       return await CA.transferCycles(caller);
+    };
+  };
+
+  public shared({caller = caller}) func tryPut(options: CanDB.PutOptions) {
+    if ((await checkCaller(caller)) and not CanDB.skExists(db, options.sk)) {
+      await* CanDB.put(db, options);
     };
   };
 }

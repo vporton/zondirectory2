@@ -4,7 +4,7 @@ import DBPartition "../storage/DBPartition";
 import Principal "mo:base/Principal";
 import Float "mo:base/Float";
 import Bool "mo:base/Bool";
-import Error "mo:base/Error";
+import Debug "mo:base/Debug";
 import Prelude "mo:base/Prelude";
 import Entity "mo:candb/Entity";
 import RBT "mo:stable-rbtree/StableRBTree";
@@ -105,7 +105,7 @@ actor ZonBackend {
     if (?caller == founder) {
       true;
     } else {
-      throw Error.reject("not the main owner");
+      Debug.trap("not the main owner");
     }
   };
 
@@ -125,15 +125,13 @@ actor ZonBackend {
 
   let phoneNumberVerificationCanisterId = "gzqxf-kqaaa-aaaak-qakba-cai"; // https://docs.nfid.one/developer/credentials/mobile-phone-number-credential
 
-  func checkSybil(sybilCanister: Principal, user: Principal): async Bool {
+  func checkSybil(sybilCanister: Principal, user: Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
     switch (await db.get({sk = Principal.toText(user)})) {
-      case (?_) {
-        true;
-      };
       case (null) {
-        throw Error.reject("not verified user");
+        Debug.trap("not verified user");
       };
+      case _ {};
     };
   };
 
@@ -146,7 +144,7 @@ actor ZonBackend {
       var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
       db.put({sk = Principal.toText(caller); attributes = [("v", #bool true)]});
     } else {
-      throw Error.reject("cannot verify phone number");
+      Debug.trap("cannot verify phone number");
     };
   };
 
@@ -234,7 +232,7 @@ actor ZonBackend {
       };
     };
     if (not res) {
-      throw Error.reject("wrong user format");
+      Debug.trap("wrong user format");
     };
     {
       locale = locale;
@@ -249,15 +247,15 @@ actor ZonBackend {
     let v = RBT.get(map, Text.compare, "v");
     switch (v) {
       case (?v) { await deserializeUserAttr(v) };
-      case _ { throw Error.reject("map not found") };
+      case _ { Debug.trap("map not found") };
     };    
   };
 
   // TODO: `removeItemOwner`
 
   // TODO: Here and in other places, setting an owner can conceal spam messages as coming from a different user.
-  public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User) {
-    await checkSybil(caller);
+  public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User, sybilCanisterId: Principal) {
+    await checkSybil(sybilCanisterId, caller);
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = Principal.toText(caller); // TODO: Should use binary encoding.
     db.put({sk = key; attributes = serializeUser(_user)});
@@ -299,7 +297,7 @@ actor ZonBackend {
     if (?caller == _item.owner) {
       true;
     } else {
-      throw Error.reject("not the item owner");
+      Debug.trap("not the item owner");
     };
   };
 
@@ -448,7 +446,7 @@ actor ZonBackend {
       };
     };
     if (not res) {
-      throw Error.reject("wrong item format");
+      Debug.trap("wrong item format");
     };
     {
       owner = owner;
@@ -461,7 +459,7 @@ actor ZonBackend {
         case (0) { #link link };
         case (1) { #post };
         case (2) { #category };
-        case _ { throw Error.reject("wrong item format"); }
+        case _ { Debug.trap("wrong item format"); }
       };
     };    
   };
@@ -470,14 +468,14 @@ actor ZonBackend {
     let v = RBT.get(map, Text.compare, "v");
     switch (v) {
       case (?v) { await deserializeItemAttr(v) };
-      case _ { throw Error.reject("map not found") };
+      case _ { Debug.trap("map not found") };
     };    
   };
 
   // FIXME: This allows items with foreign user attribution.
   // We don't check owner: If a user lost his/her item, that's his/her problem, not ours.
-  public shared({caller = caller}) func createItemData(canisterId: Principal, _item: Item) {
-    await checkSybil(caller);
+  public shared({caller = caller}) func createItemData(canisterId: Principal, _item: Item, sybilCanisterId: Principal) {
+    await checkSybil(sybilCanisterId, caller);
     let _itemId = maxId;
     maxId += 1;
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
@@ -493,13 +491,13 @@ actor ZonBackend {
       case (?oldItemRepr) {
         let oldItem = await deserializeItem(oldItemRepr.attributes);
         if (_item.owner != oldItem.owner) {
-          throw Error.reject("can't change item owner");
-        }
+          Debug.trap("can't change item owner");
+        };
         if (await onlyItemOwner(caller, oldItem)) {
           db.put({sk = key; attributes = serializeItem(_item)});
         };
       };
-      case _ { throw Error.reject("no item") };
+      case _ { Debug.trap("no item") };
     };
   };
 
@@ -514,7 +512,7 @@ actor ZonBackend {
           db.delete({sk = key});
         };
       };
-      case _ { throw Error.reject("no item") };
+      case _ { Debug.trap("no item") };
     };
   };
 
