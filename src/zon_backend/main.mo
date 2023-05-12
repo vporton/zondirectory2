@@ -166,7 +166,6 @@ actor ZonBackend {
     };
     buf.add(#int (item.price));
     buf.add(#text (item.locale));
-    buf.add(#text (item.nick));
     buf.add(#text (item.title));
     buf.add(#text (item.description));
     switch (item.details) {
@@ -361,6 +360,7 @@ actor ZonBackend {
   func serializeUserAttr(user: User): Entity.AttributeValue {
     var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
     buf.add(#text (user.locale));
+    buf.add(#text (user.nick));
     buf.add(#text (user.title));
     buf.add(#text (user.description));
     buf.add(#text (user.link));
@@ -389,38 +389,42 @@ actor ZonBackend {
                 };
                 case _ { break r false };
               };
-              pos += 1;
             };
             case (1) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  nick := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case (2) {
               switch (arr[pos]) {
                 case (#text v) {
                   title := v;
                 };
                 case _ { break r false };
               };
-              pos += 1;
             };
-            case (2) {
+            case (3) {
               switch (arr[pos]) {
                 case (#text v) {
                   description := v;
                 };
                 case _ { break r false };
               };
-              pos += 1;
             };
-            case (3) {
+            case (4) {
               switch (arr[pos]) {
                 case (#text v) {
                   link := v;
                 };
                 case _ { break r false };
               };
-              pos += 1;
             };
             case _ { break r false; };
           };
-          num += 1;
+          pos += 1;
         };
         true;
       };
@@ -466,7 +470,7 @@ actor ZonBackend {
   };
 
   let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs
-  // TODO: Or "utozz-siaaa-aaaam-qaaxq-cai": https://dank.ooo/wicp/ (seem to have less UX)\
+  // TODO: Or "utozz-siaaa-aaaam-qaaxq-cai": https://dank.ooo/wicp/ (seem to have less UX)
   // TODO: Or "ryjl3-tyaaa-aaaaa-aaaba-cai" - native NNS ICP token.
   // Also consider using https://github.com/dfinity/examples/tree/master/motoko/invoice-canister
   // or https://github.com/research-ag/motoko-lib/blob/main/src/TokenHandler.mo
