@@ -12,6 +12,9 @@ import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import xNat "mo:xtendedNumbers/NatX";
 import Buffer "mo:base/Buffer";
+import Token "mo:icrc1/ICRC1/Canisters/Token";
+import Int "mo:base/Int";
+import fractions "./fractions";
 
 // TODO: Also make the founder's account an owner?
 actor ZonBackend {
@@ -21,6 +24,7 @@ actor ZonBackend {
   stable var authorsDB: ?DBPartition.DBPartition = null; // principal -> User
   stable var sybilDB: ?DBPartition.DBPartition = null; // principal -> () (defined if human)
   stable var paymentsDB: ?DBPartition.DBPartition = null; // principal -> Payment
+  stable var ledger: Token.Token = actor(nativeIPCToken);
 
   /// Initialization ///
 
@@ -51,43 +55,43 @@ actor ZonBackend {
 
   /// Shares ///
 
-  stable var salesOwnersShare = 0.1;
-  stable var upvotesOwnersShare = 0.5;
-  stable var uploadOwnersShare = 0.15;
-  stable var buyerAffiliateShare = 0.1;
-  stable var sellerAffiliateShare = 0.15;
+  stable var salesOwnersShare = fractions.fdiv(1, 10); // 10%
+  stable var upvotesOwnersShare = fractions.fdiv(1, 2); //50%
+  stable var uploadOwnersShare = fractions.fdiv(3, 20); // 15%
+  stable var buyerAffiliateShare = fractions.fdiv(1, 10); // 10%
+  stable var sellerAffiliateShare = fractions.fdiv(3, 20); // 15%
 
-  public query func getSalesOwnersShare(): async Float { salesOwnersShare };
-  public query func getUpvotesOwnersShare(): async Float { upvotesOwnersShare };
-  public query func getUploadOwnersShare(): async Float { uploadOwnersShare };
-  public query func getBuyerAffiliateShare(): async Float { buyerAffiliateShare };
-  public query func getSellerAffiliateShare(): async Float { sellerAffiliateShare };
+  public query func getSalesOwnersShare(): async fractions.Fraction { salesOwnersShare };
+  public query func getUpvotesOwnersShare(): async fractions.Fraction { upvotesOwnersShare };
+  public query func getUploadOwnersShare(): async fractions.Fraction { uploadOwnersShare };
+  public query func getBuyerAffiliateShare(): async fractions.Fraction { buyerAffiliateShare };
+  public query func getSellerAffiliateShare(): async fractions.Fraction { sellerAffiliateShare };
 
-  public shared({caller = caller}) func setSalesOwnersShare(_share: Float) {
+  public shared({caller = caller}) func setSalesOwnersShare(_share: fractions.Fraction) {
     if (await onlyMainOwner(caller)) {
       salesOwnersShare := _share;
     };
   };
 
-  public shared({caller = caller}) func setUpvotesOwnersShare(_share: Float) {
+  public shared({caller = caller}) func setUpvotesOwnersShare(_share: fractions.Fraction) {
     if (await onlyMainOwner(caller)) {
       upvotesOwnersShare := _share;
     };
   };
 
-  public shared({caller = caller}) func setUploadOwnersShare(_share: Float) {
+  public shared({caller = caller}) func setUploadOwnersShare(_share: fractions.Fraction) {
     if (await onlyMainOwner(caller)) {
       uploadOwnersShare := _share;
     };
   };
 
-  public shared({caller = caller}) func setBuyerAffiliateShare(_share: Float) {
+  public shared({caller = caller}) func setBuyerAffiliateShare(_share: fractions.Fraction) {
     if (await onlyMainOwner(caller)) {
       buyerAffiliateShare := _share;
     };
   };
 
-  public shared({caller = caller}) func setSellerAffiliateShare(_share: Float) {
+  public shared({caller = caller}) func setSellerAffiliateShare(_share: fractions.Fraction) {
     if (await onlyMainOwner(caller)) {
       sellerAffiliateShare := _share;
     };
@@ -534,7 +538,107 @@ actor ZonBackend {
   // or https://github.com/research-ag/motoko-lib/blob/main/src/TokenHandler.mo
 
   type Payment = {
-    
+    kind: { #payment; #donation };
+    itemId: Int; // TODO: Enough `Nat64`.
+    amount: Nat; // TODO: Enough `Nat`
+  };
+
+  func deserializePaymentAttr(attr: Entity.AttributeValue): async Payment {
+    var kind: { #payment; #donation } = #payment;
+    var itemId: Int = 0;
+    var amount = 0;
+    let res = label r: Bool switch (attr) {
+      case (#tuple arr) {
+        var pos = 0;
+        while (pos < arr.size()) {
+          switch (pos) {
+            case (0) {
+              switch (arr[pos]) {
+                case (#int v) {
+                  switch (v) {
+                    case (0) { kind := #payment; };
+                    case (1) { kind := #donation; };
+                    case _ { break r false };
+                  }
+                };
+                case _ { break r false };
+              };
+            };
+            case (1) {
+              switch (arr[pos]) {
+                case (#int v) {
+                  itemId := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case (2) {
+              switch (arr[pos]) {
+                case (#int v) {
+                  amount := Int.abs(v);
+                };
+                case _ { break r false };
+              };
+            };
+            case _ { break r false; };
+          };
+          pos += 1;
+        };
+        true;
+      };
+      case _ {
+        false;
+      };
+    };
+    if (not res) {
+      Debug.trap("wrong user format");
+    };
+    {
+      kind = kind;
+      itemId = itemId;
+      amount = amount;
+    };    
+  };
+
+  func deserializePayment(map: Entity.AttributeMap): async Payment {
+    let v = RBT.get(map, Text.compare, "v");
+    switch (v) {
+      case (?v) { await deserializePaymentAttr(v) };
+      case _ { Debug.trap("map not found") };
+    };    
+  };
+
+  // FIXME: Need to check that payment really happened.
+  func processPayment(paymentCanisterId: Principal, userId: Principal): async () {
+    var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
+    switch (await db.remove({sk = Principal.toText(userId)})) {
+      case (?paymentRepr) {
+        let payment = await deserializePayment(paymentRepr.attributes);
+        let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
+        let itemKey = Int.toText(payment.itemId);
+        switch (await db.get({sk = itemKey})) {
+          case (?itemRepr) {
+            let item = await deserializeItem(itemRepr.attributes);
+            let author = item.owner;
+            // payToShareholders(_shareholdersShare, author); // TODO
+            let toAuthor = payment.amount - _shareholdersShare;
+            switch (author) {
+              case (?author) {
+                // ledger.transfer({memo = 0; amount = toAuthor; fee = 10000; from_subaccount = null; to = author});
+                // TODO: author's subaccount
+                let _ = await ledger.icrc1_transfer({from_subaccount = null; to = {owner = author; subaccount = null}; amount = Int.abs(toAuthor); fee = null; memo = null; created_at_time = null});
+                // TODO: process error returned by `icrc1_transfer`.
+              };
+              case (null) {
+                // TODO: Give the money to the other parties, not leave it in canister.
+              };
+            }
+          };
+          case (null) { Debug.trap("no item"); };
+        };
+      };
+      case (null) {};
+    }
   };
 
   public shared({caller = caller}) func pay(canisterId: Principal) {
