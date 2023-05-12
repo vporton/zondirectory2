@@ -450,6 +450,7 @@ actor ZonBackend {
 
   // TODO: `removeItemOwner`
 
+  // TODO: Here and in other places, setting an owner can conceal spam messages as coming from a different user.
   public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User) {
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = Principal.toText(caller); // TODO: Should use binary encoding.

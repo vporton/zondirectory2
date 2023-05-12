@@ -6,4 +6,4 @@
 
 - Check that the input is valid before calling `shared` functions.
 
-- `canister_inspect_message`.
+- `canister_inspect_message`: https://internetcomputer.org/docs/current/motoko/main/message-inspection.
