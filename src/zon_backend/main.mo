@@ -123,6 +123,8 @@ actor ZonBackend {
 
   /// Users ///
 
+  let phoneNumberVerificationCanisterId = "gzqxf-kqaaa-aaaak-qakba-cai"; // https://docs.nfid.one/developer/credentials/mobile-phone-number-credential
+
   func checkSybil(sybilCanister: Principal, user: Principal): async Bool {
     var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
     switch (await db.get({sk = Principal.toText(user)})) {
@@ -137,8 +139,15 @@ actor ZonBackend {
 
   // anti-Sybil verification
   public shared({caller}) func verifyUser(sybilCanister: Principal): async () {
-    var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
-    db.put({sk = Principal.toText(caller); attributes = [("v", #bool true)]});
+    let verifyActor = actor(phoneNumberVerificationCanisterId): actor {
+      is_phone_number_approved(principal: Text) : async Bool;
+    };
+    if (await verifyActor.is_phone_number_approved(Principal.toText(caller))) {
+      var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
+      db.put({sk = Principal.toText(caller); attributes = [("v", #bool true)]});
+    } else {
+      throw Error.reject("cannot verify phone number");
+    };
   };
 
   type User = {
@@ -248,6 +257,7 @@ actor ZonBackend {
 
   // TODO: Here and in other places, setting an owner can conceal spam messages as coming from a different user.
   public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User) {
+    await checkSybil(caller);
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = Principal.toText(caller); // TODO: Should use binary encoding.
     db.put({sk = key; attributes = serializeUser(_user)});
@@ -467,6 +477,7 @@ actor ZonBackend {
   // FIXME: This allows items with foreign user attribution.
   // We don't check owner: If a user lost his/her item, that's his/her problem, not ours.
   public shared({caller = caller}) func createItemData(canisterId: Principal, _item: Item) {
+    await checkSybil(caller);
     let _itemId = maxId;
     maxId += 1;
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
@@ -474,13 +485,16 @@ actor ZonBackend {
     db.put({sk = key; attributes = serializeItem(_item)});
   };
 
-  // We don't check owner: If a user lost his/her item, that's his/her problem, not ours.
+  // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
   public shared({caller = caller}) func setItemData(canisterId: Principal, _itemId: Nat64, _item: Item) {
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
         let oldItem = await deserializeItem(oldItemRepr.attributes);
+        if (_item.owner != oldItem.owner) {
+          throw Error.reject("can't change item owner");
+        }
         if (await onlyItemOwner(caller, oldItem)) {
           db.put({sk = key; attributes = serializeItem(_item)});
         };

@@ -6,4 +6,4 @@
 
 - `canister_inspect_message`: https://internetcomputer.org/docs/current/motoko/main/message-inspection.
 
-- maanging identity: https://nfid.one - allows to verify phone number.
+- managing identity: https://nfid.one - allows to verify phone number.
