@@ -5,3 +5,5 @@
 - [`await*` vs `await`](https://forum.dfinity.org/t/what-is-await-with-asterisk/19887/4)
 
 - Check that the input is valid before calling `shared` functions.
+
+- `canister_inspect_message`.

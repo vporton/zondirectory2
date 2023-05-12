@@ -465,5 +465,11 @@ actor ZonBackend {
   };
 
   let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs
+  // TODO: Or "utozz-siaaa-aaaam-qaaxq-cai": https://dank.ooo/wicp/ (seem to have less UX)\
+  // TODO: Or "ryjl3-tyaaa-aaaaa-aaaba-cai" - native NNS ICP token.
+  // Also consider using https://github.com/dfinity/examples/tree/master/motoko/invoice-canister
+  // or https://github.com/research-ag/motoko-lib/blob/main/src/TokenHandler.mo
 
+  public shared({caller = caller}) func pay(canisterId: Principal) {
+  }
 };
