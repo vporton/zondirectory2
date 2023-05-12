@@ -18,11 +18,11 @@ shared actor class IndexCanister(
 ) = this {
   stable var owners = initialOwners;
 
-  func checkCaller(caller: Principal): Bool {
+  func checkCaller(caller: Principal): async Bool {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
       true;
     } else {
-      Debug.trap("not allowed");
+      throw Error.reject("not allowed");
     }
   };
 
@@ -63,7 +63,7 @@ shared actor class IndexCanister(
     if (Utils.callingCanisterOwnsPK(caller, pkToCanisterMap, pk)) {
       await createStorageCanister(pk, owners);
     } else {
-      Debug.trap("error, called by non-controller=" # debug_show(caller));
+      throw Error.reject("error, called by non-controller=" # debug_show(caller));
     };
   };
 
@@ -75,7 +75,7 @@ shared actor class IndexCanister(
   };
 
   public shared({caller = caller}) func createDBPartitionImpl(pk: Text): async ?Text {
-    if (checkCaller(caller)) {
+    if (await checkCaller(caller)) {
       let canisterIds = getCanisterIdsIfExists(pk);
       if (canisterIds == []) {
         ?(await createStorageCanister(pk, owners)); // FIXME
@@ -85,7 +85,7 @@ shared actor class IndexCanister(
         null 
       };
     } else {
-      Debug.trap("caller not allowed to create partition");
+      throw Error.reject("caller not allowed to create partition");
     }
   };
 

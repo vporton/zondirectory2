@@ -4,7 +4,7 @@ import DBPartition "../storage/DBPartition";
 import Principal "mo:base/Principal";
 import Float "mo:base/Float";
 import Bool "mo:base/Bool";
-import Debug "mo:base/Debug";
+import Error "mo:base/Error";
 import Prelude "mo:base/Prelude";
 import Entity "mo:candb/Entity";
 import RBT "mo:stable-rbtree/StableRBTree";
@@ -17,8 +17,11 @@ import Buffer "mo:base/Buffer";
 actor ZonBackend {
   stable var index: ?IndexCanister.IndexCanister = null;
   stable var pst: ?PST.PST = null;
-  stable var itemsDB: ?DBPartition.DBPartition = null;
-  stable var authorsDB: ?DBPartition.DBPartition = null;
+  stable var itemsDB: ?DBPartition.DBPartition = null; // ID -> Item
+  stable var authorsDB: ?DBPartition.DBPartition = null; // principal -> User
+  stable var sybilDB: ?DBPartition.DBPartition = null; // principal -> () (defined if human)
+
+  /// Initialization ///
 
   public shared({ caller }) func init() {
     founder := ?caller;
@@ -36,8 +39,18 @@ actor ZonBackend {
         };
         case (null) {}
       }
-    }
+    };
+    if (sybilDB == null) {
+      switch (index) {
+        case (?index) {
+          sybilDB := await index.createDBPartition("sybil");
+        };
+        case (null) {}
+      }
+    };
   };
+
+  /// Shares ///
 
   stable var salesOwnersShare = 0.1;
   stable var upvotesOwnersShare = 0.5;
@@ -51,10 +64,204 @@ actor ZonBackend {
   public query func getBuyerAffiliateShare(): async Float { buyerAffiliateShare };
   public query func getSellerAffiliateShare(): async Float { sellerAffiliateShare };
 
+  public shared({caller = caller}) func setSalesOwnersShare(_share: Float) {
+    if (await onlyMainOwner(caller)) {
+      salesOwnersShare := _share;
+    };
+  };
+
+  public shared({caller = caller}) func setUpvotesOwnersShare(_share: Float) {
+    if (await onlyMainOwner(caller)) {
+      upvotesOwnersShare := _share;
+    };
+  };
+
+  public shared({caller = caller}) func setUploadOwnersShare(_share: Float) {
+    if (await onlyMainOwner(caller)) {
+      uploadOwnersShare := _share;
+    };
+  };
+
+  public shared({caller = caller}) func setBuyerAffiliateShare(_share: Float) {
+    if (await onlyMainOwner(caller)) {
+      buyerAffiliateShare := _share;
+    };
+  };
+
+  public shared({caller = caller}) func setSellerAffiliateShare(_share: Float) {
+    if (await onlyMainOwner(caller)) {
+      sellerAffiliateShare := _share;
+    };
+  };
+
+  /// Globals ///
+
   stable var maxId: Nat64 = 0;
 
   // TODO: Here and below: subaccount?
   stable var founder: ?Principal = null;
+
+  func onlyMainOwner(caller: Principal): async Bool {
+    if (?caller == founder) {
+      true;
+    } else {
+      throw Error.reject("not the main owner");
+    }
+  };
+
+  public shared({caller = caller}) func setMainOwner(_founder: Principal) {
+    if (await onlyMainOwner(caller)) {
+      founder := ?_founder;
+    }
+  };
+
+  public shared({caller = caller}) func removeMainOwner() {
+    if (await onlyMainOwner(caller)) {
+      founder := null;
+    }
+  };
+
+  /// Users ///
+
+  func checkSybil(sybilCanister: Principal, user: Principal): async Bool {
+    var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
+    switch (await db.get({sk = Principal.toText(user)})) {
+      case (?_) {
+        true;
+      };
+      case (null) {
+        throw Error.reject("not verified user");
+      };
+    };
+  };
+
+  // anti-Sybil verification
+  public shared({caller}) func verifyUser(sybilCanister: Principal): async () {
+    var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
+    db.put({sk = Principal.toText(caller); attributes = [("v", #bool true)]});
+  };
+
+  type User = {
+    locale: Text;
+    nick: Text;
+    title: Text;
+    description: Text;
+    link : Text;
+  };
+
+  func serializeUserAttr(user: User): Entity.AttributeValue {
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(5);
+    buf.add(#text (user.locale));
+    buf.add(#text (user.nick));
+    buf.add(#text (user.title));
+    buf.add(#text (user.description));
+    buf.add(#text (user.link));
+    #tuple (buf.toArray());
+  };
+
+  func serializeUser(user: User): [(Entity.AttributeKey, Entity.AttributeValue)] {
+    [("v", serializeUserAttr(user))];
+  };
+
+  func deserializeUserAttr(attr: Entity.AttributeValue): async User {
+    var locale = "";
+    var nick = "";
+    var title = "";
+    var description = "";
+    var link = "";
+    let res = label r: Bool switch (attr) {
+      case (#tuple arr) {
+        var pos = 0;
+        while (pos < arr.size()) {
+          switch (pos) {
+            case (0) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  locale := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case (1) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  nick := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case (2) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  title := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case (3) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  description := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case (4) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  link := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case _ { break r false; };
+          };
+          pos += 1;
+        };
+        true;
+      };
+      case _ {
+        false;
+      };
+    };
+    if (not res) {
+      throw Error.reject("wrong user format");
+    };
+    {
+      locale = locale;
+      nick = nick;
+      title = title;
+      description = description;
+      link = link;
+    };    
+  };
+
+  func deserializeUser(map: Entity.AttributeMap): async User {
+    let v = RBT.get(map, Text.compare, "v");
+    switch (v) {
+      case (?v) { await deserializeUserAttr(v) };
+      case _ { throw Error.reject("map not found") };
+    };    
+  };
+
+  // TODO: `removeItemOwner`
+
+  // TODO: Here and in other places, setting an owner can conceal spam messages as coming from a different user.
+  public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User) {
+    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
+    let key = Principal.toText(caller); // TODO: Should use binary encoding.
+    db.put({sk = key; attributes = serializeUser(_user)});
+  };
+
+  // FIXME
+  // TODO: Should also remove all his/her items?
+  public shared({caller = caller}) func removeUser(canisterId: Principal) {
+    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
+    let key = Principal.toText(caller);
+    db.delete({sk = key});
+  };
+
+  /// Items ///
 
   // TODO: Add `license` field?
   // TODO: Affiliates.
@@ -74,73 +281,15 @@ actor ZonBackend {
     };
   };
 
-  type User = {
-    locale: Text;
-    nick: Text;
-    title: Text;
-    description: Text;
-    link : Text;
-  };
-
-  func onlyMainOwner(caller: Principal): Bool {
-    if (?caller == founder) {
-      true;
-    } else {
-      Debug.trap("not the main owner");
-    }
-  };
-
-  public shared({caller = caller}) func setMainOwner(_founder: Principal) {
-    if (onlyMainOwner(caller)) {
-      founder := ?_founder;
-    }
-  };
-
-  public shared({caller = caller}) func removeMainOwner() {
-    if (onlyMainOwner(caller)) {
-      founder := null;
-    }
-  };
-
-  public shared({caller = caller}) func setSalesOwnersShare(_share: Float) {
-    if (onlyMainOwner(caller)) {
-      salesOwnersShare := _share;
-    };
-  };
-
-  public shared({caller = caller}) func setUpvotesOwnersShare(_share: Float) {
-    if (onlyMainOwner(caller)) {
-      upvotesOwnersShare := _share;
-    };
-  };
-
-  public shared({caller = caller}) func setUploadOwnersShare(_share: Float) {
-    if (onlyMainOwner(caller)) {
-      uploadOwnersShare := _share;
-    };
-  };
-
-  public shared({caller = caller}) func setBuyerAffiliateShare(_share: Float) {
-    if (onlyMainOwner(caller)) {
-      buyerAffiliateShare := _share;
-    };
-  };
-
-  public shared({caller = caller}) func setSellerAffiliateShare(_share: Float) {
-    if (onlyMainOwner(caller)) {
-      sellerAffiliateShare := _share;
-    };
-  };
-
   func getItemsDB(): DBPartition.DBPartition {
     actor("itemsDB");
   };
 
-  func onlyItemOwner(caller: Principal, _item: Item): Bool {
+  func onlyItemOwner(caller: Principal, _item: Item): async Bool {
     if (?caller == _item.owner) {
       true;
     } else {
-      Debug.trap("not the item owner");
+      throw Error.reject("not the item owner");
     };
   };
 
@@ -181,7 +330,7 @@ actor ZonBackend {
     [("v", serializeItemAttr(item))];
   };
 
-  func deserializeItemAttr(attr: Entity.AttributeValue): Item {
+  func deserializeItemAttr(attr: Entity.AttributeValue): async Item {
     var kind: Int = 0;
     var owner: ?Principal = null;
     var price = 0;
@@ -289,7 +438,7 @@ actor ZonBackend {
       };
     };
     if (not res) {
-      Debug.trap("wrong item format");
+      throw Error.reject("wrong item format");
     };
     {
       owner = owner;
@@ -302,16 +451,16 @@ actor ZonBackend {
         case (0) { #link link };
         case (1) { #post };
         case (2) { #category };
-        case _ { Debug.trap("wrong item format"); }
+        case _ { throw Error.reject("wrong item format"); }
       };
     };    
   };
 
-  func deserializeItem(map: Entity.AttributeMap): Item {
+  func deserializeItem(map: Entity.AttributeMap): async Item {
     let v = RBT.get(map, Text.compare, "v");
     switch (v) {
-      case (?v) { deserializeItemAttr(v) };
-      case _ { Debug.trap("map not found") };
+      case (?v) { await deserializeItemAttr(v) };
+      case _ { throw Error.reject("map not found") };
     };    
   };
 
@@ -331,12 +480,12 @@ actor ZonBackend {
     let key = Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
-        let oldItem = deserializeItem(oldItemRepr.attributes);
-        if (onlyItemOwner(caller, oldItem)) {
+        let oldItem = await deserializeItem(oldItemRepr.attributes);
+        if (await onlyItemOwner(caller, oldItem)) {
           db.put({sk = key; attributes = serializeItem(_item)});
         };
       };
-      case _ { Debug.trap("no item") };
+      case _ { throw Error.reject("no item") };
     };
   };
 
@@ -346,128 +495,18 @@ actor ZonBackend {
     let key = Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
-        let oldItem = deserializeItem(oldItemRepr.attributes);
-        if (onlyItemOwner(caller, oldItem)) {
+        let oldItem = await deserializeItem(oldItemRepr.attributes);
+        if (await onlyItemOwner(caller, oldItem)) {
           db.delete({sk = key});
         };
       };
-      case _ { Debug.trap("no item") };
+      case _ { throw Error.reject("no item") };
     };
   };
 
   // TODO: Should I set maximum lengths on user nick, chirp length, etc.
 
-  func serializeUserAttr(user: User): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
-    buf.add(#text (user.locale));
-    buf.add(#text (user.nick));
-    buf.add(#text (user.title));
-    buf.add(#text (user.description));
-    buf.add(#text (user.link));
-    #tuple (buf.toArray());
-  };
-
-  func serializeUser(user: User): [(Entity.AttributeKey, Entity.AttributeValue)] {
-    [("v", serializeUserAttr(user))];
-  };
-
-  func deserializeUserAttr(attr: Entity.AttributeValue): User {
-    var locale = "";
-    var nick = "";
-    var title = "";
-    var description = "";
-    var link = "";
-    let res = label r: Bool switch (attr) {
-      case (#tuple arr) {
-        var pos = 0;
-        while (pos < arr.size()) {
-          switch (pos) {
-            case (0) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  locale := v;
-                };
-                case _ { break r false };
-              };
-            };
-            case (1) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  nick := v;
-                };
-                case _ { break r false };
-              };
-            };
-            case (2) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  title := v;
-                };
-                case _ { break r false };
-              };
-            };
-            case (3) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  description := v;
-                };
-                case _ { break r false };
-              };
-            };
-            case (4) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  link := v;
-                };
-                case _ { break r false };
-              };
-            };
-            case _ { break r false; };
-          };
-          pos += 1;
-        };
-        true;
-      };
-      case _ {
-        false;
-      };
-    };
-    if (not res) {
-      Debug.trap("wrong user format");
-    };
-    {
-      locale = locale;
-      nick = nick;
-      title = title;
-      description = description;
-      link = link;
-    };    
-  };
-
-  func deserializeUser(map: Entity.AttributeMap): User {
-    let v = RBT.get(map, Text.compare, "v");
-    switch (v) {
-      case (?v) { deserializeUserAttr(v) };
-      case _ { Debug.trap("map not found") };
-    };    
-  };
-
-  // TODO: `removeItemOwner`
-
-  // TODO: Here and in other places, setting an owner can conceal spam messages as coming from a different user.
-  public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User) {
-    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
-    let key = Principal.toText(caller); // TODO: Should use binary encoding.
-    db.put({sk = key; attributes = serializeUser(_user)});
-  };
-
-  // FIXME
-  // TODO: Should also remove all his/her items?
-  public shared({caller = caller}) func removeUser(canisterId: Principal) {
-    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
-    let key = Principal.toText(caller);
-    db.delete({sk = key});
-  };
+  /// Payments ///
 
   let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs
   // TODO: Or "utozz-siaaa-aaaam-qaaxq-cai": https://dank.ooo/wicp/ (seem to have less UX)

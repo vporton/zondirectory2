@@ -4,8 +4,8 @@ import Entity "mo:candb/Entity";
 import CanDB "mo:candb/CanDB";
 import Principal "mo:base/Principal";
 import Bool "mo:base/Bool";
-import Debug "mo:base/Debug";
 import PeekableIter "mo:itertools/PeekableIter";
+import Error "mo:base/Error";
 
 shared actor class DBPartition({
   // the primary key of this canister
@@ -24,11 +24,12 @@ shared actor class DBPartition({
     btreeOrder = null;
   });
 
-  func checkCaller(caller: Principal): Bool {
+  func checkCaller(caller: Principal): async Bool {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
       true;
     } else {
-      Debug.trap("not allowed");
+      throw Error.reject("not allowed");
+      false;
     }
   };
 
@@ -54,13 +55,13 @@ shared actor class DBPartition({
 
   // FIXME: Why here and below `await` with `*`? Is it correct?
   public shared({caller = caller}) func put(options: CanDB.PutOptions) {
-    if (checkCaller(caller)) {
+    if (await checkCaller(caller)) {
       await* CanDB.put(db, options);
     };
   };
 
   public shared({caller = caller}) func replace(options: CanDB.ReplaceOptions): async ?Entity.Entity {
-    if (checkCaller(caller)) {
+    if (await checkCaller(caller)) {
       await* CanDB.replace(db, options);
     } else {
       null;
@@ -76,13 +77,13 @@ shared actor class DBPartition({
   // };
 
   public shared({caller = caller}) func delete(options: CanDB.DeleteOptions) {
-    if (checkCaller(caller)) {
+    if (await checkCaller(caller)) {
       CanDB.delete(db, options);
     };
   };
 
   public shared({caller = caller}) func remove(options: CanDB.RemoveOptions): async ?Entity.Entity {
-    if (checkCaller(caller)) {
+    if (await checkCaller(caller)) {
       CanDB.remove(db, options);
     } else {
       null;
@@ -95,7 +96,7 @@ shared actor class DBPartition({
 
   /// @required public API (Do not delete or change)
   public shared({ caller = caller }) func transferCycles(): async () {
-    if (checkCaller(caller)) {
+    if (await checkCaller(caller)) {
       return await CA.transferCycles(caller);
     };
   };
