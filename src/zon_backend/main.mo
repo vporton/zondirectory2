@@ -20,6 +20,7 @@ actor ZonBackend {
   stable var itemsDB: ?DBPartition.DBPartition = null; // ID -> Item
   stable var authorsDB: ?DBPartition.DBPartition = null; // principal -> User
   stable var sybilDB: ?DBPartition.DBPartition = null; // principal -> () (defined if human)
+  stable var paymentsDB: ?DBPartition.DBPartition = null; // principal -> Payment
 
   /// Initialization ///
 
@@ -32,21 +33,19 @@ actor ZonBackend {
     if (index == null) {
       index := ?(await IndexCanister.IndexCanister([Principal.fromActor(ZonBackend)]));
     };
-    if (authorsDB == null) {
-      switch (index) {
-        case (?index) {
+    switch (index) {
+      case (?index) {
+        if (authorsDB == null) {
           authorsDB := await index.createDBPartition("authors");
         };
-        case (null) {}
-      }
-    };
-    if (sybilDB == null) {
-      switch (index) {
-        case (?index) {
+        if (sybilDB == null) {
           sybilDB := await index.createDBPartition("sybil");
         };
-        case (null) {}
-      }
+        if (paymentsDB == null) {
+          paymentsDB := await index.createDBPartition("pay");
+        };
+      };
+      case (null) {}
     };
   };
 
@@ -520,11 +519,13 @@ actor ZonBackend {
 
   /// Payments ///
 
-  let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs
+  // let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs
   // TODO: Or "utozz-siaaa-aaaam-qaaxq-cai": https://dank.ooo/wicp/ (seem to have less UX)
-  // TODO: Or "ryjl3-tyaaa-aaaaa-aaaba-cai" - native NNS ICP token.
+  let nativeIPCToken = "ryjl3-tyaaa-aaaaa-aaaba-cai"; // native NNS ICP token.
   // Also consider using https://github.com/dfinity/examples/tree/master/motoko/invoice-canister
   // or https://github.com/research-ag/motoko-lib/blob/main/src/TokenHandler.mo
+
+
 
   public shared({caller = caller}) func pay(canisterId: Principal) {
   }
