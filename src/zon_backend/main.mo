@@ -20,11 +20,13 @@ import fractions "./fractions";
 actor ZonBackend {
   stable var index: ?IndexCanister.IndexCanister = null;
   stable var pst: ?PST.PST = null;
-  stable var itemsDB: ?DBPartition.DBPartition = null; // ID -> Item
-  stable var authorsDB: ?DBPartition.DBPartition = null; // principal -> User
-  stable var sybilDB: ?DBPartition.DBPartition = null; // principal -> () (defined if human)
-  stable var paymentsDB: ?DBPartition.DBPartition = null; // principal -> Payment
   stable var ledger: Token.Token = actor(nativeIPCToken);
+
+  // "s/" - anti-sybil
+  // "u/" - User
+  // "i/" - Item
+  // "p/" - Payment
+  stable var firstDB: ?DBPartition.DBPartition = null; // ID -> Item
 
   /// Initialization ///
 
@@ -39,14 +41,8 @@ actor ZonBackend {
     };
     switch (index) {
       case (?index) {
-        if (authorsDB == null) {
-          authorsDB := await index.createDBPartition("authors");
-        };
-        if (sybilDB == null) {
-          sybilDB := await index.createDBPartition("sybil");
-        };
-        if (paymentsDB == null) {
-          paymentsDB := await index.createDBPartition("pay");
+        if (firstDB == null) {
+          firstDB := await index.createDBPartition("only");
         };
       };
       case (null) {}
@@ -130,7 +126,7 @@ actor ZonBackend {
 
   func checkSybil(sybilCanister: Principal, user: Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
-    switch (await db.get({sk = Principal.toText(user)})) {
+    switch (await db.get({sk = "s/" # Principal.toText(user)})) {
       case (null) {
         Debug.trap("not verified user");
       };
@@ -145,7 +141,7 @@ actor ZonBackend {
     };
     if (await verifyActor.is_phone_number_approved(Principal.toText(caller))) {
       var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
-      db.put({sk = Principal.toText(caller); attributes = [("v", #bool true)]});
+      db.put({sk = "s/" # Principal.toText(caller); attributes = [("v", #bool true)]});
     } else {
       Debug.trap("cannot verify phone number");
     };
@@ -260,7 +256,7 @@ actor ZonBackend {
   public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User, sybilCanisterId: Principal) {
     await checkSybil(sybilCanisterId, caller);
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
-    let key = Principal.toText(caller); // TODO: Should use binary encoding.
+    let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     db.put({sk = key; attributes = serializeUser(_user)});
   };
 
@@ -268,7 +264,7 @@ actor ZonBackend {
   // TODO: Should also remove all his/her items?
   public shared({caller = caller}) func removeUser(canisterId: Principal) {
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
-    let key = Principal.toText(caller);
+    let key = "u/" # Principal.toText(caller);
     db.delete({sk = key});
   };
 
@@ -490,14 +486,14 @@ actor ZonBackend {
     let _itemId = maxId;
     maxId += 1;
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
-    let key = Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
+    let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     db.put({sk = key; attributes = serializeItem(_item)});
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
   public shared({caller = caller}) func setItemData(canisterId: Principal, _itemId: Nat64, _item: Item) {
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
-    let key = Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
+    let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
         let oldItem = await deserializeItem(oldItemRepr.attributes);
@@ -515,7 +511,7 @@ actor ZonBackend {
   // TODO: Also remove voting data.
   public shared({caller = caller}) func removeItem(canisterId: Principal, _itemId: Nat64) {
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
-    let key = Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
+    let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
         let oldItem = await deserializeItem(oldItemRepr.attributes);
@@ -626,11 +622,11 @@ actor ZonBackend {
   // FIXME: Need to check that payment really happened.
   func processPayment(paymentCanisterId: Principal, userId: Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
-    switch (await db.remove({sk = Principal.toText(userId)})) {
+    switch (await db.remove({sk = "p/" # Principal.toText(userId)})) {
       case (?paymentRepr) {
         let payment = await deserializePayment(paymentRepr.attributes);
         let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
-        let itemKey = Int.toText(payment.itemId);
+        let itemKey = "i/" # Int.toText(payment.itemId);
         switch (await db.get({sk = itemKey})) {
           case (?itemRepr) {
             let item = await deserializeItem(itemRepr.attributes);
