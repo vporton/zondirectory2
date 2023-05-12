@@ -619,7 +619,7 @@ actor ZonBackend {
     };    
   };
 
-  // FIXME: Need to check that payment really happened.
+  // TODO: What if this function is interrupted by an error?
   func processPayment(paymentCanisterId: Principal, userId: Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
     switch (await db.remove({sk = "p/" # Principal.toText(userId)})) {
