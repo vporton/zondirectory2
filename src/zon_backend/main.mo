@@ -669,7 +669,7 @@ actor ZonBackend {
     }
   };
 
-  public shared({caller = caller}) func pay(canisterId: Principal, payment: Payment) {
-    actor(Principal.toText(canisterId))
-  };
+  // public shared({caller = caller}) func pay(canisterId: Principal, payment: Payment) {
+  //   actor(Principal.toText(canisterId))
+  // };
 };
