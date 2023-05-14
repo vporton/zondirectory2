@@ -33,7 +33,7 @@ shared actor class DBPartition({
     }
   };
 
-  public shared({caller = caller}) func setOwners(_owners: [Principal]) {
+  public shared({caller = caller}) func setOwners(_owners: [Principal]): async () {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
       owners := _owners;
     };
@@ -54,7 +54,7 @@ shared actor class DBPartition({
   };
 
   // FIXME: Why here and below `await` with `*`? Is it correct?
-  public shared({caller = caller}) func put(options: CanDB.PutOptions) {
+  public shared({caller = caller}) func put(options: CanDB.PutOptions): async () {
     if (checkCaller(caller)) {
       await* CanDB.put(db, options);
     };
@@ -76,7 +76,7 @@ shared actor class DBPartition({
   //   };
   // };
 
-  public shared({caller = caller}) func delete(options: CanDB.DeleteOptions) {
+  public shared({caller = caller}) func delete(options: CanDB.DeleteOptions): async () {
     if (checkCaller(caller)) {
       CanDB.delete(db, options);
     };
@@ -101,7 +101,7 @@ shared actor class DBPartition({
     };
   };
 
-  public shared({caller = caller}) func tryPut(options: CanDB.PutOptions) {
+  public shared({caller = caller}) func tryPut(options: CanDB.PutOptions): async () {
     if ((checkCaller(caller)) and not CanDB.skExists(db, options.sk)) {
       await* CanDB.put(db, options);
     };

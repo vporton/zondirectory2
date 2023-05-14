@@ -141,7 +141,7 @@ actor ZonBackend {
     };
     if (await verifyActor.is_phone_number_approved(Principal.toText(caller))) {
       var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
-      db.put({sk = "s/" # Principal.toText(caller); attributes = [("v", #bool true)]});
+      await db.put({sk = "s/" # Principal.toText(caller); attributes = [("v", #bool true)]});
     } else {
       Debug.trap("cannot verify phone number");
     };
@@ -257,7 +257,7 @@ actor ZonBackend {
     await checkSybil(sybilCanisterId, caller);
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-    db.put({sk = key; attributes = serializeUser(_user)});
+    await db.put({sk = key; attributes = serializeUser(_user)});
   };
 
   // FIXME
@@ -265,7 +265,7 @@ actor ZonBackend {
   public shared({caller = caller}) func removeUser(canisterId: Principal) {
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller);
-    db.delete({sk = key});
+    await db.delete({sk = key});
   };
 
   /// Items ///
@@ -487,7 +487,7 @@ actor ZonBackend {
     maxId += 1;
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
-    db.put({sk = key; attributes = serializeItem(_item)});
+    await db.put({sk = key; attributes = serializeItem(_item)});
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
@@ -501,7 +501,7 @@ actor ZonBackend {
           Debug.trap("can't change item owner");
         };
         if (onlyItemOwner(caller, oldItem)) {
-          db.put({sk = key; attributes = serializeItem(_item)});
+          await db.put({sk = key; attributes = serializeItem(_item)});
         };
       };
       case _ { Debug.trap("no item") };
@@ -516,7 +516,7 @@ actor ZonBackend {
       case (?oldItemRepr) {
         let oldItem = deserializeItem(oldItemRepr.attributes);
         if (onlyItemOwner(caller, oldItem)) {
-          db.delete({sk = key});
+          await db.delete({sk = key});
         };
       };
       case _ { Debug.trap("no item") };
@@ -662,7 +662,8 @@ actor ZonBackend {
         };
       };
       case (null) {};
-    }
+    };
+    await db.delete({sk = "p/" # Principal.toText(userId)});
   };
 
   // public shared({caller = caller}) func pay(canisterId: Principal, payment: Payment) {
