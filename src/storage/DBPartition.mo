@@ -24,7 +24,7 @@ shared actor class DBPartition({
     btreeOrder = null;
   });
 
-  func checkCaller(caller: Principal): async Bool {
+  func checkCaller(caller: Principal): Bool {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
       true;
     } else {
@@ -55,13 +55,13 @@ shared actor class DBPartition({
 
   // FIXME: Why here and below `await` with `*`? Is it correct?
   public shared({caller = caller}) func put(options: CanDB.PutOptions) {
-    if (await checkCaller(caller)) {
+    if (checkCaller(caller)) {
       await* CanDB.put(db, options);
     };
   };
 
   public shared({caller = caller}) func replace(options: CanDB.ReplaceOptions): async ?Entity.Entity {
-    if (await checkCaller(caller)) {
+    if (checkCaller(caller)) {
       await* CanDB.replace(db, options);
     } else {
       null;
@@ -77,13 +77,13 @@ shared actor class DBPartition({
   // };
 
   public shared({caller = caller}) func delete(options: CanDB.DeleteOptions) {
-    if (await checkCaller(caller)) {
+    if (checkCaller(caller)) {
       CanDB.delete(db, options);
     };
   };
 
   public shared({caller = caller}) func remove(options: CanDB.RemoveOptions): async ?Entity.Entity {
-    if (await checkCaller(caller)) {
+    if (checkCaller(caller)) {
       CanDB.remove(db, options);
     } else {
       null;
@@ -96,13 +96,13 @@ shared actor class DBPartition({
 
   /// @required public API (Do not delete or change)
   public shared({ caller = caller }) func transferCycles(): async () {
-    if (await checkCaller(caller)) {
+    if (checkCaller(caller)) {
       return await CA.transferCycles(caller);
     };
   };
 
   public shared({caller = caller}) func tryPut(options: CanDB.PutOptions) {
-    if ((await checkCaller(caller)) and not CanDB.skExists(db, options.sk)) {
+    if ((checkCaller(caller)) and not CanDB.skExists(db, options.sk)) {
       await* CanDB.put(db, options);
     };
   };
