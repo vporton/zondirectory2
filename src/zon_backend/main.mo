@@ -622,7 +622,7 @@ actor ZonBackend {
   // TODO: What if this function is interrupted by an error?
   func processPayment(paymentCanisterId: Principal, userId: Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
-    switch (await db.remove({sk = "p/" # Principal.toText(userId)})) {
+    switch (await db.get({sk = "p/" # Principal.toText(userId)})) {
       case (?paymentRepr) {
         let payment = deserializePayment(paymentRepr.attributes);
         let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
