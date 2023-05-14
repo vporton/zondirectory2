@@ -64,31 +64,31 @@ actor ZonBackend {
   public query func getSellerAffiliateShare(): async fractions.Fraction { sellerAffiliateShare };
 
   public shared({caller = caller}) func setSalesOwnersShare(_share: fractions.Fraction) {
-    if (await onlyMainOwner(caller)) {
+    if (onlyMainOwner(caller)) {
       salesOwnersShare := _share;
     };
   };
 
   public shared({caller = caller}) func setUpvotesOwnersShare(_share: fractions.Fraction) {
-    if (await onlyMainOwner(caller)) {
+    if (onlyMainOwner(caller)) {
       upvotesOwnersShare := _share;
     };
   };
 
   public shared({caller = caller}) func setUploadOwnersShare(_share: fractions.Fraction) {
-    if (await onlyMainOwner(caller)) {
+    if (onlyMainOwner(caller)) {
       uploadOwnersShare := _share;
     };
   };
 
   public shared({caller = caller}) func setBuyerAffiliateShare(_share: fractions.Fraction) {
-    if (await onlyMainOwner(caller)) {
+    if (onlyMainOwner(caller)) {
       buyerAffiliateShare := _share;
     };
   };
 
   public shared({caller = caller}) func setSellerAffiliateShare(_share: fractions.Fraction) {
-    if (await onlyMainOwner(caller)) {
+    if (onlyMainOwner(caller)) {
       sellerAffiliateShare := _share;
     };
   };
@@ -100,7 +100,7 @@ actor ZonBackend {
   // TODO: Here and below: subaccount?
   stable var founder: ?Principal = null;
 
-  func onlyMainOwner(caller: Principal): async Bool {
+  func onlyMainOwner(caller: Principal): Bool {
     if (?caller == founder) {
       true;
     } else {
@@ -109,13 +109,13 @@ actor ZonBackend {
   };
 
   public shared({caller = caller}) func setMainOwner(_founder: Principal) {
-    if (await onlyMainOwner(caller)) {
+    if (onlyMainOwner(caller)) {
       founder := ?_founder;
     }
   };
 
   public shared({caller = caller}) func removeMainOwner() {
-    if (await onlyMainOwner(caller)) {
+    if (onlyMainOwner(caller)) {
       founder := null;
     }
   };
@@ -169,7 +169,7 @@ actor ZonBackend {
     [("v", serializeUserAttr(user))];
   };
 
-  func deserializeUserAttr(attr: Entity.AttributeValue): async User {
+  func deserializeUserAttr(attr: Entity.AttributeValue): User {
     var locale = "";
     var nick = "";
     var title = "";
@@ -242,10 +242,10 @@ actor ZonBackend {
     };    
   };
 
-  func deserializeUser(map: Entity.AttributeMap): async User {
+  func deserializeUser(map: Entity.AttributeMap): User {
     let v = RBT.get(map, Text.compare, "v");
     switch (v) {
-      case (?v) { await deserializeUserAttr(v) };
+      case (?v) { deserializeUserAttr(v) };
       case _ { Debug.trap("map not found") };
     };    
   };
@@ -294,7 +294,7 @@ actor ZonBackend {
     actor("itemsDB");
   };
 
-  func onlyItemOwner(caller: Principal, _item: Item): async Bool {
+  func onlyItemOwner(caller: Principal, _item: Item): Bool {
     if (?caller == _item.owner) {
       true;
     } else {
@@ -343,7 +343,7 @@ actor ZonBackend {
     [("v", serializeItemAttr(item))];
   };
 
-  func deserializeItemAttr(attr: Entity.AttributeValue): async Item {
+  func deserializeItemAttr(attr: Entity.AttributeValue): Item {
     var kind: Int = 0;
     var owner: ?Principal = null;
     var price = 0;
@@ -471,10 +471,10 @@ actor ZonBackend {
     };    
   };
 
-  func deserializeItem(map: Entity.AttributeMap): async Item {
+  func deserializeItem(map: Entity.AttributeMap): Item {
     let v = RBT.get(map, Text.compare, "v");
     switch (v) {
-      case (?v) { await deserializeItemAttr(v) };
+      case (?v) { deserializeItemAttr(v) };
       case _ { Debug.trap("map not found") };
     };    
   };
@@ -496,11 +496,11 @@ actor ZonBackend {
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
-        let oldItem = await deserializeItem(oldItemRepr.attributes);
+        let oldItem = deserializeItem(oldItemRepr.attributes);
         if (_item.owner != oldItem.owner) {
           Debug.trap("can't change item owner");
         };
-        if (await onlyItemOwner(caller, oldItem)) {
+        if (onlyItemOwner(caller, oldItem)) {
           db.put({sk = key; attributes = serializeItem(_item)});
         };
       };
@@ -514,8 +514,8 @@ actor ZonBackend {
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
-        let oldItem = await deserializeItem(oldItemRepr.attributes);
-        if (await onlyItemOwner(caller, oldItem)) {
+        let oldItem = deserializeItem(oldItemRepr.attributes);
+        if (onlyItemOwner(caller, oldItem)) {
           db.delete({sk = key});
         };
       };
@@ -554,7 +554,7 @@ actor ZonBackend {
     [("v", serializePaymentAttr(payment))];
   };
 
-  func deserializePaymentAttr(attr: Entity.AttributeValue): async Payment {
+  func deserializePaymentAttr(attr: Entity.AttributeValue): Payment {
     var kind: { #payment; #donation } = #payment;
     var itemId: Int = 0;
     var amount = 0;
@@ -611,10 +611,10 @@ actor ZonBackend {
     };    
   };
 
-  func deserializePayment(map: Entity.AttributeMap): async Payment {
+  func deserializePayment(map: Entity.AttributeMap): Payment {
     let v = RBT.get(map, Text.compare, "v");
     switch (v) {
-      case (?v) { await deserializePaymentAttr(v) };
+      case (?v) { deserializePaymentAttr(v) };
       case _ { Debug.trap("map not found") };
     };    
   };
@@ -624,12 +624,12 @@ actor ZonBackend {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
     switch (await db.remove({sk = "p/" # Principal.toText(userId)})) {
       case (?paymentRepr) {
-        let payment = await deserializePayment(paymentRepr.attributes);
+        let payment = deserializePayment(paymentRepr.attributes);
         let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
         let itemKey = "i/" # Int.toText(payment.itemId);
         switch (await db.get({sk = itemKey})) {
           case (?itemRepr) {
-            let item = await deserializeItem(itemRepr.attributes);
+            let item = deserializeItem(itemRepr.attributes);
             let author = item.owner;
             // payToShareholders(_shareholdersShare, author); // TODO
             let toAuthor = payment.amount - _shareholdersShare;
