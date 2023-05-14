@@ -7,3 +7,5 @@
 - `canister_inspect_message`: https://internetcomputer.org/docs/current/motoko/main/message-inspection.
 
 - The current code allows to write to an "alien" canister. Possible solution is to use one CanDB with key prefixes.
+
+- Improve performance by using `var` in structs to write directly to a struct rather than to intermediary variables.

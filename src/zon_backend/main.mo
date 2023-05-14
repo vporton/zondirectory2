@@ -8,6 +8,7 @@ import Debug "mo:base/Debug";
 import Prelude "mo:base/Prelude";
 import Entity "mo:candb/Entity";
 import RBT "mo:stable-rbtree/StableRBTree";
+import StableTrieMap "mo:StableTrieMap";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import xNat "mo:xtendedNumbers/NatX";
@@ -15,6 +16,9 @@ import Buffer "mo:base/Buffer";
 import Token "mo:icrc1/ICRC1/Canisters/Token";
 import Int "mo:base/Int";
 import fractions "./fractions";
+import HashMap "mo:base/HashMap";
+import Nat8 "mo:base/Nat8";
+import Hash "mo:base/Hash";
 
 // TODO: Also make the founder's account an owner?
 actor ZonBackend {
@@ -619,6 +623,8 @@ actor ZonBackend {
     };    
   };
 
+  stable var currentPaymentStages: StableTrieMap.StableTrieMap<Text, Nat8> = StableTrieMap.new();
+
   // TODO: What if this function is interrupted by an error?
   func processPayment(paymentCanisterId: Principal, userId: Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
@@ -631,7 +637,11 @@ actor ZonBackend {
           case (?itemRepr) {
             let item = deserializeItem(itemRepr.attributes);
             let author = item.owner;
-            // payToShareholders(_shareholdersShare, author); // TODO
+            if (not StableTrieMap.containsKey<Text, Nat8>(currentPaymentStages, Text.equal, Text.hash, Principal.toText(userId))) {
+              // FIXME: `payToShareholders` contains two `await`s (two checkpoints).
+              // await payToShareholders(_shareholdersShare, author); // TODO
+            };
+            StableTrieMap.put<Text, Nat8>(currentPaymentStages, Text.equal, Text.hash, Principal.toText(paymentCanisterId), 0);
             let toAuthor = payment.amount - _shareholdersShare;
             switch (author) {
               case (?author) {
