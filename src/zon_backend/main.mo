@@ -507,6 +507,7 @@ actor ZonBackend {
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
+  // FIXME: Cannot change item type.
   public shared({caller = caller}) func setItemData(canisterId: Principal, _itemId: Nat64, _item: Item) {
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
