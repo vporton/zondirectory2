@@ -8,7 +8,7 @@ import Debug "mo:base/Debug";
 import Prelude "mo:base/Prelude";
 import Entity "mo:candb/Entity";
 import RBT "mo:stable-rbtree/StableRBTree";
-import StableTrieMap "mo:StableTrieMap";
+import StableRBTree "mo:stable-rbtree/StableRBTree";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import xNat "mo:xtendedNumbers/NatX";
@@ -274,13 +274,7 @@ actor ZonBackend {
 
   /// Items ///
 
-  // TODO: Add `license` field?
-  // TODO: Affiliates.
-  // TODO: Images.
-  // TODO: Upload files.
-  // TODO: Item version.
-  type Item = {
-    owner: ?Principal;
+  type ItemWithoutOwner = {
     price: Nat;
     locale: Text;
     title: Text;
@@ -290,8 +284,21 @@ actor ZonBackend {
       #message : ();
       #post : ();
       #download : ();
-      #category : ();
+      #ownedCategory : ();
+      #communalCategory : ();
     };
+  };
+
+
+  // TODO: Add `license` field?
+  // TODO: Affiliates.
+  // TODO: Images.
+  // TODO: Upload files.
+  // TODO: Item version.
+  // TODO: Check that #communalCategory cannot be deleted.
+  type Item = {
+    creator: ?Principal;
+    item: ItemWithoutOwner;
   };
 
   func getItemsDB(): DBPartition.DBPartition {
@@ -299,29 +306,32 @@ actor ZonBackend {
   };
 
   func onlyItemOwner(caller: Principal, _item: Item): Bool {
-    if (?caller == _item.owner) {
+    if (?caller == _item.creator) {
       true;
     } else {
       Debug.trap("not the item owner");
     };
   };
 
+  // TODO: Rename:
   let SER_LINK = 0;
   let SER_MESSAGE = 1;
   let SER_POST = 2;
   let SER_DOWNLOAD = 3;
-  let SER_CATEGORY = 4;
+  let SER_OWNED_CATEGORY = 4;
+  let SER_COMMUNAL_CATEGORY = 5;
 
   func serializeItemAttr(item: Item): Entity.AttributeValue {
     var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
-    buf.add(#int (switch (item.details) {
+    buf.add(#int (switch (item.item.details) {
       case (#link v) { SER_LINK };
       case (#message) { SER_MESSAGE };
       case (#post) { SER_POST };
       case (#download) { SER_DOWNLOAD };
-      case (#category) { SER_CATEGORY };
+      case (#ownedCategory) { SER_OWNED_CATEGORY };
+      case (#communalCategory) { SER_COMMUNAL_CATEGORY };
     }));
-    switch (item.owner) {
+    switch (item.creator) {
       case (?owner) {
         buf.add(#bool (true));
         buf.add(#text (Principal.toText(owner)));
@@ -330,11 +340,11 @@ actor ZonBackend {
         buf.add(#bool (false));
       };
     };
-    buf.add(#int (item.price));
-    buf.add(#text (item.locale));
-    buf.add(#text (item.title));
-    buf.add(#text (item.description));
-    switch (item.details) {
+    buf.add(#int (item.item.price));
+    buf.add(#text (item.item.locale));
+    buf.add(#text (item.item.title));
+    buf.add(#text (item.item.description));
+    switch (item.item.details) {
       case (#link v) {
         buf.add(#text v);
       };
@@ -355,7 +365,7 @@ actor ZonBackend {
     var nick = "";
     var title = "";
     var description = "";
-    var details: {#none; #link; #message; #post; #download; #category} = #none;
+    var details: {#none; #link; #message; #post; #download; #ownedCategory; #communalCategory} = #none;
     var link = "";
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
@@ -458,19 +468,22 @@ actor ZonBackend {
       Debug.trap("wrong item format");
     };
     {
-      owner = owner;
-      price = price;
-      locale = locale;
-      nick = nick;
-      title = title;
-      description = description;
-      details = switch (kind) {
-        case (0) { #link link };
-        case (1) { #message };
-        case (2) { #post };
-        case (3) { #download };
-        case (4) { #category };
-        case _ { Debug.trap("wrong item format"); }
+      creator = owner;
+      item = {
+        price = price;
+        locale = locale;
+        nick = nick;
+        title = title;
+        description = description;
+        details = switch (kind) {
+          case (0) { #link link };
+          case (1) { #message };
+          case (2) { #post };
+          case (3) { #download };
+          case (4) { #ownedCategory };
+          case (5) { #communalCategory };
+          case _ { Debug.trap("wrong item format"); }
+        };
       };
     };    
   };
@@ -483,15 +496,14 @@ actor ZonBackend {
     };    
   };
 
-  // FIXME: This allows items with foreign user attribution.
-  // We don't check owner: If a user lost his/her item, that's his/her problem, not ours.
-  public shared({caller = caller}) func createItemData(canisterId: Principal, _item: Item, sybilCanisterId: Principal) {
+  public shared({caller = caller}) func createItemData(canisterId: Principal, _item: ItemWithoutOwner, sybilCanisterId: Principal) {
     await checkSybil(sybilCanisterId, caller);
+    let item2 = { creator = ?caller; item = _item; };
     let _itemId = maxId;
     maxId += 1;
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
-    await db.put({sk = key; attributes = serializeItem(_item)});
+    await db.put({sk = key; attributes = serializeItem(item2)});
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
@@ -501,7 +513,7 @@ actor ZonBackend {
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
         let oldItem = deserializeItem(oldItemRepr.attributes);
-        if (_item.owner != oldItem.owner) {
+        if (_item.creator != oldItem.creator) {
           Debug.trap("can't change item owner");
         };
         if (onlyItemOwner(caller, oldItem)) {
@@ -623,12 +635,29 @@ actor ZonBackend {
     };    
   };
 
-  stable var currentPaymentStages: StableTrieMap.StableTrieMap<Text, Nat8> = StableTrieMap.new();
+  // stable var currentPaymentStages: StableRBTree.Tree<Text, Nat8> = StableRBTree.init();
+  stable var ourDebts: StableRBTree.Tree<Principal, Nat> = StableRBTree.init(); // TODO: subaccounts?
+
+  public query func getOurDebt(user: Principal): async Nat {
+    switch (StableRBTree.get(ourDebts, Principal.compare, user)) {
+      case (?amount) { amount };
+      case (null) { 0 };
+    };
+  };
+
+  func indebt(to: Principal, amount: Nat) {
+    ignore StableRBTree.update<Principal, Nat>(ourDebts, Principal.compare, to, func (oldAmount: ?Nat): Nat {
+      switch (oldAmount) {
+        case (?oldAmount) { oldAmount + amount };
+        case (null) { amount };
+      };
+    });
+  };
 
   // TODO: What if this function is interrupted by an error?
   func processPayment(paymentCanisterId: Principal, userId: Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
-    switch (await db.get({sk = "p/" # Principal.toText(userId)})) {
+    switch (await db.remove({sk = "p/" # Principal.toText(userId)})) {
       case (?paymentRepr) {
         let payment = deserializePayment(paymentRepr.attributes);
         let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
@@ -636,32 +665,12 @@ actor ZonBackend {
         switch (await db.get({sk = itemKey})) {
           case (?itemRepr) {
             let item = deserializeItem(itemRepr.attributes);
-            let author = item.owner;
-            if (not StableTrieMap.containsKey<Text, Nat8>(currentPaymentStages, Text.equal, Text.hash, Principal.toText(userId))) {
-              // FIXME: `payToShareholders` contains two `await`s (two checkpoints).
-              // await payToShareholders(_shareholdersShare, author); // TODO
-            };
-            StableTrieMap.put<Text, Nat8>(currentPaymentStages, Text.equal, Text.hash, Principal.toText(paymentCanisterId), 0);
+            let author = item.creator;
+            // payToShareholders(_shareholdersShare, author); // TODO
             let toAuthor = payment.amount - _shareholdersShare;
             switch (author) {
               case (?author) {
-                // ledger.transfer({memo = 0; amount = toAuthor; fee = 10000; from_subaccount = ?Principal.toBlob(userId); to = author});
-                // TODO: author's subaccount
-                // FIXME: Due to the transfer fee, the amount on account may be not enough for transfer.
-                let transferResult = await ledger.icrc1_transfer({
-                  from_subaccount = ?Principal.toBlob(userId);
-                  to = { owner = author; subaccount = null};
-                  amount = Int.abs(toAuthor);
-                  fee = null;
-                  memo = null;
-                  created_at_time = null;
-                });
-                switch (transferResult) {
-                  case (#Err err) {
-                    Debug.trap("can't pay author");
-                  };
-                  case (#Ok _) {}
-                }
+                indebt(userId, Int.abs(toAuthor)); // TODO: abs() is a hack.
               };
               case (null) {
                 // TODO: Give the money to the other parties, not leave it in canister.
@@ -673,7 +682,6 @@ actor ZonBackend {
       };
       case (null) {};
     };
-    await db.delete({sk = "p/" # Principal.toText(userId)});
   };
 
   // public shared({caller = caller}) func pay(canisterId: Principal, payment: Payment) {
