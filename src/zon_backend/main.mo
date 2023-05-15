@@ -30,6 +30,7 @@ actor ZonBackend {
   // "u/" - User
   // "i/" - Item
   // "p/" - Payment
+  // "d/" - the value of totalDividends after the last payment to an address
   stable var firstDB: ?DBPartition.DBPartition = null; // ID -> Item
 
   /// Initialization ///
@@ -656,9 +657,10 @@ actor ZonBackend {
   };
 
   // TODO: What if this function is interrupted by an error?
-  func processPayment(paymentCanisterId: Principal, userId: Principal): async () {
+  func processPayment(paymentCanisterId: Principal, userId: Principal, tx: Nat): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
-    switch (await db.remove({sk = "p/" # Principal.toText(userId)})) {
+    // FIXME: Double payments.
+    switch (await db.get({sk = "p/" # Principal.toText(userId)})) {
       case (?paymentRepr) {
         let payment = deserializePayment(paymentRepr.attributes);
         let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
@@ -678,12 +680,24 @@ actor ZonBackend {
               };
             }
           };
-          case (null) { Debug.trap("no item"); };
+          case (null) {};
         };
+        await db.delete({sk = "p/" # Principal.toText(userId)})
       };
       case (null) {};
     };
   };
+
+  /// Dividents and Withdrawals ///
+
+  var totalDividends = 0;
+  var totalDividendsPaid = 0; // actually paid sum
+
+  func _dividendsOwing(_account: Principal): Nat {
+    let _newDividends = totalDividends - lastTotalDivedends[_account]; // FIXME: If lastTotalDivedends retrieved from a wrong canister, it will be overpaid.
+    return (balances[_account] * _newDividends) / totalSupply; // rounding down
+  }
+
 
   // public shared({caller = caller}) func pay(canisterId: Principal, payment: Payment) {
   //   actor(Principal.toText(canisterId))
