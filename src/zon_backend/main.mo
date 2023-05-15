@@ -25,6 +25,16 @@ import Nat64 "mo:base/Nat64";
 
 // TODO: Also make the founder's account an owner?
 actor ZonBackend {
+  /// External Canisters ///
+
+  // let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs
+  // TODO: Or "utozz-siaaa-aaaam-qaaxq-cai": https://dank.ooo/wicp/ (seem to have less UX)
+  let nativeIPCToken = "ryjl3-tyaaa-aaaaa-aaaba-cai"; // native NNS ICP token.
+  // Also consider using https://github.com/dfinity/examples/tree/master/motoko/invoice-canister
+  // or https://github.com/research-ag/motoko-lib/blob/main/src/TokenHandler.mo
+
+  /// Some Global Variables ///
+
   stable var index: ?IndexCanister.IndexCanister = null;
   stable var pst: ?PST.PST = null;
   stable var ledger: Token.Token = actor(nativeIPCToken);
@@ -34,6 +44,11 @@ actor ZonBackend {
   // "i/" - ID -> Item
   // "a/" - user -> <buyer affiliate>/<seller affiliate>
   stable var firstDB: ?DBPartition.DBPartition = null; // ID -> Item
+
+  stable var maxId: Nat64 = 0;
+
+  // TODO: Here and below: subaccount?
+  stable var founder: ?Principal = null;
 
   /// Initialization ///
 
@@ -100,12 +115,7 @@ actor ZonBackend {
     };
   };
 
-  /// Globals ///
-
-  stable var maxId: Nat64 = 0;
-
-  // TODO: Here and below: subaccount?
-  stable var founder: ?Principal = null;
+  /// Owners ///
 
   func onlyMainOwner(caller: Principal): Bool {
     if (?caller == founder) {
@@ -546,12 +556,6 @@ actor ZonBackend {
   // TODO: Should I set maximum lengths on user nick, chirp length, etc.
 
   /// Incoming Payments ///
-
-  // let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs
-  // TODO: Or "utozz-siaaa-aaaam-qaaxq-cai": https://dank.ooo/wicp/ (seem to have less UX)
-  let nativeIPCToken = "ryjl3-tyaaa-aaaaa-aaaba-cai"; // native NNS ICP token.
-  // Also consider using https://github.com/dfinity/examples/tree/master/motoko/invoice-canister
-  // or https://github.com/research-ag/motoko-lib/blob/main/src/TokenHandler.mo
 
   type IncomingPayment = {
     kind: { #payment; #donation };
