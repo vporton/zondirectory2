@@ -29,7 +29,6 @@ actor ZonBackend {
   // "s/" - anti-sybil
   // "u/" - User
   // "i/" - Item
-  // "p/" - Payment
   // "d/" - the value of totalDividends after the last payment to an address
   stable var firstDB: ?DBPartition.DBPartition = null; // ID -> Item
 
@@ -637,7 +636,7 @@ actor ZonBackend {
     };    
   };
 
-  // stable var currentPaymentStages: StableRBTree.Tree<Text, Nat8> = StableRBTree.init();
+  stable var currentPayments: StableRBTree.Tree<Principal, Payment> = StableRBTree.init(); // TODO: Delete old ones.
   stable var ourDebts: StableRBTree.Tree<Principal, Nat> = StableRBTree.init(); // TODO: subaccounts?
 
   public query func getOurDebt(user: Principal): async Nat {
@@ -656,19 +655,17 @@ actor ZonBackend {
     });
   };
 
-  // TODO: What if this function is interrupted by an error?
+  // FIXME: Check `tx`.
   func processPayment(paymentCanisterId: Principal, userId: Principal, tx: Nat): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
-    // FIXME: Double payments.
-    switch (await db.get({sk = "p/" # Principal.toText(userId)})) {
-      case (?paymentRepr) {
-        let payment = deserializePayment(paymentRepr.attributes);
-        let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
+    switch (StableRBTree.get<Principal, Payment>(currentPayments, Principal.compare, userId)) {
+      case (?payment) {
         let itemKey = "i/" # Int.toText(payment.itemId);
         switch (await db.get({sk = itemKey})) {
           case (?itemRepr) {
             let item = deserializeItem(itemRepr.attributes);
             let author = item.creator;
+            let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
             // payToShareholders(_shareholdersShare, author); // TODO
             let toAuthor = payment.amount - _shareholdersShare;
             switch (author) {
@@ -679,10 +676,10 @@ actor ZonBackend {
                 // TODO: Give the money to the other parties, not leave it in canister.
               };
             };
-            await db.delete({sk = "p/" # Principal.toText(userId)});
           };
           case (null) {};
         };
+        ignore StableRBTree.delete<Principal, Payment>(currentPayments, Principal.compare, userId);
       };
       case (null) {};
     };
@@ -693,10 +690,10 @@ actor ZonBackend {
   var totalDividends = 0;
   var totalDividendsPaid = 0; // actually paid sum
 
-  func _dividendsOwing(_account: Principal): Nat {
-    let _newDividends = totalDividends - lastTotalDivedends[_account]; // FIXME: If lastTotalDivedends retrieved from a wrong canister, it will be overpaid.
-    return (balances[_account] * _newDividends) / totalSupply; // rounding down
-  }
+  // func _dividendsOwing(_account: Principal): Nat {
+  //   let _newDividends = totalDividends - lastTotalDivedends[_account]; // FIXME: If lastTotalDivedends retrieved from a wrong canister, it will be overpaid.
+  //   return (balances[_account] * _newDividends) / totalSupply; // rounding down
+  // }
 
 
   // public shared({caller = caller}) func pay(canisterId: Principal, payment: Payment) {
