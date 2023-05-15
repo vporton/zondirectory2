@@ -30,9 +30,9 @@ actor ZonBackend {
   stable var ledger: Token.Token = actor(nativeIPCToken);
 
   // "s/" - anti-sybil
-  // "u/" - User
-  // "i/" - Item
-  // "d/" - the value of totalDividends after the last payment to an address
+  // "u/" - Principal -> User
+  // "i/" - ID -> Item
+  // "a/" - user -> <buyer affiliate>/<seller affiliate>
   stable var firstDB: ?DBPartition.DBPartition = null; // ID -> Item
 
   /// Initialization ///
@@ -730,6 +730,37 @@ actor ZonBackend {
     let total = await pst2.icrc1_total_supply();
     balance * _newDividends / total;
   };
+
+  // TODO: Rename into `debtToShareholders` or `shareholdersDebt`.
+  func payToShareholders(_amount: Nat, _buyerAffiliate: ?Principal, _sellerAffiliate: ?Principal) {
+    // Affiliates are delivered by frontend.
+    // address payable _buyerAffiliate = affiliates[msg.sender];
+    // address payable _sellerAffiliate = affiliates[_author];
+    var _shareHoldersAmount = _amount;
+    switch (_buyerAffiliate) {
+      case (?_buyerAffiliate) {
+        let _buyerAffiliateAmount = uint256(buyerAffiliateShare.muli(int256(_amount)));
+        indebt(_buyerAffiliate, _buyerAffiliateAmount);
+        if (_shareHoldersAmount < _buyerAffiliateAmount) {
+          Debug.trap("negative amount to pay");
+        };
+        _shareHoldersAmount -= _buyerAffiliateAmount;
+      };
+      case (null) {};
+    };
+    switch (_sellerAffiliate) {
+      case (?_sellerAffiliate) {
+        let _sellerAffiliateAmount = uint256(sellerAffiliateShare.muli(int256(_amount)));
+        indebt(_sellerAffiliate, _sellerAffiliateAmount);
+        if (_shareHoldersAmount < _sellerAffiliateAmount) {
+          Debug.trap("negative amount to pay");
+        };
+        _shareHoldersAmount -= _sellerAffiliateAmount;
+      };
+      case (null) {};
+    };
+    totalDividends += _shareHoldersAmount;
+  }
 
   // public shared({caller = caller}) func pay(canisterId: Principal, payment: Payment) {
   //   actor(Principal.toText(canisterId))
