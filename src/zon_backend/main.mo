@@ -307,12 +307,12 @@ actor ZonBackend {
   // TODO: Item version.
   // TODO: Check that #communalCategory cannot be deleted.
   type Item = {
-    creator: ?Principal;
+    creator: Principal;
     item: ItemWithoutOwner;
   };
 
   func onlyItemOwner(caller: Principal, _item: Item): Bool {
-    if (?caller == _item.creator) {
+    if (caller == _item.creator) {
       true;
     } else {
       Debug.trap("not the item owner");
@@ -337,15 +337,8 @@ actor ZonBackend {
       case (#ownedCategory) { ITEM_TYPE_OWNED_CATEGORY };
       case (#communalCategory) { ITEM_TYPE_COMMUNAL_CATEGORY };
     }));
-    switch (item.creator) {
-      case (?owner) {
-        buf.add(#bool (true));
-        buf.add(#text (Principal.toText(owner)));
-      };
-      case (null) {
-        buf.add(#bool (false));
-      };
-    };
+    buf.add(#bool (true)); // TODO: superfluous
+    buf.add(#text (Principal.toText(item.creator)));
     buf.add(#int (item.item.price));
     buf.add(#text (item.item.locale));
     buf.add(#text (item.item.title));
@@ -365,7 +358,7 @@ actor ZonBackend {
 
   func deserializeItemAttr(attr: Entity.AttributeValue): Item {
     var kind: Int = 0;
-    var owner: ?Principal = null;
+    var creator: ?Principal = null;
     var price = 0;
     var locale = "";
     var nick = "";
@@ -393,16 +386,13 @@ actor ZonBackend {
                 case (#bool true) {
                   switch (arr[pos+1]) {
                     case (#text v) {
-                      owner := ?Principal.fromText(v);
+                      creator := ?Principal.fromText(v);
                     };
                     case _ { break r false; };
                   };
                   pos += 2;
                 };
-                case (#bool false) {
-                  owner := null;
-                  pos += 1;
-                };
+                case _ {}; // TODO: Remove.
                 case _ { break r false; }
               };
             };
@@ -473,8 +463,9 @@ actor ZonBackend {
     if (not res) {
       Debug.trap("wrong item format");
     };
+    let ?creator2 = creator else { Debug.trap("programming error"); };
     {
-      creator = owner;
+      creator = creator2;
       item = {
         price = price;
         locale = locale;
@@ -502,10 +493,9 @@ actor ZonBackend {
     };    
   };
 
-  // FIXME: Don't update `details`. Don't update communal categories.
   public shared({caller = caller}) func createItemData(canisterId: Principal, _item: ItemWithoutOwner, sybilCanisterId: Principal) {
     await checkSybil(sybilCanisterId, caller);
-    let item2 = { creator = ?caller; item = _item; };
+    let item2 = { creator = caller; item = _item; };
     let _itemId = maxId;
     maxId += 1;
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
@@ -514,15 +504,21 @@ actor ZonBackend {
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
-  // FIXME: Cannot change item type.
-  public shared({caller = caller}) func setItemData(canisterId: Principal, _itemId: Nat64, _item: Item) {
+  public shared({caller = caller}) func setItemData(canisterId: Principal, _itemId: Nat64, item: ItemWithoutOwner) {
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
         let oldItem = deserializeItem(oldItemRepr.attributes);
-        if (_item.creator != oldItem.creator) {
+        if (caller != oldItem.creator) {
           Debug.trap("can't change item owner");
+        };
+        let _item = { item = item; creator = caller };
+        if (_item.item.details != oldItem.item.details) {
+          Debug.trap("can't change item type");
+        };
+        if (oldItem.item.details == #communalCategory) {
+          Debug.trap("can't edit communal category");
         };
         if (onlyItemOwner(caller, oldItem)) {
           await db.put({sk = key; attributes = serializeItem(_item)});
@@ -662,7 +658,7 @@ actor ZonBackend {
   };
 
   // TODO: On non-existent payment it proceeds successful. Is it OK?
-  func processPayment(paymentCanisterId: Principal, userId: Principal): async () {
+  func processPayment(paymentCanisterId: Principal, userId: Principal, _buyerAffiliate: ?Principal, _sellerAffiliate: ?Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
     switch (StableRBTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
       case (?payment) {
@@ -691,18 +687,10 @@ actor ZonBackend {
               case (#Ok _ or #Err (#Duplicate _)) {};
               case _ { Debug.trap("can't pay") };
             };
-            let author = item.creator;
             let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
-            // payToShareholders(_shareholdersShare, author); // TODO
+            payToShareholders(Int.abs(_shareholdersShare), _buyerAffiliate, _sellerAffiliate); // TODO: abs() is a hack.
             let toAuthor = payment.amount - _shareholdersShare;
-            switch (author) {
-              case (?author) {
-                indebt(userId, Int.abs(toAuthor)); // TODO: abs() is a hack.
-              };
-              case (null) {
-                // TODO: Give the money to the other parties, not leave it in canister.
-              };
-            };
+            indebt(item.creator, Int.abs(toAuthor)); // TODO: abs() is a hack.
           };
           case (null) {};
         };
