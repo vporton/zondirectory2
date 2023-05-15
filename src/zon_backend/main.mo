@@ -678,11 +678,11 @@ actor ZonBackend {
               case (null) {
                 // TODO: Give the money to the other parties, not leave it in canister.
               };
-            }
+            };
+            await db.delete({sk = "p/" # Principal.toText(userId)});
           };
           case (null) {};
         };
-        await db.delete({sk = "p/" # Principal.toText(userId)})
       };
       case (null) {};
     };
