@@ -337,7 +337,6 @@ actor ZonBackend {
       case (#ownedCategory) { ITEM_TYPE_OWNED_CATEGORY };
       case (#communalCategory) { ITEM_TYPE_COMMUNAL_CATEGORY };
     }));
-    buf.add(#bool (true)); // TODO: superfluous
     buf.add(#text (Principal.toText(item.creator)));
     buf.add(#int (item.item.price));
     buf.add(#text (item.item.locale));
@@ -383,18 +382,12 @@ actor ZonBackend {
             };
             case (1) {
               switch (arr[pos]) {
-                case (#bool true) {
-                  switch (arr[pos+1]) {
-                    case (#text v) {
-                      creator := ?Principal.fromText(v);
-                    };
-                    case _ { break r false; };
-                  };
-                  pos += 2;
+                case (#text v) {
+                  creator := ?Principal.fromText(v);
                 };
-                case _ {}; // TODO: Remove.
-                case _ { break r false; }
+                case _ { break r false; };
               };
+              pos += 1;
             };
             case (2) {
               switch (arr[pos]) {
