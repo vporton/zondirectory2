@@ -545,7 +545,7 @@ actor ZonBackend {
 
   // TODO: Should I set maximum lengths on user nick, chirp length, etc.
 
-  /// Payments ///
+  /// Incoming Payments ///
 
   // let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs
   // TODO: Or "utozz-siaaa-aaaam-qaaxq-cai": https://dank.ooo/wicp/ (seem to have less UX)
@@ -553,14 +553,14 @@ actor ZonBackend {
   // Also consider using https://github.com/dfinity/examples/tree/master/motoko/invoice-canister
   // or https://github.com/research-ag/motoko-lib/blob/main/src/TokenHandler.mo
 
-  type Payment = {
+  type IncomingPayment = {
     kind: { #payment; #donation };
     itemId: Int; // TODO: Enough `Nat64`.
     amount: Nat;
     var time: ?Time.Time;
   };
 
-  // func serializePaymentAttr(payment: Payment): Entity.AttributeValue {
+  // func serializePaymentAttr(payment: IncomingPayment): Entity.AttributeValue {
   //   var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(3);
   //   buf.add(#int (switch (payment.kind) {
   //     case (#payment) { 0 };
@@ -571,11 +571,11 @@ actor ZonBackend {
   //   #tuple (Buffer.toArray(buf));
   // };
 
-  // func serializePayment(payment: Payment): [(Entity.AttributeKey, Entity.AttributeValue)] {
+  // func serializePayment(payment: IncomingPayment): [(Entity.AttributeKey, Entity.AttributeValue)] {
   //   [("v", serializePaymentAttr(payment))];
   // };
 
-  // func deserializePaymentAttr(attr: Entity.AttributeValue): Payment {
+  // func deserializePaymentAttr(attr: Entity.AttributeValue): IncomingPayment {
   //   var kind: { #payment; #donation } = #payment;
   //   var itemId: Int = 0;
   //   var amount = 0;
@@ -632,7 +632,7 @@ actor ZonBackend {
   //   };    
   // };
 
-  // func deserializePayment(map: Entity.AttributeMap): Payment {
+  // func deserializePayment(map: Entity.AttributeMap): IncomingPayment {
   //   let v = RBT.get(map, Text.compare, "v");
   //   switch (v) {
   //     case (?v) { deserializePaymentAttr(v) };
@@ -640,29 +640,30 @@ actor ZonBackend {
   //   };    
   // };
 
-  stable var currentPayments: StableRBTree.Tree<Principal, Payment> = StableRBTree.init(); // TODO: Delete old ones.
-  stable var ourDebts: StableRBTree.Tree<Principal, Nat> = StableRBTree.init(); // TODO: subaccounts?
+  stable var currentPayments: StableRBTree.Tree<Principal, IncomingPayment> = StableRBTree.init(); // TODO: Delete old ones.
+  stable var ourDebts: StableRBTree.Tree<Principal, OutgoingPayment> = StableRBTree.init(); // TODO: subaccounts?
 
   public query func getOurDebt(user: Principal): async Nat {
     switch (StableRBTree.get(ourDebts, Principal.compare, user)) {
-      case (?amount) { amount };
+      case (?debt) { debt.amount };
       case (null) { 0 };
     };
   };
 
   func indebt(to: Principal, amount: Nat) {
-    ignore StableRBTree.update<Principal, Nat>(ourDebts, Principal.compare, to, func (oldAmount: ?Nat): Nat {
-      switch (oldAmount) {
-        case (?oldAmount) { oldAmount + amount };
+    ignore StableRBTree.update<Principal, OutgoingPayment>(ourDebts, Principal.compare, to, func (old: ?OutgoingPayment): OutgoingPayment {
+      let sum = switch (old) {
+        case (?old) { old.amount + amount };
         case (null) { amount };
       };
+      { amount = sum; var time = null };
     });
   };
 
   // TODO: On non-existent payment it proceeds successful. Is it OK?
   func processPayment(paymentCanisterId: Principal, userId: Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
-    switch (StableRBTree.get<Principal, Payment>(currentPayments, Principal.compare, userId)) {
+    switch (StableRBTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
       case (?payment) {
         let itemKey = "i/" # Int.toText(payment.itemId);
         switch (await db.get({sk = itemKey})) {
@@ -673,7 +674,7 @@ actor ZonBackend {
               case (null) {
                 let time = Time.now();
                 payment.time := ?time;
-                currentPayments := StableRBTree.put<Principal, Payment>(currentPayments, Principal.compare, userId, payment);
+                currentPayments := StableRBTree.put<Principal, IncomingPayment>(currentPayments, Principal.compare, userId, payment);
                 time;
               };
             };
@@ -704,7 +705,7 @@ actor ZonBackend {
           };
           case (null) {};
         };
-        ignore StableRBTree.delete<Principal, Payment>(currentPayments, Principal.compare, userId);
+        ignore StableRBTree.delete<Principal, IncomingPayment>(currentPayments, Principal.compare, userId);
       };
       case (null) {};
     };
@@ -760,9 +761,37 @@ actor ZonBackend {
       case (null) {};
     };
     totalDividends += _shareHoldersAmount;
-  }
+  };
 
-  // public shared({caller = caller}) func pay(canisterId: Principal, payment: Payment) {
-  //   actor(Principal.toText(canisterId))
-  // };
+  /// Outgoing Payments ///
+
+  type OutgoingPayment = {
+    amount: Nat;
+    var time: ?Time.Time;
+  };
+
+  public shared({caller = caller}) func payout() {
+    switch (StableRBTree.get<Principal, OutgoingPayment>(ourDebts, Principal.compare, caller)) {
+      case (?payment) {
+        let time = switch (payment.time) {
+          case (?time) { time };
+          case (null) {
+            let time = Time.now();
+            payment.time := ?time;
+            time;
+          }
+        };
+        let result = await ledger.icrc1_transfer({
+          from_subaccount = null;
+          to = {owner = caller; subaccount = null}; // TODO: subaccount
+          amount = payment.amount;
+          fee = null;
+          memo = null;
+          created_at_time = ?Nat64.fromNat(Int.abs(time)); // idempotent
+        });
+        ignore StableRBTree.delete<Principal, OutgoingPayment>(ourDebts, Principal.compare, caller);
+      };
+      case (null) {};
+    }
+  };
 };
