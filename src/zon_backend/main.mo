@@ -714,12 +714,22 @@ actor ZonBackend {
 
   var totalDividends = 0;
   var totalDividendsPaid = 0; // actually paid sum
+  // TODO: Set a heavy transfer fee of the PST to ensure that `lastTotalDivedends` doesn't take much memory.
+  stable var lastTotalDivedends: StableRBTree.Tree<Principal, Nat> = StableRBTree.init(); // TODO: subaccounts?
 
-  // func _dividendsOwing(_account: Principal): Nat {
-  //   let _newDividends = totalDividends - lastTotalDivedends[_account]; // FIXME: If lastTotalDivedends retrieved from a wrong canister, it will be overpaid.
-  //   return (balances[_account] * _newDividends) / totalSupply; // rounding down
-  // }
-
+  // TODO: subaccount?
+  func _dividendsOwing(_account: Principal): async Nat {
+    let lastTotal = switch (StableRBTree.get(lastTotalDivedends, Principal.compare, _account)) {
+      case (?value) { value };
+      case (null) { 0 };
+    };
+    let _newDividends = totalDividends - lastTotal;
+    let ?pst2 = pst else { Debug.trap("no PST"); };
+    // rounding down
+    let balance = await pst2.icrc1_balance_of({owner = _account; subaccount = null});
+    let total = await pst2.icrc1_total_supply();
+    balance * _newDividends / total;
+  };
 
   // public shared({caller = caller}) func pay(canisterId: Principal, payment: Payment) {
   //   actor(Principal.toText(canisterId))
