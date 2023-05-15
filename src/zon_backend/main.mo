@@ -739,7 +739,7 @@ actor ZonBackend {
     var _shareHoldersAmount = _amount;
     switch (_buyerAffiliate) {
       case (?_buyerAffiliate) {
-        let _buyerAffiliateAmount = uint256(buyerAffiliateShare.muli(int256(_amount)));
+        let _buyerAffiliateAmount = Int.abs(fractions.mul(_amount, buyerAffiliateShare));
         indebt(_buyerAffiliate, _buyerAffiliateAmount);
         if (_shareHoldersAmount < _buyerAffiliateAmount) {
           Debug.trap("negative amount to pay");
@@ -750,7 +750,7 @@ actor ZonBackend {
     };
     switch (_sellerAffiliate) {
       case (?_sellerAffiliate) {
-        let _sellerAffiliateAmount = uint256(sellerAffiliateShare.muli(int256(_amount)));
+        let _sellerAffiliateAmount = Int.abs(fractions.mul(_amount, sellerAffiliateShare));
         indebt(_sellerAffiliate, _sellerAffiliateAmount);
         if (_shareHoldersAmount < _sellerAffiliateAmount) {
           Debug.trap("negative amount to pay");
