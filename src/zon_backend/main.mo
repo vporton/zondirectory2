@@ -45,6 +45,7 @@ actor ZonBackend {
   // "i/" - ID -> Item
   // "a/" - user -> <buyer affiliate>/<seller affiliate>
   stable var firstDB: ?DBPartition.DBPartition = null; // ID -> Item
+  // TODO: Avoid duplicate user nick names.
 
   stable var maxId: Nat64 = 0;
 
