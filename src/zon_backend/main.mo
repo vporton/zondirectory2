@@ -268,7 +268,6 @@ actor ZonBackend {
 
   // TODO: `removeItemOwner`
 
-  // TODO: Here and in other places, setting an owner can conceal spam messages as coming from a different user.
   public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User, sybilCanisterId: Principal) {
     await checkSybil(sybilCanisterId, caller);
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
@@ -305,7 +304,6 @@ actor ZonBackend {
   // TODO: Images.
   // TODO: Upload files.
   // TODO: Item version.
-  // TODO: Check that #communalCategory cannot be deleted.
   type Item = {
     creator: Principal;
     item: ItemWithoutOwner;
@@ -319,7 +317,6 @@ actor ZonBackend {
     };
   };
 
-  // TODO: Rename:
   let ITEM_TYPE_LINK = 0;
   let ITEM_TYPE_MESSAGE = 1;
   let ITEM_TYPE_POST = 2;
@@ -528,6 +525,9 @@ actor ZonBackend {
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
         let oldItem = deserializeItem(oldItemRepr.attributes);
+        if (oldItem.item.details == #communalCategory) {
+          Debug.trap("it's communal")
+        };
         if (onlyItemOwner(caller, oldItem)) {
           await db.delete({sk = key});
         };
@@ -536,7 +536,7 @@ actor ZonBackend {
     };
   };
 
-  // TODO: Should I set maximum lengths on user nick, chirp length, etc.?
+  // TODO: Set maximum lengths on user nick, chirp length, etc.?
 
   /// Incoming Payments ///
 
@@ -681,7 +681,7 @@ actor ZonBackend {
               case _ { Debug.trap("can't pay") };
             };
             let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
-            payToShareholders(Int.abs(_shareholdersShare), _buyerAffiliate, _sellerAffiliate); // TODO: abs() is a hack.
+            recalculateShareholdersDebt(Int.abs(_shareholdersShare), _buyerAffiliate, _sellerAffiliate); // TODO: abs() is a hack.
             let toAuthor = payment.amount - _shareholdersShare;
             indebt(item.creator, Int.abs(toAuthor)); // TODO: abs() is a hack.
           };
@@ -714,8 +714,7 @@ actor ZonBackend {
     balance * _newDividends / total;
   };
 
-  // TODO: Rename into `debtToShareholders` or `shareholdersDebt`.
-  func payToShareholders(_amount: Nat, _buyerAffiliate: ?Principal, _sellerAffiliate: ?Principal) {
+  func recalculateShareholdersDebt(_amount: Nat, _buyerAffiliate: ?Principal, _sellerAffiliate: ?Principal) {
     // Affiliates are delivered by frontend.
     // address payable _buyerAffiliate = affiliates[msg.sender];
     // address payable _sellerAffiliate = affiliates[_author];
