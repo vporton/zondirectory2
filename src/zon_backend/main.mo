@@ -23,15 +23,16 @@ import Time "mo:base/Time";
 import Int64 "mo:base/Int64";
 import Nat64 "mo:base/Nat64";
 
-// TODO: Also make the founder's account an owner?
 actor ZonBackend {
   /// External Canisters ///
 
-  // let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs
-  // TODO: Or "utozz-siaaa-aaaam-qaaxq-cai": https://dank.ooo/wicp/ (seem to have less UX)
   let nativeIPCToken = "ryjl3-tyaaa-aaaaa-aaaba-cai"; // native NNS ICP token.
+  // let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs
+  // let wrappedICPCanisterId = "utozz-siaaa-aaaam-qaaxq-cai"; // https://dank.ooo/wicp/ (seem to have less UX)
   // Also consider using https://github.com/dfinity/examples/tree/master/motoko/invoice-canister
   // or https://github.com/research-ag/motoko-lib/blob/main/src/TokenHandler.mo
+
+  let phoneNumberVerificationCanisterId = "gzqxf-kqaaa-aaaak-qakba-cai"; // https://docs.nfid.one/developer/credentials/mobile-phone-number-credential
 
   /// Some Global Variables ///
 
@@ -138,8 +139,6 @@ actor ZonBackend {
   };
 
   /// Users ///
-
-  let phoneNumberVerificationCanisterId = "gzqxf-kqaaa-aaaak-qakba-cai"; // https://docs.nfid.one/developer/credentials/mobile-phone-number-credential
 
   func checkSybil(sybilCanister: Principal, user: Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
@@ -277,7 +276,6 @@ actor ZonBackend {
     await db.put({sk = key; attributes = serializeUser(_user)});
   };
 
-  // FIXME
   // TODO: Should also remove all his/her items?
   public shared({caller = caller}) func removeUser(canisterId: Principal) {
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
@@ -304,7 +302,6 @@ actor ZonBackend {
 
 
   // TODO: Add `license` field?
-  // TODO: Affiliates.
   // TODO: Images.
   // TODO: Upload files.
   // TODO: Item version.
@@ -312,10 +309,6 @@ actor ZonBackend {
   type Item = {
     creator: ?Principal;
     item: ItemWithoutOwner;
-  };
-
-  func getItemsDB(): DBPartition.DBPartition {
-    actor("itemsDB");
   };
 
   func onlyItemOwner(caller: Principal, _item: Item): Bool {
@@ -327,22 +320,22 @@ actor ZonBackend {
   };
 
   // TODO: Rename:
-  let SER_LINK = 0;
-  let SER_MESSAGE = 1;
-  let SER_POST = 2;
-  let SER_DOWNLOAD = 3;
-  let SER_OWNED_CATEGORY = 4;
-  let SER_COMMUNAL_CATEGORY = 5;
+  let ITEM_TYPE_LINK = 0;
+  let ITEM_TYPE_MESSAGE = 1;
+  let ITEM_TYPE_POST = 2;
+  let ITEM_TYPE_DOWNLOAD = 3;
+  let ITEM_TYPE_OWNED_CATEGORY = 4;
+  let ITEM_TYPE_COMMUNAL_CATEGORY = 5;
 
   func serializeItemAttr(item: Item): Entity.AttributeValue {
     var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
     buf.add(#int (switch (item.item.details) {
-      case (#link v) { SER_LINK };
-      case (#message) { SER_MESSAGE };
-      case (#post) { SER_POST };
-      case (#download) { SER_DOWNLOAD };
-      case (#ownedCategory) { SER_OWNED_CATEGORY };
-      case (#communalCategory) { SER_COMMUNAL_CATEGORY };
+      case (#link v) { ITEM_TYPE_LINK };
+      case (#message) { ITEM_TYPE_MESSAGE };
+      case (#post) { ITEM_TYPE_POST };
+      case (#download) { ITEM_TYPE_DOWNLOAD };
+      case (#ownedCategory) { ITEM_TYPE_OWNED_CATEGORY };
+      case (#communalCategory) { ITEM_TYPE_COMMUNAL_CATEGORY };
     }));
     switch (item.creator) {
       case (?owner) {
@@ -509,6 +502,7 @@ actor ZonBackend {
     };    
   };
 
+  // FIXME: Don't update `details`. Don't update communal categories.
   public shared({caller = caller}) func createItemData(canisterId: Principal, _item: ItemWithoutOwner, sybilCanisterId: Principal) {
     await checkSybil(sybilCanisterId, caller);
     let item2 = { creator = ?caller; item = _item; };
@@ -553,7 +547,7 @@ actor ZonBackend {
     };
   };
 
-  // TODO: Should I set maximum lengths on user nick, chirp length, etc.
+  // TODO: Should I set maximum lengths on user nick, chirp length, etc.?
 
   /// Incoming Payments ///
 
@@ -655,6 +649,9 @@ actor ZonBackend {
   };
 
   func indebt(to: Principal, amount: Nat) {
+    if (amount == 0) {
+      return;
+    };
     ignore StableRBTree.update<Principal, OutgoingPayment>(ourDebts, Principal.compare, to, func (old: ?OutgoingPayment): OutgoingPayment {
       let sum = switch (old) {
         case (?old) { old.amount + amount };
