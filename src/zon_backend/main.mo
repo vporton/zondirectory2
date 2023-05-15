@@ -685,6 +685,10 @@ actor ZonBackend {
               memo = null;
               created_at_time = ?Nat64.fromNat(Int.abs(time)); // idempotent
             });
+            switch (result) {
+              case (#Ok _ or #Err (#Duplicate _)) {};
+              case _ { Debug.trap("can't pay") };
+            };
             let author = item.creator;
             let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
             // payToShareholders(_shareholdersShare, author); // TODO
