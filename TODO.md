@@ -11,3 +11,5 @@
 - Improve performance by using `var` in structs to write directly to a struct rather than to intermediary variables.
 
 - Payments with other tokens than IPC.
+
+- https://github.com/canscale/StableHeapBTreeMap/ instead of `StableRBTree`, because it's balanced.
