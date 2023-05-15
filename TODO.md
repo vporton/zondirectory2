@@ -9,3 +9,5 @@
 - The current code allows to write to an "alien" canister. Possible solution is to use one CanDB with key prefixes.
 
 - Improve performance by using `var` in structs to write directly to a struct rather than to intermediary variables.
+
+- Payments with other tokens than IPC.

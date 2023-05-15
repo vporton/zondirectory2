@@ -19,6 +19,9 @@ import fractions "./fractions";
 import HashMap "mo:base/HashMap";
 import Nat8 "mo:base/Nat8";
 import Hash "mo:base/Hash";
+import Time "mo:base/Time";
+import Int64 "mo:base/Int64";
+import Nat64 "mo:base/Nat64";
 
 // TODO: Also make the founder's account an owner?
 actor ZonBackend {
@@ -554,87 +557,88 @@ actor ZonBackend {
     kind: { #payment; #donation };
     itemId: Int; // TODO: Enough `Nat64`.
     amount: Nat;
+    var time: ?Time.Time;
   };
 
-  func serializePaymentAttr(payment: Payment): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(3);
-    buf.add(#int (switch (payment.kind) {
-      case (#payment) { 0 };
-      case (#donation) { 1 };
-    }));
-    buf.add(#int (payment.itemId));
-    buf.add(#int (payment.amount));
-    #tuple (Buffer.toArray(buf));
-  };
+  // func serializePaymentAttr(payment: Payment): Entity.AttributeValue {
+  //   var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(3);
+  //   buf.add(#int (switch (payment.kind) {
+  //     case (#payment) { 0 };
+  //     case (#donation) { 1 };
+  //   }));
+  //   buf.add(#int (payment.itemId));
+  //   buf.add(#int (payment.amount));
+  //   #tuple (Buffer.toArray(buf));
+  // };
 
-  func serializePayment(payment: Payment): [(Entity.AttributeKey, Entity.AttributeValue)] {
-    [("v", serializePaymentAttr(payment))];
-  };
+  // func serializePayment(payment: Payment): [(Entity.AttributeKey, Entity.AttributeValue)] {
+  //   [("v", serializePaymentAttr(payment))];
+  // };
 
-  func deserializePaymentAttr(attr: Entity.AttributeValue): Payment {
-    var kind: { #payment; #donation } = #payment;
-    var itemId: Int = 0;
-    var amount = 0;
-    let res = label r: Bool switch (attr) {
-      case (#tuple arr) {
-        var pos = 0;
-        while (pos < arr.size()) {
-          switch (pos) {
-            case (0) {
-              switch (arr[pos]) {
-                case (#int v) {
-                  switch (v) {
-                    case (0) { kind := #payment; };
-                    case (1) { kind := #donation; };
-                    case _ { break r false };
-                  }
-                };
-                case _ { break r false };
-              };
-            };
-            case (1) {
-              switch (arr[pos]) {
-                case (#int v) {
-                  itemId := v;
-                };
-                case _ { break r false };
-              };
-            };
-            case (2) {
-              switch (arr[pos]) {
-                case (#int v) {
-                  amount := Int.abs(v);
-                };
-                case _ { break r false };
-              };
-            };
-            case _ { break r false; };
-          };
-          pos += 1;
-        };
-        true;
-      };
-      case _ {
-        false;
-      };
-    };
-    if (not res) {
-      Debug.trap("wrong user format");
-    };
-    {
-      kind = kind;
-      itemId = itemId;
-      amount = amount;
-    };    
-  };
+  // func deserializePaymentAttr(attr: Entity.AttributeValue): Payment {
+  //   var kind: { #payment; #donation } = #payment;
+  //   var itemId: Int = 0;
+  //   var amount = 0;
+  //   let res = label r: Bool switch (attr) {
+  //     case (#tuple arr) {
+  //       var pos = 0;
+  //       while (pos < arr.size()) {
+  //         switch (pos) {
+  //           case (0) {
+  //             switch (arr[pos]) {
+  //               case (#int v) {
+  //                 switch (v) {
+  //                   case (0) { kind := #payment; };
+  //                   case (1) { kind := #donation; };
+  //                   case _ { break r false };
+  //                 }
+  //               };
+  //               case _ { break r false };
+  //             };
+  //           };
+  //           case (1) {
+  //             switch (arr[pos]) {
+  //               case (#int v) {
+  //                 itemId := v;
+  //               };
+  //               case _ { break r false };
+  //             };
+  //           };
+  //           case (2) {
+  //             switch (arr[pos]) {
+  //               case (#int v) {
+  //                 amount := Int.abs(v);
+  //               };
+  //               case _ { break r false };
+  //             };
+  //           };
+  //           case _ { break r false; };
+  //         };
+  //         pos += 1;
+  //       };
+  //       true;
+  //     };
+  //     case _ {
+  //       false;
+  //     };
+  //   };
+  //   if (not res) {
+  //     Debug.trap("wrong user format");
+  //   };
+  //   {
+  //     kind = kind;
+  //     itemId = itemId;
+  //     amount = amount;
+  //   };    
+  // };
 
-  func deserializePayment(map: Entity.AttributeMap): Payment {
-    let v = RBT.get(map, Text.compare, "v");
-    switch (v) {
-      case (?v) { deserializePaymentAttr(v) };
-      case _ { Debug.trap("map not found") };
-    };    
-  };
+  // func deserializePayment(map: Entity.AttributeMap): Payment {
+  //   let v = RBT.get(map, Text.compare, "v");
+  //   switch (v) {
+  //     case (?v) { deserializePaymentAttr(v) };
+  //     case _ { Debug.trap("map not found") };
+  //   };    
+  // };
 
   stable var currentPayments: StableRBTree.Tree<Principal, Payment> = StableRBTree.init(); // TODO: Delete old ones.
   stable var ourDebts: StableRBTree.Tree<Principal, Nat> = StableRBTree.init(); // TODO: subaccounts?
@@ -655,8 +659,8 @@ actor ZonBackend {
     });
   };
 
-  // FIXME: Check `tx`.
-  func processPayment(paymentCanisterId: Principal, userId: Principal, tx: Nat): async () {
+  // TODO: On non-existent payment it proceeds successful. Is it OK?
+  func processPayment(paymentCanisterId: Principal, userId: Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
     switch (StableRBTree.get<Principal, Payment>(currentPayments, Principal.compare, userId)) {
       case (?payment) {
@@ -664,6 +668,23 @@ actor ZonBackend {
         switch (await db.get({sk = itemKey})) {
           case (?itemRepr) {
             let item = deserializeItem(itemRepr.attributes);
+            let time = switch (payment.time) {
+              case (?time) { time };
+              case (null) {
+                let time = Time.now();
+                payment.time := ?time;
+                currentPayments := StableRBTree.put<Principal, Payment>(currentPayments, Principal.compare, userId, payment);
+                time;
+              };
+            };
+            let result = await ledger.icrc1_transfer({
+              from_subaccount = ?Principal.toBlob(userId);
+              to = {owner = Principal.fromText("zon_backend"); subaccount = null}; // FIXME: I think, it does not work.
+              amount = payment.amount;
+              fee = null;
+              memo = null;
+              created_at_time = ?Nat64.fromNat(Int.abs(time)); // idempotent
+            });
             let author = item.creator;
             let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
             // payToShareholders(_shareholdersShare, author); // TODO
