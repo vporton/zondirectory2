@@ -294,7 +294,7 @@ actor ZonBackend {
       #link : Text;
       #message : ();
       #post : ();
-      #download : ();
+      #download : (); // TODO: paid file storage
       #ownedCategory : ();
       #communalCategory : ();
     };
