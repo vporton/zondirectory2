@@ -266,8 +266,6 @@ actor ZonBackend {
     };    
   };
 
-  // TODO: `removeItemOwner`
-
   public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User, sybilCanisterId: Principal) {
     await checkSybil(sybilCanisterId, caller);
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
@@ -301,7 +299,6 @@ actor ZonBackend {
 
   // TODO: Add `license` field?
   // TODO: Images.
-  // TODO: Upload files.
   // TODO: Item version.
   type Item = {
     creator: Principal;
@@ -532,7 +529,7 @@ actor ZonBackend {
     };
   };
 
-  // TODO: Set maximum lengths on user nick, chirp length, etc.?
+  // TODO: Set maximum lengths on user nick, chirp length, etc.
 
   /// Incoming Payments ///
 
@@ -702,7 +699,7 @@ actor ZonBackend {
       case (?value) { value };
       case (null) { 0 };
     };
-    let _newDividends = totalDividends - lastTotal;
+    let _newDividends = Int.abs((totalDividends: Int) - lastTotal);
     let ?pst2 = pst else { Debug.trap("no PST"); };
     // rounding down
     let balance = await pst2.icrc1_balance_of({owner = _account; subaccount = null});
