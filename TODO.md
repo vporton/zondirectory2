@@ -14,3 +14,5 @@
 - Payments with other tokens than IPC.
 
 - Google Analytics
+
+- https://github.com/dfinity/sdk/blob/master/CHANGELOG.md (`dfx deps`)
