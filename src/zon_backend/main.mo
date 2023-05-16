@@ -292,7 +292,7 @@ actor ZonBackend {
     description: Text;
     details: {
       #link : Text;
-      #message : (); // TODO: Implement
+      #message : ();
       #post : ();
       #ownedCategory : ();
       #communalCategory : ();
@@ -625,7 +625,7 @@ actor ZonBackend {
   // };
 
   stable var currentPayments: BTree.BTree<Principal, IncomingPayment> = BTree.init<Principal, IncomingPayment>(null); // TODO: Delete old ones.
-  stable var ourDebts: BTree.BTree<Principal, OutgoingPayment> = BTree.init<Principal, OutgoingPayment>(null); // TODO: subaccounts?
+  stable var ourDebts: BTree.BTree<Principal, OutgoingPayment> = BTree.init<Principal, OutgoingPayment>(null);
 
   public query func getOurDebt(user: Principal): async Nat {
     switch (BTree.get(ourDebts, Principal.compare, user)) {
@@ -695,9 +695,8 @@ actor ZonBackend {
   var totalDividends = 0;
   var totalDividendsPaid = 0; // actually paid sum
   // TODO: Set a heavy transfer fee of the PST to ensure that `lastTotalDivedends` doesn't take much memory.
-  stable var lastTotalDivedends: BTree.BTree<Principal, Nat> = BTree.init<Principal, Nat>(null); // TODO: subaccounts?
+  stable var lastTotalDivedends: BTree.BTree<Principal, Nat> = BTree.init<Principal, Nat>(null);
 
-  // TODO: subaccount?
   func _dividendsOwing(_account: Principal): async Nat {
     let lastTotal = switch (BTree.get(lastTotalDivedends, Principal.compare, _account)) {
       case (?value) { value };
@@ -748,7 +747,7 @@ actor ZonBackend {
     var time: ?Time.Time;
   };
 
-  public shared({caller = caller}) func payout() {
+  public shared({caller = caller}) func payout(subaccount: ?ICRC1Types.Subaccount) {
     switch (BTree.get<Principal, OutgoingPayment>(ourDebts, Principal.compare, caller)) {
       case (?payment) {
         let time = switch (payment.time) {
@@ -762,7 +761,7 @@ actor ZonBackend {
         let fee = await ledger.icrc1_fee();
         let result = await ledger.icrc1_transfer({
           from_subaccount = null;
-          to = {owner = caller; subaccount = null}; // TODO: subaccount
+          to = {owner = caller; subaccount = subaccount};
           amount = payment.amount - fee;
           fee = null;
           memo = null;
