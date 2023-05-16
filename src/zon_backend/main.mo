@@ -760,6 +760,7 @@ actor ZonBackend {
             time;
           }
         };
+        // FIXME: Take fee paid by sender into account.
         let result = await ledger.icrc1_transfer({
           from_subaccount = null;
           to = {owner = caller; subaccount = null}; // TODO: subaccount
