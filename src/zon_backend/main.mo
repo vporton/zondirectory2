@@ -538,7 +538,7 @@ actor ZonBackend {
 
   type IncomingPayment = {
     kind: { #payment; #donation };
-    itemId: Int; // TODO: Enough `Nat64`.
+    itemId: Nat64; // TODO: Enough `Nat64`.
     amount: ICRC1Types.Balance;
     var time: ?Time.Time;
   };
@@ -651,7 +651,7 @@ actor ZonBackend {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
     switch (BTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
       case (?payment) {
-        let itemKey = "i/" # Int.toText(payment.itemId);
+        let itemKey = "i/" # Nat64.toText(payment.itemId);
         switch (await db.get({sk = itemKey})) {
           case (?itemRepr) {
             let item = deserializeItem(itemRepr.attributes);
@@ -680,7 +680,7 @@ actor ZonBackend {
             let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
             recalculateShareholdersDebt(Int.abs(_shareholdersShare), _buyerAffiliate, _sellerAffiliate); // TODO: abs() is a hack.
             let toAuthor = payment.amount - _shareholdersShare;
-            indebt(item.creator, Int.abs(toAuthor)); // TODO: abs() is a hack.
+            indebt(item.creator, Int.abs(toAuthor));
           };
           case (null) {};
         };
