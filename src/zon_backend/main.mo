@@ -850,14 +850,14 @@ actor ZonBackend {
 
     // FIXME: What to do with `oldKey` during double key period?
     // TODO: Should use binary format.
-    // newVotes -> tmp.child
+    // newVotes -> child
     let newKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Float.toText(newVotes) # "/" # newVotes.random;
     await db.put({sk = newKey; attributes = [("v", #text (Principal.toText(tmp.child)))]});
-    // tmp.child -> newVotes
+    // child -> newVotes
     let newKey2 = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Nat.toText(xNat.from64ToNat(tmp.child));
     await db.put({sk = newKey2; attributes = [("v", #float (newVotes))]});
     let oldKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Float.toText(oldVotes) # "/" # oldVotes.random;
-    // delete oldVotes -> tmp.child
+    // delete oldVotes -> child
     await db.delete({sk = oldKey});
 
     ignore settingVotes.removeLast();
