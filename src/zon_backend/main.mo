@@ -44,6 +44,7 @@ actor ZonBackend {
   // "u/" - Principal -> User
   // "i/" - ID -> Item
   // "a/" - user -> <buyer affiliate>/<seller affiliate>
+  // "v/" - <parent>/<votes> -> <child>
   stable var firstDB: ?DBPartition.DBPartition = null; // ID -> Item
   // TODO: Avoid duplicate user nick names.
 
@@ -667,7 +668,7 @@ actor ZonBackend {
             };
             let result = await ledger.icrc1_transfer({
               from_subaccount = ?Principal.toBlob(userId);
-              to = {owner = Principal.fromText("zon_backend"); subaccount = null}; // FIXME: I think, it does not work.
+              to = {owner = Principal.fromActor(ZonBackend); subaccount = null};
               amount = payment.amount;
               fee = null;
               memo = null;
