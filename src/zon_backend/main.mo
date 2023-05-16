@@ -44,7 +44,10 @@ actor ZonBackend {
   // "u/" - Principal -> User
   // "i/" - ID -> Item
   // "a/" - user -> <buyer affiliate>/<seller affiliate>
-  // "v/" - <parent>/<votes> -> <child>
+  // "v/" - <parent>/<votes>/<random> -> <child> [prefix1]
+  // "p/" - <parent>/<child> -> <votes> [prefix2]
+  // "q/" - <parent>/<child> -> <quadratic votes> [prefix1]
+  // "w/" - <parent>/<quadratic votes>/<random> -> <child> [prefix2]
   stable var firstDB: ?DBPartition.DBPartition = null; // ID -> Item
   // TODO: Avoid duplicate user nick names.
 
@@ -786,5 +789,31 @@ actor ZonBackend {
       case (null) { "" }
     };
     await db.put({sk = "a/" # Principal.toText(caller); attributes = [("v", #text (buyerAffiliateStr # "/" # sellerAffiliateStr))]});
+  };
+
+  /// Voting ///
+
+  type VotesTmp = {
+    parent: Nat64;
+    child: Nat64;
+    oldVotes: Float;
+    newVotes: Float;
+  };
+
+  stable var settingVotes: BTree.BTree<Principal, VotesTmp> = BTree.init<Principal, VotesTmp>(null); // TODO: Delete old ones.
+
+  // FIXME: It seems that several `setVotes` in parallel may race.
+  func setVotes(tmp: VotesTmp, prefix1: Text, prefix2: Text): async () {
+    // TODO: Should use binary format.
+    // newVotes -> child
+    let newKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(tmp.newVotes) # "/" # random;
+    await db.put({sk = newKey; attributes = [("v", #text (Principal.toText(child)))]});
+    // child -> newVotes
+    let newKey2 = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
+    await db.put({sk = newKey2; attributes = [("v", #float (tmp.newVotes))]});
+    let oldKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(tmp.oldVotes) # "/" # random;
+    // delete oldVotes -> child
+    await db.delete({sk = oldKey});
+
   }
 };
