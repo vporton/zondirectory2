@@ -813,27 +813,35 @@ actor ZonBackend {
     };
   };
 
-  // type VotesTmp = {
-  //   parent: Nat64;
-  //   child: Nat64;
-  //   // oldVotes: ItemWeight;
-  //   // newVotes: ItemWeight;
-  // };
+  type VotesTmp = {
+    parent: Nat64;
+    child: Nat64;
+    var inProcess: Bool;
+    // oldVotes: ItemWeight;
+    // newVotes: ItemWeight;
+  };
 
-  // stable var settingVotes: [VotesTmp] = []; // TODO: Delete old ones.
+  // FIXME: Separate variables for different item streams.
+  stable var settingVotes: Buffer<VotesTmp> = Buffer.Buffer<Nat>(1); // TODO: Delete old ones.
   stable var currentVotes: BTree.BTree<Nat64, ()> = BTree.init(null); // Item ID -> () // TODO: Delete old ones.
 
   // TODO: Use binary keys.
-  func setVotes(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text, votesUpdater: ?Float -> Float): async* () {
+  func setVotes(prefix1: Text, prefix2: Text, votesUpdater: ?Float -> Float): async* () {
+    if (settingVotes.isEmpty()) {
+      return;
+    };
+    let tmp = settingVotes.last();
+
     // Prevent races:
-    // FIXME: This can't be passed again if a below `db.` operation fails.
-    if (BTree.has(currentVotes, Nat64.compare, parent) or BTree.has(currentVotes, Nat64.compare, child)) {
+    if (not tmp.inProcess)
+    if (BTree.has(currentVotes, Nat64.compare, tmp.parent) or BTree.has(currentVotes, Nat64.compare, tmp.child)) {
       Debug.trap("clash");
     };
-    ignore BTree.insert(currentVotes, Nat64.compare, parent, ());
-    ignore BTree.insert(currentVotes, Nat64.compare, child, ());
+    ignore BTree.insert(currentVotes, Nat64.compare, tmp.parent, ());
+    ignore BTree.insert(currentVotes, Nat64.compare, tmp.child, ());
+    tmp.inProcess := true;
 
-    let oldVotesKey = prefix2 # Nat.toText(xNat.from64ToNat(parent)) # '/' # Nat.toText(xNat.from64ToNat(child));
+    let oldVotesKey = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Nat.toText(xNat.from64ToNat(tmp.child));
     let oldVotes = await db.get({sk = oldVotesKey}) else { 0.0 }; // FIXME: deserialize
     let newVotesWeight = votesUpdater oldVotesWeight;
     let newVotes = switch (oldVotes) {
@@ -843,15 +851,17 @@ actor ZonBackend {
 
     // FIXME: What to do with `oldKey` during double key period?
     // TODO: Should use binary format.
-    // newVotes -> child
-    let newKey = prefix1 # Nat.toText(xNat.from64ToNat(parent)) # '/' # Float.toText(newVotes) # "/" # newVotes.random;
-    await db.put({sk = newKey; attributes = [("v", #text (Principal.toText(child)))]});
-    // child -> newVotes
-    let newKey2 = prefix2 # Nat.toText(xNat.from64ToNat(parent)) # '/' # Nat.toText(xNat.from64ToNat(child));
+    // newVotes -> tmp.child
+    let newKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Float.toText(newVotes) # "/" # newVotes.random;
+    await db.put({sk = newKey; attributes = [("v", #text (Principal.toText(tmp.child)))]});
+    // tmp.child -> newVotes
+    let newKey2 = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Nat.toText(xNat.from64ToNat(tmp.child));
     await db.put({sk = newKey2; attributes = [("v", #float (newVotes))]});
-    let oldKey = prefix1 # Nat.toText(xNat.from64ToNat(parent)) # '/' # Float.toText(oldVotes) # "/" # oldVotes.random;
-    // delete oldVotes -> child
+    let oldKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Float.toText(oldVotes) # "/" # oldVotes.random;
+    // delete oldVotes -> tmp.child
     await db.delete({sk = oldKey});
+
+    ignore settingVotes.removeLast();
   };
 
   func setVotes2(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text) {
