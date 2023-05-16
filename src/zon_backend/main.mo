@@ -20,7 +20,6 @@ import HashMap "mo:base/HashMap";
 import Nat8 "mo:base/Nat8";
 import Hash "mo:base/Hash";
 import Time "mo:base/Time";
-import Int64 "mo:base/Int64";
 import Nat64 "mo:base/Nat64";
 import ICRC1Types "mo:icrc1/ICRC1/Types";
 
