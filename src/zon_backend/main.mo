@@ -665,10 +665,11 @@ actor ZonBackend {
                 time;
               };
             };
+            let fee = await ledger.icrc1_fee();
             let result = await ledger.icrc1_transfer({
               from_subaccount = ?Principal.toBlob(userId);
               to = {owner = Principal.fromActor(ZonBackend); subaccount = null};
-              amount = payment.amount;
+              amount = payment.amount - fee;
               fee = null;
               memo = null;
               created_at_time = ?Nat64.fromNat(Int.abs(time)); // idempotent
