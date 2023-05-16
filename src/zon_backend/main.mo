@@ -538,7 +538,7 @@ actor ZonBackend {
 
   type IncomingPayment = {
     kind: { #payment; #donation };
-    itemId: Nat64; // TODO: Enough `Nat64`.
+    itemId: Nat64;
     amount: ICRC1Types.Balance;
     var time: ?Time.Time;
   };
