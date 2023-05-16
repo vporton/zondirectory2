@@ -3,4 +3,4 @@
 .PHONY: deploy
 deploy:
 	dfx deploy
-	dfx canister call zon_backend init
+	dfx canister call zon_backend init '(null)'

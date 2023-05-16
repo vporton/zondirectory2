@@ -22,6 +22,7 @@ import Hash "mo:base/Hash";
 import Time "mo:base/Time";
 import Int64 "mo:base/Int64";
 import Nat64 "mo:base/Nat64";
+import ICRC1Types "mo:icrc1/ICRC1/Types";
 
 actor ZonBackend {
   /// External Canisters ///
@@ -50,16 +51,14 @@ actor ZonBackend {
 
   stable var maxId: Nat64 = 0;
 
-  // TODO: Here and below: subaccount?
   stable var founder: ?Principal = null;
 
   /// Initialization ///
 
-  public shared({ caller }) func init() {
+  public shared({ caller }) func init(subaccount : ?ICRC1Types.Subaccount) {
     founder := ?caller;
     if (pst == null) {
-      // FIXME: `null` subaccount?
-      pst := ?(await PST.PST({ owner = Principal.fromActor(ZonBackend); subaccount = null }));
+      pst := ?(await PST.PST({ owner = Principal.fromActor(ZonBackend); subaccount = subaccount }));
     };
     if (index == null) {
       index := ?(await IndexCanister.IndexCanister([Principal.fromActor(ZonBackend)]));
