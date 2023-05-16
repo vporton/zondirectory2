@@ -5,6 +5,7 @@
 - [`await*` vs `await`](https://forum.dfinity.org/t/what-is-await-with-asterisk/19887/4)
 
 - `canister_inspect_message`: https://internetcomputer.org/docs/current/motoko/main/message-inspection.
+  Also rate-limit API.
 
 - The current code allows to write to an "alien" canister. Possible solution is to use one CanDB with key prefixes.
 
