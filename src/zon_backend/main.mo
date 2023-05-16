@@ -623,7 +623,9 @@ actor ZonBackend {
   //   };    
   // };
 
+  // TODO: Can be rewritten simply with a list/array instead of BTree?
   stable var currentPayments: BTree.BTree<Principal, IncomingPayment> = BTree.init<Principal, IncomingPayment>(null); // TODO: Delete old ones.
+  
   stable var ourDebts: BTree.BTree<Principal, OutgoingPayment> = BTree.init<Principal, OutgoingPayment>(null);
 
   public query func getOurDebt(user: Principal): async Nat {
@@ -800,7 +802,7 @@ actor ZonBackend {
     newVotes: Float;
   };
 
-  stable var settingVotes: BTree.BTree<Principal, VotesTmp> = BTree.init<Principal, VotesTmp>(null); // TODO: Delete old ones.
+  stable var settingVotes: [VotesTmp] = []; // TODO: Delete old ones.
 
   // FIXME: It seems that several `setVotes` in parallel may race.
   func setVotes(tmp: VotesTmp, prefix1: Text, prefix2: Text): async () {
@@ -814,6 +816,5 @@ actor ZonBackend {
     let oldKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(tmp.oldVotes) # "/" # random;
     // delete oldVotes -> child
     await db.delete({sk = oldKey});
-
   }
 };
