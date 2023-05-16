@@ -13,4 +13,4 @@
 
 - Payments with other tokens than IPC.
 
-- https://github.com/canscale/StableHeapBTreeMap/ instead of `StableRBTree`, because it's balanced.
+- Google Analytics
