@@ -292,9 +292,8 @@ actor ZonBackend {
     description: Text;
     details: {
       #link : Text;
-      #message : ();
+      #message : (); // TODO: Implement
       #post : ();
-      #download : (); // TODO: paid file storage
       #ownedCategory : ();
       #communalCategory : ();
     };
@@ -321,9 +320,8 @@ actor ZonBackend {
   let ITEM_TYPE_LINK = 0;
   let ITEM_TYPE_MESSAGE = 1;
   let ITEM_TYPE_POST = 2;
-  let ITEM_TYPE_DOWNLOAD = 3;
-  let ITEM_TYPE_OWNED_CATEGORY = 4;
-  let ITEM_TYPE_COMMUNAL_CATEGORY = 5;
+  let ITEM_TYPE_OWNED_CATEGORY = 3;
+  let ITEM_TYPE_COMMUNAL_CATEGORY = 4;
 
   func serializeItemAttr(item: Item): Entity.AttributeValue {
     var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
@@ -331,7 +329,6 @@ actor ZonBackend {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
       case (#post) { ITEM_TYPE_POST };
-      case (#download) { ITEM_TYPE_DOWNLOAD };
       case (#ownedCategory) { ITEM_TYPE_OWNED_CATEGORY };
       case (#communalCategory) { ITEM_TYPE_COMMUNAL_CATEGORY };
     }));
@@ -361,7 +358,7 @@ actor ZonBackend {
     var nick = "";
     var title = "";
     var description = "";
-    var details: {#none; #link; #message; #post; #download; #ownedCategory; #communalCategory} = #none;
+    var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none;
     var link = "";
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
@@ -467,9 +464,8 @@ actor ZonBackend {
           case (0) { #link link };
           case (1) { #message };
           case (2) { #post };
-          case (3) { #download };
-          case (4) { #ownedCategory };
-          case (5) { #communalCategory };
+          case (3) { #ownedCategory };
+          case (4) { #communalCategory };
           case _ { Debug.trap("wrong item format"); }
         };
       };
