@@ -823,6 +823,7 @@ actor ZonBackend {
   stable var settingVotes: Buffer<VotesTmp> = Buffer.Buffer<Nat>(1); // TODO: Delete old ones.
   stable var currentVotes: BTree.BTree<Nat64, ()> = BTree.init(null); // Item ID -> () // TODO: Delete old ones.
 
+  // TODO: It has race period of duplicate (two) keys. In frontend de-duplicate.
   // TODO: Use binary keys.
   func setVotes(prefix1: Text, prefix2: Text, votesUpdater: ?Float -> Float): async* () {
     if (settingVotes.isEmpty()) {
