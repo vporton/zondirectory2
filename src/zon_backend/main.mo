@@ -21,6 +21,7 @@ import Nat8 "mo:base/Nat8";
 import Hash "mo:base/Hash";
 import Time "mo:base/Time";
 import Nat64 "mo:base/Nat64";
+import Order "mo:base/Order";
 import ICRC1Types "mo:icrc1/ICRC1/Types";
 
 actor ZonBackend {
@@ -795,26 +796,65 @@ actor ZonBackend {
 
   /// Voting ///
 
-  type VotesTmp = {
-    parent: Nat64;
-    child: Nat64;
-    oldVotes: Float;
-    newVotes: Float;
+  // Determines item order.
+  type ItemWeight = {
+    weight: Float;
+    random: Text;
   };
 
-  stable var settingVotes: [VotesTmp] = []; // TODO: Delete old ones.
+  module ItemWeight {
+    public func compare(X: ItemWeight, Y: ItemWeight): Order.Order {
+      let c = Float.compare(X.weight, Y.weight);
+      if (c != #equal) {
+        c;
+      } else {
+        Text.compare(X.random, Y.random);
+      }
+    };
+  };
 
-  // FIXME: It seems that several `setVotes` in parallel may race.
-  func setVotes(tmp: VotesTmp, prefix1: Text, prefix2: Text): async () {
+  // type VotesTmp = {
+  //   parent: Nat64;
+  //   child: Nat64;
+  //   // oldVotes: ItemWeight;
+  //   // newVotes: ItemWeight;
+  // };
+
+  // stable var settingVotes: [VotesTmp] = []; // TODO: Delete old ones.
+  stable var currentVotes: BTree.BTree<Nat64, ()> = BTree.init(null); // Item ID -> () // TODO: Delete old ones.
+
+  // TODO: Use binary keys.
+  func setVotes(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text, votesUpdater: ?Float -> Float): async* () {
+    // Prevent races:
+    // FIXME: This can't be passed again if a below `db.` operation fails.
+    if (BTree.has(currentVotes, Nat64.compare, parent) or BTree.has(currentVotes, Nat64.compare, child)) {
+      Debug.trap("clash");
+    };
+    ignore BTree.insert(currentVotes, Nat64.compare, parent, ());
+    ignore BTree.insert(currentVotes, Nat64.compare, child, ());
+
+    let oldVotesKey = prefix2 # Nat.toText(xNat.from64ToNat(parent)) # '/' # Nat.toText(xNat.from64ToNat(child));
+    let oldVotes = await db.get({sk = oldVotesKey}) else { 0.0 }; // FIXME: deserialize
+    let newVotesWeight = votesUpdater oldVotesWeight;
+    let newVotes = switch (oldVotes) {
+      case (?weight) { { newVotesWeight; random = weight.random } };
+      case (null) { { newVotesWeight; random = ?? } };
+    };
+
+    // FIXME: What to do with `oldKey` during double key period?
     // TODO: Should use binary format.
     // newVotes -> child
-    let newKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(tmp.newVotes) # "/" # random;
+    let newKey = prefix1 # Nat.toText(xNat.from64ToNat(parent)) # '/' # Float.toText(newVotes) # "/" # newVotes.random;
     await db.put({sk = newKey; attributes = [("v", #text (Principal.toText(child)))]});
     // child -> newVotes
-    let newKey2 = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
-    await db.put({sk = newKey2; attributes = [("v", #float (tmp.newVotes))]});
-    let oldKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(tmp.oldVotes) # "/" # random;
+    let newKey2 = prefix2 # Nat.toText(xNat.from64ToNat(parent)) # '/' # Nat.toText(xNat.from64ToNat(child));
+    await db.put({sk = newKey2; attributes = [("v", #float (newVotes))]});
+    let oldKey = prefix1 # Nat.toText(xNat.from64ToNat(parent)) # '/' # Float.toText(oldVotes) # "/" # oldVotes.random;
     // delete oldVotes -> child
     await db.delete({sk = oldKey});
+  };
+
+  func setVotes2(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text) {
+
   }
 };
