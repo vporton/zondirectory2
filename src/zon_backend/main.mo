@@ -7,8 +7,8 @@ import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
 import Prelude "mo:base/Prelude";
 import Entity "mo:candb/Entity";
+import BTree "mo:btree/BTree";
 import RBT "mo:stable-rbtree/StableRBTree";
-import StableRBTree "mo:stable-rbtree/StableRBTree";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import xNat "mo:xtendedNumbers/NatX";
@@ -624,11 +624,11 @@ actor ZonBackend {
   //   };    
   // };
 
-  stable var currentPayments: StableRBTree.Tree<Principal, IncomingPayment> = StableRBTree.init(); // TODO: Delete old ones.
-  stable var ourDebts: StableRBTree.Tree<Principal, OutgoingPayment> = StableRBTree.init(); // TODO: subaccounts?
+  stable var currentPayments: BTree.BTree<Principal, IncomingPayment> = BTree.init<Principal, IncomingPayment>(null); // TODO: Delete old ones.
+  stable var ourDebts: BTree.BTree<Principal, OutgoingPayment> = BTree.init<Principal, OutgoingPayment>(null); // TODO: subaccounts?
 
   public query func getOurDebt(user: Principal): async Nat {
-    switch (StableRBTree.get(ourDebts, Principal.compare, user)) {
+    switch (BTree.get(ourDebts, Principal.compare, user)) {
       case (?debt) { debt.amount };
       case (null) { 0 };
     };
@@ -638,7 +638,7 @@ actor ZonBackend {
     if (amount == 0) {
       return;
     };
-    ignore StableRBTree.update<Principal, OutgoingPayment>(ourDebts, Principal.compare, to, func (old: ?OutgoingPayment): OutgoingPayment {
+    ignore BTree.update<Principal, OutgoingPayment>(ourDebts, Principal.compare, to, func (old: ?OutgoingPayment): OutgoingPayment {
       let sum = switch (old) {
         case (?old) { old.amount + amount };
         case (null) { amount };
@@ -650,7 +650,7 @@ actor ZonBackend {
   // TODO: On non-existent payment it proceeds successful. Is it OK?
   func processPayment(paymentCanisterId: Principal, userId: Principal, _buyerAffiliate: ?Principal, _sellerAffiliate: ?Principal): async () {
     var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
-    switch (StableRBTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
+    switch (BTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
       case (?payment) {
         let itemKey = "i/" # Int.toText(payment.itemId);
         switch (await db.get({sk = itemKey})) {
@@ -661,7 +661,7 @@ actor ZonBackend {
               case (null) {
                 let time = Time.now();
                 payment.time := ?time;
-                currentPayments := StableRBTree.put<Principal, IncomingPayment>(currentPayments, Principal.compare, userId, payment);
+                ignore BTree.insert<Principal, IncomingPayment>(currentPayments, Principal.compare, userId, payment);
                 time;
               };
             };
@@ -684,7 +684,7 @@ actor ZonBackend {
           };
           case (null) {};
         };
-        ignore StableRBTree.delete<Principal, IncomingPayment>(currentPayments, Principal.compare, userId);
+        ignore BTree.delete<Principal, IncomingPayment>(currentPayments, Principal.compare, userId);
       };
       case (null) {};
     };
@@ -695,11 +695,11 @@ actor ZonBackend {
   var totalDividends = 0;
   var totalDividendsPaid = 0; // actually paid sum
   // TODO: Set a heavy transfer fee of the PST to ensure that `lastTotalDivedends` doesn't take much memory.
-  stable var lastTotalDivedends: StableRBTree.Tree<Principal, Nat> = StableRBTree.init(); // TODO: subaccounts?
+  stable var lastTotalDivedends: BTree.BTree<Principal, Nat> = BTree.init<Principal, Nat>(null); // TODO: subaccounts?
 
   // TODO: subaccount?
   func _dividendsOwing(_account: Principal): async Nat {
-    let lastTotal = switch (StableRBTree.get(lastTotalDivedends, Principal.compare, _account)) {
+    let lastTotal = switch (BTree.get(lastTotalDivedends, Principal.compare, _account)) {
       case (?value) { value };
       case (null) { 0 };
     };
@@ -749,7 +749,7 @@ actor ZonBackend {
   };
 
   public shared({caller = caller}) func payout() {
-    switch (StableRBTree.get<Principal, OutgoingPayment>(ourDebts, Principal.compare, caller)) {
+    switch (BTree.get<Principal, OutgoingPayment>(ourDebts, Principal.compare, caller)) {
       case (?payment) {
         let time = switch (payment.time) {
           case (?time) { time };
@@ -767,7 +767,7 @@ actor ZonBackend {
           memo = null;
           created_at_time = ?Nat64.fromNat(Int.abs(time)); // idempotent
         });
-        ignore StableRBTree.delete<Principal, OutgoingPayment>(ourDebts, Principal.compare, caller);
+        ignore BTree.delete<Principal, OutgoingPayment>(ourDebts, Principal.compare, caller);
       };
       case (null) {};
     }
