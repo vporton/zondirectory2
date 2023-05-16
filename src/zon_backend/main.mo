@@ -760,11 +760,11 @@ actor ZonBackend {
             time;
           }
         };
-        // FIXME: Take fee paid by sender into account.
+        let fee = await ledger.icrc1_fee();
         let result = await ledger.icrc1_transfer({
           from_subaccount = null;
           to = {owner = caller; subaccount = null}; // TODO: subaccount
-          amount = payment.amount;
+          amount = payment.amount - fee;
           fee = null;
           memo = null;
           created_at_time = ?Nat64.fromNat(Int.abs(time)); // idempotent
