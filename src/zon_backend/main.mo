@@ -387,7 +387,7 @@ actor ZonBackend {
             case (2) {
               switch (arr[pos]) {
                 case (#int v) {
-                  price := 0; // FIXME: Use `v` instead.
+                  price := Int.abs(v);
                 };
                 case _ { break r false; };
               };
