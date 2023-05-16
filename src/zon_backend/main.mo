@@ -350,7 +350,7 @@ actor ZonBackend {
   };
 
   func deserializeItemAttr(attr: Entity.AttributeValue): Item {
-    var kind: Int = 0;
+    var kind: Nat = 0;
     var creator: ?Principal = null;
     var price = 0;
     var locale = "";
@@ -368,7 +368,7 @@ actor ZonBackend {
             case (0) {
               switch (arr[pos]) {
                 case (#int v) {
-                  kind := v;
+                  kind := Int.abs(v);
                 };
                 case _ { break r false };
               };
