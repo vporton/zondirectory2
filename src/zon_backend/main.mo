@@ -817,8 +817,6 @@ actor ZonBackend {
     parent: Nat64;
     child: Nat64;
     var inProcess: Bool;
-    // oldVotes: ItemWeight;
-    // newVotes: ItemWeight;
   };
 
   // FIXME: Separate variables for different item streams.
