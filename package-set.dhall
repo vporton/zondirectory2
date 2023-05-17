@@ -55,6 +55,11 @@ let
       , version = "v1.1.0"
       , repo = "https://github.com/edjCase/motoko_numbers"
       , dependencies = [ "base" ]
+      },
+      { name = "motoko-lib"
+      , version = "0.7"
+      , repo = "https://github.com/research-ag/motoko-lib"
+      , dependencies = [ "base" ]
       }
     ] : List Package
 

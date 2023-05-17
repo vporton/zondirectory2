@@ -18,3 +18,5 @@
 - https://github.com/dfinity/sdk/blob/master/CHANGELOG.md (`dfx deps`)
 
 - Remove superfluous imports.
+
+- `StableBuffer` vs `stable-buffer`.

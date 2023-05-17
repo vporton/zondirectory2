@@ -23,6 +23,8 @@ import Time "mo:base/Time";
 import Nat64 "mo:base/Nat64";
 import Order "mo:base/Order";
 import ICRC1Types "mo:icrc1/ICRC1/Types";
+import Prng "mo:motoko-lib/Prng";
+import StableBuffer "mo:StableBuffer/StableBuffer";
 
 actor ZonBackend {
   /// External Canisters ///
@@ -820,36 +822,54 @@ actor ZonBackend {
   };
 
   // FIXME: Separate variables for different item streams.
-  stable var settingVotes: Buffer<VotesTmp> = Buffer.Buffer<Nat>(1); // TODO: Delete old ones.
+  stable var settingVotes: StableBuffer.StableBuffer<VotesTmp> = StableBuffer.init<VotesTmp>(); // TODO: Delete old ones.
   stable var currentVotes: BTree.BTree<Nat64, ()> = BTree.init(null); // Item ID -> () // TODO: Delete old ones.
+
+  stable var rng = Prng.Seiran128().init(0); // WARNING: This is not a cryptographically secure pseudorandom number generator.
+
+  func deserializeVoteAttr(attr: Entity.AttributeValue): Float {
+    switch(attr) {
+      case (#float v) { v };
+      case _ { Debug.trap("wrong data"); };
+    }
+  };
+  
+  func deserializeVotes(map: Entity.AttributeMap): Float {
+    let v = RBT.get(map, Text.compare, "v");
+    switch (v) {
+      case (?v) { deserializeVoteAttr(v) };
+      case _ { Debug.trap("map not found") };
+    };    
+  };
 
   // TODO: It has race period of duplicate (two) keys. In frontend de-duplicate.
   // TODO: Use binary keys.
+  // FIXME: Sorting CanDB by `Float` is wrong order.
   func setVotes(prefix1: Text, prefix2: Text, votesUpdater: ?Float -> Float): async* () {
     if (settingVotes.isEmpty()) {
       return;
     };
-    let tmp = settingVotes.last();
+    let tmp = StableBuffer.get(settingVotes, StableBuffer.size(settingVotes) - 1);
 
     // Prevent races:
-    if (not tmp.inProcess)
-    if (BTree.has(currentVotes, Nat64.compare, tmp.parent) or BTree.has(currentVotes, Nat64.compare, tmp.child)) {
-      Debug.trap("clash");
+    if (not tmp.inProcess) {
+      if (BTree.has(currentVotes, Nat64.compare, tmp.parent) or BTree.has(currentVotes, Nat64.compare, tmp.child)) {
+        Debug.trap("clash");
+      };
+      ignore BTree.insert(currentVotes, Nat64.compare, tmp.parent, ());
+      ignore BTree.insert(currentVotes, Nat64.compare, tmp.child, ());
+      tmp.inProcess := true;
     };
-    ignore BTree.insert(currentVotes, Nat64.compare, tmp.parent, ());
-    ignore BTree.insert(currentVotes, Nat64.compare, tmp.child, ());
-    tmp.inProcess := true;
 
     let oldVotesKey = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Nat.toText(xNat.from64ToNat(tmp.child));
-    let oldVotes = await db.get({sk = oldVotesKey}) else { 0.0 }; // FIXME: deserialize
+    let oldVotes = deserializeVotes(await db.get({sk = oldVotesKey})) else { 0.0 };
     let newVotesWeight = votesUpdater oldVotesWeight;
     let newVotes = switch (oldVotes) {
       case (?weight) { { newVotesWeight; random = weight.random } };
-      case (null) { { newVotesWeight; random = ?? } };
+      case (null) { { newVotesWeight; random = rng.next() } };
     };
 
-    // FIXME: What to do with `oldKey` during double key period?
-    // TODO: Should use binary format.
+    // TODO: Should use binary format. // FIXME: Decimal serialization makes order by `random` broken.
     // newVotes -> child
     let newKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Float.toText(newVotes) # "/" # newVotes.random;
     await db.put({sk = newKey; attributes = [("v", #text (Principal.toText(tmp.child)))]});
