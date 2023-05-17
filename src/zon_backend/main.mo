@@ -146,7 +146,7 @@ actor ZonBackend {
 
   /// Users ///
 
-  func checkSybil(sybilCanister: Principal, user: Principal): async () {
+  func checkSybil(sybilCanister: Principal, user: Principal): async* () {
     var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
     switch (await db.get({sk = "s/" # Principal.toText(user)})) {
       case (null) {
@@ -273,7 +273,7 @@ actor ZonBackend {
   };
 
   public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User, sybilCanisterId: Principal) {
-    await checkSybil(sybilCanisterId, caller);
+    await* checkSybil(sybilCanisterId, caller);
     var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     await db.put({sk = key; attributes = serializeUser(_user)});
@@ -483,7 +483,7 @@ actor ZonBackend {
   };
 
   public shared({caller = caller}) func createItemData(canisterId: Principal, _item: ItemWithoutOwner, sybilCanisterId: Principal) {
-    await checkSybil(sybilCanisterId, caller);
+    await* checkSybil(sybilCanisterId, caller);
     let item2 = { creator = caller; item = _item; };
     let _itemId = maxId;
     maxId += 1;
@@ -870,7 +870,7 @@ actor ZonBackend {
     votesUpdater: ?Float -> Float,
     oldVotesDBCanisterId: Principal,
     parentChildCanisterId: Principal,
-): async* () {
+  ): async* () {
     if (StableBuffer.size(stream.settingVotes) != 0) {
       return;
     };
@@ -923,7 +923,21 @@ actor ZonBackend {
     ignore StableBuffer.removeLast(stream.settingVotes);
   };
 
+  // TODO: Need to remember the votes // FIXME: Remembering in CanDB makes no sense because need to check canister.
+  public shared({caller}) func oneVotePerPersonVote(sybilCanister: Principal) {
+    await* checkSybil(sybilCanister, caller);
+    // setVotes(
+    //   stream: VotesStream,
+    //   oldVotesRandom: Text,
+    //   votesUpdater: ?Float -> Float,
+    //   oldVotesDBCanisterId: Principal,
+    //   parentChildCanisterId)
+    // TODO
+  }
+
   // func setVotes2(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text) {
 
   // }
+
+  // TODO: Also ordering by time of publication.
 };
