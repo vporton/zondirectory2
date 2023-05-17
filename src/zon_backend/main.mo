@@ -821,9 +821,27 @@ actor ZonBackend {
     var inProcess: Bool;
   };
 
-  // FIXME: Separate variables for different item streams.
-  stable var settingVotes: StableBuffer.StableBuffer<VotesTmp> = StableBuffer.init<VotesTmp>(); // TODO: Delete old ones.
-  stable var currentVotes: BTree.BTree<Nat64, ()> = BTree.init(null); // Item ID -> () // TODO: Delete old ones.
+  type VotesStream = {
+    var settingVotes: StableBuffer.StableBuffer<VotesTmp>; // TODO: Delete old ones.
+    var currentVotes: BTree.BTree<Nat64, ()>; // Item ID -> () // TODO: Delete old ones.
+    prefix1: Text;
+    prefix2: Text;
+  };
+
+  stable var votesStreams: [VotesStream] = [
+    {
+      var settingVotes = StableBuffer.init<VotesTmp>();
+      var currentVotes = BTree.init(null);
+      prefix1 = "v/";
+      prefix2 = "p/";
+    },
+    {
+      var settingVotes = StableBuffer.init<VotesTmp>();
+      var currentVotes = BTree.init(null);
+      prefix1 = "q/";
+      prefix2 = "w/";
+    },
+  ];
 
   // TODO: Does the below initialize pseudo-random correctly?
   // stable var rng = Prng.SFC64a(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
@@ -847,30 +865,29 @@ actor ZonBackend {
   // TODO: Use binary keys.
   // FIXME: Sorting CanDB by `Float` is wrong order.
   func setVotes(
-    prefix1: Text,
-    prefix2: Text,
+    stream: VotesStream,
     oldVotesRandom: Text,
     votesUpdater: ?Float -> Float,
     oldVotesDBCanisterId: Principal,
     parentChildCanisterId: Principal,
 ): async* () {
-    if (StableBuffer.size(settingVotes) != 0) {
+    if (StableBuffer.size(stream.settingVotes) != 0) {
       return;
     };
-    let tmp = StableBuffer.get(settingVotes, Int.abs((StableBuffer.size(settingVotes): Int) - 1));
+    let tmp = StableBuffer.get(stream.settingVotes, Int.abs((StableBuffer.size(stream.settingVotes): Int) - 1));
 
     // Prevent races:
     if (not tmp.inProcess) {
-      if (BTree.has(currentVotes, Nat64.compare, tmp.parent) or BTree.has(currentVotes, Nat64.compare, tmp.child)) {
+      if (BTree.has(stream.currentVotes, Nat64.compare, tmp.parent) or BTree.has(stream.currentVotes, Nat64.compare, tmp.child)) {
         Debug.trap("clash");
       };
-      ignore BTree.insert(currentVotes, Nat64.compare, tmp.parent, ());
-      ignore BTree.insert(currentVotes, Nat64.compare, tmp.child, ());
+      ignore BTree.insert(stream.currentVotes, Nat64.compare, tmp.parent, ());
+      ignore BTree.insert(stream.currentVotes, Nat64.compare, tmp.child, ());
       tmp.inProcess := true;
     };
 
     let oldVotesDB: DBPartition.DBPartition = actor(Principal.toText(oldVotesDBCanisterId));
-    let oldVotesKey = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
+    let oldVotesKey = stream.prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
     let oldVotesWeight = switch (await oldVotesDB.get({sk = oldVotesKey})) {
       case (?oldVotesData) { ?deserializeVotes(oldVotesData.attributes) };
       case (null) { null }
@@ -888,25 +905,25 @@ actor ZonBackend {
 
     // TODO: Should use binary format. // FIXME: Decimal serialization makes order by `random` broken.
     // newVotes -> child
-    let newKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(newVotes.weight) # "/" # oldVotesRandom;
+    let newKey = stream.prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(newVotes.weight) # "/" # oldVotesRandom;
     await oldVotesDB.put({sk = newKey; attributes = [("v", #text (Nat.toText(Nat64.toNat(tmp.child))))]});
     // child -> newVotes
     let parentChildCanister: DBPartition.DBPartition = actor(Principal.toText(parentChildCanisterId));
-    let newKey2 = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
+    let newKey2 = stream.prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
     await parentChildCanister.put({sk = newKey2; attributes = [("v", #float (newVotes.weight))]});
     switch (oldVotesWeight) {
       case (?oldVotesWeight) {
-        let oldKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(oldVotesWeight) # "/" # oldVotesRandom;
+        let oldKey = stream.prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(oldVotesWeight) # "/" # oldVotesRandom;
         // delete oldVotes -> child
         await oldVotesDB.delete({sk = oldKey});
       };
       case (null) {};
     };
 
-    ignore StableBuffer.removeLast(settingVotes);
+    ignore StableBuffer.removeLast(stream.settingVotes);
   };
 
-  func setVotes2(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text) {
+  // func setVotes2(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text) {
 
-  }
+  // }
 };
