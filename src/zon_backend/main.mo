@@ -852,6 +852,7 @@ actor ZonBackend {
     oldVotesRandom: Text,
     votesUpdater: ?Float -> Float,
     oldVotesDBCanisterId: Principal,
+    parentChildCanisterId: Principal,
 ): async* () {
     if (StableBuffer.size(settingVotes) != 0) {
       return;
@@ -885,14 +886,14 @@ actor ZonBackend {
       };
     };
 
-    // FIXME: Check that `put`/`delete` operations are done on the right canisters.
     // TODO: Should use binary format. // FIXME: Decimal serialization makes order by `random` broken.
     // newVotes -> child
     let newKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(newVotes.weight) # "/" # oldVotesRandom;
     await oldVotesDB.put({sk = newKey; attributes = [("v", #text (Nat.toText(Nat64.toNat(tmp.child))))]});
     // child -> newVotes
+    let parentChildCanister: DBPartition.DBPartition = actor(Principal.toText(parentChildCanisterId));
     let newKey2 = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
-    await oldVotesDB.put({sk = newKey2; attributes = [("v", #float (newVotes.weight))]});
+    await parentChildCanister.put({sk = newKey2; attributes = [("v", #float (newVotes.weight))]});
     switch (oldVotesWeight) {
       case (?oldVotesWeight) {
         let oldKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(oldVotesWeight) # "/" # oldVotesRandom;
