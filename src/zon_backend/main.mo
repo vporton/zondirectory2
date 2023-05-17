@@ -801,7 +801,7 @@ actor ZonBackend {
   // Determines item order.
   type ItemWeight = {
     weight: Float;
-    random: Text;
+    random: Text; // TODO: Is this field used by the below algorithm.
   };
 
   module ItemWeight {
@@ -825,7 +825,8 @@ actor ZonBackend {
   stable var settingVotes: StableBuffer.StableBuffer<VotesTmp> = StableBuffer.init<VotesTmp>(); // TODO: Delete old ones.
   stable var currentVotes: BTree.BTree<Nat64, ()> = BTree.init(null); // Item ID -> () // TODO: Delete old ones.
 
-  stable var rng = Prng.Seiran128().init(0); // WARNING: This is not a cryptographically secure pseudorandom number generator.
+  // TODO: Does the below initialize pseudo-random correctly?
+  // stable var rng = Prng.SFC64a(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
 
   func deserializeVoteAttr(attr: Entity.AttributeValue): Float {
     switch(attr) {
@@ -848,13 +849,14 @@ actor ZonBackend {
   func setVotes(
     prefix1: Text,
     prefix2: Text,
+    oldVotesRandom: Text,
     votesUpdater: ?Float -> Float,
     oldVotesDBCanisterId: Principal,
 ): async* () {
-    if (settingVotes.isEmpty()) {
+    if (StableBuffer.size(settingVotes) != 0) {
       return;
     };
-    let tmp = StableBuffer.get(settingVotes, StableBuffer.size(settingVotes) - 1);
+    let tmp = StableBuffer.get(settingVotes, Int.abs((StableBuffer.size(settingVotes): Int) - 1));
 
     // Prevent races:
     if (not tmp.inProcess) {
@@ -866,32 +868,41 @@ actor ZonBackend {
       tmp.inProcess := true;
     };
 
-    let oldVotesDB: DBPartition.DBPartition = actor(oldVotesDBCanisterId);
-    let oldVotesKey = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Nat.toText(xNat.from64ToNat(tmp.child));
-    let newVotes = switch (await oldVotesDB.get({sk = oldVotesKey})) {
-      case (?oldVotesData) {
-        let oldVotes = deserializeVotes(oldVotesData);
-        let newVotesWeight = votesUpdater oldVotesWeight;
-        { weight = newVotesWeight; random = oldVotes.random };
+    let oldVotesDB: DBPartition.DBPartition = actor(Principal.toText(oldVotesDBCanisterId));
+    let oldVotesKey = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
+    let oldVotesWeight = switch (await oldVotesDB.get({sk = oldVotesKey})) {
+      case (?oldVotesData) { ?deserializeVotes(oldVotesData.attributes) };
+      case (null) { null }
+    };
+    let newVotes = switch (oldVotesWeight) {
+      case (?oldVotesWeight) {
+        let newVotesWeight = votesUpdater(?oldVotesWeight);
+        { weight = newVotesWeight; random = oldVotesRandom };
       };
       case (null) {
         let newVotesWeight = votesUpdater null;
-        { weight = newVotesWeight; random = rng.next() };
+        { weight = newVotesWeight; random = 0/*rng.next()*/ }; // FIXME
       };
     };
 
+    // FIXME: Check that `put`/`delete` operations are done on the right canisters.
     // TODO: Should use binary format. // FIXME: Decimal serialization makes order by `random` broken.
     // newVotes -> child
-    let newKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Float.toText(newVotes) # "/" # newVotes.random;
-    await db.put({sk = newKey; attributes = [("v", #text (Principal.toText(tmp.child)))]});
+    let newKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(newVotes.weight) # "/" # oldVotesRandom;
+    await oldVotesDB.put({sk = newKey; attributes = [("v", #text (Nat.toText(Nat64.toNat(tmp.child))))]});
     // child -> newVotes
-    let newKey2 = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Nat.toText(xNat.from64ToNat(tmp.child));
-    await db.put({sk = newKey2; attributes = [("v", #float (newVotes))]});
-    let oldKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Float.toText(oldVotes) # "/" # oldVotes.random;
-    // delete oldVotes -> child
-    await db.delete({sk = oldKey});
+    let newKey2 = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
+    await oldVotesDB.put({sk = newKey2; attributes = [("v", #float (newVotes.weight))]});
+    switch (oldVotesWeight) {
+      case (?oldVotesWeight) {
+        let oldKey = prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(oldVotesWeight) # "/" # oldVotesRandom;
+        // delete oldVotes -> child
+        await oldVotesDB.delete({sk = oldKey});
+      };
+      case (null) {};
+    };
 
-    ignore settingVotes.removeLast();
+    ignore StableBuffer.removeLast(settingVotes);
   };
 
   func setVotes2(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text) {
