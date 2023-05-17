@@ -20,3 +20,5 @@
 - Remove superfluous imports.
 
 - `StableBuffer` vs `stable-buffer`.
+
+- Consider re-partitioning CanDB to avoid too much parallelism.
