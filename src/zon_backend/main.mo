@@ -845,7 +845,12 @@ actor ZonBackend {
   // TODO: It has race period of duplicate (two) keys. In frontend de-duplicate.
   // TODO: Use binary keys.
   // FIXME: Sorting CanDB by `Float` is wrong order.
-  func setVotes(prefix1: Text, prefix2: Text, votesUpdater: ?Float -> Float): async* () {
+  func setVotes(
+    prefix1: Text,
+    prefix2: Text,
+    votesUpdater: ?Float -> Float,
+    oldVotesDBCanisterId: Principal,
+): async* () {
     if (settingVotes.isEmpty()) {
       return;
     };
@@ -861,12 +866,18 @@ actor ZonBackend {
       tmp.inProcess := true;
     };
 
+    let oldVotesDB: DBPartition.DBPartition = actor(oldVotesDBCanisterId);
     let oldVotesKey = prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # '/' # Nat.toText(xNat.from64ToNat(tmp.child));
-    let oldVotes = deserializeVotes(await db.get({sk = oldVotesKey})) else { 0.0 };
-    let newVotesWeight = votesUpdater oldVotesWeight;
-    let newVotes = switch (oldVotes) {
-      case (?weight) { { newVotesWeight; random = weight.random } };
-      case (null) { { newVotesWeight; random = rng.next() } };
+    let newVotes = switch (await oldVotesDB.get({sk = oldVotesKey})) {
+      case (?oldVotesData) {
+        let oldVotes = deserializeVotes(oldVotesData);
+        let newVotesWeight = votesUpdater oldVotesWeight;
+        { weight = newVotesWeight; random = oldVotes.random };
+      };
+      case (null) {
+        let newVotesWeight = votesUpdater null;
+        { weight = newVotesWeight; random = rng.next() };
+      };
     };
 
     // TODO: Should use binary format. // FIXME: Decimal serialization makes order by `random` broken.
