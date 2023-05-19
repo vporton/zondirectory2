@@ -626,7 +626,6 @@ actor ZonBackend {
   //   };    
   // };
 
-  // TODO: Can be rewritten simply with a list/array instead of BTree?
   stable var currentPayments: BTree.BTree<Principal, IncomingPayment> = BTree.init<Principal, IncomingPayment>(null); // TODO: Delete old ones.
   
   stable var ourDebts: BTree.BTree<Principal, OutgoingPayment> = BTree.init<Principal, OutgoingPayment>(null);
