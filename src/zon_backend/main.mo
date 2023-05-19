@@ -626,8 +626,10 @@ actor ZonBackend {
   //   };    
   // };
 
+  // TODO: clean space by removing smallest payments.
   stable var currentPayments: BTree.BTree<Principal, IncomingPayment> = BTree.init<Principal, IncomingPayment>(null); // TODO: Delete old ones.
   
+  // TODO: clean space by removing smallest debts.
   stable var ourDebts: BTree.BTree<Principal, OutgoingPayment> = BTree.init<Principal, OutgoingPayment>(null);
 
   public query func getOurDebt(user: Principal): async Nat {
@@ -922,9 +924,13 @@ actor ZonBackend {
     ignore StableBuffer.removeLast(stream.settingVotes);
   };
 
+  stable var userBusyVoting: BTree.BTree<Principal, ()> = BTree.init<Principal, ()>(null); // TODO: Delete old ones.
+
   // TODO: Need to remember the votes // FIXME: Remembering in CanDB makes no sense because need to check canister.
   public shared({caller}) func oneVotePerPersonVote(sybilCanister: Principal) {
     await* checkSybil(sybilCanister, caller);
+    ignore BTree.insert(userBusyVoting, Principal.compare, caller, ());
+    
     // setVotes(
     //   stream: VotesStream,
     //   oldVotesRandom: Text,
@@ -932,11 +938,11 @@ actor ZonBackend {
     //   oldVotesDBCanisterId: Principal,
     //   parentChildCanisterId)
     // TODO
-  }
+  };
 
   // func setVotes2(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text) {
 
   // }
 
-  // TODO: Also ordering by time of publication.
+  // TODO: Also ordering by time of publication (requires lexigraphical ordering by item ID).
 };
