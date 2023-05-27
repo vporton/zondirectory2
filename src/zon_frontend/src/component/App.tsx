@@ -8,15 +8,16 @@ import {
     Routes,
     NavLink,
     useNavigate,
+    HashRouter,
 } from "react-router-dom";
  
 export default function App() {
     return (
         <>
             <h1>Zon Dir</h1>
-            <Router>
+            <HashRouter>
                 <MyRouted/>
-            </Router>
+            </HashRouter>
         </>
     );
 }
