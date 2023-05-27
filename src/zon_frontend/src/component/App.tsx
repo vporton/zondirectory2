@@ -7,6 +7,7 @@ import {
     Route,
     Routes,
     NavLink,
+    useNavigate,
 } from "react-router-dom";
  
 export default function App() {
@@ -14,16 +15,26 @@ export default function App() {
         <>
             <h1>Zon Dir</h1>
             <Router>
-                <nav>
-                    <NavLink to="/folder/0">Main folder</NavLink>
-                </nav>
-                <Routes>
-                    <Route
-                        path="folder/:id"
-                        element={<ShowFolder/>}
-                    />
-                </Routes>
+                <MyRouted/>
             </Router>
+        </>
+    );
+}
+
+function MyRouted() {
+    const navigate = useNavigate();
+    React.useEffect(() => navigate("/folder/0"), []);
+    return (
+        <>
+            <nav>
+                <NavLink to="/folder/0">Main folder</NavLink>
+            </nav>
+            <Routes>
+                <Route
+                    path="/folder/:id"
+                    element={<ShowFolder/>}
+                />
+            </Routes>
         </>
     );
 }

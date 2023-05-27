@@ -8,7 +8,7 @@ export default function ShowFolder() {
     const data = new AppData(id);
     return (
         <>
-            <h2>Folder {data.folderName()}</h2>
+            <h2>Folder: {data.folderName()}</h2>
         </>
     );
 }
