@@ -30,14 +30,14 @@ export default class MockData {
                 description: "This is just an example post.",
             },
             {
-                id: 1,
+                id: 2,
                 locale: "en",
                 title: "A with a link",
                 description: "This is just an example post with a link.",
                 link: "https://example.com",
             },
             {
-                id: 1,
+                id: 3,
                 locale: "en",
                 title: "A paid item",
                 description: "This is for purchase.",

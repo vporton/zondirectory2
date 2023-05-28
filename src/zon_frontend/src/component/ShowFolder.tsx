@@ -21,6 +21,15 @@ export default function ShowFolder() {
                 {take(data.superCategories(), 3).map(x => <li lang={x.locale} key={x.id}><a href={`#/folder/${x.id}`}>{x.title}</a></li>)}
             </ul>
             <p><a href={`#/superfolders-of/${id}`}>More...</a></p>
+            {data.items().map(item => 
+                <div key={item.id}>
+                    <p lang={item.locale} key={item.id}>
+                        {item.price ? <>({item.price} ICP) </> : ""}
+                        {item.link ? <a href={item.link}>item.title</a> : item.title}</p>
+                    <p lang={item.locale} key={item.id+'a'} style={{marginLeft: '1em'}}>{item.description}</p>
+                </div>
+            )}
+            <p><a href={`#`}>More...</a></p>
         </>
     );
 }
