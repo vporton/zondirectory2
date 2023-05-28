@@ -9,7 +9,6 @@ export function take<T>(iterable: Iterable<T>, n) {
         break;
       }
     }
-    console.log(results)
     return results;
   }
   

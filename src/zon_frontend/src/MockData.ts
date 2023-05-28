@@ -15,4 +15,7 @@ export default class MockData {
             {id: 5, name: "Sport"},
         ];
     }
+    superCategories() {
+        return this.subCategories();
+    }
 }

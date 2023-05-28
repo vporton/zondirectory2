@@ -38,7 +38,11 @@ function MyRouted() {
                 />
                 <Route
                     path="/subfolders-of/:id"
-                    element={<SubFolders/>}
+                    element={<SubFolders data-dir="sub"/>}
+                />
+                <Route
+                    path="/superfolders-of/:id"
+                    element={<SubFolders data-dir="super"/>}
                 />
             </Routes>
         </>
