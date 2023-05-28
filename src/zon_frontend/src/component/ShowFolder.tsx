@@ -9,16 +9,16 @@ export default function ShowFolder() {
     const data = new AppData(id);
     return (
         <>
-            <h2>Folder: {data.folderName()}</h2>
-            {data.folderDescription() ? <p>{data.folderDescription()}</p> : ""}
+            <h2>Folder: <span lang={data.locale()}>{data.folderName()}</span></h2>
+            {data.folderDescription() ? <p lang={data.locale()}>{data.folderDescription()}</p> : ""}
             <h3>Sub-categories</h3>
             <ul>
-                {take(data.subCategories(), 3).map(x => <li key={x.id}><a href={`#/folder/${x.id}`}>{x.name}</a></li>)}
+                {take(data.subCategories(), 3).map(x => <li lang={x.locale} key={x.id}><a href={`#/folder/${x.id}`}>{x.title}</a></li>)}
             </ul>
             <p><a href={`#/subfolders-of/${id}`}>More...</a></p>
             <h3>Super-categories</h3>
             <ul>
-                {take(data.superCategories(), 3).map(x => <li key={x.id}><a href={`#/folder/${x.id}`}>{x.name}</a></li>)}
+                {take(data.superCategories(), 3).map(x => <li lang={x.locale} key={x.id}><a href={`#/folder/${x.id}`}>{x.title}</a></li>)}
             </ul>
             <p><a href={`#/superfolders-of/${id}`}>More...</a></p>
         </>
