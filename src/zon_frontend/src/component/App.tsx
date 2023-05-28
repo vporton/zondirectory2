@@ -10,6 +10,7 @@ import {
     useNavigate,
     HashRouter,
 } from "react-router-dom";
+import SubFolders from "./SubFolders";
  
 export default function App() {
     return (
@@ -31,9 +32,13 @@ function MyRouted() {
                 <NavLink to="/folder/0">Main folder</NavLink>
             </nav>
             <Routes>
-                <Route
+            <Route
                     path="/folder/:id"
                     element={<ShowFolder/>}
+                />
+                <Route
+                    path="/subfolders-of/:id"
+                    element={<SubFolders/>}
                 />
             </Routes>
         </>

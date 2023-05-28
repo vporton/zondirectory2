@@ -15,7 +15,7 @@ export default function ShowFolder() {
             <ul>
                 {take(data.subCategories(), 3).map(x => <li key={x.id}><a href={`#/folder/${x.id}`}>{x.name}</a></li>)}
             </ul>
-            <p><a href="#">More...</a></p>
+            <p><a href={`#/subfolders-of/${id}`}>More...</a></p>
             <h3>Super-categories</h3>
         </>
     );

@@ -11,7 +11,8 @@ export default class MockData {
             {id: 1, name: "Climate change"},
             {id: 2, name: "Science"},
             {id: 3, name: "Life style"},
-            {id: 4, name: "Sport"},
+            {id: 4, name: "Victor Porton's writing", description: "My personal writings. I write about science, software, and religion."},
+            {id: 5, name: "Sport"},
         ];
     }
 }
