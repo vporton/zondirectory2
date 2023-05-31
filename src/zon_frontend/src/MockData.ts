@@ -4,10 +4,10 @@ export default class MockData {
         return 'en';
     }
     folderName() {
-        return "Writings of Victor Porton";
+        return "The Homepage";
     }
     folderDescription() {
-        return "Folder owned by Victor Porton, where he publishes his writings";
+        return null;
     }
     subCategories() {
         return [
@@ -32,7 +32,7 @@ export default class MockData {
             {
                 id: 2,
                 locale: "en",
-                title: "A with a link",
+                title: "A post with a link",
                 description: "This is just an example post with a link.",
                 link: "https://example.com",
             },

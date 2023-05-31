@@ -12,7 +12,10 @@ export default function SubFolders(props) {
             <ul>
                 {(props['data-dir'] == 'super' ? data.superCategories() : data.subCategories()).map(x =>
                     <li key={x.id}>
-                        <p><a lang={x.locale} href={`#/folder/${x.id}`}>{x.title}</a></p>
+                        <p>
+                            {x.type == 'public' ? <>&#x1f465;</> : <>&#x1f464;</>}
+                            <a lang={x.locale} href={`#/folder/${x.id}`}>{x.title}</a>
+                        </p>
                         {x.description ? <p lang={x.locale}><small>{x.description}</small></p> : ""}
                     </li>)}
             </ul>
