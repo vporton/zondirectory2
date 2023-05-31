@@ -1,7 +1,6 @@
 {
   "name": "zon_frontend",
   "private": true,
-  "homepage": "/zondir-mockup/",
   "version": "0.2.0",
   "description": "Internet Computer starter application",
   "keywords": [
