@@ -11,11 +11,11 @@ export default class MockData {
     }
     subCategories() {
         return [
-            {id: 1, locale: "en", title: "Climate change"},
-            {id: 2, locale: "en", title: "Science"},
-            {id: 3, locale: "en", title: "Life style"},
-            {id: 4, locale: "en", title: "Victor Porton's writing", description: "My personal writings. I write about science, software, and religion."},
-            {id: 5, locale: "en", title: "Sport"},
+            {id: 1, locale: "en", title: "Climate change", type: 'public'},
+            {id: 4, locale: "en", title: "Victor Porton's writings", description: "My personal writings. I write about science, software, and religion.", type: 'private'},
+            {id: 2, locale: "en", title: "Science", type: 'public'},
+            {id: 3, locale: "en", title: "Life style", type: 'public'},
+            {id: 5, locale: "en", title: "Sport", type: 'public'},
         ];
     }
     superCategories() {
