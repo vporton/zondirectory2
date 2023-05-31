@@ -14,7 +14,7 @@ export default function ShowFolder() {
             <h3>Sub-categories</h3>
             <ul>
                 {take(data.subCategories(), 3).map(x => <li lang={x.locale} key={x.id}>
-                    {x.type == 'public' ? <>&#x1f465;</> : <>&#x1f464;</>}
+                    {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
                     <a href={`#/folder/${x.id}`}>{x.title}</a>
                 </li>)}
             </ul>
@@ -22,7 +22,7 @@ export default function ShowFolder() {
             <h3>Super-categories</h3>
             <ul>
                 {take(data.superCategories(), 3).map(x => <li lang={x.locale} key={x.id}>
-                    {x.type == 'public' ? <>&#x1f465;</> : <>&#x1f464;</>}
+                    {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
                     <a href={`#/folder/${x.id}`}>{x.title}</a>
                 </li>)}
             </ul>

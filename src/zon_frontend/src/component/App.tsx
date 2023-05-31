@@ -16,7 +16,7 @@ export default function App() {
     return (
         <>
             <h1>Zon Dir</h1>
-            <HashRouter>
+            <HashRouter basename={'/zondir-mockup/'}>
                 <MyRouted/>
             </HashRouter>
         </>

@@ -19,7 +19,10 @@ export default class MockData {
         ];
     }
     superCategories() {
-        return this.subCategories();
+        return [
+            {id: 1, locale: "en", title: "All the World", type: 'public'},
+            {id: 4, locale: "en", title: "John's notes", type: 'private', description: "John writes about everything, including the content of The Homepage."},
+        ];
     }
     items() {
         return [
