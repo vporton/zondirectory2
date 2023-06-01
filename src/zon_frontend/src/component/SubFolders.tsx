@@ -8,7 +8,7 @@ export default function SubFolders(props) {
     const data = new AppData(id);
     return (
         <>
-            <h2>Subfolders of: {data.folderName()}</h2>
+            <h2>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: {data.folderName()}</h2>
             <ul>
                 {(props['data-dir'] == 'super' ? data.superCategories() : data.subCategories()).map(x =>
                     <li key={x.id}>
