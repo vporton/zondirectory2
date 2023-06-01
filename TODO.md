@@ -1,5 +1,7 @@
 - Should use owned or communal folder for comments stream of a post?
 
+- The CycleOps team has built https://cycleops.dev/ to power automated cycles top-ups with notifications for IC applications.
+
 - Calculate the amount of cycles to upload to every canister.
 
 - [Accept cycles from a wallet](https://internetcomputer.org/docs/current/developer-docs/backend/motoko/simple-cycles).
