@@ -6,5 +6,5 @@
       "jsx": "react",            /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
       "moduleResolution": "nodenext",
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*.ts"],
 }
