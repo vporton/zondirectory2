@@ -4,7 +4,6 @@ import Entity "mo:candb/Entity";
 import CanDB "mo:candb/CanDB";
 import Principal "mo:base/Principal";
 import Bool "mo:base/Bool";
-import PeekableIter "mo:itertools/PeekableIter";
 import Debug "mo:base/Debug";
 
 shared actor class DBPartition({
