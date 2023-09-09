@@ -6,13 +6,13 @@ import CA "mo:candb/CanisterActions";
 import Utils "mo:candb/Utils";
 import CanisterMap "mo:candb/CanisterMap";
 import Buffer "mo:stable-buffer/StableBuffer";
-import DBPartition "DBPartition";
+import CanDBPartition "CanDBPartition";
 import Principal "mo:base/Principal";
 import Hash "mo:base/Hash";
 import PeekableIter "mo:itertools/PeekableIter";
 import Array "mo:base/Array";
 
-shared actor class IndexCanister(
+shared actor class CanDBIndex(
     initialOwners: [Principal]
 ) = this {
   stable var owners = initialOwners;
@@ -66,13 +66,14 @@ shared actor class IndexCanister(
     };
   };
 
-  public shared({caller = caller}) func createDBPartition(pk: Text): async ?DBPartition.DBPartition {
+  public shared({caller = caller}) func createDBPartition(pk: Text): async ?CanDBPartition.CanDBPartition {
     switch (await createDBPartitionImpl(pk)) {
       case (?canisterId) { ?actor(canisterId) };
       case (null) { null };
     }
   };
 
+  // FIXME: Not public shared.
   public shared({caller = caller}) func createDBPartitionImpl(pk: Text): async ?Text {
     if (await checkCaller(caller)) {
       let canisterIds = getCanisterIdsIfExists(pk);
@@ -94,7 +95,7 @@ shared actor class IndexCanister(
     // Note that canister creation costs 100 billion cycles, meaning there are 200 billion
     // left over for the new canister when it is created
     Cycles.add(300_000_000_000); // TODO: Choose the number.
-    let newStorageCanister = await DBPartition.DBPartition({
+    let newStorageCanister = await CanDBPartition.CanDBPartition({
       primaryKey = pk;
       scalingOptions = {
         autoScalingHook = autoScaleCanister;

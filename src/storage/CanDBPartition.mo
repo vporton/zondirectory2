@@ -6,7 +6,7 @@ import Principal "mo:base/Principal";
 import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
 
-shared actor class DBPartition({
+shared actor class CanDBPartition({
   // the primary key of this canister
   primaryKey: Text;
   // the scaling options that determine when to auto-scale out this canister storage partition

@@ -1,6 +1,6 @@
-import IndexCanister "../storage/IndexCanister";
+import CanDBIndex "../storage/CanDBIndex";
 import PST "../zon_pst";
-import DBPartition "../storage/DBPartition";
+import CanDBPartition "../storage/CanDBPartition";
 import Principal "mo:base/Principal";
 import Float "mo:base/Float";
 import Bool "mo:base/Bool";
@@ -26,7 +26,7 @@ import ICRC1Types "mo:icrc1/ICRC1/Types";
 import Prng "mo:motoko-lib/Prng";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 
-actor ZonBackend {
+shared actor class ZonBackend() = this {
   /// External Canisters ///
 
   let nativeIPCToken = "ryjl3-tyaaa-aaaaa-aaaba-cai"; // native NNS ICP token.
@@ -39,7 +39,7 @@ actor ZonBackend {
 
   /// Some Global Variables ///
 
-  stable var index: ?IndexCanister.IndexCanister = null;
+  stable var index: ?CanDBIndex.CanDBIndex = null;
   stable var pst: ?PST.PST = null;
   stable var ledger: Token.Token = actor(nativeIPCToken);
 
@@ -47,11 +47,10 @@ actor ZonBackend {
   // "u/" - Principal -> User
   // "i/" - ID -> Item
   // "a/" - user -> <buyer affiliate>/<seller affiliate>
-  // "v/" - <parent>/<votes>/<random> -> <child> [prefix1]
-  // "p/" - <parent>/<child> -> <votes> [prefix2]
-  // "q/" - <parent>/<child> -> <quadratic votes> [prefix1]
-  // "w/" - <parent>/<quadratic votes>/<random> -> <child> [prefix2]
-  stable var firstDB: ?DBPartition.DBPartition = null; // ID -> Item
+  // // "v/" - <parent>/<votes>/<random> -> <child> [prefix1]
+  // // "p/" - <parent>/<child> -> <votes> [prefix2]
+  // // "q/" - <parent>/<child> -> <quadratic votes> [prefix1]
+  // // "w/" - <parent>/<quadratic votes>/<random> -> <child> [prefix2]
   // TODO: Avoid duplicate user nick names.
 
   stable var maxId: Nat64 = 0;
@@ -63,18 +62,10 @@ actor ZonBackend {
   public shared({ caller }) func init(subaccount : ?ICRC1Types.Subaccount) {
     founder := ?caller;
     if (pst == null) {
-      pst := ?(await PST.PST({ owner = Principal.fromActor(ZonBackend); subaccount = subaccount }));
+      pst := ?(await PST.PST({ owner = Principal.fromActor(this); subaccount = subaccount }));
     };
     if (index == null) {
-      index := ?(await IndexCanister.IndexCanister([Principal.fromActor(ZonBackend)]));
-    };
-    switch (index) {
-      case (?index) {
-        if (firstDB == null) {
-          firstDB := await index.createDBPartition("only");
-        };
-      };
-      case (null) {}
+      index := ?(await CanDBIndex.CanDBIndex([Principal.fromActor(this)]));
     };
   };
 
@@ -147,7 +138,7 @@ actor ZonBackend {
   /// Users ///
 
   func checkSybil(sybilCanister: Principal, user: Principal): async* () {
-    var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
+    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
     switch (await db.get({sk = "s/" # Principal.toText(user)})) {
       case (null) {
         Debug.trap("not verified user");
@@ -162,7 +153,7 @@ actor ZonBackend {
       is_phone_number_approved(principal: Text) : async Bool;
     };
     if (await verifyActor.is_phone_number_approved(Principal.toText(caller))) {
-      var db: DBPartition.DBPartition = actor(Principal.toText(sybilCanister));
+      var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
       await db.put({sk = "s/" # Principal.toText(caller); attributes = [("v", #bool true)]});
     } else {
       Debug.trap("cannot verify phone number");
@@ -274,14 +265,14 @@ actor ZonBackend {
 
   public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User, sybilCanisterId: Principal) {
     await* checkSybil(sybilCanisterId, caller);
-    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
+    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     await db.put({sk = key; attributes = serializeUser(_user)});
   };
 
   // TODO: Should also remove all his/her items?
   public shared({caller = caller}) func removeUser(canisterId: Principal) {
-    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
+    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller);
     await db.delete({sk = key});
   };
@@ -487,14 +478,14 @@ actor ZonBackend {
     let item2 = { creator = caller; item = _item; };
     let _itemId = maxId;
     maxId += 1;
-    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
+    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     await db.put({sk = key; attributes = serializeItem(item2)});
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
   public shared({caller = caller}) func setItemData(canisterId: Principal, _itemId: Nat64, item: ItemWithoutOwner) {
-    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
+    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
@@ -519,7 +510,7 @@ actor ZonBackend {
 
   // TODO: Also remove voting data.
   public shared({caller = caller}) func removeItem(canisterId: Principal, _itemId: Nat64) {
-    var db: DBPartition.DBPartition = actor(Principal.toText(canisterId));
+    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
@@ -654,7 +645,7 @@ actor ZonBackend {
 
   // TODO: On non-existent payment it proceeds successful. Is it OK?
   func processPayment(paymentCanisterId: Principal, userId: Principal, _buyerAffiliate: ?Principal, _sellerAffiliate: ?Principal): async () {
-    var db: DBPartition.DBPartition = actor(Principal.toText(paymentCanisterId));
+    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(paymentCanisterId));
     switch (BTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
       case (?payment) {
         let itemKey = "i/" # Nat64.toText(payment.itemId);
@@ -673,7 +664,7 @@ actor ZonBackend {
             let fee = await ledger.icrc1_fee();
             let result = await ledger.icrc1_transfer({
               from_subaccount = ?Principal.toBlob(userId);
-              to = {owner = Principal.fromActor(ZonBackend); subaccount = null};
+              to = {owner = Principal.fromActor(this); subaccount = null};
               amount = payment.amount - fee;
               fee = null;
               memo = null;
@@ -782,7 +773,7 @@ actor ZonBackend {
   /// Affiliates ///
 
   public shared({caller}) func setAffiliate(canister: Principal, buyerAffiliate: ?Principal, sellerAffiliate: ?Principal): async () {
-    var db: DBPartition.DBPartition = actor(Principal.toText(canister));
+    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canister));
     if (buyerAffiliate == null and sellerAffiliate == null) {
       await db.delete({sk = "a/" # Principal.toText(caller)});
     };
@@ -829,21 +820,6 @@ actor ZonBackend {
     prefix2: Text;
   };
 
-  stable var votesStreams: [VotesStream] = [
-    {
-      var settingVotes = StableBuffer.init<VotesTmp>();
-      var currentVotes = BTree.init(null);
-      prefix1 = "v/";
-      prefix2 = "p/";
-    },
-    {
-      var settingVotes = StableBuffer.init<VotesTmp>();
-      var currentVotes = BTree.init(null);
-      prefix1 = "q/";
-      prefix2 = "w/";
-    },
-  ];
-
   // TODO: Check out the UUID and ULID libraries: https://github.com/aviate-labs/ulid.mo
   // TODO: Does the below initialize pseudo-random correctly?
   // stable var rng = Prng.SFC64a(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
@@ -888,7 +864,7 @@ actor ZonBackend {
       tmp.inProcess := true;
     };
 
-    let oldVotesDB: DBPartition.DBPartition = actor(Principal.toText(oldVotesDBCanisterId));
+    let oldVotesDB: CanDBPartition.CanDBPartition = actor(Principal.toText(oldVotesDBCanisterId));
     let oldVotesKey = stream.prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
     let oldVotesWeight = switch (await oldVotesDB.get({sk = oldVotesKey})) {
       case (?oldVotesData) { ?deserializeVotes(oldVotesData.attributes) };
@@ -910,7 +886,7 @@ actor ZonBackend {
     let newKey = stream.prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(newVotes.weight) # "/" # oldVotesRandom;
     await oldVotesDB.put({sk = newKey; attributes = [("v", #text (Nat.toText(Nat64.toNat(tmp.child))))]});
     // child -> newVotes
-    let parentChildCanister: DBPartition.DBPartition = actor(Principal.toText(parentChildCanisterId));
+    let parentChildCanister: CanDBPartition.CanDBPartition = actor(Principal.toText(parentChildCanisterId));
     let newKey2 = stream.prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
     await parentChildCanister.put({sk = newKey2; attributes = [("v", #float (newVotes.weight))]});
     switch (oldVotesWeight) {
