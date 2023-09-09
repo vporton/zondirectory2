@@ -9,7 +9,6 @@ import Buffer "mo:stable-buffer/StableBuffer";
 import CanDBPartition "CanDBPartition";
 import Principal "mo:base/Principal";
 import Hash "mo:base/Hash";
-import PeekableIter "mo:itertools/PeekableIter";
 import Array "mo:base/Array";
 
 shared actor class CanDBIndex(
@@ -17,18 +16,16 @@ shared actor class CanDBIndex(
 ) = this {
   stable var owners = initialOwners;
 
-  func checkCaller(caller: Principal): async Bool {
-    if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
-      true;
-    } else {
+  func checkCaller(caller: Principal) {
+    if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
       Debug.trap("not allowed");
     }
   };
 
-  public shared({caller = caller}) func setOwners(_owners: [Principal]) {
-    if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
-      owners := _owners;
-    };
+  public shared({caller = caller}) func setOwners(_owners: [Principal]): async () {
+    checkCaller(caller);
+
+    owners := _owners;
   };
 
   public query func getOwners(): async [Principal] { owners };
@@ -60,7 +57,7 @@ shared actor class CanDBIndex(
 
   public shared({caller = caller}) func autoScaleCanister(pk: Text): async Text {
     if (Utils.callingCanisterOwnsPK(caller, pkToCanisterMap, pk)) {
-      await createStorageCanister(pk, owners);
+      await* createStorageCanister(pk, owners);
     } else {
       Debug.trap("error, called by non-controller=" # debug_show(caller));
     };
@@ -74,22 +71,13 @@ shared actor class CanDBIndex(
   };
 
   // FIXME: Not public shared.
-  public shared({caller = caller}) func createDBPartitionImpl(pk: Text): async ?Text {
-    if (await checkCaller(caller)) {
-      let canisterIds = getCanisterIdsIfExists(pk);
-      if (canisterIds == []) {
-        ?(await createStorageCanister(pk, owners)); // FIXME
-      // the partition already exists, so don't create a new canister
-      } else {
-        Debug.print(pk # " already exists");
-        null 
-      };
-    } else {
-      Debug.trap("caller not allowed to create partition");
-    }
+  public shared({caller = caller}) func createDBPartitionImpl(pk: Text): async Text {
+    checkCaller(caller);
+  
+    await* createStorageCanister(pk, owners); // FIXME
   };
 
-  func createStorageCanister(pk: Text, controllers: [Principal]): async Text {
+  func createStorageCanister(pk: Text, controllers: [Principal]): async* Text {
     Debug.print("creating new storage canister with pk=" # pk);
     // Pre-load 300 billion cycles for the creation of a new storage canister
     // Note that canister creation costs 100 billion cycles, meaning there are 200 billion
@@ -115,7 +103,6 @@ shared actor class CanDBIndex(
     });
 
     let newStorageCanisterId = Principal.toText(newStorageCanisterPrincipal);
-    // After creating the new Hello Service canister, add it to the pkToCanisterMap
     pkToCanisterMap := CanisterMap.add(pkToCanisterMap, pk, newStorageCanisterId);
 
     Debug.print("new storage canisterId=" # newStorageCanisterId);
