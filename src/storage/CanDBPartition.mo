@@ -7,11 +7,8 @@ import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
 
 shared actor class CanDBPartition({
-  // the primary key of this canister
   primaryKey: Text;
-  // the scaling options that determine when to auto-scale out this canister storage partition
   scalingOptions: CanDB.ScalingOptions;
-  // (optional) allows the developer to specify additional owners (i.e. for allowing admin or backfill access to specific endpoints)
   initialOwners: [Principal];
 }) {
   stable var owners = initialOwners;
@@ -23,19 +20,16 @@ shared actor class CanDBPartition({
     btreeOrder = null;
   });
 
-  func checkCaller(caller: Principal): Bool {
-    if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
-      true;
-    } else {
+  func checkCaller(caller: Principal) {
+    if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
       Debug.trap("not allowed");
-      false;
     }
   };
 
-  public shared({caller = caller}) func setOwners(_owners: [Principal]): async () {
-    if (Array.find(owners, func(e: Principal): Bool { e == caller; }) != null) {
-      owners := _owners;
-    };
+  public shared({caller}) func setOwners(_owners: [Principal]): async () {
+    checkCaller(caller);
+
+    owners := _owners;
   };
 
   public query func getOwners(): async [Principal] { owners };
@@ -53,19 +47,17 @@ shared actor class CanDBPartition({
   };
 
   // FIXME: Why here and below `await` with `*`? Is it correct?
-  public shared({caller = caller}) func put(options: CanDB.PutOptions): async () {
-    if (checkCaller(caller)) {
-      await* CanDB.put(db, options);
-    };
+  public shared({caller}) func put(options: CanDB.PutOptions): async () {
+    checkCaller(caller);
+
+    await* CanDB.put(db, options);
   };
 
-  public shared({caller = caller}) func replace(options: CanDB.ReplaceOptions): async ?Entity.Entity {
-    if (checkCaller(caller)) {
-      await* CanDB.replace(db, options);
-    } else {
-      null;
-    };
-  };
+  // public shared({caller}) func replace(options: CanDB.ReplaceOptions): async ?Entity.Entity {
+  //   checkCaller(caller);
+
+  //   await* CanDB.replace(db, options);
+  // };
 
   // public shared({caller = caller}) func update(options: CanDB.UpdateOptions): async ?Entity.Entity {
   //   if (checkCaller(caller)) {
@@ -75,34 +67,34 @@ shared actor class CanDBPartition({
   //   };
   // };
 
-  public shared({caller = caller}) func delete(options: CanDB.DeleteOptions): async () {
-    if (checkCaller(caller)) {
-      CanDB.delete(db, options);
-    };
+  public shared({caller}) func delete(options: CanDB.DeleteOptions): async () {
+    checkCaller(caller);
+
+    CanDB.delete(db, options);
   };
 
-  public shared({caller = caller}) func remove(options: CanDB.RemoveOptions): async ?Entity.Entity {
-    if (checkCaller(caller)) {
-      CanDB.remove(db, options);
-    } else {
-      null;
-    };
-  };
+  // public shared({caller}) func remove(options: CanDB.RemoveOptions): async ?Entity.Entity {
+  //   checkCaller(caller);
+
+  //   CanDB.remove(db, options);
+  // };
 
   public query func scan(options: CanDB.ScanOptions): async CanDB.ScanResult {
     CanDB.scan(db, options);
   };
 
   /// @required public API (Do not delete or change)
-  public shared({ caller = caller }) func transferCycles(): async () {
-    if (checkCaller(caller)) {
-      return await CA.transferCycles(caller);
-    };
+  public shared({caller}) func transferCycles(): async () {
+    checkCaller(caller);
+
+    return await CA.transferCycles(caller);
   };
 
-  public shared({caller = caller}) func tryPut(options: CanDB.PutOptions): async () {
-    if ((checkCaller(caller)) and not CanDB.skExists(db, options.sk)) {
-      await* CanDB.put(db, options);
-    };
-  };
+  // public shared({caller}) func tryPut(options: CanDB.PutOptions): async () {
+  //   checkCaller(caller);
+
+  //   if (not CanDB.skExists(db, options.sk)) {
+  //     await* CanDB.put(db, options);
+  //   };
+  // };
 }

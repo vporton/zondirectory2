@@ -7,6 +7,7 @@ import Utils "mo:candb/Utils";
 import CanisterMap "mo:candb/CanisterMap";
 import Buffer "mo:stable-buffer/StableBuffer";
 import CanDBPartition "CanDBPartition";
+import Admin "mo:candb/CanDBAdmin";
 import Principal "mo:base/Principal";
 import Hash "mo:base/Hash";
 import Array "mo:base/Array";
@@ -28,11 +29,16 @@ shared actor class CanDBIndex(
     owners := _owners;
   };
 
+  let maxSize = #heapSize(500_000_000);
+
   public query func getOwners(): async [Principal] { owners };
 
-  /// @required stable variable (Do not delete or change)
-  ///
-  /// Holds the CanisterMap of PK -> CanisterIdList
+  func ownersOrSelf(): [Principal] {
+    let buf = Buffer.fromArray<Principal>(owners);
+    Buffer.add(buf, Principal.fromActor(this));
+    Buffer.toArray(buf);
+  };
+
   stable var pkToCanisterMap = CanisterMap.init();
 
   /// @required API (Do not delete or change)
@@ -40,10 +46,10 @@ shared actor class CanDBIndex(
   /// Get all canisters for an specific PK
   ///
   /// This method is called often by the candb-client query & update methods. 
-  public shared query({caller = caller}) func getCanistersByPK(pk: Text): async [Text] {
+  public shared query({caller}) func getCanistersByPK(pk: Text): async [Text] {
     getCanisterIdsIfExists(pk);
   };
-
+  
   /// @required function (Do not delete or change)
   ///
   /// Helper method acting as an interface for returning an empty array if no canisters
@@ -55,26 +61,73 @@ shared actor class CanDBIndex(
     }
   };
 
-  public shared({caller = caller}) func autoScaleCanister(pk: Text): async Text {
+  /// Helper function that creates a user canister for a given PK
+  func createPartitionCanister(pk: Text, controllers: ?[Principal]): async Text {
+    Debug.print("creating new CanDB canister with pk=" # pk);
+    Cycles.add(300_000_000_000);
+    let newUserCanister = await CanDBPartition.CanDBPartition({
+      primaryKey = pk;
+      scalingOptions = {
+        autoScalingHook = autoScaleUserCanister;
+        sizeLimit = maxSize;
+      };
+      initialOwners = ownersOrSelf();
+    });
+    let newUserCanisterPrincipal = Principal.fromActor(newUserCanister);
+    await CA.updateCanisterSettings({
+      canisterId = newUserCanisterPrincipal;
+      settings = {
+        controllers = controllers;
+        compute_allocation = ?0;
+        memory_allocation = ?0;
+        freezing_threshold = ?2592000;
+      }
+    });
+
+    let newUserCanisterId = Principal.toText(newUserCanisterPrincipal);
+    pkToCanisterMap := CanisterMap.add(pkToCanisterMap, pk, newUserCanisterId);
+
+    newUserCanisterId;
+  };
+
+  /// This hook is called by CanDB for AutoScaling the User Service Actor.
+  ///
+  /// If the developer does not spin up an additional User canister in the same partition within this method, auto-scaling will NOT work
+  public shared ({caller}) func autoScaleUserCanister(pk: Text): async Text {
+    checkCaller(caller);
+
+    // Auto-Scaling Authorization - ensure the request to auto-scale the partition is coming from an existing canister in the partition, otherwise reject it
     if (Utils.callingCanisterOwnsPK(caller, pkToCanisterMap, pk)) {
-      await* createStorageCanister(pk, owners);
+      await createPartitionCanister(pk, ?ownersOrSelf());
     } else {
       Debug.trap("error, called by non-controller=" # debug_show(caller));
     };
   };
 
-  public shared({caller = caller}) func createDBPartition(pk: Text): async ?CanDBPartition.CanDBPartition {
-    switch (await createDBPartitionImpl(pk)) {
-      case (?canisterId) { ?actor(canisterId) };
-      case (null) { null };
-    }
+  /// Upgrade user canisters in a PK range, i.e. rolling upgrades (limit is fixed at upgrading the canisters of 5 PKs per call)
+  public shared({caller}) func upgradeUserCanistersInPKRange(wasmModule: Blob): async Admin.UpgradePKRangeResult {
+    checkCaller(caller);
+
+    await Admin.upgradeCanistersInPKRange({
+      canisterMap = pkToCanisterMap;
+      lowerPK = "";
+      upperPK = "\u{FFFF}";
+      limit = 5;
+      wasmModule = wasmModule;
+      scalingOptions = {
+        autoScalingHook = autoScaleUserCanister;
+        sizeLimit = maxSize;
+      };
+      owners = ?ownersOrSelf();
+    });
   };
 
-  // FIXME: Not public shared.
-  public shared({caller = caller}) func createDBPartitionImpl(pk: Text): async Text {
-    checkCaller(caller);
-  
-    await* createStorageCanister(pk, owners); // FIXME
+  public shared({caller}) func autoScaleCanister(pk: Text): async Text {
+    if (Utils.callingCanisterOwnsPK(caller, pkToCanisterMap, pk)) {
+      await* createStorageCanister(pk, owners);
+    } else {
+      Debug.trap("error, called by non-controller=" # debug_show(caller));
+    };
   };
 
   func createStorageCanister(pk: Text, controllers: [Principal]): async* Text {
@@ -87,7 +140,7 @@ shared actor class CanDBIndex(
       primaryKey = pk;
       scalingOptions = {
         autoScalingHook = autoScaleCanister;
-        sizeLimit = #heapSize(900_000_000); // Scale out at 900MB
+        sizeLimit = maxSize;
       };
       initialOwners = controllers;
     });
