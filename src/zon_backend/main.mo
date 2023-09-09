@@ -39,10 +39,11 @@ shared actor class ZonBackend() = this {
 
   /// Some Global Variables ///
 
-  stable var index: ?CanDBIndex.CanDBIndex = null;
+  stable var canDBIndex: ?CanDBIndex.CanDBIndex = null;
   stable var pst: ?PST.PST = null;
   stable var ledger: Token.Token = actor(nativeIPCToken);
 
+  // FIXME: Fix this comment.
   // "s/" - anti-sybil
   // "u/" - Principal -> User
   // "i/" - ID -> Item
@@ -64,8 +65,8 @@ shared actor class ZonBackend() = this {
     if (pst == null) {
       pst := ?(await PST.PST({ owner = Principal.fromActor(this); subaccount = subaccount }));
     };
-    if (index == null) {
-      index := ?(await CanDBIndex.CanDBIndex([Principal.fromActor(this)]));
+    if (canDBIndex == null) {
+      canDBIndex := ?(await CanDBIndex.CanDBIndex([Principal.fromActor(this)]));
     };
   };
 
@@ -83,31 +84,31 @@ shared actor class ZonBackend() = this {
   public query func getBuyerAffiliateShare(): async fractions.Fraction { buyerAffiliateShare };
   public query func getSellerAffiliateShare(): async fractions.Fraction { sellerAffiliateShare };
 
-  public shared({caller = caller}) func setSalesOwnersShare(_share: fractions.Fraction) {
+  public shared({caller}) func setSalesOwnersShare(_share: fractions.Fraction) {
     if (onlyMainOwner(caller)) {
       salesOwnersShare := _share;
     };
   };
 
-  public shared({caller = caller}) func setUpvotesOwnersShare(_share: fractions.Fraction) {
+  public shared({caller}) func setUpvotesOwnersShare(_share: fractions.Fraction) {
     if (onlyMainOwner(caller)) {
       upvotesOwnersShare := _share;
     };
   };
 
-  public shared({caller = caller}) func setUploadOwnersShare(_share: fractions.Fraction) {
+  public shared({caller}) func setUploadOwnersShare(_share: fractions.Fraction) {
     if (onlyMainOwner(caller)) {
       uploadOwnersShare := _share;
     };
   };
 
-  public shared({caller = caller}) func setBuyerAffiliateShare(_share: fractions.Fraction) {
+  public shared({caller}) func setBuyerAffiliateShare(_share: fractions.Fraction) {
     if (onlyMainOwner(caller)) {
       buyerAffiliateShare := _share;
     };
   };
 
-  public shared({caller = caller}) func setSellerAffiliateShare(_share: fractions.Fraction) {
+  public shared({caller}) func setSellerAffiliateShare(_share: fractions.Fraction) {
     if (onlyMainOwner(caller)) {
       sellerAffiliateShare := _share;
     };
@@ -115,24 +116,22 @@ shared actor class ZonBackend() = this {
 
   /// Owners ///
 
-  func onlyMainOwner(caller: Principal): Bool {
-    if (?caller == founder) {
-      true;
-    } else {
+  func onlyMainOwner(caller: Principal) {
+    if (?caller != founder) {
       Debug.trap("not the main owner");
     }
   };
 
-  public shared({caller = caller}) func setMainOwner(_founder: Principal) {
-    if (onlyMainOwner(caller)) {
-      founder := ?_founder;
-    }
+  public shared({caller}) func setMainOwner(_founder: Principal) {
+    onlyMainOwner(caller);
+
+    founder := ?_founder;
   };
 
-  public shared({caller = caller}) func removeMainOwner() {
-    if (onlyMainOwner(caller)) {
-      founder := null;
-    }
+  public shared({caller}) func removeMainOwner() {
+    onlyMainOwner(caller);
+    
+    founder := null;
   };
 
   /// Users ///
@@ -263,7 +262,7 @@ shared actor class ZonBackend() = this {
     };    
   };
 
-  public shared({caller = caller}) func setUserData(canisterId: Principal, _user: User, sybilCanisterId: Principal) {
+  public shared({caller}) func setUserData(canisterId: Principal, _user: User, sybilCanisterId: Principal) {
     await* checkSybil(sybilCanisterId, caller);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
@@ -271,7 +270,7 @@ shared actor class ZonBackend() = this {
   };
 
   // TODO: Should also remove all his/her items?
-  public shared({caller = caller}) func removeUser(canisterId: Principal) {
+  public shared({caller}) func removeUser(canisterId: Principal) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller);
     await db.delete({sk = key});
@@ -303,9 +302,7 @@ shared actor class ZonBackend() = this {
   };
 
   func onlyItemOwner(caller: Principal, _item: Item): Bool {
-    if (caller == _item.creator) {
-      true;
-    } else {
+    if (caller != _item.creator) {
       Debug.trap("not the item owner");
     };
   };
@@ -473,8 +470,9 @@ shared actor class ZonBackend() = this {
     };    
   };
 
-  public shared({caller = caller}) func createItemData(canisterId: Principal, _item: ItemWithoutOwner, sybilCanisterId: Principal) {
+  public shared({caller}) func createItemData(canisterId: Principal, _item: ItemWithoutOwner, sybilCanisterId: Principal) {
     await* checkSybil(sybilCanisterId, caller);
+
     let item2 = { creator = caller; item = _item; };
     let _itemId = maxId;
     maxId += 1;
@@ -484,7 +482,7 @@ shared actor class ZonBackend() = this {
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
-  public shared({caller = caller}) func setItemData(canisterId: Principal, _itemId: Nat64, item: ItemWithoutOwner) {
+  public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat64, item: ItemWithoutOwner) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
@@ -509,7 +507,7 @@ shared actor class ZonBackend() = this {
   };
 
   // TODO: Also remove voting data.
-  public shared({caller = caller}) func removeItem(canisterId: Principal, _itemId: Nat64) {
+  public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat64) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
@@ -744,7 +742,7 @@ shared actor class ZonBackend() = this {
     var time: ?Time.Time;
   };
 
-  public shared({caller = caller}) func payout(subaccount: ?ICRC1Types.Subaccount) {
+  public shared({caller}) func payout(subaccount: ?ICRC1Types.Subaccount) {
     switch (BTree.get<Principal, OutgoingPayment>(ourDebts, Principal.compare, caller)) {
       case (?payment) {
         let time = switch (payment.time) {
@@ -888,6 +886,7 @@ shared actor class ZonBackend() = this {
     // child -> newVotes
     let parentChildCanister: CanDBPartition.CanDBPartition = actor(Principal.toText(parentChildCanisterId));
     let newKey2 = stream.prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
+    // FIXME: Use NacDB:
     await parentChildCanister.put({sk = newKey2; attributes = [("v", #float (newVotes.weight))]});
     switch (oldVotesWeight) {
       case (?oldVotesWeight) {
