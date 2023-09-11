@@ -34,7 +34,7 @@ shared actor class NacDBIndex(
         Buffer.toArray(buf);
     };
     
-    stable var dbIndex: Nac.DBIndex = Nac.createDBIndex(dbOptions);
+    stable var dbIndex: Nac.DBIndex = Nac.createDBIndex(Common.dbOptions);
 
     stable var initialized = false;
 
