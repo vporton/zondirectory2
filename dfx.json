@@ -16,6 +16,14 @@
         "dist/zon_frontend/"
       ],
       "type": "assets"
+    },
+    "payments": {
+      "main": "src/zon_backend/payments.mo",
+      "type": "motoko"
+    },
+    "zon_pst": {
+      "main": "src/zon_pst/lib.mo",
+      "type": "motoko"
     }
   },
   "defaults": {
