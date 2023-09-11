@@ -29,8 +29,6 @@ shared actor class CanDBIndex(
     owners := _owners;
   };
 
-  let maxSize = #heapSize(500_000_000);
-
   public query func getOwners(): async [Principal] { owners };
 
   func ownersOrSelf(): [Principal] {
@@ -38,6 +36,8 @@ shared actor class CanDBIndex(
     Buffer.add(buf, Principal.fromActor(this));
     Buffer.toArray(buf);
   };
+
+  let maxSize = #heapSize(500_000_000);
 
   stable var pkToCanisterMap = CanisterMap.init();
 

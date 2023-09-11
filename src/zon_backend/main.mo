@@ -1,6 +1,9 @@
 import CanDBIndex "../storage/CanDBIndex";
-import PST "../zon_pst";
 import CanDBPartition "../storage/CanDBPartition";
+import NacDBIndex "../storage/NacDBIndex";
+import NacDBPartition "../storage/NacDBPartition";
+import Nac "mo:nacdb/NacDB";
+import PST "../zon_pst";
 import Principal "mo:base/Principal";
 import Float "mo:base/Float";
 import Bool "mo:base/Bool";
@@ -40,6 +43,7 @@ shared actor class ZonBackend() = this {
   /// Some Global Variables ///
 
   stable var canDBIndex: ?CanDBIndex.CanDBIndex = null;
+  stable var nacDBIndex: ?NacDBIndex.NacDBIndex = null;
   stable var pst: ?PST.PST = null;
   stable var ledger: Token.Token = actor(nativeIPCToken);
 
@@ -68,6 +72,17 @@ shared actor class ZonBackend() = this {
     if (canDBIndex == null) {
       canDBIndex := ?(await CanDBIndex.CanDBIndex([Principal.fromActor(this)]));
     };
+    if (nacDBIndex == null) {
+      let dbOptions: Nac.DBOptions = {
+          moveCap = #usedMemory 500_000_000;
+          hardCap = ?1000;
+          partitionCycles = 10_000_000_000;
+          timeout = 20 * 1_000_000_000; // 20 sec
+          createDBQueueLength = 60;
+          insertQueueLength = 60;
+      };
+      nacDBIndex := ?(await NacDBIndex.NacDBIndex([Principal.fromActor(this)], dbOptions));
+    };
   };
 
   /// Shares ///
@@ -85,33 +100,33 @@ shared actor class ZonBackend() = this {
   public query func getSellerAffiliateShare(): async fractions.Fraction { sellerAffiliateShare };
 
   public shared({caller}) func setSalesOwnersShare(_share: fractions.Fraction) {
-    if (onlyMainOwner(caller)) {
-      salesOwnersShare := _share;
-    };
+    onlyMainOwner(caller);
+    
+    salesOwnersShare := _share;
   };
 
   public shared({caller}) func setUpvotesOwnersShare(_share: fractions.Fraction) {
-    if (onlyMainOwner(caller)) {
-      upvotesOwnersShare := _share;
-    };
+    onlyMainOwner(caller);
+    
+    upvotesOwnersShare := _share;
   };
 
   public shared({caller}) func setUploadOwnersShare(_share: fractions.Fraction) {
-    if (onlyMainOwner(caller)) {
-      uploadOwnersShare := _share;
-    };
+    onlyMainOwner(caller);
+    
+    uploadOwnersShare := _share;
   };
 
   public shared({caller}) func setBuyerAffiliateShare(_share: fractions.Fraction) {
-    if (onlyMainOwner(caller)) {
-      buyerAffiliateShare := _share;
-    };
+    onlyMainOwner(caller);
+    
+    buyerAffiliateShare := _share;
   };
 
   public shared({caller}) func setSellerAffiliateShare(_share: fractions.Fraction) {
-    if (onlyMainOwner(caller)) {
-      sellerAffiliateShare := _share;
-    };
+    onlyMainOwner(caller);
+    
+    sellerAffiliateShare := _share;
   };
 
   /// Owners ///
@@ -301,7 +316,7 @@ shared actor class ZonBackend() = this {
     item: ItemWithoutOwner;
   };
 
-  func onlyItemOwner(caller: Principal, _item: Item): Bool {
+  func onlyItemOwner(caller: Principal, _item: Item) {
     if (caller != _item.creator) {
       Debug.trap("not the item owner");
     };
@@ -498,9 +513,8 @@ shared actor class ZonBackend() = this {
         if (oldItem.item.details == #communalCategory) {
           Debug.trap("can't edit communal category");
         };
-        if (onlyItemOwner(caller, oldItem)) {
-          await db.put({sk = key; attributes = serializeItem(_item)});
-        };
+        onlyItemOwner(caller, oldItem);
+        await db.put({sk = key; attributes = serializeItem(_item)});
       };
       case _ { Debug.trap("no item") };
     };
@@ -516,9 +530,8 @@ shared actor class ZonBackend() = this {
         if (oldItem.item.details == #communalCategory) {
           Debug.trap("it's communal")
         };
-        if (onlyItemOwner(caller, oldItem)) {
-          await db.delete({sk = key});
-        };
+        onlyItemOwner(caller, oldItem);
+        await db.delete({sk = key});
       };
       case _ { Debug.trap("no item") };
     };

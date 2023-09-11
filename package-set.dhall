@@ -21,6 +21,11 @@ let
       , version = "v0.2.0"
       , dependencies = [ "base" ]
       },
+      { name = "stablebuffer"
+      , repo = "https://github.com/canscale/StableBuffer"
+      , version = "v0.2.0"
+      , dependencies = [ "base" ]
+      },
       { name = "btree"
       , repo = "https://github.com/canscale/StableHeapBTreeMap"
       , version = "v0.3.1"
@@ -29,6 +34,11 @@ let
       { name = "candb"
       , repo = "git@github.com:canscale/CanDB.git"
       , version = "beta"
+      , dependencies = [ "base", "candy" ]
+      },
+      { name = "nacdb"
+      , repo = "git@github.com:vporton/NacDB.git"
+      , version = "main"
       , dependencies = [ "base" ]
       },
       { name = "icrc1"
@@ -60,7 +70,17 @@ let
       , version = "0.7"
       , repo = "https://github.com/research-ag/motoko-lib"
       , dependencies = [ "base" ]
-      }
+      },
+      { name = "candy"
+      , version = "0.2.0"
+      , repo = "https://github.com/icdevs/candy_library"
+      , dependencies = [ "base" ]
+      },
+      { name = "map7"
+      , version = "v7.0.0"
+      , repo = "https://github.com/ZhenyaUsenko/motoko-hash-map"
+      , dependencies = [ "base" ]
+      },
     ] : List Package
 
 let
