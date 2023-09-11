@@ -29,6 +29,7 @@ import Nat64 "mo:base/Nat64";
 import Order "mo:base/Order";
 import Prng "mo:motoko-lib/Prng";
 import StableBuffer "mo:StableBuffer/StableBuffer";
+import Payments "payments";
 
 shared actor class ZonBackend() = this {
   /// External Canisters ///
@@ -55,6 +56,8 @@ shared actor class ZonBackend() = this {
 
   stable var founder: ?Principal = null;
 
+  stable var payments: ?Payments.Payments = null;
+
   /// Initialization ///
 
   public shared({ caller }) func init(subaccount : ?ICRC1Types.Subaccount): async () {
@@ -68,6 +71,12 @@ shared actor class ZonBackend() = this {
     if (nacDBIndex == null) {
       MyCycles.addPart(Common.dbOptions.partitionCycles);
       nacDBIndex := ?(await NacDBIndex.NacDBIndex([Principal.fromActor(this)]));
+    };
+    if (payments == null) {
+      MyCycles.addPart(Common.dbOptions.partitionCycles);
+      let _payments = await Payments.Payments();
+      payments := ?_payments;
+      await _payments.init(subaccount);
     };
   };
 
