@@ -7,18 +7,12 @@ import MyCycles "mo:nacdb/Cycles";
 import Array "mo:base/Array";
 import Buffer "mo:stable-buffer/StableBuffer";
 import Partition "./NacDBPartition";
+import Common "common";
 
 shared actor class NacDBIndex(
     initialOwners: [Principal],
     dbOptions: Nac.DBOptions,
 ) = this {
-    // TODO: Rename.
-    public shared({caller}) func constructor(dbOptions: Nac.DBOptions): async Partition.Partition {
-        checkCaller(caller);
-
-        await Partition.Partition(ownersOrSelf(), dbOptions);
-    };
-
     stable var owners = initialOwners;
 
     func checkCaller(caller: Principal) {
@@ -62,11 +56,11 @@ shared actor class NacDBIndex(
         Nac.getCanisters(dbIndex);
     };
 
-    public shared({caller}) func createPartition(dbOptions: Nac.DBOptions): async Nac.PartitionCanister {
+    public shared({caller}) func createPartition(): async Nac.PartitionCanister {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles(dbOptions.partitionCycles);
-        MyCycles.addPart(dbOptions.partitionCycles);
+        MyCycles.addPart(Common.dbOptions.partitionCycles);
         await Partition.Partition(ownersOrSelf(), dbOptions);
     };
 
