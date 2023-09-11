@@ -88,7 +88,7 @@ shared actor class ZonBackend() = this {
   /// Shares ///
 
   stable var salesOwnersShare = fractions.fdiv(1, 10); // 10%
-  stable var upvotesOwnersShare = fractions.fdiv(1, 2); //50%
+  stable var upvotesOwnersShare = fractions.fdiv(1, 2); // 50%
   stable var uploadOwnersShare = fractions.fdiv(3, 20); // 15%
   stable var buyerAffiliateShare = fractions.fdiv(1, 10); // 10%
   stable var sellerAffiliateShare = fractions.fdiv(3, 20); // 15%
