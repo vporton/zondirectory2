@@ -73,15 +73,7 @@ shared actor class ZonBackend() = this {
       canDBIndex := ?(await CanDBIndex.CanDBIndex([Principal.fromActor(this)]));
     };
     if (nacDBIndex == null) {
-      let dbOptions: Nac.DBOptions = {
-          moveCap = #usedMemory 500_000_000;
-          hardCap = ?1000;
-          partitionCycles = 10_000_000_000;
-          timeout = 20 * 1_000_000_000; // 20 sec
-          createDBQueueLength = 60;
-          insertQueueLength = 60;
-      };
-      nacDBIndex := ?(await NacDBIndex.NacDBIndex([Principal.fromActor(this)], dbOptions));
+      nacDBIndex := ?(await NacDBIndex.NacDBIndex([Principal.fromActor(this)]));
     };
   };
 
