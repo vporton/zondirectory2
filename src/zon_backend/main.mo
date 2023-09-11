@@ -1,17 +1,15 @@
 import ICRC1Types "mo:icrc1/ICRC1/Types";
-import Token "mo:icrc1/ICRC1/Canisters/Token";
+// import Token "mo:icrc1/ICRC1/Canisters/Token";
 import CanDBIndex "../storage/CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
-import NacDBIndex "../storage/NacDBIndex";
-import NacDBPartition "../storage/NacDBPartition";
-import Nac "mo:nacdb/NacDB";
+// import NacDBIndex "../storage/NacDBIndex";
+// import NacDBPartition "../storage/NacDBPartition";
+// import Nac "mo:nacdb/NacDB";
 import MyCycles "mo:nacdb/Cycles";
 import Common "../storage/common";
 import Principal "mo:base/Principal";
 import Float "mo:base/Float";
-import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
-import Prelude "mo:base/Prelude";
 import Entity "mo:candb/Entity";
 import BTree "mo:btree/BTree";
 import RBT "mo:stable-rbtree/StableRBTree";
@@ -20,14 +18,13 @@ import Nat "mo:base/Nat";
 import xNat "mo:xtendedNumbers/NatX";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
-import fractions "./fractions";
-import HashMap "mo:base/HashMap";
-import Nat8 "mo:base/Nat8";
-import Hash "mo:base/Hash";
-import Time "mo:base/Time";
+// import HashMap "mo:base/HashMap";
+// import Nat8 "mo:base/Nat8";
+// import Hash "mo:base/Hash";
+// import Time "mo:base/Time";
 import Nat64 "mo:base/Nat64";
 import Order "mo:base/Order";
-import Prng "mo:motoko-lib/Prng";
+// import Prng "mo:motoko-lib/Prng";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 import Payments "payments";
 
@@ -39,7 +36,7 @@ shared actor class ZonBackend() = this {
   /// Some Global Variables ///
 
   stable var canDBIndex: ?CanDBIndex.CanDBIndex = null;
-  stable var nacDBIndex: ?NacDBIndex.NacDBIndex = null;
+  // stable var nacDBIndex: ?NacDBIndex.NacDBIndex = null;
 
   // FIXME: Fix this comment.
   // "s/" - anti-sybil
@@ -68,14 +65,15 @@ shared actor class ZonBackend() = this {
       MyCycles.addPart(Common.dbOptions.partitionCycles);
       canDBIndex := ?(await CanDBIndex.CanDBIndex([Principal.fromActor(this)]));
     };
-    if (nacDBIndex == null) {
-      MyCycles.addPart(Common.dbOptions.partitionCycles);
-      nacDBIndex := ?(await NacDBIndex.NacDBIndex([Principal.fromActor(this)]));
-    };
+    // if (nacDBIndex == null) {
+    //   MyCycles.addPart(Common.dbOptions.partitionCycles);
+    //   nacDBIndex := ?(await NacDBIndex.NacDBIndex([Principal.fromActor(this)]));
+    // };
     if (payments == null) {
       MyCycles.addPart(Common.dbOptions.partitionCycles);
       let _payments = await Payments.Payments();
       payments := ?_payments;
+      MyCycles.addPart(Common.dbOptions.partitionCycles);
       await _payments.init(subaccount);
     };
   };
