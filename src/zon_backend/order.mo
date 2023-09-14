@@ -1,4 +1,5 @@
 import Common "../storage/common";
+import CanDBPartition "../storage/CanDBPartition";
 import Entity "mo:candb/Entity";
 import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
@@ -8,12 +9,13 @@ import Iter "mo:base/Iter";
 shared actor class Orders() = this {
   var initialized: Bool = false;
 
+  // TODO: Remove this function?
   public shared({ caller }) func init(): async () {
     if (initialized) {
       Debug.trap("already initialized");
     };
 
-    ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
+    // ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
 
     initialized := true;
   };
@@ -35,13 +37,13 @@ shared actor class Orders() = this {
   };
 
   func iter<T>(list: DList): Iter.Iter<T> {
-    var current = do ? { list!.start };
+    var current = do ? { list.ptrs!.start };
     {
-      next = func(): ?T {
+      next = func(): async ?T {
         let ?cur = current else {
           return null;
         };
-        let item = cur.0.get("p/" # Nat.toText(cur.1));
+        let item = await cur.0.get("p/" # Nat.toText(cur.1));
         current := cur.fwd;
         do ? { item!.value };
       };
