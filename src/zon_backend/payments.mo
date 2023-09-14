@@ -1,4 +1,4 @@
-import PST "../zon_pst";
+import PST "canister:zon_pst";
 import Token "mo:icrc1/ICRC1/Canisters/Token";
 import BTree "mo:btree/BTree";
 import ICRC1Types "mo:icrc1/ICRC1/Types";
@@ -11,13 +11,18 @@ import fractions "./fractions";
 import Debug "mo:base/Debug";
 
 actor class Payments() = this {
+  stable var initialized: Bool = false;
+
   /// Incoming Payments ///
 
   public shared({ caller }) func init(subaccount : ?ICRC1Types.Subaccount): async () {
-    founder := ?caller;
-    if (pst == null) {
-      pst := ?(await PST.PST({ owner = Principal.fromActor(this); subaccount = subaccount }));
+    if (initialized) {
+      Debug.trap("already initialized");
     };
+
+    founder := ?caller;
+
+    initialized := true;
   };
 
   /// Owners ///
@@ -49,8 +54,6 @@ actor class Payments() = this {
   // or https://github.com/research-ag/motoko-lib/blob/main/src/TokenHandler.mo
 
   stable var ledger: Token.Token = actor(nativeIPCToken);
-
-  stable var pst: ?PST.PST = null;
 
   /// Shares ///
 
@@ -268,10 +271,10 @@ actor class Payments() = this {
       case (null) { 0 };
     };
     let _newDividends = Int.abs((totalDividends: Int) - lastTotal);
-    let ?pst2 = pst else { Debug.trap("no PST"); };
+    // let ?pst2 = pst else { Debug.trap("no PST"); };
     // rounding down
-    let balance = await pst2.icrc1_balance_of({owner = _account; subaccount = null});
-    let total = await pst2.icrc1_total_supply();
+    let balance = await PST.icrc1_balance_of({owner = _account; subaccount = null});
+    let total = await PST.icrc1_total_supply();
     balance * _newDividends / total;
   };
 

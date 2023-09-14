@@ -1,10 +1,7 @@
 import ICRC1Types "mo:icrc1/ICRC1/Types";
 // import Token "mo:icrc1/ICRC1/Canisters/Token";
-import CanDBIndex "../storage/CanDBIndex";
+import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
-// import NacDBIndex "../storage/NacDBIndex";
-// import NacDBPartition "../storage/NacDBPartition";
-// import Nac "mo:nacdb/NacDB";
 import MyCycles "mo:nacdb/Cycles";
 import Common "../storage/common";
 import Principal "mo:base/Principal";
@@ -35,18 +32,15 @@ shared actor class ZonBackend() = this {
 
   /// Some Global Variables ///
 
-  stable var canDBIndex: ?CanDBIndex.CanDBIndex = null;
-  // stable var nacDBIndex: ?NacDBIndex.NacDBIndex = null;
-
   // FIXME: Fix this comment.
   // "s/" - anti-sybil
   // "u/" - Principal -> User
   // "i/" - ID -> Item
   // "a/" - user -> <buyer affiliate>/<seller affiliate>
-  // // "v/" - <parent>/<votes>/<random> -> <child> [prefix1]
-  // // "p/" - <parent>/<child> -> <votes> [prefix2]
-  // // "q/" - <parent>/<child> -> <quadratic votes> [prefix1]
-  // // "w/" - <parent>/<quadratic votes>/<random> -> <child> [prefix2]
+  //
+  // In other canisters:
+  // "p/<NUM>" - nodes of linked lists
+  // ID, (time, votes) -> head of double linked list 
   // TODO: Avoid duplicate user nick names.
 
   stable var maxId: Nat64 = 0;
@@ -57,18 +51,16 @@ shared actor class ZonBackend() = this {
 
   /// Initialization ///
 
+  stable var initialized: Bool = false;
+
   public shared({ caller }) func init(subaccount : ?ICRC1Types.Subaccount): async () {
     ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
 
-    founder := ?caller;
-    if (canDBIndex == null) {
-      MyCycles.addPart(Common.dbOptions.partitionCycles);
-      canDBIndex := ?(await CanDBIndex.CanDBIndex([Principal.fromActor(this)]));
+    if (initialized) {
+      Debug.trap("already initialized");
     };
-    // if (nacDBIndex == null) {
-    //   MyCycles.addPart(Common.dbOptions.partitionCycles);
-    //   nacDBIndex := ?(await NacDBIndex.NacDBIndex([Principal.fromActor(this)]));
-    // };
+
+    founder := ?caller;
     if (payments == null) {
       MyCycles.addPart(Common.dbOptions.partitionCycles);
       let _payments = await Payments.Payments();
@@ -76,6 +68,8 @@ shared actor class ZonBackend() = this {
       MyCycles.addPart(Common.dbOptions.partitionCycles);
       await _payments.init(subaccount);
     };
+
+    initialized := true;
   };
 
   /// Owners ///

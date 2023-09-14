@@ -12,10 +12,20 @@ import Principal "mo:base/Principal";
 import Hash "mo:base/Hash";
 import Array "mo:base/Array";
 
-shared actor class CanDBIndex(
-    initialOwners: [Principal]
-) = this {
-  stable var owners = initialOwners;
+actor CanDBIndex {
+  stable var owners: [Principal] = [];
+
+  stable var initialized: Bool = false;
+
+  public shared func init(initialOwners: [Principal]): async () {
+    if (initialized) {
+      Debug.trap("already initialized");
+    };
+
+    owners := initialOwners;
+
+    initialized := true;
+  };
 
   func checkCaller(caller: Principal) {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
@@ -33,7 +43,7 @@ shared actor class CanDBIndex(
 
   func ownersOrSelf(): [Principal] {
     let buf = Buffer.fromArray<Principal>(owners);
-    Buffer.add(buf, Principal.fromActor(this));
+    Buffer.add(buf, Principal.fromActor(CanDBIndex  ));
     Buffer.toArray(buf);
   };
 
@@ -161,4 +171,7 @@ shared actor class CanDBIndex(
     Debug.print("new storage canisterId=" # newStorageCanisterId);
     newStorageCanisterId;
   };
+
+  /// Linked lists code follows. ///
+
 }

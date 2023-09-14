@@ -2,7 +2,12 @@
   "canisters": {
     "zon_backend": {
       "main": "src/zon_backend/main.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": [
+        "payments",
+        "zon_pst",
+        "CanDBIndex"
+      ]
     },
     "zon_frontend": {
       "dependencies": [
@@ -23,6 +28,10 @@
     },
     "zon_pst": {
       "main": "src/zon_pst/lib.mo",
+      "type": "motoko"
+    },
+    "CanDBIndex": {
+      "main": "src/storage/CanDBIndex.mo",
       "type": "motoko"
     }
   },
