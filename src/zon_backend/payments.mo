@@ -1,4 +1,4 @@
-import PST "canister:zon_pst";
+// import PST "canister:zon_pst"; // TODO
 import Token "mo:icrc1/ICRC1/Canisters/Token";
 import BTree "mo:btree/BTree";
 import ICRC1Types "mo:icrc1/ICRC1/Types";
@@ -273,8 +273,9 @@ actor class Payments() = this {
     let _newDividends = Int.abs((totalDividends: Int) - lastTotal);
     // let ?pst2 = pst else { Debug.trap("no PST"); };
     // rounding down
-    let balance = await PST.icrc1_balance_of({owner = _account; subaccount = null});
-    let total = await PST.icrc1_total_supply();
+    // FIXME: Use PST.
+    let balance = 0; // await PST.icrc1_balance_of({owner = _account; subaccount = null});
+    let total = 0; // PST.icrc1_total_supply();
     balance * _newDividends / total;
   };
 
