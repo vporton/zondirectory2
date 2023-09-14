@@ -19,7 +19,7 @@ shared ({ caller = _owner }) actor class PST(
         initial_balances = [(creator, 10_000_000_000)];
         max_supply = 10_000_000_000;
         min_burn_amount = 100_000;
-        minting_account = { owner = Principal.fromText(""); subaccount = null; }; // nobody // FIXME: Does it work?
+        minting_account = { owner = Principal.fromText("aaaaa-aa"); subaccount = null; }; // nobody
         name = "Zon Directory PST token";
         symbol = "ZDPST";
     });

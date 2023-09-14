@@ -47,8 +47,6 @@ shared actor class ZonBackend() = this {
 
   stable var founder: ?Principal = null;
 
-  stable var payments: ?Payments.Payments = null;
-
   /// Initialization ///
 
   stable var initialized: Bool = false;
@@ -61,13 +59,6 @@ shared actor class ZonBackend() = this {
     };
 
     founder := ?caller;
-    if (payments == null) {
-      MyCycles.addPart(Common.dbOptions.partitionCycles);
-      let _payments = await Payments.Payments();
-      payments := ?_payments;
-      MyCycles.addPart(Common.dbOptions.partitionCycles);
-      await _payments.init(subaccount);
-    };
 
     initialized := true;
   };
