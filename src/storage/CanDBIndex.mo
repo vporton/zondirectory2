@@ -43,7 +43,7 @@ actor CanDBIndex {
 
   func ownersOrSelf(): [Principal] {
     let buf = Buffer.fromArray<Principal>(owners);
-    Buffer.add(buf, Principal.fromActor(CanDBIndex  ));
+    Buffer.add(buf, Principal.fromActor(CanDBIndex));
     Buffer.toArray(buf);
   };
 

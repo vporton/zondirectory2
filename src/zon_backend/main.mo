@@ -85,6 +85,9 @@ shared actor class ZonBackend() = this {
 
   /// Users ///
 
+  // `sybilCanister` is determined by UI code.
+  // TODO: `sybilCanister` should have its dedicated PK, to reduce the number of UI calls.
+  //       Alternatively, store `sybilCanister` on-chain or somehow.
   func checkSybil(sybilCanister: Principal, user: Principal): async* () {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
     switch (await db.get({sk = "s/" # Principal.toText(user)})) {
