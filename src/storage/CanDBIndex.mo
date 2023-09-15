@@ -11,6 +11,8 @@ import Admin "mo:candb/CanDBAdmin";
 import Principal "mo:base/Principal";
 import Hash "mo:base/Hash";
 import Array "mo:base/Array";
+import Int "mo:base/Int";
+import CanDB "mo:candb/CanDB";
 
 actor CanDBIndex {
   stable var owners: [Principal] = [];
@@ -172,6 +174,15 @@ actor CanDBIndex {
     newStorageCanisterId;
   };
 
-  /// Linked lists code follows. ///
+  func put(options: CanDB.PutOptions): async () {
+    // checkCaller(caller); // checked by the child call
 
+    let ?buf = CanisterMap.get(pkToCanisterMap, ""/* FIXME: maybe pass as function arg? */) else {
+      Debug.trap("no partition canisters");
+    };
+    let part0 = Buffer.get(buf, Int.abs(Buffer.size(buf) - 1));
+    let part: CanDBPartition.CanDBPartition = actor(part0);
+
+    await part.put(options);
+  };
 }

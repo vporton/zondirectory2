@@ -1,4 +1,5 @@
 import Common "../storage/common";
+import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
 import Entity "mo:candb/Entity";
 import Debug "mo:base/Debug";
@@ -172,24 +173,43 @@ shared actor class Orders() = this {
     };
   };
 
-  // FIXME
-  func prepend(list: DList, value: (ItemDListNode, [Entity.AttributeValuePrimitive])) {
-    switch (list.ptrs) {
-      case (?ptrs) {
-        let newItem = {
-          fwd = do ? { ptrs.start };
-          bwd = null;
-          itemId = value.0.itemId;
-        };
-        let start = rng.next();
-        ptrs.start := start;
-      };
-      case null {
-        list.ptrs := {
-          fwd = guidGen.next();
-          bwd = null;
-        };
-      };
+  func prepend(list: DList, value: ({itemId: Nat}, [Entity.AttributeValuePrimitive])) {
+    let wasEmpty = switch (list.ptrs) {
+      case (?ptrs) { false };
+      case null { true };
     };
-  }
+    let newItem = {
+      fwd = do ? { ptrs!.start };
+      bwd = null;
+      itemId = value.0.itemId;
+    };
+    let value2 = Buffer.fromArray(serializeItemNode(newItem));
+    value2.append(value.1);
+    let start = rng.next();
+    CanDBIndex.put({sk = start; attributes = [("x", value2)]});
+    ptrs.start := start;
+    if (wasEmpty) {
+      ptrs.end := start;
+    };
+  };
+
+  func append(list: DList, value: ({itemId: Nat}, [Entity.AttributeValuePrimitive])) {
+    let wasEmpty = switch (list.ptrs) {
+      case (?ptrs) { false };
+      case null { true };
+    };
+    let newItem = {
+      fwd = null;
+      bwd = do ? { ptrs!.start };
+      itemId = value.0.itemId;
+    };
+    let value2 = Buffer.fromArray(serializeItemNode(newItem));
+    value2.append(value.1);
+    let end = rng.next();
+    CanDBIndex.put({sk = end; attributes = [("x", value2)]});
+    ptrs.end := end;
+    if (wasEmpty) {
+      ptrs.start := end;
+    };
+  };
 }
