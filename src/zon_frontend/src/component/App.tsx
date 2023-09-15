@@ -11,6 +11,7 @@ import {
     HashRouter,
 } from "react-router-dom";
 import SubFolders from "./SubFolders";
+import Edit from "./Edit";
  
 export default function App() {
     return (
@@ -32,7 +33,7 @@ function MyRouted() {
                 <NavLink to="/folder/0">Main folder</NavLink>
             </nav>
             <Routes>
-            <Route
+                <Route
                     path="/folder/:id"
                     element={<ShowFolder/>}
                 />
@@ -43,6 +44,14 @@ function MyRouted() {
                 <Route
                     path="/superfolders-of/:id"
                     element={<SubFolders data-dir="super"/>}
+                />
+                <Route
+                    path="/create/"
+                    element={<Edit/>}
+                />
+                <Route
+                    path="/create/for-category/:cat"
+                    element={<Edit/>}
                 />
             </Routes>
         </>

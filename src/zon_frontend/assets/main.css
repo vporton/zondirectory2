@@ -3,3 +3,7 @@ body {
 }
 
 a.active{color:red;}
+
+input[type=text], input[type=url], textarea {
+    width: 100%;
+}
