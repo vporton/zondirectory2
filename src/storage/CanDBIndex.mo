@@ -14,7 +14,7 @@ import Array "mo:base/Array";
 import Int "mo:base/Int";
 import CanDB "mo:candb/CanDB";
 
-actor CanDBIndex {
+actor class CanDBIndex() = this {
   stable var owners: [Principal] = [];
 
   stable var initialized: Bool = false;
@@ -45,7 +45,7 @@ actor CanDBIndex {
 
   func ownersOrSelf(): [Principal] {
     let buf = Buffer.fromArray<Principal>(owners);
-    Buffer.add(buf, Principal.fromActor(CanDBIndex));
+    Buffer.add(buf, Principal.fromActor(this));
     Buffer.toArray(buf);
   };
 

@@ -33,6 +33,10 @@
     "CanDBIndex": {
       "main": "src/storage/CanDBIndex.mo",
       "type": "motoko"
+    },
+    "CanDBPartition": {
+      "main": "src/storage/CanDBPartition.mo",
+      "type": "motoko"
     }
   },
   "defaults": {
