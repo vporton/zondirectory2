@@ -7,6 +7,7 @@ import { obtainSybilCanister } from '../util/sybil';
 import 'react-tabs/style/react-tabs.css';
 import { initializeCanDBPartitionClient, initializeMainClient, intializeCanDBIndexClient } from "../util/client";
 import { ItemWithoutOwner } from "../../../declarations/backend/backend.did";
+import Categories from "./Categories";
 
 export default function Edit() {
     const routeParams = useParams();
@@ -16,21 +17,8 @@ export default function Edit() {
     const [shortDescription, setShortDescription] = useState("");
     const [link, setLink] = useState(""); // TODO: Check URL validity.
     const [post, setPost] = useState("");
-    const [categories, setCategories] = useState(mainCategory === undefined ? [] : [mainCategory]);
-    const [categoriesList, setCategoriesList] = useState(mainCategory === undefined ? [] : [mainCategory.toString()]);
     enum SelectedTab {selectedLink, selectedOther}
     const [selectedTab, setSelectedTab] = useState(SelectedTab.selectedLink);
-    function updateCategories() {
-        setCategories(categoriesList.filter(c => /^[0-9]+$/.test(c)).map(c => +c));
-    }
-    useEffect(updateCategories, [categoriesList]);
-    function updateCategoriesList() {
-        const list: string[] = [];
-        for (const e of document.querySelectorAll('#categoriesList input') as any) {
-            list.push((e as HTMLInputElement).value)
-        }
-        setCategoriesList(list);
-    }
     async function submit() {
         function itemData(): ItemWithoutOwner {
             // TODO: Differentiating post and message by `post === ""` is unreliable.
@@ -86,16 +74,7 @@ export default function Edit() {
                     <p>Text: <textarea style={{height: "10ex"}} onChange={e => setPost(e.target.value)}/></p>
                 </TabPanel>
             </Tabs>
-            <h2>Post to categories (TODO: Limited to ?? posts per day)</h2>
-            <p>TODO: Visual editor of categories</p>
-            <ul id="categoriesList">
-                {categoriesList.map((cat, i) => {
-                    return (
-                        <li key={i}><input type="number" value={cat} onChange={updateCategoriesList}/></li>
-                    );
-                })}
-            </ul>
-            <p><Button onClick={() => setCategoriesList(categoriesList.concat([""]))}>Add</Button></p>
+            <Categories defaultCategories={mainCategory === undefined ? [] : [mainCategory]}/>
             <p><Button onClick={submit}>Submit</Button></p>
         </>
     );
