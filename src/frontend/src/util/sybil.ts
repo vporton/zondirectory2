@@ -14,7 +14,7 @@ function getCookie(name: string): string | undefined {
 // TODO: Updating the cookie if it is from a previous alpha/beta.
 // Obtain Sybil canister, possibly creating a new user identity.
 // FIXME: Check that this is not in an infinite loop, if user has no phone.
-export async function sybilCanister() {
+export async function obtainSybilCanister() {
     const cookie = getCookie('sybilCanister');
     if (cookie !== undefined) {
         return cookie;
@@ -22,7 +22,7 @@ export async function sybilCanister() {
 
     const isLocal = true; // TODO
     const canDBIndexClient = intializeCanDBIndexClient(isLocal);
-    const canDBPartitionClient: ActorClient<CanDBIndex, CanDBPartition> = initializeCanDBPartitionClient(isLocal, canDBIndexClient);
+    const canDBPartitionClient = initializeCanDBPartitionClient(isLocal, canDBIndexClient);
     for(;;) {
         let sybilResults = await canDBPartitionClient.query<CanDBPartition["get"]>( // FIXME
             "", // pk, // FIXME
@@ -41,7 +41,6 @@ export async function sybilCanister() {
             const isLocal = true; // FIXME
             const canisters = await canDBIndexClient.getCanistersForPK("x"); // FIXME: PK
             const lastCanister = canisters[canisters.length - 1];
-            // TODO: 
             const backend = initializeMainClient(isLocal);
             await backend.verifyUser(Principal.fromText(lastCanister));
         } else {

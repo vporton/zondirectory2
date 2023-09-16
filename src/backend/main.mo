@@ -231,14 +231,14 @@ shared actor class ZonBackend() = this {
   /// Items ///
 
   type ItemWithoutOwner = {
-    price: Nat;
+    price: Float;
     locale: Text;
     title: Text;
     description: Text;
     details: {
       #link : Text;
       #message : ();
-      #post : ();
+      #post : Text;
       #ownedCategory : ();
       #communalCategory : ();
     };
@@ -270,17 +270,20 @@ shared actor class ZonBackend() = this {
     buf.add(#int (switch (item.item.details) {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
-      case (#post) { ITEM_TYPE_POST };
+      case (#post _) { ITEM_TYPE_POST };
       case (#ownedCategory) { ITEM_TYPE_OWNED_CATEGORY };
       case (#communalCategory) { ITEM_TYPE_COMMUNAL_CATEGORY };
     }));
     buf.add(#text (Principal.toText(item.creator)));
-    buf.add(#int (item.item.price));
+    buf.add(#float (item.item.price));
     buf.add(#text (item.item.locale));
     buf.add(#text (item.item.title));
     buf.add(#text (item.item.description));
     switch (item.item.details) {
       case (#link v) {
+        buf.add(#text v);
+      };
+      case (#post v) {
         buf.add(#text v);
       };
       case _ {};
@@ -295,7 +298,7 @@ shared actor class ZonBackend() = this {
   func deserializeItemAttr(attr: Entity.AttributeValue): Item {
     var kind: Nat = 0;
     var creator: ?Principal = null;
-    var price = 0;
+    var price = 0.0;
     var locale = "";
     var nick = "";
     var title = "";
@@ -328,8 +331,8 @@ shared actor class ZonBackend() = this {
             };
             case (2) {
               switch (arr[pos]) {
-                case (#int v) {
-                  price := Int.abs(v);
+                case (#float v) {
+                  price := v;
                 };
                 case _ { break r false; };
               };
@@ -405,7 +408,7 @@ shared actor class ZonBackend() = this {
         details = switch (kind) {
           case (0) { #link link };
           case (1) { #message };
-          case (2) { #post };
+          case (2) { #post "" }; // FIXME: post text
           case (3) { #ownedCategory };
           case (4) { #communalCategory };
           case _ { Debug.trap("wrong item format"); }
