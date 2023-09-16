@@ -70,7 +70,7 @@ export default function Edit() {
             <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
             <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
             <p>Short (meta) description: <textarea onChange={e => setShortDescription(e.target.value)}/></p>
-            {/* TODO:
+            {/* TODO (should not because complicates ordering?):
             <p>Link type:
                 <label><input type="radio" name="kind" value="0" required={true}/> Directory entry</label>
                 <label><input type="radio" name="kind" value="1" required={true}/> Message</label></p>*/}
