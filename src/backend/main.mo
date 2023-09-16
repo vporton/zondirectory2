@@ -25,6 +25,8 @@ import Order "mo:base/Order";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 import Payments "payments";
 
+// FIXME: Below itemId should also contain Principal of the canister.
+
 shared actor class ZonBackend() = this {
   /// External Canisters ///
 
@@ -37,6 +39,7 @@ shared actor class ZonBackend() = this {
   // "u/" - Principal -> User
   // "i/" - ID -> Item
   // "a/" - user -> <buyer affiliate>/<seller affiliate>
+  // "r/<CATEGORY>/<ITEM>" - which items were addeded to which categories (both time and votes streams)
   //
   // In other canisters:
   // "p/<NUM>" - nodes of linked lists

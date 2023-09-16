@@ -24,7 +24,7 @@ export async function obtainSybilCanister() {
     const canDBIndexClient = intializeCanDBIndexClient(isLocal);
     const canDBPartitionClient = initializeCanDBPartitionClient(isLocal, canDBIndexClient);
     for(;;) {
-        let sybilResults = await canDBPartitionClient.query<CanDBPartition["get"]>( // FIXME
+        let sybilResults = await canDBPartitionClient.query<CanDBPartition["get"]>(
             "", // pk, // FIXME
             (actor) => actor.get({sk: "s/username"}), // FIXME
         );

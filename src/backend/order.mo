@@ -212,4 +212,10 @@ shared actor class Orders() = this {
       ptrs.start := end;
     };
   };
+
+  // Public API //
+
+  public shared func addItemToCategory(catId: (Principal, Nat), itemId: (Principal, Nat)): async () {
+
+  }
 }
