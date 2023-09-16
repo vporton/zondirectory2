@@ -1,5 +1,5 @@
 import * as React from "react";
-// import { zon_backend } from "../../../declarations/zon_backend";
+// import { backend } from "../../../declarations/backend";
 import { Nav } from 'react-bootstrap';
 import ShowFolder from "./ShowFolder";
 import {

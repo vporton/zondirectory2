@@ -2,7 +2,7 @@ import * as React from "react";
 import { AppData } from "../DataDispatcher";
 import { useParams } from "react-router-dom";
 import { take } from "../util/iterators";
-// import { zon_backend } from "../../../declarations/zon_backend";
+// import { backend } from "../../../declarations/backend";
 
 export default function ShowFolder() {
     const { id } = useParams();
