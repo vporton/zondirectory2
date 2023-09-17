@@ -1,8 +1,8 @@
 import Common "../storage/common";
 import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
-import CanDBIndex "canister:NacDBIndex";
-import CanDBPartition "../storage/NacDBPartition";
+import NacDBIndex "canister:NacDBIndex";
+import NacDBPartition "../storage/NacDBPartition";
 import Entity "mo:candb/Entity";
 import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
@@ -19,7 +19,7 @@ import Array "mo:base/Array";
 import Payments "payments";
 import RBT "mo:stable-rbtree/StableRBTree";
 import Prng "mo:prng";
-import NacDbIndex "../storage/NacDBIndex";
+import lib "lib";
 
 // TODO: Delete "hanging" items (as soon, as they found)
 
@@ -27,7 +27,7 @@ shared actor class Orders() = this {
   var initialized: Bool = false;
 
   // var rng: Prng.Seiran128 = Prng.Seiran128();
-  let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
+  // let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
 
   // TODO: Remove this function?
   public shared({ caller }) func init(): async () {
@@ -121,33 +121,33 @@ shared actor class Orders() = this {
     }
   };
 
-  func serializeItemNode(node: ItemDListNode): [Entity.AttributeValuePrimitive] {
-    let result = Buffer.Buffer<Entity.AttributeValuePrimitive>(7);
-    result.append(Buffer.fromArray(_serializePointer(node.fwd)));
-    result.append(Buffer.fromArray(_serializePointer(node.bwd)));
-    result.add(#int(node.itemId));
-    Buffer.toArray(result);
-  };
+  // func serializeItemNode(node: ItemDListNode): [Entity.AttributeValuePrimitive] {
+  //   let result = Buffer.Buffer<Entity.AttributeValuePrimitive>(7);
+  //   result.append(Buffer.fromArray(_serializePointer(node.fwd)));
+  //   result.append(Buffer.fromArray(_serializePointer(node.bwd)));
+  //   result.add(#int(node.itemId));
+  //   Buffer.toArray(result);
+  // };
 
   // Returns deserialization of item and remaining data.
-  func deserializeItemNode(e: [Entity.AttributeValuePrimitive]): (ItemDListNode, [Entity.AttributeValuePrimitive]) {
-    let (fwd, e1) = _deserializePointer(e);
-    let (bwd, e2) = _deserializePointer(e1);
-    let #int itemId = e2[0] else {
-      Debug.trap("wrong linked list pointer format");
-    };
-    (
-      {var fwd; var bwd; itemId = Int.abs(itemId)},
-      Array.subArray(e2, 1, Int.abs(e2.size()-1)),
-    );
-  };
+  // func deserializeItemNode(e: [Entity.AttributeValuePrimitive]): (ItemDListNode, [Entity.AttributeValuePrimitive]) {
+  //   let (fwd, e1) = _deserializePointer(e);
+  //   let (bwd, e2) = _deserializePointer(e1);
+  //   let #int itemId = e2[0] else {
+  //     Debug.trap("wrong linked list pointer format");
+  //   };
+  //   (
+  //     {var fwd; var bwd; itemId = Int.abs(itemId)},
+  //     Array.subArray(e2, 1, Int.abs(e2.size()-1)),
+  //   );
+  // };
 
   // Public API //
 
   // We will use that "-XXX" < "XXX" for any hex number XXX.
 
   // FIXME: Check function arguments (and whether they are used correctly).
-  public shared({caller}) func addItemToCategory(catId: (CanDBPartition, Nat), itemId: (CanDBPartition, Nat)): async () {
+  public shared({caller}) func addItemToCategory(catId: (CanDBPartition.CanDBPartition, Nat), itemId: (CanDBPartition.CanDBPartition, Nat)): async () {
     let categoryItemData = await catId.0.get({sk = catId.1});
     let categoryItem = lib.deserializeItem(categoryItemData);
 
@@ -159,7 +159,7 @@ shared actor class Orders() = this {
       case _ {
         // TODO: Keep doing for other categories after a trap?
         Debug.trap("not a category");
-      }
+      };
     };
     // FIXME: We need to add items that are both above (timeOrder) or below (votes order) others. So need Int, not Nat?
 

@@ -81,6 +81,11 @@ let
       , repo = "https://github.com/ZhenyaUsenko/motoko-hash-map"
       , dependencies = [ "base" ]
       },
+      { name = "prng"
+      , repo = "https://github.com/research-ag/prng"
+      , version = "main"
+      , dependencies = [ "base" ]
+      },
     ] : List Package
 
 let
