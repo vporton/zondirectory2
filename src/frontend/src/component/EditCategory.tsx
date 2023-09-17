@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
+import { ItemWithoutOwner } from "../../../declarations/backend/backend.did";
 
 export default function EditCategory() {
     const routeParams = useParams();
@@ -22,7 +23,30 @@ export default function EditCategory() {
                 break;
             }
     }
-
+    async function submit() { // FIXME: Rewrite all this function.
+        function itemData(): ItemWithoutOwner {
+            // TODO: Differentiating post and message by `post === ""` is unreliable.
+            return {
+                locale,
+                title,
+                description: shortDescription,
+                details: selectedTab == SelectedTab.selectedLink ? {link: link} :
+                    (post === "" ? {message: null} : {post: post}),
+                price: 0.0, // TODO
+            };
+        }
+        async function submitItem(item: ItemWithoutOwner) {
+            const isLocal = true; // FIXME
+            const sybilCanister = obtainSybilCanister();
+            const canDBIndexClient = intializeCanDBIndexClient(isLocal);
+            const canDBPartitionClient = initializeCanDBPartitionClient(isLocal, canDBIndexClient);
+            const backend = initializeMainClient(isLocal);
+            const canisters = await canDBIndexClient.getCanistersForPK(""); // FIXME: PK
+            const lastCanister = canisters[canisters.length - 1];
+            await backend.createItemData(lastCanister, item, sybilCanister)
+        }
+        await submitItem(itemData());
+    }
     return (
         <>
             <Tabs onSelect={onSelectTab}>
