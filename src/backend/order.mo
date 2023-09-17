@@ -177,7 +177,7 @@ shared actor class Orders() = this {
     let timeScanSK = if (timeScanResult.entities.size() == 0) { // empty list
       0;
     } else {
-      fromSignedHex(timeScanResult.entities) + 1;
+      fromSignedHex(timeScanResult.entities) + 1; // FIXME: Define fromSignedHex().
     };
     let timeScanItemInfo = #tuple (#text(Principal.toText(itemId.0)), #int(itemId.1));
     await item.timeOrderSubDB.0.put({sk = timeScanSK; attributes = [("i", timeScanItemInfo)]});
