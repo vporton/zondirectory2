@@ -11,7 +11,8 @@ import {
     HashRouter,
 } from "react-router-dom";
 import SubFolders from "./SubFolders";
-import Edit from "./Edit";
+import EditItem from "./EditItem";
+import EditCategory from "./EditCategory";
  
 export default function App() {
     return (
@@ -47,11 +48,15 @@ function MyRouted() {
                 />
                 <Route
                     path="/create/"
-                    element={<Edit/>}
+                    element={<EditItem/>}
                 />
                 <Route
                     path="/create/for-category/:cat"
-                    element={<Edit/>}
+                    element={<EditItem/>}
+                />
+                <Route
+                    path="/create-subcategory/for-category/:cat"
+                    element={<EditCategory/>}
                 />
             </Routes>
         </>

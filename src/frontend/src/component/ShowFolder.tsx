@@ -18,7 +18,7 @@ export default function ShowFolder() {
                     <a href={`#/folder/${x.id}`}>{x.title}</a>
                 </li>)}
             </ul>
-            <p><a href={`#/subfolders-of/${id}`}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
+            <p><a href={`#/subfolders-of/${id}`}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
             <h3>Super-categories</h3>
             <ul>
                 {take(data.superCategories(), 3).map(x => <li lang={x.locale} key={x.id}>
@@ -26,6 +26,7 @@ export default function ShowFolder() {
                     <a href={`#/folder/${x.id}`}>{x.title}</a>
                 </li>)}
             </ul>
+            {/* TODO: Create super-category */}
             <p><a href={`#/superfolders-of/${id}`}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
             {data.items().map(item => 
                 <div key={item.id}>

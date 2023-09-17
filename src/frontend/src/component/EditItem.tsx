@@ -9,7 +9,7 @@ import { initializeCanDBPartitionClient, initializeMainClient, intializeCanDBInd
 import { ItemWithoutOwner } from "../../../declarations/backend/backend.did";
 import Categories from "./Categories";
 
-export default function Edit() {
+export default function EditItemItem() {
     const routeParams = useParams();
     const mainCategory: number | undefined = routeParams.cat !== undefined ? +routeParams.cat : undefined;
     const [locale, setLocale] = useState('en'); // TODO: user's locale
