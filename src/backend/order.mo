@@ -1,6 +1,8 @@
 import Common "../storage/common";
 import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
+import CanDBIndex "canister:NacDBIndex";
+import CanDBPartition "../storage/NacDBPartition";
 import Entity "mo:candb/Entity";
 import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
@@ -36,6 +38,8 @@ shared actor class Orders() = this {
 
     initialized := true;
   };
+
+  // TODO: It seems that below there are many unused functions.
 
   type GUID = Blob;
 
@@ -83,21 +87,6 @@ shared actor class Orders() = this {
       buf.add(b);
     };
     Blob.fromArray(Buffer.toArray(buf));
-  };
-
-  // A double linked list:
-  type DList = {
-    ptrs: ?{
-      var start: (CanDBPartition.CanDBPartition, GUID);
-      var end: (CanDBPartition.CanDBPartition, GUID);
-    };
-  };
-
-  type ItemDListNode = {
-    var fwd: ?(CanDBPartition.CanDBPartition, GUID);
-    var bwd: ?(CanDBPartition.CanDBPartition, GUID);
-    itemId: Nat;
-    // TODO: Also store number of votes, where appropriate.
   };
 
   func _serializePointer(ptr: ?(CanDBPartition.CanDBPartition, GUID)): [Entity.AttributeValuePrimitive] {
@@ -152,70 +141,9 @@ shared actor class Orders() = this {
     );
   };
 
-  func iter(list: DList): { next: shared() -> async ?[Entity.AttributeValuePrimitive] } {
-    var current = do ? { list.ptrs!.start };
-    {
-      next = shared func(): async ?[Entity.AttributeValuePrimitive] {
-        let ?cur = current else {
-          return null;
-        };
-        let v = await cur.0.get({sk = encodeGuid(cur.1)});
-        switch (v) {
-          case (?v) {
-            let ?(#tuple t) = RBT.get(v.attributes, Text.compare, "x") else {
-              Debug.trap("wrong linked list pointer format");
-            };
-            ?t;
-          };
-          case (null) { null }
-        };
-      };
-    };
-  };
-
-  func prepend(list: DList, value: ({itemId: Nat}, [Entity.AttributeValuePrimitive])) {
-    let wasEmpty = switch (list.ptrs) {
-      case (?ptrs) { false };
-      case null { true };
-    };
-    let newItem = {
-      fwd = do ? { ptrs!.start };
-      bwd = null;
-      itemId = value.0.itemId;
-    };
-    let value2 = Buffer.fromArray(serializeItemNode(newItem));
-    value2.append(value.1);
-    let start = rng.next();
-    CanDBIndex.put({sk = start; attributes = [("x", value2)]});
-    ptrs.start := start;
-    if (wasEmpty) {
-      ptrs.end := start;
-    };
-  };
-
-  func append(list: DList, value: ({itemId: Nat}, [Entity.AttributeValuePrimitive])) {
-    let wasEmpty = switch (list.ptrs) {
-      case (?ptrs) { false };
-      case null { true };
-    };
-    let newItem = {
-      fwd = null;
-      bwd = do ? { ptrs!.start };
-      itemId = value.0.itemId;
-    };
-    let value2 = Buffer.fromArray(serializeItemNode(newItem));
-    value2.append(value.1);
-    let end = rng.next();
-    CanDBIndex.put({sk = end; attributes = [("x", value2)]});
-    ptrs.end := end;
-    if (wasEmpty) {
-      ptrs.start := end;
-    };
-  };
-
   // Public API //
 
   public shared func addItemToCategory(catId: (Principal, Nat), itemId: (Principal, Nat)): async () {
-
+    
   }
 }

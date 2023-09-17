@@ -6,7 +6,8 @@
       "dependencies": [
         "payments",
         "zon_pst",
-        "CanDBIndex"
+        "CanDBIndex",
+        "NacDBIndex"
       ]
     },
     "frontend": {
@@ -34,8 +35,8 @@
       "main": "src/storage/CanDBIndex.mo",
       "type": "motoko"
     },
-    "CanDBPartition": {
-      "main": "src/storage/CanDBPartition.mo",
+    "NacDBIndex": {
+      "main": "src/storage/NacDBIndex.mo",
       "type": "motoko"
     }
   },
