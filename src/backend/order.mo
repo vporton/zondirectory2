@@ -19,6 +19,7 @@ import Array "mo:base/Array";
 import Payments "payments";
 import RBT "mo:stable-rbtree/StableRBTree";
 import Prng "mo:prng";
+import NacDbIndex "../storage/NacDBIndex";
 
 // TODO: Delete "hanging" items (as soon, as they found)
 
@@ -143,7 +144,42 @@ shared actor class Orders() = this {
 
   // Public API //
 
-  public shared func addItemToCategory(catId: (Principal, Nat), itemId: (Principal, Nat)): async () {
-    
-  }
+  // We will use that "-XXX" < "XXX" for any hex number XXX.
+
+  // FIXME: Check function arguments (and whether they are used correctly).
+  public shared({caller}) func addItemToCategory(catId: (CanDBPartition, Nat), itemId: (CanDBPartition, Nat)): async () {
+    let categoryItemData = await catId.0.get({sk = catId.1});
+    let categoryItem = lib.deserializeItem(categoryItemData);
+
+    switch (categoryItem.details.catKind) {
+      case (#communal) {};
+      case (#owned) {
+        lib.onlyItemOwner(caller, categoryItem);
+      };
+      case _ {
+        // TODO: Keep doing for other categories after a trap?
+        Debug.trap("not a category");
+      }
+    };
+    // FIXME: We need to add items that are both above (timeOrder) or below (votes order) others. So need Int, not Nat?
+
+    // FIXME: To reduce cost of moving an item (jumping over several items of the same weight),
+    //        need to make multi-hash instead of just hash.
+    // For now, I implement time list only, it does not need moving items around.
+
+    // Put into the beginning of time order.
+    let timeScanResult = item.timeOrderSubDB.scan({
+      skLowerBound = "";
+      skUpperBound = "x";
+      limit = 1;
+      ascending = ?false;
+    });
+    let timeScanSK = if (timeScanResult.entities.size() == 0) { // empty list
+      0;
+    } else {
+      fromSignedHex(timeScanResult.entities) + 1;
+    };
+    let timeScanItemInfo = #tuple (#text(Principal.toText(itemId.0)), #int(itemId.1));
+    await item.timeOrderSubDB.0.put({sk = timeScanSK; attributes = [("i", timeScanItemInfo)]});
+  };
 }

@@ -24,8 +24,8 @@ import Order "mo:base/Order";
 // import Prng "mo:motoko-lib/Prng";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 import Payments "payments";
-
-// FIXME: Below itemId should also contain Principal of the canister.
+import NacDbPartition "../storage/NacDBPartition";
+import lib "lib";
 
 shared actor class ZonBackend() = this {
   /// External Canisters ///
@@ -233,202 +233,7 @@ shared actor class ZonBackend() = this {
 
   /// Items ///
 
-  type ItemWithoutOwner = {
-    price: Float;
-    locale: Text;
-    title: Text;
-    description: Text;
-    details: {
-      #link : Text;
-      #message : ();
-      #post : Text;
-      #ownedCategory : ();
-      #communalCategory : ();
-    };
-  };
-
-
-  // TODO: Add `license` field?
-  // TODO: Images.
-  // TODO: Item version.
-  type Item = {
-    creator: Principal;
-    item: ItemWithoutOwner;
-  };
-
-  func onlyItemOwner(caller: Principal, _item: Item) {
-    if (caller != _item.creator) {
-      Debug.trap("not the item owner");
-    };
-  };
-
-  let ITEM_TYPE_LINK = 0;
-  let ITEM_TYPE_MESSAGE = 1;
-  let ITEM_TYPE_POST = 2;
-  let ITEM_TYPE_OWNED_CATEGORY = 3;
-  let ITEM_TYPE_COMMUNAL_CATEGORY = 4;
-
-  func serializeItemAttr(item: Item): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
-    buf.add(#int (switch (item.item.details) {
-      case (#link v) { ITEM_TYPE_LINK };
-      case (#message) { ITEM_TYPE_MESSAGE };
-      case (#post _) { ITEM_TYPE_POST };
-      case (#ownedCategory) { ITEM_TYPE_OWNED_CATEGORY };
-      case (#communalCategory) { ITEM_TYPE_COMMUNAL_CATEGORY };
-    }));
-    buf.add(#text (Principal.toText(item.creator)));
-    buf.add(#float (item.item.price));
-    buf.add(#text (item.item.locale));
-    buf.add(#text (item.item.title));
-    buf.add(#text (item.item.description));
-    switch (item.item.details) {
-      case (#link v) {
-        buf.add(#text v);
-      };
-      case (#post v) {
-        buf.add(#text v);
-      };
-      case _ {};
-    };
-    #tuple (Buffer.toArray(buf));
-  };
-
-  func serializeItem(item: Item): [(Entity.AttributeKey, Entity.AttributeValue)] {
-    [("v", serializeItemAttr(item))];
-  };
-
-  func deserializeItemAttr(attr: Entity.AttributeValue): Item {
-    var kind: Nat = 0;
-    var creator: ?Principal = null;
-    var price = 0.0;
-    var locale = "";
-    var nick = "";
-    var title = "";
-    var description = "";
-    var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none;
-    var link = "";
-    let res = label r: Bool switch (attr) {
-      case (#tuple arr) {
-        var pos = 0;
-        var num = 0;
-        while (pos < arr.size()) {
-          switch (num) {
-            case (0) {
-              switch (arr[pos]) {
-                case (#int v) {
-                  kind := Int.abs(v);
-                };
-                case _ { break r false };
-              };
-              pos += 1;
-            };
-            case (1) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  creator := ?Principal.fromText(v);
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case (2) {
-              switch (arr[pos]) {
-                case (#float v) {
-                  price := v;
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case (3) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  locale := v;
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case (4) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  nick := v;
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case (5) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  title := v;
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case (6) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  description := v;
-                };
-                case _ { break r false; }
-              };
-              pos += 1;
-            };
-            case (7) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  link := v;
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case _ { break r false; };
-          };
-          num += 1;
-        };
-        true;
-      };
-      case _ {
-        false;
-      };
-    };
-    if (not res) {
-      Debug.trap("wrong item format");
-    };
-    let ?creator2 = creator else { Debug.trap("programming error"); };
-    {
-      creator = creator2;
-      item = {
-        price = price;
-        locale = locale;
-        nick = nick;
-        title = title;
-        description = description;
-        details = switch (kind) {
-          case (0) { #link link };
-          case (1) { #message };
-          case (2) { #post "" }; // FIXME: post text
-          case (3) { #ownedCategory };
-          case (4) { #communalCategory };
-          case _ { Debug.trap("wrong item format"); }
-        };
-      };
-    };    
-  };
-
-  func deserializeItem(map: Entity.AttributeMap): Item {
-    let v = RBT.get(map, Text.compare, "v");
-    switch (v) {
-      case (?v) { deserializeItemAttr(v) };
-      case _ { Debug.trap("map not found") };
-    };    
-  };
-
-  public shared({caller}) func createItemData(canisterId: Principal, _item: ItemWithoutOwner, sybilCanisterId: Principal) {
+  public shared({caller}) func createItemData(canisterId: Principal, _item: lib.ItemWithoutOwner, sybilCanisterId: Principal) {
     await* checkSybil(sybilCanisterId, caller);
 
     let item2 = { creator = caller; item = _item; };
@@ -440,12 +245,12 @@ shared actor class ZonBackend() = this {
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
-  public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat64, item: ItemWithoutOwner) {
+  public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat64, item: lib.ItemWithoutOwner) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
-        let oldItem = deserializeItem(oldItemRepr.attributes);
+        let oldItem = lib.deserializeItem(oldItemRepr.attributes);
         if (caller != oldItem.creator) {
           Debug.trap("can't change item owner");
         };
@@ -456,7 +261,7 @@ shared actor class ZonBackend() = this {
         if (oldItem.item.details == #communalCategory) {
           Debug.trap("can't edit communal category");
         };
-        onlyItemOwner(caller, oldItem);
+        lib.onlyItemOwner(caller, oldItem);
         await db.put({sk = key; attributes = serializeItem(_item)});
       };
       case _ { Debug.trap("no item") };
@@ -469,11 +274,11 @@ shared actor class ZonBackend() = this {
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
-        let oldItem = deserializeItem(oldItemRepr.attributes);
+        let oldItem = lib.deserializeItem(oldItemRepr.attributes);
         if (oldItem.item.details == #communalCategory) {
           Debug.trap("it's communal")
         };
-        onlyItemOwner(caller, oldItem);
+        lib.onlyItemOwner(caller, oldItem);
         await db.delete({sk = key});
       };
       case _ { Debug.trap("no item") };
@@ -519,6 +324,7 @@ shared actor class ZonBackend() = this {
     };
   };
 
+  // FIXME: Move votes to `order.mo`.
   type VotesTmp = {
     parent: Nat64;
     child: Nat64;
