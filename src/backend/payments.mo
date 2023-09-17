@@ -1,4 +1,4 @@
-// import PST "canister:zon_pst"; // TODO
+import PST "canister:pst"; // TODO
 import Token "mo:icrc1/ICRC1/Canisters/Token";
 import BTree "mo:btree/BTree";
 import ICRC1Types "mo:icrc1/ICRC1/Types";

@@ -8,14 +8,14 @@ FOUNDER = principal "racnx-sccpy-mgfgr-rgb67-bvwyx-gjkad-lyw33-prq23-yw24r-eb65i
 .PHONY: deploy-backend
 deploy-backend:
 	# TODO: correct principal
-	dfx deploy zon_pst --argument 'record { owner = $(FOUNDER); subaccount = null; }'
+	dfx deploy pst --argument 'record { owner = $(FOUNDER); subaccount = null; }'
 	dfx deploy NacDBIndex --argument 'vec { $(FOUNDER) }'
 #	dfx deploy CanDBIndex
-#	dfx deploy zon_pst
+#	dfx deploy pst
 #	dfx deploy payments
-	dfx deploy backend
+	dfx deploy main
 	dfx ledger fabricate-cycles --amount 1000000000 --canister backend
-	dfx canister call backend init '(null)'
+	dfx canister call main init '(null)'
 
 .PHONY: deploy-frontend
 deploy-frontend:

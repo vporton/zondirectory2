@@ -1,18 +1,17 @@
 {
   "canisters": {
-    "backend": {
+    "main": {
       "main": "src/backend/main.mo",
       "type": "motoko",
       "dependencies": [
         "payments",
-        "zon_pst",
         "CanDBIndex",
         "NacDBIndex"
       ]
     },
     "frontend": {
       "dependencies": [
-        "backend"
+        "main"
       ],
       "frontend": {
         "entrypoint": "src/frontend/src/index.html"
@@ -25,10 +24,13 @@
     },
     "payments": {
       "main": "src/backend/payments.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": [
+        "pst"
+      ]
     },
-    "zon_pst": {
-      "main": "src/zon_pst/lib.mo",
+    "pst": {
+      "main": "src/backend/pst.mo",
       "type": "motoko"
     },
     "CanDBIndex": {
