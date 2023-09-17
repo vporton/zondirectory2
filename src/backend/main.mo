@@ -241,7 +241,7 @@ shared actor class ZonBackend() = this {
     maxId += 1;
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
-    await db.put({sk = key; attributes = serializeItem(item2)});
+    await db.put({sk = key; attributes = lib.serializeItem(item2)});
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
@@ -258,11 +258,16 @@ shared actor class ZonBackend() = this {
         if (_item.item.details != oldItem.item.details) {
           Debug.trap("can't change item type");
         };
-        if (oldItem.item.details == #communalCategory) {
-          Debug.trap("can't edit communal category");
+        switch (oldItem.item.details) {
+          case (#category cat) {
+            if (cat.catKind == #communal) {
+              Debug.trap("can't edit communal category");
+            };
+          };
+          case _ {};
         };
         lib.onlyItemOwner(caller, oldItem);
-        await db.put({sk = key; attributes = serializeItem(_item)});
+        await db.put({sk = key; attributes = lib.serializeItem(_item)});
       };
       case _ { Debug.trap("no item") };
     };
@@ -275,8 +280,13 @@ shared actor class ZonBackend() = this {
     switch (await db.get({sk = key})) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr.attributes);
-        if (oldItem.item.details == #communalCategory) {
-          Debug.trap("it's communal")
+        switch (oldItem.item.details) {
+          case (#category cat) {
+            if (cat.catKind == #communal) {
+              Debug.trap("it's communal");
+            };
+          };
+          case _ {};
         };
         lib.onlyItemOwner(caller, oldItem);
         await db.delete({sk = key});

@@ -25,17 +25,18 @@ module {
       #post : Text;
       #category: {
         // Locators for `order.mo`:
-        timeOrderSubDB: (
+        // TODO: Are these locators `?opt`
+        timeOrderSubDB: ?(
           NacDbPartition.Partition,
           Nat, // TODO: correct type?
         );
-        votesOrderSubDB: (
+        votesOrderSubDB: ?(
           NacDbPartition.Partition,
           Nat, // TODO: correct type?
         );
         catKind: {
-          #owned : ();
-          #communal : ();
+          #owned;
+          #communal;
         };
       };
     };
@@ -65,8 +66,12 @@ module {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
       case (#post _) { ITEM_TYPE_POST };
-      case (#ownedCategory) { ITEM_TYPE_OWNED_CATEGORY };
-      case (#communalCategory) { ITEM_TYPE_COMMUNAL_CATEGORY };
+      case (#category cat) {
+        switch (cat.catKind) {
+          case (#owned) { ITEM_TYPE_OWNED_CATEGORY };
+          case (#communal) { ITEM_TYPE_COMMUNAL_CATEGORY };
+        };
+      };
     }));
     buf.add(#text (Principal.toText(item.creator)));
     buf.add(#float (item.item.price));
@@ -85,7 +90,7 @@ module {
     #tuple (Buffer.toArray(buf));
   };
 
-  func serializeItem(item: Item): [(Entity.AttributeKey, Entity.AttributeValue)] {
+  public func serializeItem(item: Item): [(Entity.AttributeKey, Entity.AttributeValue)] {
     [("v", serializeItemAttr(item))];
   };
 
@@ -203,15 +208,27 @@ module {
           case (0) { #link link };
           case (1) { #message };
           case (2) { #post "" }; // FIXME: post text
-          case (3) { #ownedCategory };
-          case (4) { #communalCategory };
+          case (3) { #category {
+              // Locators for `order.mo`:
+              timeOrderSubDB = null;
+              votesOrderSubDB = null;
+              catKind = #owned;
+            }
+          };
+          case (4) { #category {
+              // Locators for `order.mo`:
+              timeOrderSubDB = null;
+              votesOrderSubDB = null;
+              catKind = #communal;
+            }
+          };
           case _ { Debug.trap("wrong item format"); }
         };
       };
     };    
   };
 
-  func onlyItemOwner(caller: Principal, _item: Item) {
+  public func onlyItemOwner(caller: Principal, _item: Item) {
     if (caller != _item.creator) {
       Debug.trap("not the item owner");
     };
