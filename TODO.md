@@ -1,3 +1,5 @@
+- Separate stream for each locale/language?
+
 - Should use owned or communal folder for comments stream of a post?
 
 - The CycleOps team has built https://cycleops.dev/ to power automated cycles top-ups with notifications for IC applications.
