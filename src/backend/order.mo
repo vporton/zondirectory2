@@ -42,84 +42,36 @@ shared actor class Orders() = this {
 
   // TODO: It seems that below there are many unused functions.
 
-  type GUID = Blob;
-
-  func _toLowerHexDigit(v: Nat): Char {
-    Char.fromNat32(Nat32.fromNat(
-      if (v < 10) {
-        Nat32.toNat(Char.toNat32('0')) + v;
-      } else {
-        Nat32.toNat(Char.toNat32('a')) + v - 10;
-      }
-    ));
-  };
-
-  func _fromLowerHexDigit(c: Char): Nat {
-    Nat32.toNat(
-      if (c <= '9') {
-        Char.toNat32(c) - Char.toNat32('0');
-      } else {
-        Char.toNat32(c) - Char.toNat32('a') + 10;
-      }
-    );
-  };
-
-  // TODO: Should use Blob instead and remove these two functions.
-  func encodeGuid(g: GUID): Text {
-    var result = ""; // TODO: Optimize, if possible, using a Buffer of pre-calculated size.
-    for (b in g.vals()) {
-      let b2 = Nat8.toNat(b);
-      result #= Text.fromChar(_toLowerHexDigit(b2 / 16)) # Text.fromChar(_toLowerHexDigit(b2 % 16));
-    };
-    result;
-  };
-
-  func decodeGuid(t: Text): GUID {
-    let buf = Buffer.Buffer<Nat8>(t.size() / 2);
-    let c = t.chars();
-    label r loop {
-      let ?upper = c.next() else {
-        Debug.trap("programming error");
-      };
-      let ?lower = c.next() else {
-        break r;
-      };
-      let b = Nat8.fromNat(_fromLowerHexDigit(upper) * 16 + _fromLowerHexDigit(lower));
-      buf.add(b);
-    };
-    Blob.fromArray(Buffer.toArray(buf));
-  };
-
-  func _serializePointer(ptr: ?(CanDBPartition.CanDBPartition, GUID)): [Entity.AttributeValuePrimitive] {
-    switch (ptr) {
-      case (?(part, guid)) {
-        [
-          #int 2,
-          #text(Principal.toText(Principal.fromActor(part))),
-          #text(encodeGuid(guid)), // TODO: space-inefficient
-        ];
-      };
-      case (null) { [#int 0] };
-    }
-  };
+  // func _serializePointer(ptr: ?(CanDBPartition.CanDBPartition, GUID)): [Entity.AttributeValuePrimitive] {
+  //   switch (ptr) {
+  //     case (?(part, guid)) {
+  //       [
+  //         #int 2,
+  //         #text(Principal.toText(Principal.fromActor(part))),
+  //         #text(encodeGuid(guid)), // TODO: space-inefficient
+  //       ];
+  //     };
+  //     case (null) { [#int 0] };
+  //   }
+  // };
 
   // The argument is a slice of an array, starting from the size of the fragment of the array to use.
-  func _deserializePointer(e: [Entity.AttributeValuePrimitive])
-    : (?(CanDBPartition.CanDBPartition, GUID), [Entity.AttributeValuePrimitive])
-  {
-    switch (e.size()) {
-      case (0) { (null, Array.subArray(e, 1, Int.abs(e.size()-1))) };
-      case (2) {
-        let (#text(part), #text(guid)) = (e[1], e[2]) else {
-          Debug.trap("wrong linked list pointer format");
-        };
-        (?(actor(part), decodeGuid(guid)), Array.subArray(e, 3, Int.abs(e.size()-3)));
-      };
-      case _ {
-        Debug.trap("wrong linked list pointer format");
-      }
-    }
-  };
+  // func _deserializePointer(e: [Entity.AttributeValuePrimitive])
+  //   : (?(CanDBPartition.CanDBPartition, GUID), [Entity.AttributeValuePrimitive])
+  // {
+  //   switch (e.size()) {
+  //     case (0) { (null, Array.subArray(e, 1, Int.abs(e.size()-1))) };
+  //     case (2) {
+  //       let (#text(part), #text(guid)) = (e[1], e[2]) else {
+  //         Debug.trap("wrong linked list pointer format");
+  //       };
+  //       (?(actor(part), decodeGuid(guid)), Array.subArray(e, 3, Int.abs(e.size()-3)));
+  //     };
+  //     case _ {
+  //       Debug.trap("wrong linked list pointer format");
+  //     }
+  //   }
+  // };
 
   // func serializeItemNode(node: ItemDListNode): [Entity.AttributeValuePrimitive] {
   //   let result = Buffer.Buffer<Entity.AttributeValuePrimitive>(7);
@@ -168,7 +120,8 @@ shared actor class Orders() = this {
     // For now, I implement time list only, it does not need moving items around.
 
     // Put into the beginning of time order.
-    let timeScanResult = item.timeOrderSubDB.scan({
+    let timeOrderSubDB = catId.0; // FIXME: correct?
+    let timeScanResult = timeOrderSubDB.scan({
       skLowerBound = "";
       skUpperBound = "x";
       limit = 1;
@@ -177,7 +130,7 @@ shared actor class Orders() = this {
     let timeScanSK = if (timeScanResult.entities.size() == 0) { // empty list
       0;
     } else {
-      fromSignedHex(timeScanResult.entities) + 1; // FIXME: Define fromSignedHex().
+      decodeBlobSigned(timeScanResult.entities) + 1; // FIXME: Define fromSignedHex().
     };
     let timeScanItemInfo = #tuple (#text(Principal.toText(itemId.0)), #int(itemId.1));
     await item.timeOrderSubDB.0.put({sk = timeScanSK; attributes = [("i", timeScanItemInfo)]});

@@ -6,8 +6,64 @@ import Debug "mo:base/Debug";
 import Buffer "mo:base/Buffer";
 import Principal "mo:base/Principal";
 import Int "mo:base/Int";
+import Nat32 "mo:base/Nat32";
+import Nat8 "mo:base/Nat8";
+import Blob "mo:base/Blob";
+import Char "mo:base/Char";
 
 module {
+  func _toLowerHexDigit(v: Nat): Char {
+    Char.fromNat32(Nat32.fromNat(
+      if (v < 10) {
+        Nat32.toNat(Char.toNat32('0')) + v;
+      } else {
+        Nat32.toNat(Char.toNat32('a')) + v - 10;
+      }
+    ));
+  };
+
+  func _fromLowerHexDigit(c: Char): Nat {
+    Nat32.toNat(
+      if (c <= '9') {
+        Char.toNat32(c) - Char.toNat32('0');
+      } else {
+        Char.toNat32(c) - Char.toNat32('a') + 10;
+      }
+    );
+  };
+
+  func encodeBlob(g: Blob): Text {
+    var result = ""; // TODO: Optimize, if possible, using a Buffer of pre-calculated size.
+    for (b in g.vals()) {
+      let b2 = Nat8.toNat(b);
+      result #= Text.fromChar(_toLowerHexDigit(b2 / 16)) # Text.fromChar(_toLowerHexDigit(b2 % 16));
+    };
+    result;
+  };
+
+  func decodeBlob(t: Text): Blob {
+    let buf = Buffer.Buffer<Nat8>(t.size() / 2);
+    let c = t.chars();
+    label r loop {
+      let ?upper = c.next() else {
+        Debug.trap("programming error");
+      };
+      let ?lower = c.next() else {
+        break r;
+      };
+      let b = Nat8.fromNat(_fromLowerHexDigit(upper) * 16 + _fromLowerHexDigit(lower));
+      buf.add(b);
+    };
+    Blob.fromArray(Buffer.toArray(buf));
+  };
+
+  func encodeNat(g: Nat): Text {
+    let g64 = Nat64.fromNat(g);
+    TODO;
+  }
+
+  // TODO: Extract below to a separate module.
+
   let ITEM_TYPE_LINK = 0;
   let ITEM_TYPE_MESSAGE = 1;
   let ITEM_TYPE_POST = 2;
