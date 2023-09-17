@@ -31,14 +31,15 @@ export default function EditCategory() {
                     <Tab>Communal</Tab>
                 </TabList>
                 <TabPanel>
-                    <p>Owned categories have an owner (you). Only the owner can add, delete, and reoder items in an owned category.</p>
+                    <p>Owned categories have an owner (you). Only the owner can add, delete, and reoder items in an owned category,{" "}
+                        or rename the category.</p>
                     <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
                     <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
                     <p>Short (meta) description: <textarea onChange={e => setShortDescription(e.target.value)}/></p>
                 </TabPanel>
                 <TabPanel>
                     <p>Communal categories have no owner. Anybody can add an item to a communal category.{" "}
-                        Nobody can delete an item from a communal category. Ordering is determined by voting.</p>
+                        Nobody can delete an item from a communal category or rename the category. Ordering is determined by voting.</p>
                     <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
                     <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
                 </TabPanel>

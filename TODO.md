@@ -1,4 +1,8 @@
+- Is an item considered as a folder for replies to it?
+
 - Separate stream for each locale/language?
+
+- Rename category -> folder.
 
 - Should use owned or communal folder for comments stream of a post?
 
