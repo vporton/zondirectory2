@@ -119,21 +119,22 @@ module {
       #message : ();
       #post : Text;
       #category: {
-        // Locators for `order.mo`:
-        // TODO: Are these locators `?opt`
-        timeOrderSubDB: ?(
-          NacDbPartition.Partition,
-          Nat, // TODO: correct type?
-        );
-        votesOrderSubDB: ?(
-          NacDbPartition.Partition,
-          Nat, // TODO: correct type?
-        );
+        // Locators for sub-DBs defined in `order.mo`:
         catKind: {
           #owned;
           #communal;
         };
       };
+    };
+    streams: ?{
+      timeOrderSubDB: (
+        NacDbPartition.Partition,
+        Nat, // TODO: correct type?
+      );
+      // votesOrderSubDB: ( // TODO
+      //   NacDbPartition.Partition,
+      //   Nat, // TODO: correct type?
+      // );
     };
   };
 
