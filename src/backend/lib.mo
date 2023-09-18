@@ -197,7 +197,7 @@ module {
     var nick = "";
     var title = "";
     var description = "";
-    var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none;
+    var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none; // FIXME: #ownedCategory & #communalCategory are outdated.
     var link = "";
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
