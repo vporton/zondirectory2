@@ -10,8 +10,12 @@ import Nat32 "mo:base/Nat32";
 import Nat8 "mo:base/Nat8";
 import Blob "mo:base/Blob";
 import Char "mo:base/Char";
+import Nat64 "mo:base/Nat64";
+import Binary "mo:encoding/Binary";
 
 module {
+  // We will use that "-XXX" < "XXX" for any hex number XXX.
+
   func _toLowerHexDigit(v: Nat): Char {
     Char.fromNat32(Nat32.fromNat(
       if (v < 10) {
@@ -57,10 +61,35 @@ module {
     Blob.fromArray(Buffer.toArray(buf));
   };
 
-  func encodeNat(g: Nat): Text {
-    let g64 = Nat64.fromNat(g);
-    TODO;
-  }
+  public func encodeNat(n: Nat): Text {
+    let n64 = Nat64.fromNat(n);
+    let blob = Blob.fromArray(Binary.BigEndian.fromNat64(n64));
+    encodeBlob(blob);
+  };
+
+  public func decodeNat(t: Text): Nat {
+    let blob = decodeBlob(t);
+    let n64 = Binary.BigEndian.toNat64(Blob.toArray(blob));
+    Nat64.toNat(n64);
+  };
+
+  public func encodeInt(n: Int): Text {
+    let a = encodeNat(Int.abs(n));
+    if (n >= 0) {
+      a;
+    } else {
+      "-" # a;
+    };
+  };
+
+  public func decodeInt(t: Text): Int {
+    let iter = t.chars();
+    if (iter.next() == ?'-') {
+      -decodeNat(Text.fromIter(iter));
+    } else {
+      decodeNat(t);
+    }
+  };
 
   // TODO: Extract below to a separate module.
 

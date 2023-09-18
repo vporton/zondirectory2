@@ -1,5 +1,7 @@
 - Is an item considered as a folder for replies to it?
 
+- Repeating failed NacDB and other operations.
+
 - Use https://github.com/aviate-labs/encoding.mo for base-32/base64 instead of my hex encoding?
 
 - Separate stream for each locale/language?

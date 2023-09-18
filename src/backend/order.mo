@@ -1,3 +1,4 @@
+import Nac "mo:nacdb/NacDB";
 import Common "../storage/common";
 import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
@@ -96,17 +97,21 @@ shared actor class Orders() = this {
 
   // Public API //
 
-  // We will use that "-XXX" < "XXX" for any hex number XXX.
-
   // FIXME: Check function arguments (and whether they are used correctly).
   public shared({caller}) func addItemToCategory(catId: (CanDBPartition.CanDBPartition, Nat), itemId: (CanDBPartition.CanDBPartition, Nat)): async () {
-    let categoryItemData = await catId.0.get({sk = catId.1});
-    let categoryItem = lib.deserializeItem(categoryItemData);
+    let ?categoryItemData = await catId.0.get({sk = "i/" # Nat.toText(catId.1)}) else {
+      Debug.trap("cannot get category item"); // FIXME: Should trap here?
+    };
+    let categoryItem = lib.deserializeItem(categoryItemData.attributes);
 
-    switch (categoryItem.details.catKind) {
-      case (#communal) {};
-      case (#owned) {
-        lib.onlyItemOwner(caller, categoryItem);
+    switch (categoryItem.item.details) {
+      case (#category cat) {
+        switch (cat.catKind) {
+          case (#communal) {};
+          case (#owned) {
+            lib.onlyItemOwner(caller, categoryItem);
+          };
+        };
       };
       case _ {
         // TODO: Keep doing for other categories after a trap?
@@ -120,19 +125,41 @@ shared actor class Orders() = this {
     // For now, I implement time list only, it does not need moving items around.
 
     // Put into the beginning of time order.
-    let timeOrderSubDB = catId.0; // FIXME: correct?
-    let timeScanResult = timeOrderSubDB.scan({
-      skLowerBound = "";
-      skUpperBound = "x";
+    let ?timeOrderSubDBLocator = switch (categoryItem.item.details) {
+      case (#category cat) {
+        cat.timeOrderSubDB
+      };
+      case _ {
+        Debug.trap("wrong stream"); // FIXME: trap?
+      }
+    } else {
+      Debug.trap("wrong stream"); // FIXME: trap?
+    };
+    let timeScanResult = await timeOrderSubDBLocator.0.scanLimitOuter({
+      dir = #bwd;
+      outerKey = timeOrderSubDBLocator.1;
+      lowerBound = "";
+      upperBound = "x";
       limit = 1;
       ascending = ?false;
     });
-    let timeScanSK = if (timeScanResult.entities.size() == 0) { // empty list
+    let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
       0;
     } else {
-      decodeBlobSigned(timeScanResult.entities) + 1; // FIXME: Define fromSignedHex().
+      let #int n = timeScanResult.results[0].1 else {
+        Debug.trap("wrong stream"); // FIXME: trap?
+      };
+      n + 1;
     };
-    let timeScanItemInfo = #tuple (#text(Principal.toText(itemId.0)), #int(itemId.1));
-    await item.timeOrderSubDB.0.put({sk = timeScanSK; attributes = [("i", timeScanItemInfo)]});
+    let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId.0))), #int(itemId.1)]);
+    
+    ignore await timeOrderSubDBLocator.0.insert({
+      guid = "xxx"; // FIXME
+      indexCanister = actor(Principal.toText(Principal.fromActor(NacDBIndex))); // FIXME: This conversion is unreliable, but direct usage of NacDBIndex doesn't work in some reason.
+      outerCanister = timeOrderSubDBLocator.0;
+      outerKey = timeOrderSubDBLocator.1;
+      sk = lib.encodeInt(timeScanSK);
+      value = timeScanItemInfo;
+    });
   };
 }

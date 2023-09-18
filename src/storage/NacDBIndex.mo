@@ -78,4 +78,7 @@ shared actor class NacDBIndex(
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
         await* Nac.createSubDB({guid; index = this; dbIndex; dbOptions = Common.dbOptions; userData});
     };
+
+    // FIXME: Remove:
+    public shared func x(): async () {}
 }

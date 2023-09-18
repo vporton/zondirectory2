@@ -5,6 +5,7 @@ import Buffer "mo:base/Buffer";
 import Sha "mo:sha/SHA256";
 import Blob "mo:base/Blob";
 
+// TODO: Is this used?
 module {
     public type GUID = Blob;
 
