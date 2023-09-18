@@ -39,7 +39,8 @@ export default function EditItemItem() {
             const backend = initializeMainClient(isLocal);
             const canisters = await canDBIndexClient.getCanistersForPK(""); // FIXME: PK
             const lastCanister = canisters[canisters.length - 1];
-            await backend.createItemData(lastCanister, item, sybilCanister)
+            let result = await backend.createItemData(lastCanister, item, sybilCanister);
+            console.log('XXX:', result); // TODO
         }
         await submitItem(itemData());
     }

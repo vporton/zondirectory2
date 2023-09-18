@@ -233,7 +233,9 @@ shared actor class ZonBackend() = this {
 
   /// Items ///
 
-  public shared({caller}) func createItemData(canisterId: Principal, _item: lib.ItemWithoutOwner, sybilCanisterId: Principal) {
+  public shared({caller}) func createItemData(canisterId: Principal, _item: lib.ItemWithoutOwner, sybilCanisterId: Principal)
+    : async (Principal, Text)
+  {
     await* checkSybil(sybilCanisterId, caller);
 
     let item2 = { creator = caller; item = _item; };
@@ -242,6 +244,7 @@ shared actor class ZonBackend() = this {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
     await db.put({sk = key; attributes = lib.serializeItem(item2)});
+    (canisterId, key);
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
