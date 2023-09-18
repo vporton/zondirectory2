@@ -11,7 +11,8 @@ import Nat8 "mo:base/Nat8";
 import Blob "mo:base/Blob";
 import Char "mo:base/Char";
 import Nat64 "mo:base/Nat64";
-import Binary "mo:encoding/Binary";
+import Array "mo:base/Array";
+import Iter "mo:base/Iter";
 
 module {
   // We will use that "-XXX" < "XXX" for any hex number XXX.
@@ -62,15 +63,24 @@ module {
   };
 
   public func encodeNat(n: Nat): Text {
-    let n64 = Nat64.fromNat(n);
-    let blob = Blob.fromArray(Binary.BigEndian.fromNat64(n64));
+    var n64 = Nat64.fromNat(n);
+    let buf = Buffer.Buffer<Nat8>(8);
+    for (i in Iter.range(0, 7)) {
+      buf.add(Nat8.fromNat(Nat64.toNat(n64 % 256)));
+      n64 >>= 8;
+    };
+    let blob = Blob.fromArray(Array.reverse(Buffer.toArray(buf)));
     encodeBlob(blob);
   };
 
   public func decodeNat(t: Text): Nat {
     let blob = decodeBlob(t);
-    let n64 = Binary.BigEndian.toNat64(Blob.toArray(blob));
-    Nat64.toNat(n64);
+    var result: Nat64 = 0;
+    for (b in blob.vals()) {
+      result <<= 8;
+      result += Nat64.fromNat(Nat8.toNat(b)); // TODO: possibly inefficient
+    };
+    Nat64.toNat(result);
   };
 
   public func encodeInt(n: Int): Text {

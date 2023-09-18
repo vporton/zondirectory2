@@ -22,8 +22,12 @@ deploy-backend:
 #	dfx deploy payments
 	dfx deploy main
 	dfx ledger fabricate-cycles --amount 1000000000 --canister main
-	dfx canister call main init '(null)'
 
 .PHONY: deploy-frontend
 deploy-frontend:
 	dfx deploy frontend
+
+.PHONY: init
+init:
+	dfx canister call main init '(null)'
+	# TODO: Initialize other canisters.
