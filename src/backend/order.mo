@@ -176,5 +176,144 @@ shared actor class Orders() = this {
         {timeOrderSubDB};
       }
     };
-  }
+  };
+
+  /// Voting ///
+
+  // FIXME: Below functions?
+
+  // Determines item order.
+  type ItemWeight = {
+    weight: Float;
+    random: Text; // TODO: Is this field used by the below algorithm.
+  };
+
+  module ItemWeight {
+    public func compare(X: ItemWeight, Y: ItemWeight): Order.Order {
+      let c = Float.compare(X.weight, Y.weight);
+      if (c != #equal) {
+        c;
+      } else {
+        Text.compare(X.random, Y.random);
+      }
+    };
+  };
+
+  // FIXME: Move votes to `order.mo`.
+  type VotesTmp = {
+    parent: Nat64;
+    child: Nat64;
+    var inProcess: Bool;
+  };
+
+  type VotesStream = {
+    var settingVotes: StableBuffer.StableBuffer<VotesTmp>; // TODO: Delete old ones.
+    var currentVotes: BTree.BTree<Nat64, ()>; // Item ID -> () // TODO: Delete old ones.
+    prefix1: Text;
+    prefix2: Text;
+  };
+
+  // TODO: Check out the UUID and ULID libraries: https://github.com/aviate-labs/ulid.mo
+  // TODO: Does the below initialize pseudo-random correctly?
+  // stable var rng = Prng.SFC64a(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
+
+  func deserializeVoteAttr(attr: Entity.AttributeValue): Float {
+    switch(attr) {
+      case (#float v) { v };
+      case _ { Debug.trap("wrong data"); };
+    }
+  };
+  
+  func deserializeVotes(map: Entity.AttributeMap): Float {
+    let v = RBT.get(map, Text.compare, "v");
+    switch (v) {
+      case (?v) { deserializeVoteAttr(v) };
+      case _ { Debug.trap("map not found") };
+    };    
+  };
+  // TODO: It has race period of duplicate (two) keys. In frontend de-duplicate.
+  // TODO: Use binary keys.
+  // FIXME: Sorting CanDB by `Float` is wrong order.
+  // FIXME: Rewrite this function.
+  func setVotes(
+    stream: VotesStream,
+    oldVotesRandom: Text,
+    votesUpdater: ?Float -> Float,
+    oldVotesDBCanisterId: Principal,
+    parentChildCanisterId: Principal,
+  ): async* () {
+    if (StableBuffer.size(stream.settingVotes) != 0) {
+      return;
+    };
+    let tmp = StableBuffer.get(stream.settingVotes, Int.abs((StableBuffer.size(stream.settingVotes): Int) - 1));
+
+    // Prevent races:
+    if (not tmp.inProcess) {
+      if (BTree.has(stream.currentVotes, Nat64.compare, tmp.parent) or BTree.has(stream.currentVotes, Nat64.compare, tmp.child)) {
+        Debug.trap("clash");
+      };
+      ignore BTree.insert(stream.currentVotes, Nat64.compare, tmp.parent, ());
+      ignore BTree.insert(stream.currentVotes, Nat64.compare, tmp.child, ());
+      tmp.inProcess := true;
+    };
+
+    let oldVotesDB: CanDBPartition.CanDBPartition = actor(Principal.toText(oldVotesDBCanisterId));
+    let oldVotesKey = stream.prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
+    let oldVotesWeight = switch (await oldVotesDB.get({sk = oldVotesKey})) {
+      case (?oldVotesData) { ?deserializeVotes(oldVotesData.attributes) };
+      case (null) { null }
+    };
+    let newVotes = switch (oldVotesWeight) {
+      case (?oldVotesWeight) {
+        let newVotesWeight = votesUpdater(?oldVotesWeight);
+        { weight = newVotesWeight; random = oldVotesRandom };
+      };
+      case (null) {
+        let newVotesWeight = votesUpdater null;
+        { weight = newVotesWeight; random = 0/*rng.next()*/ }; // FIXME
+      };
+    };
+
+    // TODO: Should use binary format. // FIXME: Decimal serialization makes order by `random` broken.
+    // newVotes -> child
+    let newKey = stream.prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(newVotes.weight) # "/" # oldVotesRandom;
+    await oldVotesDB.put({sk = newKey; attributes = [("v", #text (Nat.toText(Nat64.toNat(tmp.child))))]});
+    // child -> newVotes
+    let parentChildCanister: CanDBPartition.CanDBPartition = actor(Principal.toText(parentChildCanisterId));
+    let newKey2 = stream.prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
+    // FIXME: Use NacDB:
+    await parentChildCanister.put({sk = newKey2; attributes = [("v", #float (newVotes.weight))]});
+    switch (oldVotesWeight) {
+      case (?oldVotesWeight) {
+        let oldKey = stream.prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(oldVotesWeight) # "/" # oldVotesRandom;
+        // delete oldVotes -> child
+        await oldVotesDB.delete({sk = oldKey});
+      };
+      case (null) {};
+    };
+
+    ignore StableBuffer.removeLast(stream.settingVotes);
+  };
+
+  stable var userBusyVoting: BTree.BTree<Principal, ()> = BTree.init<Principal, ()>(null); // TODO: Delete old ones.
+
+  // TODO: Need to remember the votes // FIXME: Remembering in CanDB makes no sense because need to check canister.
+  public shared({caller}) func oneVotePerPersonVote(sybilCanister: Principal) {
+    await* checkSybil(sybilCanister, caller);
+    ignore BTree.insert(userBusyVoting, Principal.compare, caller, ());
+    
+    // setVotes(
+    //   stream: VotesStream,
+    //   oldVotesRandom: Text,
+    //   votesUpdater: ?Float -> Float,
+    //   oldVotesDBCanisterId: Principal,
+    //   parentChildCanisterId)
+    // TODO
+  };
+
+  // func setVotes2(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text) {
+
+  // }
+
+  // TODO: Also ordering by time of publication (requires lexigraphical ordering by item ID).
 }

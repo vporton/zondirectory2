@@ -190,8 +190,8 @@ module {
     var nick = "";
     var title = "";
     var description = "";
-    var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none; // FIXME: #ownedCategory & #communalCategory are outdated.
-    var link = "";
+    var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none;
+    var linkOrText = "";
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
         var pos = 0;
@@ -264,7 +264,7 @@ module {
             case (7) {
               switch (arr[pos]) {
                 case (#text v) {
-                  link := v;
+                  linkOrText := v;
                 };
                 case _ { break r false; };
               };
@@ -293,9 +293,9 @@ module {
         title = title;
         description = description;
         details = switch (kind) {
-          case (0) { #link link };
+          case (0) { #link linkOrText };
           case (1) { #message };
-          case (2) { #post "" }; // FIXME: post text
+          case (2) { #post linkOrText };
           case (3) { #ownedCategory };
           case (4) { #communalCategory };
           case _ { Debug.trap("wrong item format"); }
