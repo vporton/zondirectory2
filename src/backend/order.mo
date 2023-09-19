@@ -107,13 +107,8 @@ shared actor class Orders() = this {
     let categoryItem = lib.deserializeItem(categoryItemData.attributes);
 
     switch (categoryItem.item.details) {
-      case (#category cat) {
-        switch (cat.catKind) {
-          case (#communal) {};
-          case (#owned) {
-            lib.onlyItemOwner(caller, categoryItem);
-          };
-        };
+      case (#ownedCategory) {
+        lib.onlyItemOwner(caller, categoryItem);
       };
       case _ {
         // TODO: Keep doing for other categories after a trap?
