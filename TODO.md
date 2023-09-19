@@ -2,6 +2,8 @@
 
 - Store post text separately, not to retrieve/save it every time, when accessing an item.
 
+- Should we differentiate between category items and comments to the category?
+
 - Repeating failed NacDB and other operations.
 
 - Use https://github.com/aviate-labs/encoding.mo for base-32/base64 instead of my hex encoding?
