@@ -142,7 +142,7 @@ shared actor class Orders() = this {
     
     ignore await timeOrderSubDB.0.insert({
       guid = Blob.toArray("xxx"); // FIXME
-      indexCanister = actor(Principal.toText(Principal.fromActor(NacDBIndex))); // FIXME: This conversion is unreliable, but direct usage of NacDBIndex doesn't work in some reason.
+      indexCanister = NacDBIndex;
       outerCanister = timeOrderSubDB.0;
       outerKey = timeOrderSubDB.1;
       sk = lib.encodeInt(timeScanSK);
