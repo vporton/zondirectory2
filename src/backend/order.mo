@@ -1,4 +1,5 @@
 import Nac "mo:nacdb/NacDB";
+import GUID "mo:nacdb/GUID";
 import Common "../storage/common";
 import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
@@ -99,6 +100,7 @@ shared actor class Orders() = this {
 
   // FIXME: Check function arguments (and whether they are used correctly).
   public shared({caller}) func addItemToCategory(catId: (CanDBPartition.CanDBPartition, Nat), itemId: (CanDBPartition.CanDBPartition, Nat)): async () {
+    // TODO: The below reads&deserializes `categoryItemData` twice.
     let ?categoryItemData = await catId.0.get({sk = "i/" # Nat.toText(catId.1)}) else {
       Debug.trap("cannot get category item"); // FIXME: Should trap here?
     };
@@ -118,31 +120,22 @@ shared actor class Orders() = this {
         Debug.trap("not a category");
       };
     };
-    // FIXME: We need to add items that are both above (timeOrder) or below (votes order) others. So need Int, not Nat?
 
     // FIXME: To reduce cost of moving an item (jumping over several items of the same weight),
     //        need to make multi-hash instead of just hash.
-    // For now, I implement time list only, it does not need moving items around.
+    // For now, I implement a simple hash-map, it does not need moving items around.
 
     // Put into the beginning of time order.
-    let ?timeOrderSubDBLocator = switch (categoryItem.item.details) {
-      case (#category cat) {
-        cat.timeOrderSubDB
-      };
-      case _ {
-        Debug.trap("wrong stream"); // FIXME: trap?
-      }
-    } else {
-      Debug.trap("wrong stream"); // FIXME: trap?
-    };
-    let timeScanResult = await timeOrderSubDBLocator.0.scanLimitOuter({
+    let { timeOrderSubDB } = await obtainStreams(catId);
+    let timeScanResult = await timeOrderSubDB.0.scanLimitOuter({
       dir = #bwd;
-      outerKey = timeOrderSubDBLocator.1;
+      outerKey = timeOrderSubDB.1;
       lowerBound = "";
       upperBound = "x";
       limit = 1;
       ascending = ?false;
     });
+    // FIXME: The below is probably with errors.
     let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
       0;
     } else {
@@ -153,13 +146,40 @@ shared actor class Orders() = this {
     };
     let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId.0))), #int(itemId.1)]);
     
-    ignore await timeOrderSubDBLocator.0.insert({
+    ignore await timeOrderSubDB.0.insert({
       guid = "xxx"; // FIXME
       indexCanister = actor(Principal.toText(Principal.fromActor(NacDBIndex))); // FIXME: This conversion is unreliable, but direct usage of NacDBIndex doesn't work in some reason.
-      outerCanister = timeOrderSubDBLocator.0;
-      outerKey = timeOrderSubDBLocator.1;
+      outerCanister = timeOrderSubDB.0;
+      outerKey = timeOrderSubDB.1;
       sk = lib.encodeInt(timeScanSK);
       value = timeScanItemInfo;
     });
   };
+
+  // Create streams for a folder identified by `itemId`, if they were not yet created.
+  func obtainStreams(itemId: (CanDBPartition.CanDBPartition, Nat)): async {
+    timeOrderSubDB: (
+      NacDBPartition.Partition,
+      Nat,
+    );
+    // votesOrderSubDB: ( // TODO
+    //   NacDBPartition.Partition,
+    //   Nat,
+    // );
+  } {
+    let ?itemData = await itemId.0.get({sk = "i/" # Nat.toText(itemId.1)}) else {
+      Debug.trap("cannot get category item"); // FIXME: Should trap here?
+    };
+    let item = lib.deserializeItem(itemData.attributes);
+    switch (item.streams) {
+      case (?data) { data };
+      case null {
+        let { outer = timeOrderSubDB } = await NacDBIndex.createSubDB({guid = GUID.nextGuid(guidGen); userData = ""}); // FIXME: `guid`
+        item.streams := ?{timeOrderSubDB};
+        let itemData = lib.serializeItem(item);
+        itemId.0.insert({pk = ""/* FIXME */; sk = "i/" # Nat.toText(itemId.1); value = itemData}); // FIXME: `guid`
+        {timeOrderSubDB};
+      }
+    };
+  }
 }

@@ -1,4 +1,4 @@
-import NacDbPartition "../storage/NacDBPartition";
+import NacDBPartition "../storage/NacDBPartition";
 import RBT "mo:stable-rbtree/StableRBTree";
 import Entity "mo:candb/Entity";
 import Text "mo:base/Text";
@@ -126,24 +126,25 @@ module {
         };
       };
     };
-    streams: ?{
-      timeOrderSubDB: (
-        NacDbPartition.Partition,
-        Nat, // TODO: correct type?
-      );
-      // votesOrderSubDB: ( // TODO
-      //   NacDbPartition.Partition,
-      //   Nat, // TODO: correct type?
-      // );
-    };
   };
 
   // TODO: Add `license` field?
   // TODO: Images.
   // TODO: Item version.
+  // TODO: Rename.
   public type Item = {
     creator: Principal;
     item: ItemWithoutOwner;
+    var streams: ?{
+      timeOrderSubDB: (
+        NacDBPartition.Partition,
+        Nat, // TODO: correct type?
+      );
+      // votesOrderSubDB: ( // TODO
+      //   NacDBPartition.Partition,
+      //   Nat, // TODO: correct type?
+      // );
+    };
   };
 
   // TODO: messy order of the below functions
@@ -321,7 +322,8 @@ module {
           case _ { Debug.trap("wrong item format"); }
         };
       };
-    };    
+      var streams = null;
+    };
   };
 
   public func onlyItemOwner(caller: Principal, _item: Item) {

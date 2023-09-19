@@ -238,7 +238,7 @@ shared actor class ZonBackend() = this {
   {
     await* checkSybil(sybilCanisterId, caller);
 
-    let item2 = { creator = caller; item = _item; };
+    let item2: lib.Item = { creator = caller; item = _item; var streams = null; };
     let _itemId = maxId;
     maxId += 1;
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
@@ -257,7 +257,7 @@ shared actor class ZonBackend() = this {
         if (caller != oldItem.creator) {
           Debug.trap("can't change item owner");
         };
-        let _item = { item = item; creator = caller };
+        let _item: lib.Item = { item = item; creator = caller; var streams = null; };
         if (_item.item.details != oldItem.item.details) {
           Debug.trap("can't change item type");
         };
