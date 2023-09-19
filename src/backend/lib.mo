@@ -118,13 +118,8 @@ module {
       #link : Text;
       #message : ();
       #post : Text;
-      #category: {
-        // Locators for sub-DBs defined in `order.mo`:
-        catKind: {
-          #owned;
-          #communal;
-        };
-      };
+      #ownedCategory : ();
+      #communalCategory : ();
     };
   };
 
@@ -163,12 +158,8 @@ module {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
       case (#post _) { ITEM_TYPE_POST };
-      case (#category cat) {
-        switch (cat.catKind) {
-          case (#owned) { ITEM_TYPE_OWNED_CATEGORY };
-          case (#communal) { ITEM_TYPE_COMMUNAL_CATEGORY };
-        };
-      };
+      case (#ownedCategory) { ITEM_TYPE_OWNED_CATEGORY };
+      case (#communalCategory) { ITEM_TYPE_COMMUNAL_CATEGORY };
     }));
     buf.add(#text (Principal.toText(item.creator)));
     buf.add(#float (item.item.price));
@@ -305,20 +296,8 @@ module {
           case (0) { #link link };
           case (1) { #message };
           case (2) { #post "" }; // FIXME: post text
-          case (3) { #category {
-              // Locators for `order.mo`:
-              timeOrderSubDB = null;
-              votesOrderSubDB = null;
-              catKind = #owned;
-            }
-          };
-          case (4) { #category {
-              // Locators for `order.mo`:
-              timeOrderSubDB = null;
-              votesOrderSubDB = null;
-              catKind = #communal;
-            }
-          };
+          case (3) { #ownedCategory };
+          case (4) { #communalCategory };
           case _ { Debug.trap("wrong item format"); }
         };
       };
