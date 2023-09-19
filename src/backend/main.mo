@@ -262,10 +262,8 @@ shared actor class ZonBackend() = this {
           Debug.trap("can't change item type");
         };
         switch (oldItem.item.details) {
-          case (#category cat) {
-            if (cat.catKind == #communal) {
-              Debug.trap("can't edit communal category");
-            };
+          case (#communalCategory) {
+            Debug.trap("can't edit communal category");
           };
           case _ {};
         };
@@ -284,10 +282,8 @@ shared actor class ZonBackend() = this {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr.attributes);
         switch (oldItem.item.details) {
-          case (#category cat) {
-            if (cat.catKind == #communal) {
-              Debug.trap("it's communal");
-            };
+          case (#communalCategory) {
+            Debug.trap("it's communal");
           };
           case _ {};
         };

@@ -86,6 +86,11 @@ let
       , version = "main"
       , dependencies = [ "base" ]
       },
+      { name = "sha"
+      , version = "master"
+      , repo = "https://github.com/enzoh/motoko-sha"
+      , dependencies = [ "base" ]
+      },
     ] : List Package
 
 let
