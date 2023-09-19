@@ -1,3 +1,4 @@
+import Nac "mo:nacdb/NacDB";
 import NacDBPartition "../storage/NacDBPartition";
 import RBT "mo:stable-rbtree/StableRBTree";
 import Entity "mo:candb/Entity";
@@ -132,12 +133,12 @@ module {
     item: ItemWithoutOwner;
     var streams: ?{
       timeOrderSubDB: (
-        NacDBPartition.Partition,
-        Nat, // TODO: correct type?
+        Nac.OuterCanister,
+        Nac.OuterSubDBKey,
       );
       // votesOrderSubDB: ( // TODO
-      //   NacDBPartition.Partition,
-      //   Nat, // TODO: correct type?
+      //   Nac.OuterCanister
+      //   Nac.OuterSubDBKey,
       // );
     };
   };

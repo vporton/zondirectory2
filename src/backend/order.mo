@@ -154,8 +154,8 @@ shared actor class Orders() = this {
   // Create streams for a folder identified by `itemId`, if they were not yet created.
   func obtainStreams(itemId: (CanDBPartition.CanDBPartition, Nat)): async {
     timeOrderSubDB: (
-      NacDBPartition.Partition,
-      Nat,
+      Nac.OuterCanister,
+      Nac.OuterSubDBKey,
     );
     // votesOrderSubDB: ( // TODO
     //   NacDBPartition.Partition,
@@ -170,7 +170,7 @@ shared actor class Orders() = this {
     switch (item.streams) {
       case (?data) { data };
       case null {
-        let { outer = timeOrderSubDB } = await NacDBIndex.createSubDB({guid; userData = ""}); // FIXME: `guid`
+        let { outer = timeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""}); // TODO: Why is `toArray` necessary?
         item.streams := ?{timeOrderSubDB};
         let itemData = lib.serializeItem(item);
         itemId.0.insert({pk = ""/* FIXME */; sk = "i/" # Nat.toText(itemId.1); value = itemData}); // FIXME: `guid`
