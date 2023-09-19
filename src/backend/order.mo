@@ -99,7 +99,6 @@ shared actor class Orders() = this {
 
   // Public API //
 
-  // FIXME: Check function arguments (and whether they are used correctly).
   public shared({caller}) func addItemToCategory(catId: (CanDBPartition.CanDBPartition, Nat), itemId: (CanDBPartition.CanDBPartition, Nat)): async () {
     // TODO: The below reads&deserializes `categoryItemData` twice.
     let ?categoryItemData = await catId.0.get({sk = "i/" # Nat.toText(catId.1)}) else {
@@ -131,7 +130,6 @@ shared actor class Orders() = this {
       limit = 1;
       ascending = ?false;
     });
-    // FIXME: The below is probably with errors.
     let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
       0;
     } else {
