@@ -102,7 +102,7 @@ shared actor class Orders() = this {
   public shared({caller}) func addItemToCategory(catId: (CanDBPartition.CanDBPartition, Nat), itemId: (CanDBPartition.CanDBPartition, Nat)): async () {
     // TODO: The below reads&deserializes `categoryItemData` twice.
     let ?categoryItemData = await catId.0.get({sk = "i/" # Nat.toText(catId.1)}) else {
-      Debug.trap("cannot get category item"); // FIXME: Should trap here?
+      Debug.trap("cannot get category item");
     };
     let categoryItem = lib.deserializeItem(categoryItemData.attributes);
 
@@ -134,14 +134,15 @@ shared actor class Orders() = this {
       0;
     } else {
       let #int n = timeScanResult.results[0].1 else {
-        Debug.trap("wrong stream"); // FIXME: trap?
+        Debug.trap("wrong stream");
       };
       n + 1;
     };
     let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId.0))), #int(itemId.1)]);
     
+    let guid = GUID.nextGuid(guidGen);
     ignore await timeOrderSubDB.0.insert({
-      guid = Blob.toArray("xxx"); // FIXME
+      guid = Blob.toArray(guid);
       indexCanister = NacDBIndex;
       outerCanister = timeOrderSubDB.0;
       outerKey = timeOrderSubDB.1;
@@ -162,7 +163,7 @@ shared actor class Orders() = this {
     // );
   } {
     let ?itemData = await itemId.0.get({sk = "i/" # Nat.toText(itemId.1)}) else {
-      Debug.trap("cannot get category item"); // FIXME: Should trap here?
+      Debug.trap("cannot get category item");
     };
     let item = lib.deserializeItem(itemData.attributes);
     let guid = GUID.nextGuid(guidGen);
