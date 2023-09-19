@@ -87,7 +87,7 @@ actor class CanDBIndex() = this {
       limit = 5;
       wasmModule = wasmModule;
       scalingOptions = {
-        autoScalingHook = autoScaleUserCanister;
+        autoScalingHook = autoScaleCanister;
         sizeLimit = maxSize;
       };
       owners = ?ownersOrSelf();
