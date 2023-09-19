@@ -73,6 +73,7 @@ actor class CanDBIndex() = this {
     }
   };
 
+  // FIXME: Seems duplicate code with createStorageCanister
   /// Helper function that creates a user canister for a given PK
   func createPartitionCanister(pk: Text, controllers: ?[Principal]): async Text {
     Debug.print("creating new CanDB canister with pk=" # pk);
@@ -142,6 +143,7 @@ actor class CanDBIndex() = this {
     };
   };
 
+  // FIXME: Seems duplicate code with createPartitionCanister
   func createStorageCanister(pk: Text, controllers: [Principal]): async* Text {
     Debug.print("creating new storage canister with pk=" # pk);
     // Pre-load 300 billion cycles for the creation of a new storage canister
