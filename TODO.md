@@ -1,5 +1,7 @@
 - Is an item considered as a folder for replies to it?
 
+- We need separate order for subcategories and rest items.
+
 - Store post text separately, not to retrieve/save it every time, when accessing an item.
 
 - Should we differentiate between category items and comments to the category?
