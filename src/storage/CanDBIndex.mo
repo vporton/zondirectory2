@@ -7,12 +7,14 @@ import Utils "mo:candb/Utils";
 import CanisterMap "mo:candb/CanisterMap";
 import Buffer "mo:stable-buffer/StableBuffer";
 import CanDBPartition "CanDBPartition";
+import CanDBPartition2 "../storage/CanDBPartition";
 import Admin "mo:candb/CanDBAdmin";
 import Principal "mo:base/Principal";
 import Hash "mo:base/Hash";
 import Array "mo:base/Array";
 import Int "mo:base/Int";
 import CanDB "mo:candb/CanDB";
+import Entity "mo:candb/Entity";
 
 actor class CanDBIndex() = this {
   stable var owners: [Principal] = [];
@@ -134,16 +136,14 @@ actor class CanDBIndex() = this {
     newStorageCanisterId;
   };
 
-  func put(options: CanDB.PutOptions): async () {
-    // checkCaller(caller); // checked by the child call
-
-    // FIXME: Does it work correctly, if canisters were created only for other PKs?
-    let ?buf = CanisterMap.get(pkToCanisterMap, ""/* FIXME: maybe pass as function arg? */) else {
-      Debug.trap("no partition canisters");
+  public shared({caller = creator}) func put(pk: Entity.PK, options: CanDB.PutOptions): async () {
+    let canisterIds = getCanisterIdsIfExists(pk);
+    let part0 = if (canisterIds == []) {
+      await* createStorageCanister(pk, ownersOrSelf());
+    } else {
+      canisterIds[canisterIds.size() - 1]
     };
-    let part0 = Buffer.get(buf, Int.abs(Buffer.size(buf) - 1));
-    let part: CanDBPartition.CanDBPartition = actor(part0);
-
+    let part: CanDBPartition2.CanDBPartition = actor(part0);
     await part.put(options);
   };
 }
