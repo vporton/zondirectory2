@@ -4,10 +4,15 @@
       "main": "src/backend/main.mo",
       "type": "motoko",
       "dependencies": [
+        "order",
         "payments",
         "CanDBIndex",
         "NacDBIndex"
       ]
+    },
+    "order": {
+      "main": "src/backend/order.mo",
+      "type": "motoko"
     },
     "frontend": {
       "dependencies": [
