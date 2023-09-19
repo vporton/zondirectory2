@@ -6,11 +6,6 @@ let
   -- This is where you can add your own packages to the package-set
   additions =
     [
---      { name = "base-0.7.3"
---      , version = "master"
---      , repo = "https://github.com/dfinity/motoko-base"
---      , dependencies = [] : List Text
---      },
       { name = "stable-rbtree"
       , repo = "https://github.com/canscale/StableRBTree"
       , version = "v0.6.1"
@@ -91,11 +86,6 @@ let
       , version = "main"
       , dependencies = [ "base" ]
       },
---      { name = "encoding"
---      , repo = "https://github.com/aviate-labs/encoding.mo"
---      , version = "main"
---      , dependencies = [ "base" ]
---      },
     ] : List Package
 
 let
