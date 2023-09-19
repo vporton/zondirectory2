@@ -73,36 +73,6 @@ actor class CanDBIndex() = this {
     }
   };
 
-  // FIXME: Seems duplicate code with createStorageCanister
-  /// Helper function that creates a user canister for a given PK
-  func createPartitionCanister(pk: Text, controllers: ?[Principal]): async Text {
-    Debug.print("creating new CanDB canister with pk=" # pk);
-    Cycles.add(300_000_000_000);
-    let newUserCanister = await CanDBPartition.CanDBPartition({
-      primaryKey = pk;
-      scalingOptions = {
-        autoScalingHook = autoScaleUserCanister;
-        sizeLimit = maxSize;
-      };
-      initialOwners = ownersOrSelf();
-    });
-    let newUserCanisterPrincipal = Principal.fromActor(newUserCanister);
-    await CA.updateCanisterSettings({
-      canisterId = newUserCanisterPrincipal;
-      settings = {
-        controllers = controllers;
-        compute_allocation = ?0;
-        memory_allocation = ?0;
-        freezing_threshold = ?2592000;
-      }
-    });
-
-    let newUserCanisterId = Principal.toText(newUserCanisterPrincipal);
-    pkToCanisterMap := CanisterMap.add(pkToCanisterMap, pk, newUserCanisterId);
-
-    newUserCanisterId;
-  };
-
   /// This hook is called by CanDB for AutoScaling the User Service Actor.
   ///
   /// If the developer does not spin up an additional User canister in the same partition within this method, auto-scaling will NOT work
@@ -143,7 +113,6 @@ actor class CanDBIndex() = this {
     };
   };
 
-  // FIXME: Seems duplicate code with createPartitionCanister
   func createStorageCanister(pk: Text, controllers: [Principal]): async* Text {
     Debug.print("creating new storage canister with pk=" # pk);
     // Pre-load 300 billion cycles for the creation of a new storage canister
