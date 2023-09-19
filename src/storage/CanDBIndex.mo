@@ -136,7 +136,8 @@ actor class CanDBIndex() = this {
     newStorageCanisterId;
   };
 
-  public shared({caller = creator}) func put(pk: Entity.PK, options: CanDB.PutOptions): async () {
+  // Put to a canister. It may create duplicates.
+  public shared({caller = creator}) func putNew(pk: Entity.PK, options: CanDB.PutOptions): async () {
     let canisterIds = getCanisterIdsIfExists(pk);
     let part0 = if (canisterIds == []) {
       await* createStorageCanister(pk, ownersOrSelf());
