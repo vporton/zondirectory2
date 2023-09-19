@@ -5,6 +5,7 @@ import Principal "mo:base/Principal";
 import Debug "mo:base/Debug";
 import MyCycles "mo:nacdb/Cycles";
 import Array "mo:base/Array";
+import Blob "mo:base/Blob";
 import Buffer "mo:stable-buffer/StableBuffer";
 import Partition "./NacDBPartition";
 import Common "common";
@@ -70,12 +71,12 @@ shared actor class NacDBIndex(
         await Nac.createPartitionImpl(this, dbIndex);
     };
 
-    public shared({caller}) func createSubDB({guid: Nac.GUID; userData: Text})
+    public shared({caller}) func createSubDB({guid: [Nat8]; userData: Text})
         : async {inner: (Nac.InnerCanister, Nac.InnerSubDBKey); outer: (Nac.OuterCanister, Nac.OuterSubDBKey)}
     {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        await* Nac.createSubDB({guid; index = this; dbIndex; dbOptions = Common.dbOptions; userData});
+        await* Nac.createSubDB({guid = Blob.fromArray(guid); index = this; dbIndex; dbOptions = Common.dbOptions; userData});
     };
 }
