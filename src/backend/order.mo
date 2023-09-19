@@ -28,8 +28,8 @@ import lib "lib";
 shared actor class Orders() = this {
   var initialized: Bool = false;
 
-  // var rng: Prng.Seiran128 = Prng.Seiran128();
-  // let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
+  stable var rng: Prng.Seiran128 = Prng.Seiran128(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
+  stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
 
   // TODO: Remove this function?
   public shared({ caller }) func init(): async () {
@@ -188,16 +188,16 @@ shared actor class Orders() = this {
     random: Text; // TODO: Is this field used by the below algorithm.
   };
 
-  module ItemWeight {
-    public func compare(X: ItemWeight, Y: ItemWeight): Order.Order {
-      let c = Float.compare(X.weight, Y.weight);
-      if (c != #equal) {
-        c;
-      } else {
-        Text.compare(X.random, Y.random);
-      }
-    };
-  };
+  // module ItemWeight {
+  //   public func compare(X: ItemWeight, Y: ItemWeight): Order.Order {
+  //     let c = Float.compare(X.weight, Y.weight);
+  //     if (c != #equal) {
+  //       c;
+  //     } else {
+  //       Text.compare(X.random, Y.random);
+  //     }
+  //   };
+  // };
 
   // FIXME: Move votes to `order.mo`.
   type VotesTmp = {
@@ -207,15 +207,11 @@ shared actor class Orders() = this {
   };
 
   type VotesStream = {
-    var settingVotes: StableBuffer.StableBuffer<VotesTmp>; // TODO: Delete old ones.
-    var currentVotes: BTree.BTree<Nat64, ()>; // Item ID -> () // TODO: Delete old ones.
+    // var settingVotes: StableBuffer.StableBuffer<VotesTmp>; // TODO: Delete old ones.
+    // var currentVotes: BTree.BTree<Nat64, ()>; // Item ID -> () // TODO: Delete old ones.
     prefix1: Text;
     prefix2: Text;
   };
-
-  // TODO: Check out the UUID and ULID libraries: https://github.com/aviate-labs/ulid.mo
-  // TODO: Does the below initialize pseudo-random correctly?
-  // stable var rng = Prng.SFC64a(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
 
   func deserializeVoteAttr(attr: Entity.AttributeValue): Float {
     switch(attr) {
@@ -270,7 +266,7 @@ shared actor class Orders() = this {
       };
       case (null) {
         let newVotesWeight = votesUpdater null;
-        { weight = newVotesWeight; random = 0/*rng.next()*/ }; // FIXME
+        { weight = newVotesWeight; random = rng.next() };
       };
     };
 
@@ -295,21 +291,21 @@ shared actor class Orders() = this {
     ignore StableBuffer.removeLast(stream.settingVotes);
   };
 
-  stable var userBusyVoting: BTree.BTree<Principal, ()> = BTree.init<Principal, ()>(null); // TODO: Delete old ones.
+  // stable var userBusyVoting: BTree.BTree<Principal, ()> = BTree.init<Principal, ()>(null); // TODO: Delete old ones.
 
   // TODO: Need to remember the votes // FIXME: Remembering in CanDB makes no sense because need to check canister.
-  public shared({caller}) func oneVotePerPersonVote(sybilCanister: Principal) {
-    await* checkSybil(sybilCanister, caller);
-    ignore BTree.insert(userBusyVoting, Principal.compare, caller, ());
+  // public shared({caller}) func oneVotePerPersonVote(sybilCanister: Principal) {
+  //   await* checkSybil(sybilCanister, caller);
+  //   ignore BTree.insert(userBusyVoting, Principal.compare, caller, ());
     
-    // setVotes(
-    //   stream: VotesStream,
-    //   oldVotesRandom: Text,
-    //   votesUpdater: ?Float -> Float,
-    //   oldVotesDBCanisterId: Principal,
-    //   parentChildCanisterId)
-    // TODO
-  };
+  //   // setVotes(
+  //   //   stream: VotesStream,
+  //   //   oldVotesRandom: Text,
+  //   //   votesUpdater: ?Float -> Float,
+  //   //   oldVotesDBCanisterId: Principal,
+  //   //   parentChildCanisterId)
+  //   // TODO
+  // };
 
   // func setVotes2(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text) {
 
