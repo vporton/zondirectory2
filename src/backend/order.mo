@@ -166,10 +166,11 @@ shared actor class Orders() = this {
       Debug.trap("cannot get category item"); // FIXME: Should trap here?
     };
     let item = lib.deserializeItem(itemData.attributes);
+    let guid = GUID.nextGuid(guidGen);
     switch (item.streams) {
       case (?data) { data };
       case null {
-        let { outer = timeOrderSubDB } = await NacDBIndex.createSubDB({guid = GUID.nextGuid(guidGen); userData = ""}); // FIXME: `guid`
+        let { outer = timeOrderSubDB } = await NacDBIndex.createSubDB({guid; userData = ""}); // FIXME: `guid`
         item.streams := ?{timeOrderSubDB};
         let itemData = lib.serializeItem(item);
         itemId.0.insert({pk = ""/* FIXME */; sk = "i/" # Nat.toText(itemId.1); value = itemData}); // FIXME: `guid`
