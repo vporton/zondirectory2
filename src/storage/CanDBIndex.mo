@@ -177,6 +177,7 @@ actor class CanDBIndex() = this {
   func put(options: CanDB.PutOptions): async () {
     // checkCaller(caller); // checked by the child call
 
+    // FIXME: Does it work correctly, if canisters were created only for other PKs?
     let ?buf = CanisterMap.get(pkToCanisterMap, ""/* FIXME: maybe pass as function arg? */) else {
       Debug.trap("no partition canisters");
     };

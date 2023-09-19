@@ -82,7 +82,7 @@ shared actor class ZonBackend() = this {
 
   /// Users ///
 
-  // `sybilCanister` is determined by UI code.
+  // `sybilCanister` is determined by frontend code (util/sybil.ts).
   // TODO: `sybilCanister` should have its dedicated PK, to reduce the number of UI calls.
   //       Alternatively, store `sybilCanister` on-chain or somehow.
   func checkSybil(sybilCanister: Principal, user: Principal): async* () {
