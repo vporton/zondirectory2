@@ -173,7 +173,7 @@ shared actor class Orders() = this {
         let { outer = timeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""}); // TODO: Why is `toArray` necessary?
         item.streams := ?{timeOrderSubDB};
         let itemData = lib.serializeItem(item);
-        await itemId.0.put({pk = ""/* FIXME */; sk = "i/" # lib.encodeInt(itemId.1); attributes = itemData}); // FIXME: `guid`
+        await itemId.0.put({pk = "main"; sk = "i/" # lib.encodeInt(itemId.1); attributes = itemData});
         {timeOrderSubDB};
       }
     };

@@ -96,6 +96,7 @@ shared actor class ZonBackend() = this {
   };
 
   // anti-Sybil verification
+  // FIXME: The first Sybil canister is never created.
   public shared({caller}) func verifyUser(sybilCanister: Principal): async () {
     let verifyActor = actor(phoneNumberVerificationCanisterId): actor {
       is_phone_number_approved(principal: Text) : async Bool;
