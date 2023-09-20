@@ -10,7 +10,11 @@ import { CanDBIndex } from "../../../declarations/CanDBIndex/CanDBIndex.did";
 // import { Order } from "../../../declarations/backend/order.did";
 import { Actor, HttpAgent } from "@dfinity/agent";
 
-const isLocal = process.env.IS_LOCAL !== '' && process.env.IS_LOCAL !== '0';
+export function getIsLocal() {
+  return process.env.IS_LOCAL !== '' && process.env.IS_LOCAL !== '0';
+}
+
+const isLocal = getIsLocal();
 
 export function intializeCanDBIndexClient(): IndexClient<CanDBIndex> {
   const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
