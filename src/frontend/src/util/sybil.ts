@@ -37,8 +37,7 @@ export async function obtainSybilCanister() {
         };
         let sybilResult = search();
         if (sybilResults === undefined) {
-            const  = true; // FIXME
-            const canisters = await canDBIndexClient.getCanistersForPK("x"); // FIXME: PK
+            const canisters = await canDBIndexClient.getCanistersForPK("sybil");
             const lastCanister = canisters[canisters.length - 1];
             const backend = initializeMainClient();
             await backend.verifyUser(Principal.fromText(lastCanister));
