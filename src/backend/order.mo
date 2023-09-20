@@ -134,12 +134,8 @@ shared actor class Orders() = this {
     // Put into the beginning of time order.
     let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB } = await obtainStreams(catId);
     let theSubDB = switch (childItem.item.details) {
-      case (#communalCategory or #ownedCategory) {
-        categoriesTimeOrderSubDB;
-      };
-      case _ {
-        itemsTimeOrderSubDB;
-      };
+      case (#communalCategory or #ownedCategory) { categoriesTimeOrderSubDB };
+      case _ { itemsTimeOrderSubDB };
     }
     let timeScanResult = await theSubDB.0.scanLimitOuter({
       dir = #bwd;
