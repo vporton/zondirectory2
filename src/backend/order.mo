@@ -221,7 +221,6 @@ shared actor class Orders() = this {
   // TODO: It has race period of duplicate (two) keys. In frontend de-duplicate.
   // TODO: Use binary keys.
   // FIXME: Sorting CanDB by `Float` is wrong order.
-  // FIXME: Rewrite this function.
   // func setVotes(
   //   stream: VotesStream,
   //   oldVotesRandom: Text,

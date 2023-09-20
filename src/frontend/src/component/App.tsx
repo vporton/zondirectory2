@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from "react";
 // import { backend } from "../../../declarations/backend";
 import { Nav } from 'react-bootstrap';
 import ShowFolder from "./ShowFolder";
@@ -10,11 +11,30 @@ import {
     useNavigate,
     HashRouter,
 } from "react-router-dom";
+import { AuthClient } from '@dfinity/auth-client';
 import SubFolders from "./SubFolders";
 import EditItem from "./EditItem";
 import EditCategory from "./EditCategory";
  
 export default function App() {
+    useEffect(() => {
+        async function doIt() {
+            const authClient = await AuthClient.create();
+
+            authClient.login({
+                // 7 days in nanoseconds
+                maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000),
+                onSuccess: async () => {
+                  console.log('ID');
+                },
+                onError(error) {
+                    console.log('error', error);
+                },
+            });
+        }
+        doIt().then(()=>{});
+    }, []);
+
     return (
         <>
             <h1>Zon Dir</h1>
