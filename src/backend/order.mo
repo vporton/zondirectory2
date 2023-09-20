@@ -136,7 +136,7 @@ shared actor class Orders() = this {
     let theSubDB = switch (childItem.item.details) {
       case (#communalCategory or #ownedCategory) { categoriesTimeOrderSubDB };
       case _ { itemsTimeOrderSubDB };
-    }
+    };
     let timeScanResult = await theSubDB.0.scanLimitOuter({
       dir = #bwd;
       outerKey = theSubDB.1;
