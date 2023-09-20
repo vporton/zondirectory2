@@ -17,6 +17,8 @@
 
 - Separate stream for each locale/language?
 
+- Should we pay to owner of an owned category, if somebody purchased an ad in it?
+
 - Rename category -> folder.
 
 - Should use owned or communal folder for comments stream of a post?
