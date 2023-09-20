@@ -3,8 +3,8 @@ import { useState } from "react";
 import { Button } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
-import { ItemWithoutOwner } from "../../../declarations/backend/backend.did";
-import { initializeCanDBPartitionClient, initializeMainClient, intializeCanDBIndexClient } from "../util/client";
+import { ItemWithoutOwner } from "../../../declarations/main/main.did";
+import { initializeMainClient, intializeCanDBIndexClient } from "../util/client";
 import { obtainSybilCanister } from "../util/sybil";
 
 export default function EditCategory() {

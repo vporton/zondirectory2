@@ -5,8 +5,8 @@ import { useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { obtainSybilCanister } from '../util/sybil';
 import 'react-tabs/style/react-tabs.css';
-import { initializeCanDBPartitionClient, initializeMainClient, intializeCanDBIndexClient } from "../util/client";
-import { ItemWithoutOwner } from "../../../declarations/backend/backend.did";
+import { initializeMainClient, intializeCanDBIndexClient } from "../util/client";
+import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import Categories from "./Categories";
 
 export default function EditItemItem() {
