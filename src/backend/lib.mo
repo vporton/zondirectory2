@@ -133,7 +133,11 @@ module {
     creator: Principal;
     item: ItemWithoutOwner;
     var streams: ?{
-      timeOrderSubDB: (
+      itemsTimeOrderSubDB: (
+        Nac.OuterCanister,
+        Nac.OuterSubDBKey,
+      );
+      categoriesTimeOrderSubDB: (
         Nac.OuterCanister,
         Nac.OuterSubDBKey,
       );

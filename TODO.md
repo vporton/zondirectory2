@@ -1,4 +1,5 @@
 - Store the total number of likes of an item. It is needed to sort items when autocomplete.
+  It should sort immediately when a new like is added/removed.
 
 - Keep statistics: How (total and daily) many items a user posted, how much his/her items were upvoted, etc.
 

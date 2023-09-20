@@ -2,6 +2,7 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 
+// FIXME: Instead of ID use (Principal, ID)
 export default function Categories(props: { defaultCategories?: number[], onChange?: (categories: number[]) => void }) {
     const [categories, setCategories] = useState(props.defaultCategories ?? []);
     const [categoriesList, setCategoriesList] = useState(categories.map(c => c.toString()) ?? []);

@@ -126,11 +126,12 @@ shared actor class Orders() = this {
     //        need to make multi-hash instead of just hash.
     // For now, I implement a simple hash-map, it does not need moving items around.
 
+    // FIXME: If `itemId` is a category, to use instead `categoriesTimeOrderSubDB`.
     // Put into the beginning of time order.
-    let { timeOrderSubDB } = await obtainStreams(catId);
-    let timeScanResult = await timeOrderSubDB.0.scanLimitOuter({
+    let { itemsTimeOrderSubDB } = await obtainStreams(catId);
+    let timeScanResult = await itemsTimeOrderSubDB.0.scanLimitOuter({
       dir = #bwd;
-      outerKey = timeOrderSubDB.1;
+      outerKey = itemsTimeOrderSubDB.1;
       lowerBound = "";
       upperBound = "x";
       limit = 1;
@@ -147,11 +148,11 @@ shared actor class Orders() = this {
     let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId.0))), #int(itemId.1)]);
     
     let guid = GUID.nextGuid(guidGen);
-    ignore await timeOrderSubDB.0.insert({
+    ignore await itemsTimeOrderSubDB.0.insert({
       guid = Blob.toArray(guid);
       indexCanister = NacDBIndex;
-      outerCanister = timeOrderSubDB.0;
-      outerKey = timeOrderSubDB.1;
+      outerCanister = itemsTimeOrderSubDB.0;
+      outerKey = itemsTimeOrderSubDB.1;
       sk = lib.encodeInt(timeScanSK);
       value = timeScanItemInfo;
     });
@@ -159,7 +160,11 @@ shared actor class Orders() = this {
 
   // Create streams for a folder identified by `itemId`, if they were not yet created.
   func obtainStreams(itemId: (CanDBPartition.CanDBPartition, Nat)): async {
-    timeOrderSubDB: (
+    itemsTimeOrderSubDB: (
+      Nac.OuterCanister,
+      Nac.OuterSubDBKey,
+    );
+    categoriesTimeOrderSubDB: (
       Nac.OuterCanister,
       Nac.OuterSubDBKey,
     );
@@ -176,11 +181,12 @@ shared actor class Orders() = this {
     switch (item.streams) {
       case (?data) { data };
       case null {
-        let { outer = timeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""}); // TODO: Why is `toArray` necessary?
-        item.streams := ?{timeOrderSubDB};
+        let { outer = itemsTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""}); // TODO: Why is `toArray` necessary?
+        let { outer = categoriesTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""}); // TODO: Why is `toArray` necessary?
+        item.streams := ?{itemsTimeOrderSubDB; categoriesTimeOrderSubDB};
         let itemData = lib.serializeItem(item);
         await itemId.0.put({pk = "main"; sk = "i/" # lib.encodeInt(itemId.1); attributes = itemData});
-        {timeOrderSubDB};
+        {itemsTimeOrderSubDB; categoriesTimeOrderSubDB};
       }
     };
   };
