@@ -318,6 +318,7 @@ module {
     };
   };
 
+  // TODO: Check that this gives right permissions.
   // `sybilCanister` is determined by frontend code (util/sybil.ts).
   // TODO: `sybilCanister` should have its dedicated PK, to reduce the number of UI calls.
   //       Alternatively, store `sybilCanister` on-chain or somehow.
