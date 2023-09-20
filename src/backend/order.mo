@@ -124,7 +124,7 @@ shared actor class Orders() = this {
 
     // FIXME: To reduce cost of moving an item (jumping over several items of the same weight),
     //        need to make multi-hash instead of just hash.
-    // For now, I implement a simple hash-map, it does not need moving items around.
+    // For now, I implement a simple hash-map, time-order does not need moving items around.
 
     let ?childItemData = await itemId.0.get({sk = "i/" # Nat.toText(itemId.1)}) else {
       Debug.trap("cannot get child item");
