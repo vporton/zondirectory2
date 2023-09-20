@@ -28,16 +28,12 @@ shared actor class ZonBackend() = this {
 
   /// Some Global Variables ///
 
-  // FIXME: Fix this comment.
   // "s/" - anti-sybil
   // "u/" - Principal -> User
   // "i/" - ID -> Item
   // "a/" - user -> <buyer affiliate>/<seller affiliate>
   // "r/<CATEGORY>/<ITEM>" - which items were addeded to which categories (both time and votes streams)
-  //
-  // In other canisters:
-  // "p/<NUM>" - nodes of linked lists
-  // ID, (time, votes) -> head of double linked list 
+
   // TODO: Avoid duplicate user nick names.
 
   stable var maxId: Nat64 = 0;
