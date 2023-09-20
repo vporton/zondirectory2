@@ -11,7 +11,7 @@ import Categories from "./Categories";
 
 export default function EditItemItem() {
     const routeParams = useParams();
-    const mainCategory: number | undefined = routeParams.cat !== undefined ? +routeParams.cat : undefined;
+    const mainCategory: string | undefined = routeParams.cat;
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
