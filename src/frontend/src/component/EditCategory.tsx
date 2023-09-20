@@ -9,7 +9,7 @@ import { obtainSybilCanister } from "../util/sybil";
 
 export default function EditCategory() {
     const routeParams = useParams();
-    const superCategory: number | undefined = routeParams.cat !== undefined ? +routeParams.cat : undefined;
+    const superCategory: string | undefined = routeParams.cat;
     enum CategoryKind { owned, communal };
     const [categoryKind, setCategoryKind] = useState<CategoryKind>(CategoryKind.owned);
     const [locale, setLocale] = useState('en'); // TODO: user's locale

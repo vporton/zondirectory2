@@ -4,7 +4,7 @@ import { ActorClient } from "candb-client-typescript/dist/ActorClient";
 import { idlFactory as CanDBIndexIDL } from "../../../declarations/CanDBIndex/index";
 import { idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition/index";
 import { idlFactory as MainIDL } from "../../../declarations/main/index";
-import { idlFactory as OrderIDL } from "../../../declarations/order/order";
+import { idlFactory as OrderIDL } from "../../../declarations/order/index";
 import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { CanDBIndex } from "../../../declarations/CanDBIndex/CanDBIndex.did";
 import { Order } from "../../../declarations/backend/order.did";
