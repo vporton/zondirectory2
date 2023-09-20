@@ -25,7 +25,7 @@ export default function EditCategory() {
                 break;
             }
     }
-    async function submit() { // FIXME
+    async function submit() {
         function itemData(): ItemWithoutOwner {
             return {
                 locale,
@@ -68,7 +68,7 @@ export default function EditCategory() {
                     <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
                 </TabPanel>
             </Tabs>
-            <Button>Save</Button> {/* TODO */}
+            <Button onClick={submit}>Save</Button> {/* TODO */}
         </>
     );
 }
