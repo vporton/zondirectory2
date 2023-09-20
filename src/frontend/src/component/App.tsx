@@ -17,23 +17,23 @@ import EditItem from "./EditItem";
 import EditCategory from "./EditCategory";
  
 export default function App() {
-    useEffect(() => {
-        async function doIt() {
-            const authClient = await AuthClient.create();
+    // useEffect(() => {
+    //     async function doIt() {
+    //         const authClient = await AuthClient.create();
 
-            authClient.login({
-                // 7 days in nanoseconds
-                maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000),
-                onSuccess: async () => {
-                  console.log('ID');
-                },
-                onError(error) {
-                    console.log('error', error);
-                },
-            });
-        }
-        doIt().then(()=>{});
-    }, []);
+    //         authClient.login({
+    //             // 7 days in nanoseconds
+    //             maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000),
+    //             onSuccess: async () => {
+    //               console.log('ID');
+    //             },
+    //             onError(error) {
+    //                 console.log('error', error);
+    //             },
+    //         });
+    //     }
+    //     doIt().then(()=>{});
+    // }, []);
 
     return (
         <>
