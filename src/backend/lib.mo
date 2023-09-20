@@ -15,6 +15,7 @@ import Nat64 "mo:base/Nat64";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
 import CanDBPartition "../storage/CanDBPartition";
+import config "../../config";
 
 module {
   // We will use that "-XXX" < "XXX" for any hex number XXX.
@@ -321,6 +322,9 @@ module {
   // TODO: `sybilCanister` should have its dedicated PK, to reduce the number of UI calls.
   //       Alternatively, store `sybilCanister` on-chain or somehow.
   public func checkSybil(sybilCanister: Principal, user: Principal): async* () {
+    if (config.skipSybil) {
+      return;
+    };
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
     switch (await db.get({sk = "s/" # Principal.toText(user)})) {
       case (null) {
