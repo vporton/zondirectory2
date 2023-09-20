@@ -1,3 +1,4 @@
+import lib "lib";
 import PST "canister:pst"; // TODO
 import Token "mo:icrc1/ICRC1/Canisters/Token";
 import BTree "mo:btree/BTree";
@@ -222,7 +223,7 @@ actor class Payments() = this {
         let itemKey = "i/" # Nat64.toText(payment.itemId);
         switch (await db.get({sk = itemKey})) {
           case (?itemRepr) {
-            // let item = deserializeItem(itemRepr.attributes); // FIXME
+            let item = lib.deserializeItem(itemRepr.attributes);
             let time = switch (payment.time) {
               case (?time) { time };
               case (null) {
@@ -248,7 +249,7 @@ actor class Payments() = this {
             let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
             recalculateShareholdersDebt(Int.abs(_shareholdersShare), _buyerAffiliate, _sellerAffiliate); // TODO: abs() is a hack.
             let toAuthor = payment.amount - _shareholdersShare;
-            // indebt(item.creator, Int.abs(toAuthor)); // FIXME
+            indebt(item.creator, Int.abs(toAuthor));
           };
           case (null) {};
         };
@@ -271,11 +272,9 @@ actor class Payments() = this {
       case (null) { 0 };
     };
     let _newDividends = Int.abs((totalDividends: Int) - lastTotal);
-    // let ?pst2 = pst else { Debug.trap("no PST"); };
     // rounding down
-    // FIXME: Use PST.
-    let balance = 0; // await PST.icrc1_balance_of({owner = _account; subaccount = null});
-    let total = 0; // PST.icrc1_total_supply();
+    let balance = await PST.icrc1_balance_of({owner = _account; subaccount = null});
+    let total = await PST.icrc1_total_supply();
     balance * _newDividends / total;
   };
 
