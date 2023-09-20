@@ -1,3 +1,5 @@
+- Store the total number of likes of an item. It is needed to sort items when autocomplete.
+
 - Keep statistics: How (total and daily) many items a user posted, how much his/her items were upvoted, etc.
 
 - Is an item considered as a folder for replies to it?
