@@ -20,9 +20,8 @@ export async function obtainSybilCanister() {
         return cookie;
     }
 
-    const isLocal = true; // TODO
-    const canDBIndexClient = intializeCanDBIndexClient(isLocal);
-    const canDBPartitionClient = initializeCanDBPartitionClient(isLocal, canDBIndexClient);
+    const canDBIndexClient = intializeCanDBIndexClient();
+    const canDBPartitionClient = initializeCanDBPartitionClient(canDBIndexClient);
     for(;;) {
         let sybilResults = await canDBPartitionClient.query<CanDBPartition["get"]>(
             "", // pk, // FIXME
@@ -38,10 +37,10 @@ export async function obtainSybilCanister() {
         };
         let sybilResult = search();
         if (sybilResults === undefined) {
-            const isLocal = true; // FIXME
+            const  = true; // FIXME
             const canisters = await canDBIndexClient.getCanistersForPK("x"); // FIXME: PK
             const lastCanister = canisters[canisters.length - 1];
-            const backend = initializeMainClient(isLocal);
+            const backend = initializeMainClient();
             await backend.verifyUser(Principal.fromText(lastCanister));
         } else {
             const date = new Date(2147483647 * 1000).toUTCString();

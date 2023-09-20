@@ -32,11 +32,10 @@ export default function EditItemItem() {
             };
         }
         async function submitItem(item: ItemWithoutOwner) {
-            const isLocal = true; // FIXME
             const sybilCanister = obtainSybilCanister();
-            const canDBIndexClient = intializeCanDBIndexClient(isLocal);
-            // const canDBPartitionClient = initializeCanDBPartitionClient(isLocal, canDBIndexClient);
-            const backend = initializeMainClient(isLocal);
+            const canDBIndexClient = intializeCanDBIndexClient();
+            // const canDBPartitionClient = initializeCanDBPartitionClient(canDBIndexClient);
+            const backend = initializeMainClient();
             const canisters = await canDBIndexClient.getCanistersForPK("main");
             const lastCanister = canisters[canisters.length - 1];
             let result = await backend.createItemData(lastCanister, item, sybilCanister);

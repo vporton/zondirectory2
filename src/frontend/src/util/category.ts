@@ -5,12 +5,12 @@ import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartit
 import { obtainSybilCanister } from "./sybil";
 
 export async function addToCategory() {
-    const isLocal = true; // TODO
+    const  = true; // TODO
     const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
     const agent = new HttpAgent({ host });
 
-    const canDBIndexClient = intializeCanDBIndexClient(isLocal);
-    // const canDBPartitionClient = initializeCanDBPartitionClient(isLocal, canDBIndexClient);
+    const canDBIndexClient = intializeCanDBIndexClient();
+    // const canDBPartitionClient = initializeCanDBPartitionClient(canDBIndexClient);
 
     const canistersResult = (await canDBIndexClient.indexCanisterActor.getCanistersByPK(""/* FIXME */));
     const canisterId = canistersResult[canistersResult.length - 1];

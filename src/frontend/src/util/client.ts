@@ -7,10 +7,12 @@ import { idlFactory as MainIDL } from "../../../declarations/main/index";
 import { idlFactory as OrderIDL } from "../../../declarations/order/index";
 import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { CanDBIndex } from "../../../declarations/CanDBIndex/CanDBIndex.did";
-import { Order } from "../../../declarations/backend/order.did";
+// import { Order } from "../../../declarations/backend/order.did";
 import { Actor, HttpAgent } from "@dfinity/agent";
 
-export function intializeCanDBIndexClient(isLocal: boolean): IndexClient<CanDBIndex> {
+const isLocal = process.env.IS_LOCAL !== '' && process.env.IS_LOCAL !== '0';
+
+export function intializeCanDBIndexClient(): IndexClient<CanDBIndex> {
   const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
   const canisterId = isLocal ? process.env.INDEX_CANISTER_ID : "<prod_canister_id>"; // TODO
   return new IndexClient<CanDBIndex>({
@@ -22,7 +24,7 @@ export function intializeCanDBIndexClient(isLocal: boolean): IndexClient<CanDBIn
   });
 };
 
-export function initializeCanDBPartitionClient(isLocal: boolean, indexClient: IndexClient<CanDBIndex>)
+export function initializeCanDBPartitionClient(indexClient: IndexClient<CanDBIndex>)
     : ActorClient<CanDBIndex, CanDBPartition>
 {
   const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
@@ -37,7 +39,7 @@ export function initializeCanDBPartitionClient(isLocal: boolean, indexClient: In
   });
 };
 
-export function initializeMainClient(isLocal: boolean)
+export function initializeMainClient()
 {
   const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
   const agent = new HttpAgent({ host });
@@ -45,7 +47,7 @@ export function initializeMainClient(isLocal: boolean)
   return Actor.createActor(MainIDL, { agent, canisterId });
 };
 
-export function initializeOrderClient(isLocal: boolean)
+export function initializeOrderClient()
 {
   const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
   const agent = new HttpAgent({ host });
