@@ -183,37 +183,6 @@ shared actor class Orders() = this {
 
   // FIXME: Below functions?
 
-  // Determines item order.
-  type ItemWeight = {
-    weight: Float;
-    random: Text; // TODO: Is this field used by the below algorithm.
-  };
-
-  // module ItemWeight {
-  //   public func compare(X: ItemWeight, Y: ItemWeight): Order.Order {
-  //     let c = Float.compare(X.weight, Y.weight);
-  //     if (c != #equal) {
-  //       c;
-  //     } else {
-  //       Text.compare(X.random, Y.random);
-  //     }
-  //   };
-  // };
-
-  // FIXME: Move votes to `order.mo`.
-  type VotesTmp = {
-    parent: Nat64;
-    child: Nat64;
-    var inProcess: Bool;
-  };
-
-  type VotesStream = {
-    // var settingVotes: StableBuffer.StableBuffer<VotesTmp>; // TODO: Delete old ones.
-    // var currentVotes: BTree.BTree<Nat64, ()>; // Item ID -> () // TODO: Delete old ones.
-    prefix1: Text;
-    prefix2: Text;
-  };
-
   func deserializeVoteAttr(attr: Entity.AttributeValue): Float {
     switch(attr) {
       case (#float v) { v };
@@ -228,6 +197,7 @@ shared actor class Orders() = this {
       case _ { Debug.trap("map not found") };
     };    
   };
+
   // TODO: It has race period of duplicate (two) keys. In frontend de-duplicate.
   // TODO: Use binary keys.
   // FIXME: Sorting CanDB by `Float` is wrong order.
@@ -311,6 +281,4 @@ shared actor class Orders() = this {
   // func setVotes2(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text) {
 
   // }
-
-  // TODO: Also ordering by time of publication (requires lexigraphical ordering by item ID).
 }
