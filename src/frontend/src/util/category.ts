@@ -1,6 +1,8 @@
 import { initializeCanDBPartitionClient, intializeCanDBIndexClient } from "./client";
 import { idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition/index";
 import { Actor, HttpAgent } from "@dfinity/agent";
+import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
+import { obtainSybilCanister } from "./sybil";
 
 async function AddToCategory() {
     const isLocal = true; // TODO
@@ -14,11 +16,7 @@ async function AddToCategory() {
     const canisterId = canistersResult[canistersResult.length - 1];
     const partition = Actor.createActor(CanDBPartitionIDL, { agent, canisterId });
     
+    const sybilCanister = obtainSybilCanister();
 
-    // TODO
-
-    // let sybilResults = await canDBPartitionClient.query<CanDBPartition["get"]>( // FIXME
-    //     "", // pk, // FIXME
-    //     (actor) => actor.get({sk: "s/username"}), // FIXME
-    // );
+    main.
 }

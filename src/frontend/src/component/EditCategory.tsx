@@ -4,6 +4,8 @@ import { Button } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { ItemWithoutOwner } from "../../../declarations/backend/backend.did";
+import { initializeCanDBPartitionClient, initializeMainClient, intializeCanDBIndexClient } from "../util/client";
+import { obtainSybilCanister } from "../util/sybil";
 
 export default function EditCategory() {
     const routeParams = useParams();
@@ -23,15 +25,13 @@ export default function EditCategory() {
                 break;
             }
     }
-    async function submit() { // FIXME: Rewrite all this function.
+    async function submit() { // FIXME
         function itemData(): ItemWithoutOwner {
-            // TODO: Differentiating post and message by `post === ""` is unreliable.
             return {
                 locale,
                 title,
                 description: shortDescription,
-                details: selectedTab == SelectedTab.selectedLink ? {link: link} :
-                    (post === "" ? {message: null} : {post: post}),
+                details: categoryKind == CategoryKind.owned ? {ownedCategory: null} : {communalCategory: null},
                 price: 0.0, // TODO
             };
         }
@@ -41,7 +41,7 @@ export default function EditCategory() {
             const canDBIndexClient = intializeCanDBIndexClient(isLocal);
             const canDBPartitionClient = initializeCanDBPartitionClient(isLocal, canDBIndexClient);
             const backend = initializeMainClient(isLocal);
-            const canisters = await canDBIndexClient.getCanistersForPK(""); // FIXME: PK
+            const canisters = await canDBIndexClient.getCanistersForPK("main");
             const lastCanister = canisters[canisters.length - 1];
             await backend.createItemData(lastCanister, item, sybilCanister)
         }

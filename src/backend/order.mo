@@ -99,7 +99,13 @@ shared actor class Orders() = this {
 
   // Public API //
 
-  public shared({caller}) func addItemToCategory(catId: (CanDBPartition.CanDBPartition, Nat), itemId: (CanDBPartition.CanDBPartition, Nat)): async () {
+  public shared({caller}) func addItemToCategory(
+    catId: (CanDBPartition.CanDBPartition, Nat),
+    itemId: (CanDBPartition.CanDBPartition, Nat),
+    sybilCanister: Principal,
+  ): async () {
+    await* lib.checkSybil(sybilCanister, caller);
+
     // TODO: The below reads&deserializes `categoryItemData` twice.
     let ?categoryItemData = await catId.0.get({sk = "i/" # Nat.toText(catId.1)}) else {
       Debug.trap("cannot get category item");

@@ -78,19 +78,6 @@ shared actor class ZonBackend() = this {
 
   /// Users ///
 
-  // `sybilCanister` is determined by frontend code (util/sybil.ts).
-  // TODO: `sybilCanister` should have its dedicated PK, to reduce the number of UI calls.
-  //       Alternatively, store `sybilCanister` on-chain or somehow.
-  func checkSybil(sybilCanister: Principal, user: Principal): async* () {
-    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
-    switch (await db.get({sk = "s/" # Principal.toText(user)})) {
-      case (null) {
-        Debug.trap("not verified user");
-      };
-      case _ {};
-    };
-  };
-
   // anti-Sybil verification
   public shared({caller}) func verifyUser(sybilCanister: ?Principal): async () {
     let verifyActor = actor(phoneNumberVerificationCanisterId): actor {
@@ -215,7 +202,7 @@ shared actor class ZonBackend() = this {
   };
 
   public shared({caller}) func setUserData(canisterId: Principal, _user: User, sybilCanisterId: Principal) {
-    await* checkSybil(sybilCanisterId, caller);
+    await* lib.checkSybil(sybilCanisterId, caller);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     await db.put({sk = key; attributes = serializeUser(_user)});
@@ -233,7 +220,7 @@ shared actor class ZonBackend() = this {
   public shared({caller}) func createItemData(canisterId: Principal, _item: lib.ItemWithoutOwner, sybilCanisterId: Principal)
     : async (Principal, Text)
   {
-    await* checkSybil(sybilCanisterId, caller);
+    await* lib.checkSybil(sybilCanisterId, caller);
 
     let item2: lib.Item = { creator = caller; item = _item; var streams = null; };
     let _itemId = maxId;

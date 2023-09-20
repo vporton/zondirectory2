@@ -37,7 +37,7 @@ export default function EditItemItem() {
             const canDBIndexClient = intializeCanDBIndexClient(isLocal);
             const canDBPartitionClient = initializeCanDBPartitionClient(isLocal, canDBIndexClient);
             const backend = initializeMainClient(isLocal);
-            const canisters = await canDBIndexClient.getCanistersForPK(""); // FIXME: PK
+            const canisters = await canDBIndexClient.getCanistersForPK("main");
             const lastCanister = canisters[canisters.length - 1];
             let result = await backend.createItemData(lastCanister, item, sybilCanister);
             console.log('XXX:', result); // TODO

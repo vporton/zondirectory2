@@ -14,6 +14,7 @@ import Char "mo:base/Char";
 import Nat64 "mo:base/Nat64";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
+import CanDBPartition "../storage/CanDBPartition";
 
 module {
   // We will use that "-XXX" < "XXX" for any hex number XXX.
@@ -309,6 +310,19 @@ module {
   public func onlyItemOwner(caller: Principal, _item: Item) {
     if (caller != _item.creator) {
       Debug.trap("not the item owner");
+    };
+  };
+
+  // `sybilCanister` is determined by frontend code (util/sybil.ts).
+  // TODO: `sybilCanister` should have its dedicated PK, to reduce the number of UI calls.
+  //       Alternatively, store `sybilCanister` on-chain or somehow.
+  public func checkSybil(sybilCanister: Principal, user: Principal): async* () {
+    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
+    switch (await db.get({sk = "s/" # Principal.toText(user)})) {
+      case (null) {
+        Debug.trap("not verified user");
+      };
+      case _ {};
     };
   };
 }
