@@ -46,7 +46,6 @@ shared actor class CanDBPartition({
     CanDB.get(db, options);
   };
 
-  // FIXME: Why here and below `await` with `*`? Is it correct?
   public shared({caller}) func put(options: CanDB.PutOptions): async () {
     checkCaller(caller);
 
