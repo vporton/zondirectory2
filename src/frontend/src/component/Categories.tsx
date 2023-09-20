@@ -2,16 +2,13 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 
-// FIXME: Instead of ID use (Principal, ID)
 export default function Categories(props: { defaultCategories?: string[], onChange?: (categories: string[]) => void }) {
     const [categories, setCategories] = useState(props.defaultCategories ?? []);
     const [categoriesList, setCategoriesList] = useState(categories.map(c => c.toString()) ?? []);
     function updateCategories() {
-        // TODO: This filter incorrectly skips without validation strings with letters.
-        const cats = categoriesList.filter(c => /^[0-9]+$/.test(c)).map(c => +c);
-        setCategories(cats);
+        setCategories(categoriesList);
         if (props.onChange !== undefined) {
-            props.onChange(cats);
+            props.onChange(categoriesList);
         }
     }
     useEffect(updateCategories, [categoriesList]);
