@@ -45,6 +45,14 @@
     "NacDBIndex": {
       "main": "src/storage/NacDBIndex.mo",
       "type": "motoko"
+    },
+    "CanDBPartition": {
+      "main": "src/storage/CanDBPartition.mo",
+      "type": "motoko"
+    },
+    "NacDBPartition": {
+      "main": "src/storage/NacDBPartition.mo",
+      "type": "motoko"
     }
   },
   "defaults": {

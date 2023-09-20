@@ -3,10 +3,11 @@ import { ActorClient } from "candb-client-typescript/dist/ActorClient";
 
 import { idlFactory as CanDBIndexIDL } from "../../../declarations/CanDBIndex/index";
 import { idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition/index";
-import { idlFactory as MainIDL } from "../../../declarations/backend/index";
+import { idlFactory as MainIDL } from "../../../declarations/main/index";
+import { idlFactory as OrderIDL } from "../../../declarations/order/order";
 import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { CanDBIndex } from "../../../declarations/CanDBIndex/CanDBIndex.did";
-import { ZonBackend } from "../../../declarations/backend/backend.did";
+import { Order } from "../../../declarations/backend/order.did";
 import { Actor, HttpAgent } from "@dfinity/agent";
 
 export function intializeCanDBIndexClient(isLocal: boolean): IndexClient<CanDBIndex> {
@@ -42,4 +43,12 @@ export function initializeMainClient(isLocal: boolean)
   const agent = new HttpAgent({ host });
   const canisterId = isLocal ? process.env.MAIN_CANISTER_ID : "<prod_canister_id>"; // TODO
   return Actor.createActor(MainIDL, { agent, canisterId });
+};
+
+export function initializeOrderClient(isLocal: boolean)
+{
+  const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
+  const agent = new HttpAgent({ host });
+  const canisterId = isLocal ? process.env.ORDER_CANISTER_ID : "<prod_canister_id>"; // TODO
+  return Actor.createActor(OrderIDL, { agent, canisterId });
 };
