@@ -126,12 +126,22 @@ shared actor class Orders() = this {
     //        need to make multi-hash instead of just hash.
     // For now, I implement a simple hash-map, it does not need moving items around.
 
-    // FIXME: If `itemId` is a category, to use instead `categoriesTimeOrderSubDB`.
+    let ?childItemData = await itemId.0.get({sk = "i/" # Nat.toText(itemId.1)}) else {
+      Debug.trap("cannot get child item");
+    };
+    let childItem = lib.deserializeItem(categoryItemData.attributes);
+
     // Put into the beginning of time order.
-    let { itemsTimeOrderSubDB } = await obtainStreams(catId);
-    let timeScanResult = await itemsTimeOrderSubDB.0.scanLimitOuter({
+    let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB } = await obtainStreams(catId);
+    let theSubDB = switch (childItem.details) {
+      case (#communalCategory or #ownedCategory):
+        categoriesTimeOrderSubDB;
+      case _:
+        itemsTimeOrderSubDB;
+    }
+    let timeScanResult = await theSubDB.0.scanLimitOuter({
       dir = #bwd;
-      outerKey = itemsTimeOrderSubDB.1;
+      outerKey = theSubDB.1;
       lowerBound = "";
       upperBound = "x";
       limit = 1;
@@ -148,11 +158,11 @@ shared actor class Orders() = this {
     let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId.0))), #int(itemId.1)]);
     
     let guid = GUID.nextGuid(guidGen);
-    ignore await itemsTimeOrderSubDB.0.insert({
+    ignore await theSubDB.0.insert({
       guid = Blob.toArray(guid);
       indexCanister = NacDBIndex;
-      outerCanister = itemsTimeOrderSubDB.0;
-      outerKey = itemsTimeOrderSubDB.1;
+      outerCanister = theSubDB.0;
+      outerKey = theSubDB.1;
       sk = lib.encodeInt(timeScanSK);
       value = timeScanItemInfo;
     });
