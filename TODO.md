@@ -22,6 +22,7 @@
 - Should we pay to owner of an owned category, if somebody purchased an ad in it?
 
 - Offshift the modifications of objects to CanDB partition actors, to avoid (de)serialization.
+  Use `AttributeMap` capabilities to avoid (de)serialization on every modification.
 
 - Rename category -> folder.
 
