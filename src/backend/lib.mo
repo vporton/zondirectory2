@@ -133,7 +133,7 @@ module {
   public type Item = {
     creator: Principal;
     item: ItemWithoutOwner;
-    var streams: ?{
+    var streams: ?{ // TODO: streams in a separate attribute?
       itemsTimeOrderSubDB: (
         Nac.OuterCanister,
         Nac.OuterSubDBKey,
