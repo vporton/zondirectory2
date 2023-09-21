@@ -133,7 +133,7 @@ module {
   public type Item = {
     creator: Principal;
     item: ItemWithoutOwner;
-    var streams: ?{ // FIXME: serialize this!
+    var streams: ?{
       itemsTimeOrderSubDB: (
         Nac.OuterCanister,
         Nac.OuterSubDBKey,
@@ -160,7 +160,7 @@ module {
   };
 
   func serializeItemAttr(item: Item): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(10);
     buf.add(#int (switch (item.item.details) {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
@@ -182,6 +182,18 @@ module {
       };
       case _ {};
     };
+    switch (item.streams) {
+      case (?streams) {
+        buf.add(#bool true);
+        buf.add(#text(Principal.toText(Principal.fromActor(streams.itemsTimeOrderSubDB.0))));
+        buf.add(#int(streams.itemsTimeOrderSubDB.1));
+        buf.add(#text(Principal.toText(Principal.fromActor(streams.categoriesTimeOrderSubDB.0))));
+        buf.add(#int(streams.categoriesTimeOrderSubDB.1));
+      };
+      case _ {
+        buf.add(#bool false);
+      };
+    };
     #tuple (Buffer.toArray(buf));
   };
 
@@ -189,6 +201,7 @@ module {
     [("v", serializeItemAttr(item))];
   };
 
+  // FIXME: Deserialize streams.
   func deserializeItemAttr(attr: Entity.AttributeValue): Item {
     var kind: Nat = 0;
     var creator: ?Principal = null;
