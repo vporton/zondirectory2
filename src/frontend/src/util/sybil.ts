@@ -27,7 +27,7 @@ export async function obtainSybilCanister() {
     const principal = authClient.getIdentity().getPrincipal().toText();
     for(;;) {
         let sybilResults = await canDBPartitionClient.query<CanDBPartition["get"]>(
-            "sybil", // pk,
+            "sybil", // pk
             actor => actor.get({sk: "s/" + principal}),
         );
         let search = () => {
