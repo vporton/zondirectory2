@@ -28,7 +28,7 @@ shared actor class ZonBackend() = this {
 
   /// Some Global Variables ///
 
-  // "s/" - anti-sybil
+  // "s/" - anti-sybil // FIXME: Merge with u/?
   // "u/" - Principal -> User
   // "i/" - ID -> Item
   // "a/" - user -> <buyer affiliate>/<seller affiliate>
