@@ -3,6 +3,7 @@ import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartit
 import { CanDBIndex } from "../../../declarations/CanDBIndex/CanDBIndex.did";
 import { initializeCanDBPartitionClient, initializeMainClient, intializeCanDBIndexClient } from "./client";
 import { Principal } from "@dfinity/principal";
+import { AuthClient } from "@dfinity/auth-client";
 
 // FIXME: correct?
 function getCookie(name: string): string | undefined {
@@ -22,10 +23,12 @@ export async function obtainSybilCanister() {
 
     const canDBIndexClient = intializeCanDBIndexClient();
     const canDBPartitionClient = initializeCanDBPartitionClient(canDBIndexClient);
+    const authClient = await AuthClient.create();
+    const principal = authClient.getIdentity().getPrincipal().toText();
     for(;;) {
         let sybilResults = await canDBPartitionClient.query<CanDBPartition["get"]>(
             "sybil", // pk,
-            (actor) => actor.get({sk: "s/username"}), // FIXME
+            actor => actor.get({sk: "u/" + principal}),
         );
         let search = () => {
             for (let settledResult of sybilResults) {

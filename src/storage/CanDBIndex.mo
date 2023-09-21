@@ -27,6 +27,8 @@ actor class CanDBIndex() = this {
     };
 
     owners := initialOwners;
+    ignore await* createStorageCanister("main", ownersOrSelf());
+    ignore await* createStorageCanister("sybil", ownersOrSelf()); // user data
 
     initialized := true;
   };
@@ -98,7 +100,7 @@ actor class CanDBIndex() = this {
 
   public shared({caller}) func autoScaleCanister(pk: Text): async Text {
     if (Utils.callingCanisterOwnsPK(caller, pkToCanisterMap, pk)) {
-      await* createStorageCanister(pk, owners);
+      await* createStorageCanister(pk, ownersOrSelf());
     } else {
       Debug.trap("error, called by non-controller=" # debug_show(caller));
     };
