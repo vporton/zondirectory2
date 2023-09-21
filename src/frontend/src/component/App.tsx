@@ -15,25 +15,32 @@ import { AuthClient } from '@dfinity/auth-client';
 import SubFolders from "./SubFolders";
 import EditItem from "./EditItem";
 import EditCategory from "./EditCategory";
+import { getIsLocal } from "../util/client";
  
 export default function App() {
-    // useEffect(() => {
-    //     async function doIt() {
-    //         const authClient = await AuthClient.create();
+    useEffect(() => {
+        async function doIt() {
+            const authClient = await AuthClient.create();
 
-    //         authClient.login({
-    //             // 7 days in nanoseconds
-    //             maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000),
-    //             onSuccess: async () => {
-    //               console.log('ID');
-    //             },
-    //             onError(error) {
-    //                 console.log('error', error);
-    //             },
-    //         });
-    //     }
-    //     doIt().then(()=>{});
-    // }, []);
+            authClient.login({
+                identityProvider: getIsLocal() ? 'http://127.0.0.1:8000/?canisterId=asrmz-lmaaa-aaaaa-qaaeq-cai' : undefined,
+                maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week
+                windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
+                onSuccess: () => {
+                    console.log('Login Successful!');
+                    console.log('identity:',
+                        authClient.getIdentity().getPrincipal().toString(),
+                        '/',
+                        authClient.getIdentity().getPrincipal().toText()
+                    )
+                },
+                onError: (error) => {
+                    console.error('Login Failed: ', error);
+                }
+            });
+        }
+        doIt().then(()=>{});
+    }, []);
 
     return (
         <>
