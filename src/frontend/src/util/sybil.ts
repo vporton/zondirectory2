@@ -14,7 +14,6 @@ function getCookie(name: string): string | undefined {
 
 // TODO: Updating the cookie if it is from a previous alpha/beta.
 // Obtain Sybil canister, possibly creating a new user identity.
-// FIXME: Check that this is not in an infinite loop, if user has no phone.
 export async function obtainSybilCanister() {
     const cookie = getCookie('sybilCanister');
     if (cookie !== undefined) {
