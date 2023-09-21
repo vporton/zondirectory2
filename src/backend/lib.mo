@@ -133,6 +133,20 @@ module {
   public type Item = {
     creator: Principal;
     item: ItemWithoutOwner;
+    var streams: ?{ // FIXME: serialize this!
+      itemsTimeOrderSubDB: (
+        Nac.OuterCanister,
+        Nac.OuterSubDBKey,
+      );
+      categoriesTimeOrderSubDB: (
+        Nac.OuterCanister,
+        Nac.OuterSubDBKey,
+      );
+      // votesOrderSubDB: ( // TODO
+      //   Nac.OuterCanister
+      //   Nac.OuterSubDBKey,
+      // );
+    };
   };
 
   // TODO: messy order of the below functions
@@ -296,22 +310,6 @@ module {
       };
       var streams = null;
     };
-  };
-
-  // TODO: `opt` in usages, not here
-  type Streams = ?{ // TODO: streams in a separate attribute? // FIXME: serialize this!
-    itemsTimeOrderSubDB: (
-      Nac.OuterCanister,
-      Nac.OuterSubDBKey,
-    );
-    categoriesTimeOrderSubDB: (
-      Nac.OuterCanister,
-      Nac.OuterSubDBKey,
-    );
-    // votesOrderSubDB: ( // TODO
-    //   Nac.OuterCanister
-    //   Nac.OuterSubDBKey,
-    // );
   };
 
   public func onlyItemOwner(caller: Principal, _item: Item) {
