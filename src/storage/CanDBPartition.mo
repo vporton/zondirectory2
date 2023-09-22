@@ -2,9 +2,13 @@ import Array "mo:base/Array";
 import CA "mo:candb/CanisterActions";
 import Entity "mo:candb/Entity";
 import CanDB "mo:candb/CanDB";
+import RBT "mo:stable-rbtree/StableRBTree";
 import Principal "mo:base/Principal";
 import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
+import Text "mo:base/Text";
+import Buffer "mo:base/Buffer";
+import Iter "mo:base/Iter";
 
 shared actor class CanDBPartition({
   primaryKey: Text;
@@ -96,4 +100,49 @@ shared actor class CanDBPartition({
   //     await* CanDB.put(db, options);
   //   };
   // };
+
+  public shared({caller}) func getAttribute(options: CanDB.PutOptions, subkey: Text): async ?Entity.AttributeValue {
+    checkCaller(caller);
+
+    let all = CanDB.get(db, options);
+    do ? { RBT.get(all!.attributes, Text.compare, subkey)! };
+  };
+
+  public shared({caller}) func transform(
+    sk: Entity.SK,
+    modifier: shared(value: ?Entity.AttributeMap) -> async [(Entity.AttributeKey, Entity.AttributeValue)]): async ()
+  {
+    checkCaller(caller);
+
+    let all = do ? { CanDB.get(db, {sk})!.attributes };
+    await* CanDB.put(db, {sk; attributes = await modifier(all)})
+  };
+
+  public shared({caller}) func transformAttribute(
+    sk: Entity.SK,
+    subkey: Entity.AttributeKey,
+    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue): async ()
+  {
+    checkCaller(caller);
+
+    let all = do ? { CanDB.get(db, {sk})!.attributes };
+    let new = switch (all) {
+      case (?all) {
+        let filtered = Iter.filter<(Entity.AttributeKey, Entity.AttributeValue)>(
+          RBT.entries<Entity.AttributeKey, Entity.AttributeValue>(all),
+          func((k,v): (Entity.AttributeKey, Entity.AttributeValue)) { k != subkey });
+        let filteredArray = Iter.toArray(filtered);
+        let newAll = Buffer.fromArray<(Entity.AttributeKey, Entity.AttributeValue)>(filteredArray);
+        let old = RBT.get(all, Text.compare, subkey);
+        let modified = await modifier(old);
+        newAll.add((subkey, modified));
+        Buffer.toArray(newAll);
+      };
+      case null {
+        let modified = await modifier(null);
+        [(subkey, modified)];
+      };
+    };
+    await* CanDB.put(db, {sk; attributes = new})
+  };
 }
