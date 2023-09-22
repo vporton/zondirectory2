@@ -100,6 +100,8 @@ actor class CanDBIndex() = this {
   };
 
   public shared({caller}) func autoScaleCanister(pk: Text): async Text {
+    checkCaller(caller);
+
     if (Utils.callingCanisterOwnsPK(caller, pkToCanisterMap, pk)) {
       await* createStorageCanister(pk, ownersOrSelf());
     } else {
@@ -140,7 +142,9 @@ actor class CanDBIndex() = this {
   };
 
   // Put to a canister. It may create duplicates.
-  public shared({caller = creator}) func putNew(pk: Entity.PK, options: CanDB.PutOptions): async () {
+  public shared({caller}) func putNew(pk: Entity.PK, options: CanDB.PutOptions): async () {
+    checkCaller(caller);
+
     let canisterIds = getCanisterIdsIfExists(pk);
     let part0 = if (canisterIds == []) {
       await* createStorageCanister(pk, ownersOrSelf());
@@ -152,7 +156,9 @@ actor class CanDBIndex() = this {
   };
 
   // FIXME: race conditions?
-  public shared({caller = creator}) func putNewNoDuplicates(pk: Entity.PK, options: CanDB.PutOptions): async () {
+  public shared({caller}) func putNewNoDuplicates(pk: Entity.PK, options: CanDB.PutOptions): async () {
+    checkCaller(caller);
+
     // Do parallel search in existing canisters:
     let canisterIds = getCanisterIdsIfExists(pk);
     let threads : [var ?(async())] = Array.init(canisterIds.size(), null);
