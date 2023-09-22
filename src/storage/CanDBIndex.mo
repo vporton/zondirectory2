@@ -156,6 +156,7 @@ actor class CanDBIndex() = this {
   };
 
   // FIXME: race conditions?
+  /// This function may be slow, because it tries all canisters in a partition.
   public shared({caller}) func putNewNoDuplicates(pk: Entity.PK, options: CanDB.PutOptions): async () {
     checkCaller(caller);
 
