@@ -157,15 +157,27 @@ actor class CanDBIndex() = this {
 
   // FIXME: race conditions?
   /// This function may be slow, because it tries all canisters in a partition.
-  public shared({caller}) func putNoDuplicates(pk: Entity.PK, options: CanDB.PutOptions): async () {
+  public shared({caller}) func putNoDuplicates(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async () {
     checkCaller(caller);
 
-    let partition = await* putNoDuplicatesCanister(pk, options);
+    let partition = await* putNoDuplicatesCanister(pk, options, hint);
     await partition.put({sk = options.sk; attributes = options.attributes});
   };
 
   /// This function may be slow, because it tries all canisters in a partition.
-  func putNoDuplicatesCanister(pk: Entity.PK, options: CanDB.PutOptions): async* CanDBPartition.CanDBPartition {
+  func putNoDuplicatesCanister(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async* CanDBPartition.CanDBPartition {
+    switch (hint) {
+      case (?hint) {
+        let canister: CanDBPartition.CanDBPartition = actor(Principal.toText(hint));
+        if (await canister.skExists(options.sk)) {
+          return canister;
+        } else {
+          Debug.trap("wrong DB partition hint");
+        };
+      };
+      case null {};
+    };
+
     // Do parallel search in existing canisters:
     let canisterIds = getCanisterIdsIfExists(pk);
     let threads : [var ?(async())] = Array.init(canisterIds.size(), null);
