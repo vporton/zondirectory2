@@ -201,7 +201,6 @@ module {
     [("v", serializeItemAttr(item))];
   };
 
-  // FIXME: Deserialize streams.
   func deserializeItemAttr(attr: Entity.AttributeValue): Item {
     var kind: Nat = 0;
     var creator: ?Principal = null;
@@ -212,6 +211,16 @@ module {
     var description = "";
     var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none;
     var linkOrText = "";
+    var streams: ?{
+      itemsTimeOrderSubDB: (
+        Nac.OuterCanister,
+        Nac.OuterSubDBKey,
+      );
+      categoriesTimeOrderSubDB: (
+        Nac.OuterCanister,
+        Nac.OuterSubDBKey,
+      );
+    } = null;
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
         var pos = 0;
@@ -271,6 +280,26 @@ module {
           case _ { break r false; };
         };
         pos += 1;
+        let haveStreams = switch (arr[pos]) {
+          case (#bool v) { v };
+          case _ { break r false; };
+        };
+        pos += 1;
+        let streams = if haveStreams {
+          ?{
+            itemsTimeOrderSubDB = switch(arr[pos], arr[pos+1]) {
+              case (#text p, #int n) { (Principal.fromText(p), n) };
+              case _ { break r false; };
+            };
+            categoriesTimeOrderSubDB = switch(arr[pos+2], arr[pos+3]) {
+              case (#text p, #int n) { (Principal.fromText(p), n) };
+              case _ { break r false; };
+            };
+          }
+        } else {
+          null;
+        };
+        pos += 4;
 
         true;
       };
@@ -299,7 +328,7 @@ module {
           case _ { Debug.trap("wrong item format"); }
         };
       };
-      var streams = null;
+      var streams = streams;
     };
   };
 
