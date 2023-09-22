@@ -149,7 +149,7 @@ actor class CanDBIndex() = this {
     let part0 = if (canisterIds == []) {
       await* createStorageCanister(pk, ownersOrSelf());
     } else {
-      canisterIds[canisterIds.size() - 1]
+      canisterIds[canisterIds.size() - 1];
     };
     let part: CanDBPartition2.CanDBPartition = actor(part0);
     await part.put(options);
