@@ -142,24 +142,30 @@ actor class CanDBIndex() = this {
   };
 
   // Put to a canister. It may create duplicates.
-  public shared({caller}) func putNew(pk: Entity.PK, options: CanDB.PutOptions): async () {
-    checkCaller(caller);
+  // public shared({caller}) func putNew(pk: Entity.PK, options: CanDB.PutOptions): async () {
+  //   checkCaller(caller);
 
-    let canisterIds = getCanisterIdsIfExists(pk);
-    let part0 = if (canisterIds == []) {
-      await* createStorageCanister(pk, ownersOrSelf());
-    } else {
-      canisterIds[canisterIds.size() - 1];
-    };
-    let part: CanDBPartition2.CanDBPartition = actor(part0);
-    await part.put(options);
-  };
+  //   let canisterIds = getCanisterIdsIfExists(pk);
+  //   let part0 = if (canisterIds == []) {
+  //     await* createStorageCanister(pk, ownersOrSelf());
+  //   } else {
+  //     canisterIds[canisterIds.size() - 1];
+  //   };
+  //   let part: CanDBPartition2.CanDBPartition = actor(part0);
+  //   await part.put(options);
+  // };
 
   // FIXME: race conditions?
   /// This function may be slow, because it tries all canisters in a partition.
-  public shared({caller}) func putNewNoDuplicates(pk: Entity.PK, options: CanDB.PutOptions): async () {
+  public shared({caller}) func putNoDuplicates(pk: Entity.PK, options: CanDB.PutOptions): async () {
     checkCaller(caller);
 
+    let partition = await* putNoDuplicatesCanister(pk, options);
+    await partition.put({sk = options.sk; attributes = options.attributes});
+  };
+
+  /// This function may be slow, because it tries all canisters in a partition.
+  func putNoDuplicatesCanister(pk: Entity.PK, options: CanDB.PutOptions): async* CanDBPartition.CanDBPartition {
     // Do parallel search in existing canisters:
     let canisterIds = getCanisterIdsIfExists(pk);
     let threads : [var ?(async())] = Array.init(canisterIds.size(), null);
@@ -187,7 +193,7 @@ actor class CanDBIndex() = this {
       await t;
     };
 
-    let partition = switch (foundInCanister) {
+    switch (foundInCanister) {
       case (?foundInCanister) {
         actor(canisterIds[foundInCanister]): CanDBPartition.CanDBPartition;
       };
@@ -196,6 +202,5 @@ actor class CanDBIndex() = this {
         actor(newStorageCanisterId): CanDBPartition.CanDBPartition;
       };
     };
-    await partition.put({sk = options.sk; attributes = options.attributes});
   };
 }
