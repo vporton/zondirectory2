@@ -20,6 +20,7 @@ import StableBuffer "mo:StableBuffer/StableBuffer";
 import Payments "payments";
 import NacDbPartition "../storage/NacDBPartition";
 import lib "lib";
+import config "../../config";
 
 shared actor class ZonBackend() = this {
   /// External Canisters ///
@@ -80,6 +81,9 @@ shared actor class ZonBackend() = this {
 
   // anti-Sybil verification
   public shared({caller}) func verifyUser(sybilCanister: ?Principal): async () {
+    if (config.skipSybil) {
+      return;
+    };
     let verifyActor = actor(phoneNumberVerificationCanisterId): actor {
       is_phone_number_approved(principal: Text) : async Bool;
     };
