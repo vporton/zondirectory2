@@ -29,11 +29,7 @@ shared actor class ZonBackend() = this {
 
   /// Some Global Variables ///
 
-  // "s/" - anti-sybil // FIXME: Merge with u/?
-  // "u/" - Principal -> User
-  // "i/" - ID -> Item
-  // "a/" - user -> <buyer affiliate>/<seller affiliate>
-  // "r/<CATEGORY>/<ITEM>" - which items were addeded to which categories (both time and votes streams)
+  // See ARCHITECTURE.md for database structure
 
   // TODO: Avoid duplicate user nick names.
 
@@ -79,6 +75,9 @@ shared actor class ZonBackend() = this {
 
   /// Users ///
 
+  // Callback (no need to check the caller).
+  public shared func _antiSybilMark(_: ?Entity.AttributeValue): async Entity.AttributeValue { #bool true };
+
   // anti-Sybil verification
   public shared({caller}) func verifyUser(sybilCanister: ?Principal): async () {
     if (config.skipSybil) {
@@ -92,10 +91,15 @@ shared actor class ZonBackend() = this {
       switch (sybilCanister) {
         case (?sybilCanister) {
           var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
-          await db.put({sk = "s/" # Principal.toText(caller); attributes = [("v", #bool true)]});
+          await db.transformAttribute(
+            "u/" # Principal.toText(caller),
+            "s",
+            _antiSybilMark,
+          );
         };
         case null {
           // FIXME: Check that there was no user with this principal.
+          // FIXME: new interface
           await CanDBIndex.putNew("user", {sk = "s/" # Principal.toText(caller); attributes = [("v", #bool true)]});
         };
       }

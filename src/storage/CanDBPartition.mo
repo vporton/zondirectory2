@@ -101,8 +101,8 @@ shared actor class CanDBPartition({
   //   };
   // };
 
-  public shared({caller}) func getAttribute(options: CanDB.PutOptions, subkey: Text): async ?Entity.AttributeValue {
-    checkCaller(caller);
+  public query func getAttribute(options: CanDB.GetOptions, subkey: Text): async ?Entity.AttributeValue {
+    // checkCaller(caller);
 
     let all = CanDB.get(db, options);
     do ? { RBT.get(all!.attributes, Text.compare, subkey)! };

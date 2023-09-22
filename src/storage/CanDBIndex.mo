@@ -15,6 +15,7 @@ import Array "mo:base/Array";
 import Int "mo:base/Int";
 import CanDB "mo:candb/CanDB";
 import Entity "mo:candb/Entity";
+import Canister "mo:matchers/Canister";
 
 actor class CanDBIndex() = this {
   stable var owners: [Principal] = [];
@@ -148,5 +149,46 @@ actor class CanDBIndex() = this {
     };
     let part: CanDBPartition2.CanDBPartition = actor(part0);
     await part.put(options);
+  };
+
+  // FIXME: race conditions?
+  public shared({caller = creator}) func putNewNoDuplicates(pk: Entity.PK, options: CanDB.PutOptions): async () {
+    // Do parallel search in existing canisters:
+    let canisterIds = getCanisterIdsIfExists(pk);
+    let threads : [var ?(async())] = Array.init(canisterIds.size(), null);
+    var foundInCanister: ?Nat = null;
+    for (threadNum in threads.keys()) {
+      threads[threadNum] := ?(async {
+        let canister: CanDBPartition.CanDBPartition = actor(canisterIds[threadNum]);
+        switch (foundInCanister) {
+          case (?foundInCanister) {
+            if (foundInCanister < threadNum) {
+              return; // eliminate unnecessary work.
+            };
+          };
+          case null {};
+        };
+        if (await canister.skExists(options.sk)) {
+          foundInCanister := ?threadNum;
+        };
+      });
+    };
+    for (topt in threads.vals()) {
+      let ?t = topt else {
+        Debug.trap("programming error: threads");
+      };
+      await t;
+    };
+
+    let partition = switch (foundInCanister) {
+      case (?foundInCanister) {
+        actor(canisterIds[foundInCanister]): CanDBPartition.CanDBPartition;
+      };
+      case null {
+        let newStorageCanisterId = await* createStorageCanister(pk, ownersOrSelf());
+        actor(newStorageCanisterId): CanDBPartition.CanDBPartition;
+      };
+    };
+    await partition.put({sk = options.sk; attributes = options.attributes});
   };
 }

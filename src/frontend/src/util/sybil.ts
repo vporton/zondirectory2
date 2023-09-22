@@ -27,7 +27,7 @@ export async function obtainSybilCanister() {
     for(;;) {
         let sybilResults = await canDBPartitionClient.query<CanDBPartition["get"]>(
             "sybil", // pk
-            actor => actor.get({sk: "s/" + principal}),
+            actor => actor.getAttribute("u/" + principal, "s"),
         );
         let search = () => {
             for (let settledResult of sybilResults) {

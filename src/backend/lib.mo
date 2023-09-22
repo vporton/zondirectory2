@@ -347,7 +347,7 @@ module {
       return;
     };
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
-    switch (await db.get({sk = "s/" # Principal.toText(user)})) {
+    switch (await db.getAttribute({sk = "u/" # Principal.toText(user)}, "s")) {
       case (null) {
         Debug.trap("not verified user");
       };
