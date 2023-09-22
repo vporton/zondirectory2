@@ -84,12 +84,14 @@ shared actor class ZonBackend() = this {
       is_phone_number_approved(principal: Text) : async Bool;
     };
     if (await verifyActor.is_phone_number_approved(Principal.toText(caller))) {
+      // FIXME: Use User object from "u/" instead.
       switch (sybilCanister) {
         case (?sybilCanister) {
           var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
           await db.put({sk = "s/" # Principal.toText(caller); attributes = [("v", #bool true)]});
         };
         case null {
+          // FIXME: Check that there was no user with this principal.
           await CanDBIndex.putNew("user", {sk = "s/" # Principal.toText(caller); attributes = [("v", #bool true)]});
         };
       }
