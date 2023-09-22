@@ -91,7 +91,7 @@ shared actor class ZonBackend() = this {
       switch (sybilCanister) {
         case (?sybilCanister) {
           var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
-          await db.transformAttribute(
+          await db.transformAttribute( // FIXME: This can create a duplicate.
             "u/" # Principal.toText(caller),
             "s",
             _antiSybilMark,
