@@ -215,85 +215,63 @@ module {
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
         var pos = 0;
-        var num = 0;
-        while (pos < arr.size()) {
-          switch (num) {
-            case (0) {
-              switch (arr[pos]) {
-                case (#int v) {
-                  kind := Int.abs(v);
-                };
-                case _ { break r false };
-              };
-              pos += 1;
-            };
-            case (1) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  creator := ?Principal.fromText(v);
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case (2) {
-              switch (arr[pos]) {
-                case (#float v) {
-                  price := v;
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case (3) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  locale := v;
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case (4) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  nick := v;
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case (5) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  title := v;
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case (6) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  description := v;
-                };
-                case _ { break r false; }
-              };
-              pos += 1;
-            };
-            case (7) {
-              switch (arr[pos]) {
-                case (#text v) {
-                  linkOrText := v;
-                };
-                case _ { break r false; };
-              };
-              pos += 1;
-            };
-            case _ { break r false; };
+        switch (arr[pos]) {
+          case (#int v) {
+            kind := Int.abs(v);
           };
-          num += 1;
+          case _ { break r false };
         };
+        pos += 1;
+        switch (arr[pos]) {
+          case (#text v) {
+            creator := ?Principal.fromText(v);
+          };
+          case _ { break r false; };
+        };
+        pos += 1;
+        switch (arr[pos]) {
+          case (#float v) {
+            price := v;
+          };
+          case _ { break r false; };
+        };
+        pos += 1;
+        switch (arr[pos]) {
+          case (#text v) {
+            locale := v;
+          };
+          case _ { break r false; };
+        };
+        pos += 1;
+        switch (arr[pos]) {
+          case (#text v) {
+            nick := v;
+          };
+          case _ { break r false; };
+        };
+        pos += 1;
+        switch (arr[pos]) {
+          case (#text v) {
+            title := v;
+          };
+          case _ { break r false; };
+        };
+        pos += 1;
+        switch (arr[pos]) {
+          case (#text v) {
+            description := v;
+          };
+          case _ { break r false; }
+        };
+        pos += 1;
+        switch (arr[pos]) {
+          case (#text v) {
+            linkOrText := v;
+          };
+          case _ { break r false; };
+        };
+        pos += 1;
+
         true;
       };
       case _ {
