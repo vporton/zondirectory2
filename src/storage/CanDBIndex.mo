@@ -156,7 +156,7 @@ actor class CanDBIndex() = this {
   // };
 
   // FIXME: race conditions?
-  /// This function may be slow, because it tries all canisters in a partition.
+  /// This function may be slow, because it tries all canisters in a partition, if `hint == null`.
   public shared({caller}) func putNoDuplicates(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async () {
     checkCaller(caller);
 
@@ -164,7 +164,7 @@ actor class CanDBIndex() = this {
     await partition.put({sk = options.sk; attributes = options.attributes});
   };
 
-  /// This function may be slow, because it tries all canisters in a partition.
+  /// This function may be slow, because it tries all canisters in a partition, if `hint == null`.
   func putNoDuplicatesCanister(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async* CanDBPartition.CanDBPartition {
     switch (hint) {
       case (?hint) {
