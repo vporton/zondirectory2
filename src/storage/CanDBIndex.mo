@@ -141,18 +141,23 @@ actor class CanDBIndex() = this {
     newStorageCanisterId;
   };
 
-  // Put to a DB. It does not ensure no duplicates.
+  // TODO: Add `hint` argument?
+  /// Put to a DB. It does not ensure no duplicates.
   public shared({caller}) func putNew(pk: Entity.PK, options: CanDB.PutOptions): async () {
     checkCaller(caller);
 
+    let partition = await* putNewCanister(pk, options);
+    await partition.put(options);
+  };
+
+  func putNewCanister(pk: Entity.PK, options: CanDB.PutOptions): async* CanDBPartition.CanDBPartition {
     let canisterIds = getCanisterIdsIfExists(pk);
     let part0 = if (canisterIds == []) {
       await* createStorageCanister(pk, ownersOrSelf());
     } else {
       canisterIds[canisterIds.size() - 1];
     };
-    let part: CanDBPartition2.CanDBPartition = actor(part0);
-    await part.put(options);
+    actor(part0);
   };
 
   // FIXME: race conditions?
@@ -160,12 +165,23 @@ actor class CanDBIndex() = this {
   public shared({caller}) func putNoDuplicates(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async () {
     checkCaller(caller);
 
-    let partition = await* putNoDuplicatesCanister(pk, options, hint);
+    let partition = await* getExistingOrNewCanister(pk, options, hint);
     await partition.put({sk = options.sk; attributes = options.attributes});
   };
 
   /// This function may be slow, because it tries all canisters in a partition, if `hint == null`.
-  func putNoDuplicatesCanister(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async* CanDBPartition.CanDBPartition {
+  func getExistingOrNewCanister(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async* CanDBPartition.CanDBPartition {
+    let existing = await* getExistingCanister(pk, options, hint);
+    switch (existing) {
+      case (?existing) { existing };
+      case null {
+        let newStorageCanisterId = await* createStorageCanister(pk, ownersOrSelf());
+        actor(newStorageCanisterId);
+      }
+    }
+  };
+
+  func getExistingCanister(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async* ?CanDBPartition.CanDBPartition {
     switch (hint) {
       case (?hint) {
         let canister: CanDBPartition.CanDBPartition = actor(Principal.toText(hint));
@@ -214,5 +230,16 @@ actor class CanDBIndex() = this {
         actor(newStorageCanisterId): CanDBPartition.CanDBPartition;
       };
     };
+  };
+
+  // FIXME
+  public shared({caller}) func transform(
+    sk: Entity.SK,
+    modifier: shared(value: ?Entity.AttributeMap) -> async [(Entity.AttributeKey, Entity.AttributeValue)]): async ()
+  {
+    checkCaller(caller);
+
+    let all = do ? { !.attributes };
+    await* CanDB.put(db, {sk; attributes = await modifier(all)})
   };
 }
