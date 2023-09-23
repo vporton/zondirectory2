@@ -141,19 +141,19 @@ actor class CanDBIndex() = this {
     newStorageCanisterId;
   };
 
-  // Put to a canister. It may create duplicates.
-  // public shared({caller}) func putNew(pk: Entity.PK, options: CanDB.PutOptions): async () {
-  //   checkCaller(caller);
+  // Put to a DB. It does not ensure no duplicates.
+  public shared({caller}) func putNew(pk: Entity.PK, options: CanDB.PutOptions): async () {
+    checkCaller(caller);
 
-  //   let canisterIds = getCanisterIdsIfExists(pk);
-  //   let part0 = if (canisterIds == []) {
-  //     await* createStorageCanister(pk, ownersOrSelf());
-  //   } else {
-  //     canisterIds[canisterIds.size() - 1];
-  //   };
-  //   let part: CanDBPartition2.CanDBPartition = actor(part0);
-  //   await part.put(options);
-  // };
+    let canisterIds = getCanisterIdsIfExists(pk);
+    let part0 = if (canisterIds == []) {
+      await* createStorageCanister(pk, ownersOrSelf());
+    } else {
+      canisterIds[canisterIds.size() - 1];
+    };
+    let part: CanDBPartition2.CanDBPartition = actor(part0);
+    await part.put(options);
+  };
 
   // FIXME: race conditions?
   /// This function may be slow, because it tries all canisters in a partition, if `hint == null`.
