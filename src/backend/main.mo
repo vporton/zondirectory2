@@ -87,6 +87,7 @@ shared actor class ZonBackend() = this {
       is_phone_number_approved(principal: Text) : async Bool;
     };
     if (await verifyActor.is_phone_number_approved(Principal.toText(caller))) {
+      // TODO: No need to store this value: instead just call `is_phone_number_approved`.
       await CanDBIndex.transformAttrubuteNoDuplicates({
         pk = "user";
         sk = "u/" # Principal.toText(caller);

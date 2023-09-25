@@ -32,8 +32,8 @@ let
       , dependencies = [ "base" ]
       },
       { name = "candb"
-      , repo = "git@github.com:canscale/CanDB.git"
-      , version = "beta"
+      , repo = "git@github.com:vporton/CanDB.git"
+      , version = "no-blob"
       , dependencies = [ "base", "candy" ]
       },
       { name = "nacdb"
