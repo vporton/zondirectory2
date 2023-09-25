@@ -3,6 +3,7 @@
 - Unittests for (de)serialize.
 
 - Llama-2 canister for moderation.
+  https://forum.dfinity.org/t/llama2-c-llm-running-in-a-canister/21991?u=ang
 
 - Scalable architecture to store phone numbers for Sybil.
 
