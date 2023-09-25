@@ -141,23 +141,12 @@ actor class CanDBIndex() = this {
     newStorageCanisterId;
   };
 
-  // TODO: Add `hint` argument?
   /// Put to a DB. It does not ensure no duplicates.
-  public shared({caller}) func putNew(pk: Entity.PK, options: CanDB.PutOptions): async () {
+  public shared({caller}) func putWithHint(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async () {
     checkCaller(caller);
 
-    let partition = await* putNewCanister(pk, options);
+    let partition = await* getExistingOrNewCanister(pk, options, hint);
     await partition.put(options);
-  };
-
-  func putNewCanister(pk: Entity.PK, options: CanDB.PutOptions): async* CanDBPartition.CanDBPartition {
-    let canisterIds = getCanisterIdsIfExists(pk);
-    let part0 = if (canisterIds == []) {
-      await* createStorageCanister(pk, ownersOrSelf());
-    } else {
-      canisterIds[canisterIds.size() - 1];
-    };
-    actor(part0);
   };
 
   // FIXME: race conditions?
@@ -169,8 +158,46 @@ actor class CanDBIndex() = this {
     await partition.put({sk = options.sk; attributes = options.attributes});
   };
 
+  public shared({caller}) func transformWithHint({
+    pk: Entity.PK;
+    sk: Entity.SK;
+    modifier: shared(value: ?Entity.AttributeMap) -> async [(Entity.AttributeKey, Entity.AttributeValue)];
+    hint: ?Principal;
+  }): async () {
+    checkCaller(caller);
+ 
+    let partition = await* lastCanister(pk);
+    let all = do ? { (await partition.get({sk}))!.attributes };
+    await partition.put({sk; attributes = await modifier(all)});
+  };
+
+  public shared({caller}) func transformNoDuplicates({
+    pk: Entity.PK;
+    sk: Entity.SK;
+    modifier: shared(value: ?Entity.AttributeMap) -> async [(Entity.AttributeKey, Entity.AttributeValue)];
+    hint: ?Principal;
+  }): async () {
+    checkCaller(caller);
+ 
+    let partition = await* getExistingOrNewCanister(pk, {sk}, hint);
+    let all = do ? { (await partition.get({sk}))!.attributes };
+    await partition.put({sk; attributes = await modifier(all)});
+  };
+
+  // Private functions for getting canisters //
+
+  func lastCanister(pk: Entity.PK): async* CanDBPartition.CanDBPartition {
+    let canisterIds = getCanisterIdsIfExists(pk);
+    let part0 = if (canisterIds == []) {
+      await* createStorageCanister(pk, ownersOrSelf());
+    } else {
+      canisterIds[canisterIds.size() - 1];
+    };
+    actor(part0);
+  };
+
   /// This function may be slow, because it tries all canisters in a partition, if `hint == null`.
-  func getExistingOrNewCanister(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async* CanDBPartition.CanDBPartition {
+  func getExistingOrNewCanister(pk: Entity.PK, options: CanDB.GetOptions, hint: ?Principal): async* CanDBPartition.CanDBPartition {
     let existing = await* getExistingCanister(pk, options, hint);
     switch (existing) {
       case (?existing) { existing };
@@ -181,12 +208,12 @@ actor class CanDBIndex() = this {
     }
   };
 
-  func getExistingCanister(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async* ?CanDBPartition.CanDBPartition {
+  func getExistingCanister(pk: Entity.PK, options: CanDB.GetOptions, hint: ?Principal): async* ?CanDBPartition.CanDBPartition {
     switch (hint) {
       case (?hint) {
         let canister: CanDBPartition.CanDBPartition = actor(Principal.toText(hint));
         if (await canister.skExists(options.sk)) {
-          return canister;
+          return ?canister;
         } else {
           Debug.trap("wrong DB partition hint");
         };
@@ -223,23 +250,12 @@ actor class CanDBIndex() = this {
 
     switch (foundInCanister) {
       case (?foundInCanister) {
-        actor(canisterIds[foundInCanister]): CanDBPartition.CanDBPartition;
+        ?(actor(canisterIds[foundInCanister]): CanDBPartition.CanDBPartition);
       };
       case null {
         let newStorageCanisterId = await* createStorageCanister(pk, ownersOrSelf());
-        actor(newStorageCanisterId): CanDBPartition.CanDBPartition;
+        ?(actor(newStorageCanisterId): CanDBPartition.CanDBPartition);
       };
     };
-  };
-
-  // FIXME
-  public shared({caller}) func transform(
-    sk: Entity.SK,
-    modifier: shared(value: ?Entity.AttributeMap) -> async [(Entity.AttributeKey, Entity.AttributeValue)]): async ()
-  {
-    checkCaller(caller);
-
-    let all = do ? { !.attributes };
-    await* CanDB.put(db, {sk; attributes = await modifier(all)})
   };
 }
