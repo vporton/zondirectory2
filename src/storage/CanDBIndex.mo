@@ -174,10 +174,12 @@ actor class CanDBIndex() = this {
   };
 
   func _transformAttribute({
+    partition: CanDBPartition.CanDBPartition;
     sk: Entity.SK;
     subkey: Text;
-    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue): async (),
+    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue;
   }): async* () {
+    // TODO: duplicate code
     let all = do ? { (await partition.get({sk}))!.attributes };
     let new = switch (all) {
       case (?all) {
@@ -188,7 +190,7 @@ actor class CanDBIndex() = this {
         let newAll = Buffer.fromArray<(Entity.AttributeKey, Entity.AttributeValue)>(filteredArray);
         let old = RBT.get(all, Text.compare, subkey);
         let modified = await modifier(old);
-        newAll.add((subkey, modified));
+        Buffer.add(newAll, (subkey, modified));
         Buffer.toArray(newAll);
       };
       case null {
@@ -197,32 +199,32 @@ actor class CanDBIndex() = this {
       };
     };
     await partition.put({sk; attributes = new});
-  }
+  };
 
   public shared({caller}) func transformAttrubuteWithHint({
     pk: Entity.PK;
     sk: Entity.SK;
     subkey: Text;
-    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue): async (),
+    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue;
     hint: ?Principal;
   }): async () {
     checkCaller(caller);
  
-    let partition = await* getLastCanister(pk);
-    await* _transformAttribute({sk; subkey; modifier});
+    let partition = await* lastCanister(pk);
+    await* _transformAttribute({partition; sk; subkey; modifier});
   };
 
   public shared({caller}) func transformAttrubuteNoDuplicates({
     pk: Entity.PK;
     sk: Entity.SK;
     subkey: Text;
-    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue): async (),
+    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue;
     hint: ?Principal;
   }): async () {
     checkCaller(caller);
  
     let partition = await* getExistingOrNewCanister(pk, {sk}, hint);
-    await* _transformAttribute({sk; subkey; modifier});
+    await* _transformAttribute({partition; sk; subkey; modifier});
   };
 
   /// This function may be slow, because it tries all canisters in a partition, if `hint == null`.

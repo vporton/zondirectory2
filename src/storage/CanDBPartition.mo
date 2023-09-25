@@ -125,7 +125,7 @@ shared actor class CanDBPartition({
   ): async () {
     checkCaller(caller);
 
-    // TODO: duplicate code (3 times)
+    // TODO: duplicate code
     let all = do ? { CanDB.get(db, {sk})!.attributes };
     let new = switch (all) {
       case (?all) {
