@@ -31,7 +31,7 @@ actor class CanDBIndex() = this {
 
     owners := initialOwners;
     ignore await* createStorageCanister("main", ownersOrSelf());
-    ignore await* createStorageCanister("sybil", ownersOrSelf()); // user data // FIXME: Wrong PK name.
+    ignore await* createStorageCanister("user", ownersOrSelf()); // user data
 
     initialized := true;
   };
