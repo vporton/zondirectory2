@@ -76,7 +76,7 @@ shared actor class ZonBackend() = this {
   /// Users ///
 
   // Callback (no need to check the caller).
-  public shared func _antiSybilMark(_: ?Entity.AttributeValue): async Entity.AttributeValue { #bool true };
+  public shared func _antiSybilMark(_: ?CanDBIndex.AttributeValue): async CanDBIndex.AttributeValue { #bool true };
 
   // anti-Sybil verification
   public shared({caller}) func verifyUser(sybilCanister: ?Principal): async () {
@@ -87,25 +87,13 @@ shared actor class ZonBackend() = this {
       is_phone_number_approved(principal: Text) : async Bool;
     };
     if (await verifyActor.is_phone_number_approved(Principal.toText(caller))) {
-      // FIXME: Use User object from "u/" instead.
-      switch (sybilCanister) {
-        case (?sybilCanister) {
-          var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
-          await db.transformAttribute( // FIXME: This can create a duplicate.
-            "u/" # Principal.toText(caller),
-            "s",
-            _antiSybilMark,
-          );
-        };
-        case null {
-          // FIXME: Check that there was no user with this principal.
-          // FIXME: new interface
-          await CanDBIndex.putNoDuplicates(
-            "user",
-            {sk = "u/" # Principal.toText(caller); attributes = [("v", #bool true)]},
-            sybilCanister); // FIXME
-        };
-      }
+      await CanDBIndex.transformAttrubuteNoDuplicates({
+        pk = "user";
+        sk = "u/" # Principal.toText(caller);
+        subkey = "s";
+        modifier = _antiSybilMark;
+        hint = sybilCanister;
+      });
     } else {
       Debug.trap("cannot verify phone number");
     };
