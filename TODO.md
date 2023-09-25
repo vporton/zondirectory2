@@ -2,6 +2,8 @@
 
 - Unittests for (de)serialize.
 
+- Llama-2 canister for moderation.
+
 - Scalable architecture to store phone numbers for Sybil.
 
 - Store the total number of likes of an item. It is needed to sort items when autocomplete.
