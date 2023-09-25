@@ -79,23 +79,14 @@ shared actor class ZonBackend() = this {
   public shared func _antiSybilMark(_: ?CanDBIndex.AttributeValue): async CanDBIndex.AttributeValue { #bool true };
 
   // anti-Sybil verification
-  public shared({caller}) func verifyUser(sybilCanister: ?Principal): async () {
+  public shared({caller}) func verifyUser(): async () {
     if (config.skipSybil) {
       return;
     };
     let verifyActor = actor(phoneNumberVerificationCanisterId): actor {
       is_phone_number_approved(principal: Text) : async Bool;
     };
-    if (await verifyActor.is_phone_number_approved(Principal.toText(caller))) {
-      // TODO: No need to store this value: instead just call `is_phone_number_approved`.
-      await CanDBIndex.transformAttrubuteNoDuplicates({
-        pk = "user";
-        sk = "u/" # Principal.toText(caller);
-        subkey = "s";
-        modifier = _antiSybilMark;
-        hint = sybilCanister;
-      });
-    } else {
+    if (not(await verifyActor.is_phone_number_approved(Principal.toText(caller)))) {
       Debug.trap("cannot verify phone number");
     };
   };
