@@ -121,10 +121,11 @@ shared actor class CanDBPartition({
   public shared({caller}) func transformAttribute(
     sk: Entity.SK,
     subkey: Entity.AttributeKey,
-    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue): async ()
-  {
+    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue
+  ): async () {
     checkCaller(caller);
 
+    // TODO: duplicate code (3 times)
     let all = do ? { CanDB.get(db, {sk})!.attributes };
     let new = switch (all) {
       case (?all) {

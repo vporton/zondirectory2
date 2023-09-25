@@ -100,7 +100,10 @@ shared actor class ZonBackend() = this {
         case null {
           // FIXME: Check that there was no user with this principal.
           // FIXME: new interface
-          await CanDBIndex.putNoDuplicates("user", {sk = "u/" # Principal.toText(caller); attributes = [("v", #bool true)]}); // FIXME
+          await CanDBIndex.putNoDuplicates(
+            "user",
+            {sk = "u/" # Principal.toText(caller); attributes = [("v", #bool true)]},
+            sybilCanister); // FIXME
         };
       }
     } else {

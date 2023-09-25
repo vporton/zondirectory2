@@ -1,3 +1,4 @@
+import RBT "mo:stable-rbtree/StableRBTree";
 import Cycles "mo:base/ExperimentalCycles";
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
@@ -13,6 +14,7 @@ import Principal "mo:base/Principal";
 import Hash "mo:base/Hash";
 import Array "mo:base/Array";
 import Int "mo:base/Int";
+import Iter "mo:base/Iter";
 import CanDB "mo:candb/CanDB";
 import Entity "mo:candb/Entity";
 import Canister "mo:matchers/Canister";
@@ -171,6 +173,59 @@ actor class CanDBIndex() = this {
     await partition.put({sk; attributes = await modifier(all)});
   };
 
+  func _transformAttribute({
+    sk: Entity.SK;
+    subkey: Text;
+    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue): async (),
+  }): async* () {
+    let all = do ? { (await partition.get({sk}))!.attributes };
+    let new = switch (all) {
+      case (?all) {
+        let filtered = Iter.filter<(Entity.AttributeKey, Entity.AttributeValue)>(
+          RBT.entries<Entity.AttributeKey, Entity.AttributeValue>(all),
+          func((k,v): (Entity.AttributeKey, Entity.AttributeValue)) { k != subkey });
+        let filteredArray = Iter.toArray(filtered);
+        let newAll = Buffer.fromArray<(Entity.AttributeKey, Entity.AttributeValue)>(filteredArray);
+        let old = RBT.get(all, Text.compare, subkey);
+        let modified = await modifier(old);
+        newAll.add((subkey, modified));
+        Buffer.toArray(newAll);
+      };
+      case null {
+        let modified = await modifier(null);
+        [(subkey, modified)];
+      };
+    };
+    await partition.put({sk; attributes = new});
+  }
+
+  public shared({caller}) func transformAttrubuteWithHint({
+    pk: Entity.PK;
+    sk: Entity.SK;
+    subkey: Text;
+    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue): async (),
+    hint: ?Principal;
+  }): async () {
+    checkCaller(caller);
+ 
+    let partition = await* getLastCanister(pk);
+    await* _transformAttribute({sk; subkey; modifier});
+  };
+
+  public shared({caller}) func transformAttrubuteNoDuplicates({
+    pk: Entity.PK;
+    sk: Entity.SK;
+    subkey: Text;
+    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue): async (),
+    hint: ?Principal;
+  }): async () {
+    checkCaller(caller);
+ 
+    let partition = await* getExistingOrNewCanister(pk, {sk}, hint);
+    await* _transformAttribute({sk; subkey; modifier});
+  };
+
+  /// This function may be slow, because it tries all canisters in a partition, if `hint == null`.
   public shared({caller}) func transformNoDuplicates({
     pk: Entity.PK;
     sk: Entity.SK;
