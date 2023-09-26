@@ -3,10 +3,10 @@ export default class MockData {
     locale() {
         return 'en';
     }
-    folderName() {
+    title() {
         return "The Homepage";
     }
-    folderDescription() {
+    description() {
         return null;
     }
     subCategories() {

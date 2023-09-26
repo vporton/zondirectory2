@@ -9,8 +9,8 @@ export default function ShowFolder() {
     const data = new AppData(id);
     return (
         <>
-            <h2>Folder: <span lang={data.locale()}>{data.folderName()}</span></h2>
-            {data.folderDescription() ? <p lang={data.locale()}>{data.folderDescription()}</p> : ""}
+            <h2>Folder: <span lang={data.locale()}>{data.title()}</span></h2>
+            {data.description() ? <p lang={data.locale()}>{data.description()}</p> : ""}
             <h3>Sub-categories</h3>
             <ul>
                 {take(data.subCategories(), 3).map(x => <li lang={x.locale} key={x.id}>

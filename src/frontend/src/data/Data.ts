@@ -1,18 +1,20 @@
 // TODO
 export default class AppData {
-    folderId: number;
-    constructor(folderId) {
-        this.folderId = folderId;
+    itemId: number;
+    item: Item;
+    constructor(itemId) {
+        this.itemId = itemId;
     }
     locale() {
         return 'en';
     }
-    folderName() {
+    title() {
         return "The Homepage";
     }
-    folderDescription() {
+    description() {
         return null;
     }
+    // FIXME: For non-folders, no distinction between `subCategories` and `items` (or better no subcategories?)
     subCategories() {
         return [
             {id: 1, locale: "en", title: "Climate change", type: 'public'},
