@@ -104,7 +104,7 @@ actor class Payments() = this {
 
   type IncomingPayment = {
     kind: { #payment; #donation };
-    itemId: Nat64;
+    itemId: Nat;
     amount: ICRC1Types.Balance;
     var time: ?Time.Time;
   };
@@ -220,7 +220,7 @@ actor class Payments() = this {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(paymentCanisterId));
     switch (BTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
       case (?payment) {
-        let itemKey = "i/" # Nat64.toText(payment.itemId);
+        let itemKey = "i/" # lib.encodeInt(payment.itemId);
         switch (await db.getAttribute({sk = itemKey}, "i")) {
           case (?itemRepr) {
             let item = lib.deserializeItem(itemRepr);

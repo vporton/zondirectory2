@@ -191,7 +191,7 @@ shared actor class ZonBackend() = this {
   // FIXME: Uncomment.
   // public shared func getItemData(canisterId: Principal, _itemId: Nat64): async ?lib.ItemWithoutOwner {
   //   var part: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-  //   let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId));
+  //   let key = "i/" # lib.encodeInt(_itemId);
   //   lib.deserializeItem(await part.get({sk = key}));
   // };
 
@@ -204,7 +204,7 @@ shared actor class ZonBackend() = this {
     let _itemId = maxId;
     maxId += 1;
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
+    let key = "i/" # lib.encodeInt(_itemId);
     await db.putAttribute(key, "i", lib.serializeItem(item2));
     (canisterId, key);
   };
@@ -212,7 +212,7 @@ shared actor class ZonBackend() = this {
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
   public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat64, item: lib.ItemWithoutOwner) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
+    let key = "i/" # lib.encodeInt(_itemId); // TODO: Should use binary encoding.
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
@@ -239,7 +239,7 @@ shared actor class ZonBackend() = this {
   // TODO: Also remove voting data.
   public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat64) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
+    let key = "i/" # lib.encodeInt(_itemId); // TODO: Should use binary encoding.
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
