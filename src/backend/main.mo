@@ -73,9 +73,6 @@ shared actor class ZonBackend() = this {
 
   /// Users ///
 
-  // Callback (no need to check the caller).
-  public shared func _antiSybilMark(_: ?CanDBIndex.AttributeValue): async CanDBIndex.AttributeValue { #bool true };
-
   // anti-Sybil verification
   public shared({caller}) func verifyUser(): async () {
     await* lib.checkSybil(caller);
