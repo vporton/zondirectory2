@@ -212,7 +212,7 @@ shared actor class ZonBackend() = this {
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
   public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat, item: lib.ItemWithoutOwner) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # lib.encodeInt(_itemId); // TODO: Should use binary encoding.
+    let key = "i/" # lib.encodeInt(_itemId);
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
