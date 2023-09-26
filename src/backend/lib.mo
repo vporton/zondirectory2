@@ -292,7 +292,7 @@ module {
     };
   };
 
-  func deserializeStreams(attr: Entity.AttributeValue): Streams {
+  public func deserializeStreams(attr: Entity.AttributeValue): Streams {
     label r switch (attr) {
       case (#tuple arr) {
         var pos = 0;

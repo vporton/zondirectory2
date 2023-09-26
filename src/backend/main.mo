@@ -99,7 +99,7 @@ shared actor class ZonBackend() = this {
     link : Text;
   };
 
-  public func serializeUser(user: User): Entity.AttributeValue {
+  func serializeUser(user: User): Entity.AttributeValue {
     var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(5);
     buf.add(#text (user.locale));
     buf.add(#text (user.nick));
@@ -109,7 +109,7 @@ shared actor class ZonBackend() = this {
     #tuple (Buffer.toArray(buf));
   };
 
-  public func deserializeUser(attr: Entity.AttributeValue): User {
+  func deserializeUser(attr: Entity.AttributeValue): User {
     var locale = "";
     var nick = "";
     var title = "";
@@ -186,7 +186,7 @@ shared actor class ZonBackend() = this {
     await* lib.checkSybil(sybilCanisterId, caller);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-    await db.put({sk = key; attributes = serializeUser(_user)});
+    await db.putAttribute(key, "u", serializeUser(_user));
   };
 
   // TODO: Should also remove all his/her items?
@@ -215,7 +215,7 @@ shared actor class ZonBackend() = this {
     maxId += 1;
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
-    await db.putAttribute({pk = "main"; sk = key}, lib.serializeItem(item2));
+    await db.putAttribute(key, "i", lib.serializeItem(item2));
     (canisterId, key);
   };
 
@@ -223,9 +223,9 @@ shared actor class ZonBackend() = this {
   public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat64, item: lib.ItemWithoutOwner) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
-    switch (await db.get({sk = key})) {
+    switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
-        let oldItem = lib.deserializeItem(oldItemRepr.attributes);
+        let oldItem = lib.deserializeItem(oldItemRepr);
         if (caller != oldItem.creator) {
           Debug.trap("can't change item owner");
         };
@@ -240,7 +240,7 @@ shared actor class ZonBackend() = this {
           case _ {};
         };
         lib.onlyItemOwner(caller, oldItem);
-        await db.put({sk = key; attributes = lib.serializeItem(_item)});
+        await db.putAttribute(key, "i", lib.serializeItem(_item));
       };
       case _ { Debug.trap("no item") };
     };
@@ -250,9 +250,9 @@ shared actor class ZonBackend() = this {
   public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat64) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
-    switch (await db.get({sk = key})) {
+    switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
-        let oldItem = lib.deserializeItem(oldItemRepr.attributes);
+        let oldItem = lib.deserializeItem(oldItemRepr);
         switch (oldItem.item.details) {
           case (#communalCategory) {
             Debug.trap("it's communal");
