@@ -1,3 +1,4 @@
+import xNat "mo:xtendedNumbers/NatX";
 import Nac "mo:nacdb/NacDB";
 import NacDBPartition "../storage/NacDBPartition";
 import RBT "mo:stable-rbtree/StableRBTree";
@@ -83,7 +84,7 @@ module {
     var result: Nat64 = 0;
     for (b in blob.vals()) {
       result <<= 8;
-      result += Nat64.fromNat(Nat8.toNat(b)); // TODO: possibly inefficient
+      result += xNat.from8To64(b);
     };
     Nat64.toNat(result);
   };
