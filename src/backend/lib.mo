@@ -155,7 +155,7 @@ module {
   // TODO: messy order of the below functions
 
   public func serializeItem(item: Item): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(5); // TODO: good number?
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
     buf.add(#int (switch (item.item.details) {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
