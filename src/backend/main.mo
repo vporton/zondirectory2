@@ -239,7 +239,7 @@ shared actor class ZonBackend() = this {
   // TODO: Also remove voting data.
   public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # lib.encodeInt(_itemId); // TODO: Should use binary encoding.
+    let key = "i/" # lib.encodeInt(_itemId);
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
