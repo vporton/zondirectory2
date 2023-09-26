@@ -43,7 +43,7 @@ module {
   };
 
   func encodeBlob(g: Blob): Text {
-    var result = ""; // TODO: Optimize, if possible, using a Buffer of pre-calculated size.
+    var result = "";
     for (b in g.vals()) {
       let b2 = Nat8.toNat(b);
       result #= Text.fromChar(_toLowerHexDigit(b2 / 16)) # Text.fromChar(_toLowerHexDigit(b2 % 16));
