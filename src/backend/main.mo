@@ -31,7 +31,7 @@ shared actor class ZonBackend() = this {
 
   // TODO: Avoid duplicate user nick names.
 
-  stable var maxId: Nat64 = 0;
+  stable var maxId: Nat = 0;
 
   stable var founder: ?Principal = null;
 
@@ -189,7 +189,7 @@ shared actor class ZonBackend() = this {
   /// Items ///
 
   // FIXME: Uncomment.
-  // public shared func getItemData(canisterId: Principal, _itemId: Nat64): async ?lib.ItemWithoutOwner {
+  // public shared func getItemData(canisterId: Principal, _itemId: Nat): async ?lib.ItemWithoutOwner {
   //   var part: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
   //   let key = "i/" # lib.encodeInt(_itemId);
   //   lib.deserializeItem(await part.get({sk = key}));
@@ -210,7 +210,7 @@ shared actor class ZonBackend() = this {
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
-  public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat64, item: lib.ItemWithoutOwner) {
+  public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat, item: lib.ItemWithoutOwner) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # lib.encodeInt(_itemId); // TODO: Should use binary encoding.
     switch (await db.getAttribute({sk = key}, "i")) {
@@ -237,7 +237,7 @@ shared actor class ZonBackend() = this {
   };
 
   // TODO: Also remove voting data.
-  public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat64) {
+  public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # lib.encodeInt(_itemId); // TODO: Should use binary encoding.
     switch (await db.getAttribute({sk = key}, "i")) {
