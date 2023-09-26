@@ -104,7 +104,7 @@ shared actor class Orders() = this {
     itemId: (CanDBPartition.CanDBPartition, Nat),
     sybilCanister: Principal,
   ): async () {
-    await* lib.checkSybil(sybilCanister, caller);
+    await* lib.checkSybil(caller);
 
     // TODO: The below reads&deserializes `categoryItemData` twice.
     let ?categoryItemData = await catId.0.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "i") else {
