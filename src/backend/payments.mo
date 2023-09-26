@@ -221,9 +221,9 @@ actor class Payments() = this {
     switch (BTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
       case (?payment) {
         let itemKey = "i/" # Nat64.toText(payment.itemId);
-        switch (await db.get({sk = itemKey})) {
+        switch (await db.getAttribute({sk = itemKey}, "i")) {
           case (?itemRepr) {
-            let item = lib.deserializeItem(itemRepr.attributes);
+            let item = lib.deserializeItem(itemRepr);
             let time = switch (payment.time) {
               case (?time) { time };
               case (null) {

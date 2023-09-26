@@ -133,34 +133,27 @@ module {
   public type Item = {
     creator: Principal;
     item: ItemWithoutOwner;
-    var streams: ?{
-      itemsTimeOrderSubDB: (
-        Nac.OuterCanister,
-        Nac.OuterSubDBKey,
-      );
-      categoriesTimeOrderSubDB: (
-        Nac.OuterCanister,
-        Nac.OuterSubDBKey,
-      );
-      // votesOrderSubDB: ( // TODO
-      //   Nac.OuterCanister
-      //   Nac.OuterSubDBKey,
-      // );
-    };
+  };
+
+  public type Streams = {
+    itemsTimeOrderSubDB: (
+      Nac.OuterCanister,
+      Nac.OuterSubDBKey,
+    );
+    categoriesTimeOrderSubDB: (
+      Nac.OuterCanister,
+      Nac.OuterSubDBKey,
+    );
+    // votesOrderSubDB: ( // TODO
+    //   Nac.OuterCanister
+    //   Nac.OuterSubDBKey,
+    // );
   };
 
   // TODO: messy order of the below functions
 
-  public func deserializeItem(map: Entity.AttributeMap): Item {
-    let v = RBT.get(map, Text.compare, "v");
-    switch (v) {
-      case (?v) { deserializeItemAttr(v) };
-      case _ { Debug.trap("map not found") };
-    };    
-  };
-
-  func serializeItemAttr(item: Item): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(10);
+  public func serializeItem(item: Item): Entity.AttributeValue {
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(5); // TODO: good number?
     buf.add(#int (switch (item.item.details) {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
@@ -168,11 +161,11 @@ module {
       case (#ownedCategory) { ITEM_TYPE_OWNED_CATEGORY };
       case (#communalCategory) { ITEM_TYPE_COMMUNAL_CATEGORY };
     }));
-    buf.add(#text (Principal.toText(item.creator)));
-    buf.add(#float (item.item.price));
-    buf.add(#text (item.item.locale));
-    buf.add(#text (item.item.title));
-    buf.add(#text (item.item.description));
+    buf.add(#text(Principal.toText(item.creator)));
+    buf.add(#float(item.item.price));
+    buf.add(#text(item.item.locale));
+    buf.add(#text(item.item.title));
+    buf.add(#text(item.item.description));
     switch (item.item.details) {
       case (#link v) {
         buf.add(#text v);
@@ -182,26 +175,19 @@ module {
       };
       case _ {};
     };
-    switch (item.streams) {
-      case (?streams) {
-        buf.add(#bool true);
-        buf.add(#text(Principal.toText(Principal.fromActor(streams.itemsTimeOrderSubDB.0))));
-        buf.add(#int(streams.itemsTimeOrderSubDB.1));
-        buf.add(#text(Principal.toText(Principal.fromActor(streams.categoriesTimeOrderSubDB.0))));
-        buf.add(#int(streams.categoriesTimeOrderSubDB.1));
-      };
-      case _ {
-        buf.add(#bool false);
-      };
-    };
-    #tuple (Buffer.toArray(buf));
+    #tuple(Buffer.toArray(buf));
   };
 
-  public func serializeItem(item: Item): [(Entity.AttributeKey, Entity.AttributeValue)] {
-    [("v", serializeItemAttr(item))];
+  public func serializeStreams(streams: Streams): Entity.AttributeValue {
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(4);
+    buf.add(#text(Principal.toText(Principal.fromActor(streams.itemsTimeOrderSubDB.0))));
+    buf.add(#int(streams.itemsTimeOrderSubDB.1));
+    buf.add(#text(Principal.toText(Principal.fromActor(streams.categoriesTimeOrderSubDB.0))));
+    buf.add(#int(streams.categoriesTimeOrderSubDB.1));
+    #tuple(Buffer.toArray(buf));
   };
 
-  func deserializeItemAttr(attr: Entity.AttributeValue): Item {
+  public func deserializeItem(attr: Entity.AttributeValue): Item {
     var kind: Nat = 0;
     var creator: ?Principal = null;
     var price = 0.0;
@@ -211,16 +197,6 @@ module {
     var description = "";
     var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none;
     var linkOrText = "";
-    var streams: ?{
-      itemsTimeOrderSubDB: (
-        Nac.OuterCanister,
-        Nac.OuterSubDBKey,
-      );
-      categoriesTimeOrderSubDB: (
-        Nac.OuterCanister,
-        Nac.OuterSubDBKey,
-      );
-    } = null;
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
         var pos = 0;
@@ -285,21 +261,6 @@ module {
           case _ { break r false; };
         };
         pos += 1;
-        let streams = if haveStreams {
-          ?{
-            itemsTimeOrderSubDB = switch(arr[pos], arr[pos+1]) {
-              case (#text p, #int n) { (Principal.fromText(p), n) };
-              case _ { break r false; };
-            };
-            categoriesTimeOrderSubDB = switch(arr[pos+2], arr[pos+3]) {
-              case (#text p, #int n) { (Principal.fromText(p), n) };
-              case _ { break r false; };
-            };
-          }
-        } else {
-          null;
-        };
-        pos += 4;
 
         true;
       };
@@ -328,8 +289,27 @@ module {
           case _ { Debug.trap("wrong item format"); }
         };
       };
-      var streams = streams;
     };
+  };
+
+  func deserializeStreams(attr: Entity.AttributeValue): Streams {
+    label r switch (attr) {
+      case (#tuple arr) {
+        var pos = 0;
+        return {
+          itemsTimeOrderSubDB = switch(arr[0], arr[1]) {
+            case (#text p, #int n) { (actor(p), Int.abs(n)) };
+            case _ { break r; };
+          };
+          categoriesTimeOrderSubDB = switch(arr[2], arr[3]) {
+            case (#text p, #int n) { (actor(p), Int.abs(n)) };
+            case _ { break r; };
+          };
+        };
+      };
+      case _ {};
+    };
+    Debug.trap("wrong streams descriptor format");
   };
 
   public func onlyItemOwner(caller: Principal, _item: Item) {

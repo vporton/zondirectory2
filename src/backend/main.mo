@@ -210,17 +210,24 @@ shared actor class ZonBackend() = this {
 
   /// Items ///
 
+  // FIXME: Uncomment.
+  // public shared func getItemData(canisterId: Principal, _itemId: Nat64): async ?lib.ItemWithoutOwner {
+  //   var part: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
+  //   let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId));
+  //   lib.deserializeItem(await part.get({sk = key}));
+  // };
+
   public shared({caller}) func createItemData(canisterId: Principal, _item: lib.ItemWithoutOwner, sybilCanisterId: Principal)
     : async (Principal, Text)
   {
     await* lib.checkSybil(sybilCanisterId, caller);
 
-    let item2: lib.Item = { creator = caller; item = _item; var streams = null; };
+    let item2: lib.Item = { creator = caller; item = _item; };
     let _itemId = maxId;
     maxId += 1;
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(xNat.from64ToNat(_itemId)); // TODO: Should use binary encoding.
-    await db.put({sk = key; attributes = lib.serializeItem(item2)});
+    await db.putAttribute({pk = "main"; sk = key}, lib.serializeItem(item2));
     (canisterId, key);
   };
 

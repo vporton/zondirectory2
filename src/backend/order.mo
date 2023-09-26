@@ -181,10 +181,11 @@ shared actor class Orders() = this {
     //   Nat,
     // );
   } {
-    let ?itemData = await itemId.0.get({sk = "i/" # Nat.toText(itemId.1)}) else {
-      Debug.trap("cannot get category item");
+    // FIXME: May be null.
+    let ?itemData = await itemId.0.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "s") else {
+      Debug.trap("cannot get streams");
     };
-    let item = lib.deserializeItem(itemData.attributes);
+    let item = lib.deserializeStreams(itemData.attributes);
     let guid = GUID.nextGuid(guidGen);
     switch (item.streams) {
       case (?data) { data };
@@ -192,8 +193,8 @@ shared actor class Orders() = this {
         let { outer = itemsTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""}); // TODO: Why is `toArray` necessary?
         let { outer = categoriesTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""}); // TODO: Why is `toArray` necessary?
         item.streams := ?{itemsTimeOrderSubDB; categoriesTimeOrderSubDB};
-        let itemData = lib.serializeItem(item);
-        await itemId.0.put({pk = "main"; sk = "i/" # lib.encodeInt(itemId.1); attributes = itemData});
+        let itemData = lib.serializeStreams(item);
+        await itemId.0.putAttribute({pk = "main"; sk = "i/" # lib.encodeInt(itemId.1); attributes = itemData}, "s");
         {itemsTimeOrderSubDB; categoriesTimeOrderSubDB};
       }
     };

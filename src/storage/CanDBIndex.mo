@@ -201,6 +201,37 @@ actor class CanDBIndex() = this {
     await partition.put({sk; attributes = new});
   };
 
+  public shared({caller}) func putAttrubuteWithHint({
+    pk: Entity.PK;
+    sk: Entity.SK;
+    subkey: Text;
+    value: Entity.AttributeValue;
+    hint: ?Principal;
+  }): async () {
+    checkCaller(caller);
+ 
+    let partition = await* lastCanister(pk);
+    // TODO: duplicate code
+    let all = do ? { (await partition.get({sk}))!.attributes };
+    let new = switch (all) {
+      case (?all) {
+        let filtered = Iter.filter<(Entity.AttributeKey, Entity.AttributeValue)>(
+          RBT.entries<Entity.AttributeKey, Entity.AttributeValue>(all),
+          func((k,v): (Entity.AttributeKey, Entity.AttributeValue)) { k != subkey });
+        let filteredArray = Iter.toArray(filtered);
+        let newAll = Buffer.fromArray<(Entity.AttributeKey, Entity.AttributeValue)>(filteredArray);
+        let old = RBT.get(all, Text.compare, subkey);
+        Buffer.add(newAll, (subkey, value));
+        Buffer.toArray(newAll);
+      };
+      case null {
+        let modified = await modifier(null);
+        [(subkey, modified)];
+      };
+    };
+    await partition.put({sk; attributes = new});
+  };
+
   public shared({caller}) func transformAttrubuteWithHint({
     pk: Entity.PK;
     sk: Entity.SK;
@@ -212,6 +243,36 @@ actor class CanDBIndex() = this {
  
     let partition = await* lastCanister(pk);
     await* _transformAttribute({partition; sk; subkey; modifier});
+  };
+
+  public shared({caller}) func putAttrubuteNoDuplicates({
+    pk: Entity.PK;
+    sk: Entity.SK;
+    subkey: Text;
+    value: Entity.AttributeValue;
+    hint: ?Principal;
+  }): async () {
+    checkCaller(caller);
+ 
+    let partition = await* getExistingOrNewCanister(pk, {sk}, hint);
+    // TODO: duplicate code
+    let all = do ? { (await partition.get({sk}))!.attributes };
+    let new = switch (all) {
+      case (?all) {
+        let filtered = Iter.filter<(Entity.AttributeKey, Entity.AttributeValue)>(
+          RBT.entries<Entity.AttributeKey, Entity.AttributeValue>(all),
+          func((k,v): (Entity.AttributeKey, Entity.AttributeValue)) { k != subkey });
+        let filteredArray = Iter.toArray(filtered);
+        let newAll = Buffer.fromArray<(Entity.AttributeKey, Entity.AttributeValue)>(filteredArray);
+        let old = RBT.get(all, Text.compare, subkey);
+        Buffer.add(newAll, (subkey, value));
+        Buffer.toArray(newAll);
+      };
+      case null {
+        [(subkey, value)];
+      };
+    };
+    await partition.put({sk; attributes = new});
   };
 
   public shared({caller}) func transformAttrubuteNoDuplicates({

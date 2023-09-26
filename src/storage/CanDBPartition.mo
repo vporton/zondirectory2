@@ -118,6 +118,33 @@ shared actor class CanDBPartition({
     await* CanDB.put(db, {sk; attributes = await modifier(all)})
   };
 
+  public shared({caller}) func putAttribute(
+    sk: Entity.SK,
+    subkey: Entity.AttributeKey,
+    value: Entity.AttributeValue,
+  ): async () {
+    checkCaller(caller);
+
+    // TODO: duplicate code
+    let all = do ? { CanDB.get(db, {sk})!.attributes };
+    let new = switch (all) {
+      case (?all) {
+        let filtered = Iter.filter<(Entity.AttributeKey, Entity.AttributeValue)>(
+          RBT.entries<Entity.AttributeKey, Entity.AttributeValue>(all),
+          func((k,v): (Entity.AttributeKey, Entity.AttributeValue)) { k != subkey });
+        let filteredArray = Iter.toArray(filtered);
+        let newAll = Buffer.fromArray<(Entity.AttributeKey, Entity.AttributeValue)>(filteredArray);
+        let old = RBT.get(all, Text.compare, subkey);
+        newAll.add((subkey, value));
+        Buffer.toArray(newAll);
+      };
+      case null {
+        [(subkey, value)];
+      };
+    };
+    await* CanDB.put(db, {sk; attributes = new})
+  };
+
   public shared({caller}) func transformAttribute(
     sk: Entity.SK,
     subkey: Entity.AttributeKey,
