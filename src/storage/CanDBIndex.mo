@@ -225,8 +225,7 @@ actor class CanDBIndex() = this {
         Buffer.toArray(newAll);
       };
       case null {
-        let modified = await modifier(null);
-        [(subkey, modified)];
+        [(subkey, value)];
       };
     };
     await partition.put({sk; attributes = new});

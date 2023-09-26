@@ -326,6 +326,7 @@ module {
     if (config.skipSybil) {
       return;
     };
+    // FIXME:
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
     switch (await db.getAttribute({sk = "u/" # Principal.toText(user)}, "s")) {
       case (null) {

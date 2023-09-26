@@ -107,10 +107,10 @@ shared actor class Orders() = this {
     await* lib.checkSybil(sybilCanister, caller);
 
     // TODO: The below reads&deserializes `categoryItemData` twice.
-    let ?categoryItemData = await catId.0.get({sk = "i/" # Nat.toText(catId.1)}) else {
+    let ?categoryItemData = await catId.0.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "i") else {
       Debug.trap("cannot get category item");
     };
-    let categoryItem = lib.deserializeItem(categoryItemData.attributes);
+    let categoryItem = lib.deserializeItem(categoryItemData);
 
     switch (categoryItem.item.details) {
       case (#ownedCategory) {
@@ -126,10 +126,10 @@ shared actor class Orders() = this {
     //       need to make multi-hash instead of just hash.
     // For now, I implement a simple hash-map, time-order does not need moving items around.
 
-    let ?childItemData = await itemId.0.get({sk = "i/" # Nat.toText(itemId.1)}) else {
+    let ?childItemData = await itemId.0.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "i") else {
       Debug.trap("cannot get child item");
     };
-    let childItem = lib.deserializeItem(categoryItemData.attributes);
+    let childItem = lib.deserializeItem(categoryItemData);
 
     // Put into the beginning of time order.
     let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB } = await obtainStreams(catId);
@@ -182,7 +182,7 @@ shared actor class Orders() = this {
     // );
   } {
     // FIXME: May be null.
-    let ?itemData = await itemId.0.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "s") else {
+    let ?itemData = await itemId.0.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "i") else {
       Debug.trap("cannot get streams");
     };
     let item = lib.deserializeStreams(itemData.attributes);
@@ -204,20 +204,20 @@ shared actor class Orders() = this {
 
   // FIXME: Below functions?
 
-  func deserializeVoteAttr(attr: Entity.AttributeValue): Float {
-    switch(attr) {
-      case (#float v) { v };
-      case _ { Debug.trap("wrong data"); };
-    }
-  };
+  // func deserializeVoteAttr(attr: Entity.AttributeValue): Float {
+  //   switch(attr) {
+  //     case (#float v) { v };
+  //     case _ { Debug.trap("wrong data"); };
+  //   }
+  // };
   
-  func deserializeVotes(map: Entity.AttributeMap): Float {
-    let v = RBT.get(map, Text.compare, "v");
-    switch (v) {
-      case (?v) { deserializeVoteAttr(v) };
-      case _ { Debug.trap("map not found") };
-    };    
-  };
+  // func deserializeVotes(map: Entity.AttributeMap): Float {
+  //   let v = RBT.get(map, Text.compare, "v");
+  //   switch (v) {
+  //     case (?v) { deserializeVoteAttr(v) };
+  //     case _ { Debug.trap("map not found") };
+  //   };    
+  // };
 
   // TODO: It has race period of duplicate (two) keys. In frontend de-duplicate.
   // TODO: Use binary keys.

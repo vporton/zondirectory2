@@ -99,7 +99,7 @@ shared actor class ZonBackend() = this {
     link : Text;
   };
 
-  func serializeUserAttr(user: User): Entity.AttributeValue {
+  public func serializeUser(user: User): Entity.AttributeValue {
     var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(5);
     buf.add(#text (user.locale));
     buf.add(#text (user.nick));
@@ -109,11 +109,7 @@ shared actor class ZonBackend() = this {
     #tuple (Buffer.toArray(buf));
   };
 
-  func serializeUser(user: User): [(Entity.AttributeKey, Entity.AttributeValue)] {
-    [("v", serializeUserAttr(user))];
-  };
-
-  func deserializeUserAttr(attr: Entity.AttributeValue): User {
+  public func deserializeUser(attr: Entity.AttributeValue): User {
     var locale = "";
     var nick = "";
     var title = "";
@@ -183,14 +179,6 @@ shared actor class ZonBackend() = this {
       title = title;
       description = description;
       link = link;
-    };    
-  };
-
-  func deserializeUser(map: Entity.AttributeMap): User {
-    let v = RBT.get(map, Text.compare, "v");
-    switch (v) {
-      case (?v) { deserializeUserAttr(v) };
-      case _ { Debug.trap("map not found") };
     };    
   };
 
@@ -295,6 +283,7 @@ shared actor class ZonBackend() = this {
       case (?user) { Principal.toText(user) };
       case (null) { "" }
     };
+    // FIXME:
     await db.put({sk = "a/" # Principal.toText(caller); attributes = [("v", #text (buyerAffiliateStr # "/" # sellerAffiliateStr))]});
   };
 

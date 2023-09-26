@@ -1,10 +1,12 @@
 ## CanDB database structure
 
 ### "u/" - Principal -> User
-- Attribute `"v"` - `User` record.
-- Attribute `"s"` - set to true if anti-sybil checking passed.
+- Attribute `"u"` - `User` record.
+- (Unused) Attribute `"s"` - set to true if anti-sybil checking passed.
 ### "i/" - ID -> Item
-TODO: Should have separate attributes for: item info, post text, streams
+- Attribute `"i"` - `Item` record.
+- Attribute `"s"` - `Streams` record..
+TODO: Should have separate attribute post text.
 ### "a/" - user -> <buyer affiliate>/<seller affiliate>
 ### [TODO: seems superfluous] "r/<CATEGORY>/<ITEM>" - which items were addeded to which categories (both time and votes streams)
 
