@@ -106,7 +106,6 @@ shared actor class Orders() = this {
   ): async () {
     await* lib.checkSybil(caller);
 
-    // TODO: The below reads&deserializes `categoryItemData` twice.
     let ?categoryItemData = await catId.0.getAttribute({sk = "i/" # lib.encodeInt(catId.1)}, "i") else {
       Debug.trap("cannot get category item");
     };
@@ -188,8 +187,8 @@ shared actor class Orders() = this {
         lib.deserializeStreams(data);
       };
       case null {
-        let { outer = itemsTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""}); // TODO: Why is `toArray` necessary?
-        let { outer = categoriesTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""}); // TODO: Why is `toArray` necessary?
+        let { outer = itemsTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""});
+        let { outer = categoriesTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""});
         let streams = {itemsTimeOrderSubDB; categoriesTimeOrderSubDB};
         let itemData = lib.serializeStreams(streams);
         await itemId.0.putAttribute("i/" # lib.encodeInt(itemId.1), "s", itemData);
