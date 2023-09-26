@@ -1,5 +1,5 @@
 import lib "lib";
-import PST "canister:pst"; // TODO
+import PST "canister:pst";
 import Token "mo:icrc1/ICRC1/Canisters/Token";
 import BTree "mo:btree/BTree";
 import ICRC1Types "mo:icrc1/ICRC1/Types";
@@ -247,7 +247,7 @@ actor class Payments() = this {
               case _ { Debug.trap("can't pay") };
             };
             let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
-            recalculateShareholdersDebt(Int.abs(_shareholdersShare), _buyerAffiliate, _sellerAffiliate); // TODO: abs() is a hack.
+            recalculateShareholdersDebt(Int.abs(_shareholdersShare), _buyerAffiliate, _sellerAffiliate);
             let toAuthor = payment.amount - _shareholdersShare;
             indebt(item.creator, Int.abs(toAuthor));
           };
