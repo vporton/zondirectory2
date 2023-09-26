@@ -248,17 +248,14 @@ module {
           case _ { break r false; }
         };
         pos += 1;
-        switch (kind) {
-          case ITEM_TYPE_LINK {
-            switch (arr[pos]) {
-              case (#text v) {
-                link := v;
-              };
-              case _ { break r false; };
+        if (kind == ITEM_TYPE_LINK) {
+          switch (arr[pos]) {
+            case (#text v) {
+              link := v;
             };
-            pos += 1;
+            case _ { break r false; };
           };
-          case _ {}; // FIXME: compiler bug https://github.com/dfinity/motoko/issues/4224
+          pos += 1;
         };
 
         true;
