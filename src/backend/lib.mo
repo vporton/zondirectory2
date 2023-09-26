@@ -122,7 +122,7 @@ module {
     details: {
       #link : Text;
       #message : ();
-      #post : Text;
+      #post : (); // save post text separately
       #ownedCategory : ();
       #communalCategory : ();
     };
@@ -172,9 +172,6 @@ module {
       case (#link v) {
         buf.add(#text v);
       };
-      case (#post v) {
-        buf.add(#text v);
-      };
       case _ {};
     };
     #tuple(Buffer.toArray(buf));
@@ -198,7 +195,7 @@ module {
     var title = "";
     var description = "";
     var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none;
-    var linkOrText = "";
+    var link = "";
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
         var pos = 0;
@@ -251,18 +248,18 @@ module {
           case _ { break r false; }
         };
         pos += 1;
-        switch (arr[pos]) {
-          case (#text v) {
-            linkOrText := v;
+        switch (kind) {
+          case ITEM_TYPE_LINK {
+            switch (arr[pos]) {
+              case (#text v) {
+                link := v;
+              };
+              case _ { break r false; };
+            };
+            pos += 1;
           };
-          case _ { break r false; };
+          case _ {}; // FIXME: compiler bug https://github.com/dfinity/motoko/issues/4224
         };
-        pos += 1;
-        let haveStreams = switch (arr[pos]) {
-          case (#bool v) { v };
-          case _ { break r false; };
-        };
-        pos += 1;
 
         true;
       };
@@ -283,9 +280,9 @@ module {
         title = title;
         description = description;
         details = switch (kind) {
-          case (0) { #link linkOrText };
+          case (0) { #link link };
           case (1) { #message };
-          case (2) { #post linkOrText };
+          case (2) { #post };
           case (3) { #ownedCategory };
           case (4) { #communalCategory };
           case _ { Debug.trap("wrong item format"); }
