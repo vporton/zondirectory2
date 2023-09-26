@@ -1,5 +1,7 @@
 - I found a solution how to solve it effeciently: for reading create additional Partition shared functions that will return single attribute from `AttributeMap`. On writing, it is reasonable create additional Partition shared functions that will take a `modifier` shared function as an argument and (possibly) modify only one attribute from `AttributeMap`. This saves cycles on (de)serializing attributes that didn't change.
 
+- `lib.encodeInt` produces too long identifiers.
+
 - It seems that `CanDB{Index,Partition}` have superfluous (not used) shared functions.
 
 - Unittests for (de)serialize.
