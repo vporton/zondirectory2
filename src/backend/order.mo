@@ -107,7 +107,7 @@ shared actor class Orders() = this {
     await* lib.checkSybil(caller);
 
     // TODO: The below reads&deserializes `categoryItemData` twice.
-    let ?categoryItemData = await catId.0.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "i") else {
+    let ?categoryItemData = await catId.0.getAttribute({sk = "i/" # lib.encodeInt(catId.1)}, "i") else {
       Debug.trap("cannot get category item");
     };
     let categoryItem = lib.deserializeItem(categoryItemData);
@@ -126,7 +126,7 @@ shared actor class Orders() = this {
     //       need to make multi-hash instead of just hash.
     // For now, I implement a simple hash-map, time-order does not need moving items around.
 
-    let ?childItemData = await itemId.0.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "i") else {
+    let ?childItemData = await itemId.0.getAttribute({sk = "i/" # lib.encodeInt(itemId.1)}, "i") else {
       Debug.trap("cannot get child item");
     };
     let childItem = lib.deserializeItem(categoryItemData);
@@ -181,10 +181,7 @@ shared actor class Orders() = this {
     //   Nat,
     // );
   } {
-    // FIXME: May be null.
-    let streamsData = await itemId.0.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "s") else {
-      Debug.trap("cannot get streams");
-    };
+    let streamsData = await itemId.0.getAttribute({sk = "i/" # lib.encodeInt(itemId.1)}, "s");
     let guid = GUID.nextGuid(guidGen);
     switch (streamsData) {
       case (?data) {
