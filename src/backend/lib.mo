@@ -132,7 +132,6 @@ module {
   // TODO: Add `license` field?
   // TODO: Images.
   // TODO: Item version.
-  // TODO: Rename.
   public type Item = {
     creator: Principal;
     item: ItemWithoutOwner;
