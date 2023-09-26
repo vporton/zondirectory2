@@ -19,7 +19,7 @@ export default function EditCategory() {
             case 0:
                 setCategoryKind(CategoryKind.owned);
                 break;
-            case 0:
+            case 1:
                 setCategoryKind(CategoryKind.communal);
                 break;
             }
