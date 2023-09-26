@@ -54,15 +54,15 @@ export default function App() {
 
 function MyRouted() {
     const navigate = useNavigate();
-    React.useEffect(() => navigate("/folder/0"), []);
+    React.useEffect(() => navigate("/item/0"), []);
     return (
         <>
             <nav>
-                <NavLink to="/folder/0">Main folder</NavLink>
+                <NavLink to="/item/0">Main item</NavLink>
             </nav>
             <Routes>
                 <Route
-                    path="/folder/:id"
+                    path="/item/:id"
                     element={<ShowFolder/>}
                 />
                 <Route

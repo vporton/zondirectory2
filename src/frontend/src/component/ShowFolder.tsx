@@ -15,7 +15,7 @@ export default function ShowFolder() {
             <ul>
                 {take(data.subCategories(), 3).map(x => <li lang={x.locale} key={x.id}>
                     {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
-                    <a href={`#/folder/${x.id}`}>{x.title}</a>
+                    <a href={`#/item/${x.id}`}>{x.title}</a>
                 </li>)}
             </ul>
             <p><a href={`#/subfolders-of/${id}`}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
@@ -23,7 +23,7 @@ export default function ShowFolder() {
             <ul>
                 {take(data.superCategories(), 3).map(x => <li lang={x.locale} key={x.id}>
                     {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
-                    <a href={`#/folder/${x.id}`}>{x.title}</a>
+                    <a href={`#/item/${x.id}`}>{x.title}</a>
                 </li>)}
             </ul>
             {/* TODO: Create super-category */}
