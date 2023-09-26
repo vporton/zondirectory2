@@ -18,6 +18,8 @@ import CanDBPartition "../storage/CanDBPartition";
 import config "../../config";
 
 module {
+  let phoneNumberVerificationCanisterId = "gzqxf-kqaaa-aaaak-qakba-cai"; // https://docs.nfid.one/developer/credentials/mobile-phone-number-credential
+
   // We will use that "-XXX" < "XXX" for any hex number XXX.
 
   func _toLowerHexDigit(v: Nat): Char {
@@ -318,21 +320,15 @@ module {
     };
   };
 
-  // TODO: Check that this gives right permissions.
-  // `sybilCanister` is determined by frontend code (util/sybil.ts).
-  // TODO: `sybilCanister` should have its dedicated PK, to reduce the number of UI calls.
-  //       Alternatively, store `sybilCanister` on-chain or somehow.
-  public func checkSybil(sybilCanister: Principal, user: Principal): async* () {
+  public func checkSybil(user: Principal): async* () {
     if (config.skipSybil) {
       return;
     };
-    // FIXME:
-    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(sybilCanister));
-    switch (await db.getAttribute({sk = "u/" # Principal.toText(user)}, "s")) {
-      case (null) {
-        Debug.trap("not verified user");
-      };
-      case _ {};
+    let verifyActor = actor(phoneNumberVerificationCanisterId): actor {
+      is_phone_number_approved(principal: Text) : async Bool;
+    };
+    if (not(await verifyActor.is_phone_number_approved(Principal.toText(user)))) {
+      Debug.trap("cannot verify phone number");
     };
   };
 }

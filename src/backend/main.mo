@@ -25,8 +25,6 @@ import config "../../config";
 shared actor class ZonBackend() = this {
   /// External Canisters ///
 
-  let phoneNumberVerificationCanisterId = "gzqxf-kqaaa-aaaak-qakba-cai"; // https://docs.nfid.one/developer/credentials/mobile-phone-number-credential
-
   /// Some Global Variables ///
 
   // See ARCHITECTURE.md for database structure
@@ -80,15 +78,7 @@ shared actor class ZonBackend() = this {
 
   // anti-Sybil verification
   public shared({caller}) func verifyUser(): async () {
-    if (config.skipSybil) {
-      return;
-    };
-    let verifyActor = actor(phoneNumberVerificationCanisterId): actor {
-      is_phone_number_approved(principal: Text) : async Bool;
-    };
-    if (not(await verifyActor.is_phone_number_approved(Principal.toText(caller)))) {
-      Debug.trap("cannot verify phone number");
-    };
+    checkSybil(caller);
   };
 
   type User = {
@@ -270,21 +260,20 @@ shared actor class ZonBackend() = this {
 
   /// Affiliates ///
 
-  public shared({caller}) func setAffiliate(canister: Principal, buyerAffiliate: ?Principal, sellerAffiliate: ?Principal): async () {
-    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canister));
-    if (buyerAffiliate == null and sellerAffiliate == null) {
-      await db.delete({sk = "a/" # Principal.toText(caller)});
-    };
-    let buyerAffiliateStr = switch (buyerAffiliate) {
-      case (?user) { Principal.toText(user) };
-      case (null) { "" }
-    };
-    let sellerAffiliateStr = switch (sellerAffiliate) {
-      case (?user) { Principal.toText(user) };
-      case (null) { "" }
-    };
-    // FIXME:
-    await db.put({sk = "a/" # Principal.toText(caller); attributes = [("v", #text (buyerAffiliateStr # "/" # sellerAffiliateStr))]});
-  };
-
-  };
+  // public shared({caller}) func setAffiliate(canister: Principal, buyerAffiliate: ?Principal, sellerAffiliate: ?Principal): async () {
+  //   var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canister));
+  //   if (buyerAffiliate == null and sellerAffiliate == null) {
+  //     await db.delete({sk = "a/" # Principal.toText(caller)});
+  //   };
+  //   let buyerAffiliateStr = switch (buyerAffiliate) {
+  //     case (?user) { Principal.toText(user) };
+  //     case (null) { "" }
+  //   };
+  //   let sellerAffiliateStr = switch (sellerAffiliate) {
+  //     case (?user) { Principal.toText(user) };
+  //     case (null) { "" }
+  //   };
+  //   // FIXME:
+  //   await db.put({sk = "a/" # Principal.toText(caller); attributes = [("v", #text (buyerAffiliateStr # "/" # sellerAffiliateStr))]});
+  // };
+}
