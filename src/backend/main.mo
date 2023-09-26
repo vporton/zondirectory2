@@ -78,7 +78,7 @@ shared actor class ZonBackend() = this {
 
   // anti-Sybil verification
   public shared({caller}) func verifyUser(): async () {
-    checkSybil(caller);
+    await* lib.checkSybil(caller);
   };
 
   type User = {
@@ -173,7 +173,7 @@ shared actor class ZonBackend() = this {
   };
 
   public shared({caller}) func setUserData(canisterId: Principal, _user: User, sybilCanisterId: Principal) {
-    await* lib.checkSybil(sybilCanisterId, caller);
+    await* lib.checkSybil(caller);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     await db.putAttribute(key, "u", serializeUser(_user));
@@ -198,7 +198,7 @@ shared actor class ZonBackend() = this {
   public shared({caller}) func createItemData(canisterId: Principal, _item: lib.ItemWithoutOwner, sybilCanisterId: Principal)
     : async (Principal, Text)
   {
-    await* lib.checkSybil(sybilCanisterId, caller);
+    await* lib.checkSybil(caller);
 
     let item2: lib.Item = { creator = caller; item = _item; };
     let _itemId = maxId;
