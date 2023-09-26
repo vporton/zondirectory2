@@ -5,7 +5,6 @@ import { useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { initializeMainClient, intializeCanDBIndexClient } from "../util/client";
-import { obtainSybilCanister } from "../util/sybil";
 
 export default function EditCategory() {
     const routeParams = useParams();
@@ -36,13 +35,12 @@ export default function EditCategory() {
             };
         }
         async function submitItem(item: ItemWithoutOwner) {
-            const sybilCanister = obtainSybilCanister();
             const canDBIndexClient = intializeCanDBIndexClient();
             // const canDBPartitionClient = initializeCanDBPartitionClient(canDBIndexClient);
             const backend = initializeMainClient();
             const canisters = await canDBIndexClient.getCanistersForPK("main");
             const lastCanister = canisters[canisters.length - 1];
-            await backend.createItemData(lastCanister, item, sybilCanister)
+            await backend.createItemData(lastCanister, item);
         }
         await submitItem(itemData());
     }

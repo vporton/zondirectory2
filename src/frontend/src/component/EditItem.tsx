@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-import { obtainSybilCanister } from '../util/sybil';
 import 'react-tabs/style/react-tabs.css';
 import { initializeMainClient, intializeCanDBIndexClient } from "../util/client";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
@@ -32,13 +31,12 @@ export default function EditItemItem() {
             };
         }
         async function submitItem(item: ItemWithoutOwner) {
-            const sybilCanister = obtainSybilCanister();
             const canDBIndexClient = intializeCanDBIndexClient();
             // const canDBPartitionClient = initializeCanDBPartitionClient(canDBIndexClient);
             const backend = initializeMainClient();
             const canisters = await canDBIndexClient.getCanistersForPK("main");
             const lastCanister = canisters[canisters.length - 1];
-            let result = await backend.createItemData(lastCanister, item, sybilCanister);
+            let result = await backend.createItemData(lastCanister, item);
             console.log('XXX:', result); // TODO
         }
         await submitItem(itemData());
