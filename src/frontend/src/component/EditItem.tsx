@@ -26,7 +26,7 @@ export default function EditItemItem() {
                 title,
                 description: shortDescription,
                 details: selectedTab == SelectedTab.selectedLink ? {link: link} :
-                    (post === "" ? {message: null} : {post: post}),
+                    (post === "" ? {message: null} : {post: null/* FIXME */}),
                 price: 0.0, // TODO
             };
         }
