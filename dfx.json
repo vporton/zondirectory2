@@ -7,7 +7,8 @@
         "order",
         "payments",
         "CanDBIndex",
-        "NacDBIndex"
+        "NacDBIndex",
+        "internet_identity"
       ]
     },
     "order": {
@@ -16,8 +17,7 @@
     },
     "frontend": {
       "dependencies": [
-        "main",
-        "internet_identity"
+        "main"
       ],
       "frontend": {
         "entrypoint": "src/frontend/src/index.html"

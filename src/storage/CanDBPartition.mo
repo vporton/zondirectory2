@@ -9,6 +9,7 @@ import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Buffer "mo:base/Buffer";
 import Iter "mo:base/Iter";
+import lib "../backend/lib";
 
 shared actor class CanDBPartition({
   primaryKey: Text;
@@ -101,11 +102,14 @@ shared actor class CanDBPartition({
   //   };
   // };
 
-  public query func getAttribute(options: CanDB.GetOptions, subkey: Text): async ?Entity.AttributeValue {
-    // checkCaller(caller);
-
+  func _getAttribute(options: CanDB.GetOptions, subkey: Text): ?Entity.AttributeValue {
     let all = CanDB.get(db, options);
     do ? { RBT.get(all!.attributes, Text.compare, subkey)! };
+  };
+
+  public query func getAttribute(options: CanDB.GetOptions, subkey: Text): async ?Entity.AttributeValue {
+    // checkCaller(caller);
+    _getAttribute(options, subkey);
   };
 
   // public shared({caller}) func transform(
@@ -172,5 +176,17 @@ shared actor class CanDBPartition({
       };
     };
     await* CanDB.put(db, {sk; attributes = new})
+  };
+
+  // Application-specific code //
+
+  public query func getItem(itemId: Nat): async ?lib.Item {
+    let data = _getAttribute({sk = "i/" # lib.encodeInt(itemId)}, "i");
+    do ? { lib.deserializeItem(data!) };
+  };
+
+  public query func getStreams(itemId: Nat): async ?lib.Streams {
+    let data = _getAttribute({sk = "i/" # lib.encodeInt(itemId)}, "s");
+    do ? { lib.deserializeStreams(data!) };
   };
 }

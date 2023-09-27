@@ -169,7 +169,7 @@ shared actor class ZonBackend() = this {
     };    
   };
 
-  public shared({caller}) func setUserData(canisterId: Principal, _user: User, sybilCanisterId: Principal) {
+  public shared({caller}) func setUserData(canisterId: Principal, _user: User) {
     await* lib.checkSybil(caller);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
@@ -192,7 +192,7 @@ shared actor class ZonBackend() = this {
   //   lib.deserializeItem(await part.get({sk = key}));
   // };
 
-  public shared({caller}) func createItemData(canisterId: Principal, _item: lib.ItemWithoutOwner, sybilCanisterId: Principal)
+  public shared({caller}) func createItemData(canisterId: Principal, _item: lib.ItemWithoutOwner)
     : async (Principal, Text)
   {
     await* lib.checkSybil(caller);

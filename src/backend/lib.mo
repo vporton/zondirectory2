@@ -15,7 +15,6 @@ import Char "mo:base/Char";
 import Nat64 "mo:base/Nat64";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
-import CanDBPartition "../storage/CanDBPartition";
 import config "../../config";
 
 module {
