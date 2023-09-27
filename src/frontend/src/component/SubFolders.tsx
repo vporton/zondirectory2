@@ -17,13 +17,17 @@ type Item = {
 
 export default function SubFolders(props) {
     const { id } = useParams();
-    const data = new AppData(id);
+    const [data, setData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
     const [subcategories, setSubcategories] = useState([] as Item[]);
     const [supercategories, setSupercategories] = useState([] as Item[]);
-    data.title().then(x => setTitle(x));
-    data.subCategories().then(x => setSubcategories(x));
-    data.superCategories().then(x => setSupercategories(x));
+    if (id !== undefined) {
+        AppData.create(id).then(data => {
+            data.title().then(x => setTitle(x));
+            data.subCategories().then(x => setSubcategories(x));
+            data.superCategories().then(x => setSupercategories(x));
+        });
+    }
 
     return (
         <>

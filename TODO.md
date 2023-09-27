@@ -2,6 +2,8 @@
 
 - `lib.encodeInt` produces too long identifiers.
 
+- Prevent making a folder its own subfolder.
+
 - It seems that `CanDB{Index,Partition}` have superfluous (not used) shared functions.
 
 - Unittests for (de)serialize.

@@ -1,5 +1,8 @@
 export default class MockData {
-    constructor(folderId) {}
+    protected constructor(itemId: string) {}
+    static async create(itemId: string) {
+        return new MockData(itemId);
+    };
     async locale() {
         return 'en';
     }

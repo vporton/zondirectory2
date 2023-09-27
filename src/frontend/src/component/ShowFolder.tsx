@@ -19,19 +19,22 @@ type Item = {
 
 export default function ShowFolder() {
     const { id } = useParams();
-    const data = new AppData(id);
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [subcategories, setSubcategories] = useState([] as Item[]);
     const [supercategories, setSupercategories] = useState([] as Item[]);
     const [items, setItems] = useState([] as Item[]);
-    data.locale().then(x => setLocale(x));
-    data.title().then(x => setTitle(x));
-    data.description().then(x => setDescription(x));
-    data.subCategories().then(x => setSubcategories(x));
-    data.superCategories().then(x => setSupercategories(x));
-    data.items().then(x => setItems(x));
+    if (id !== undefined) {
+        AppData.create(id).then(data => {
+            data.locale().then(x => setLocale(x));
+            data.title().then(x => setTitle(x));
+            data.description().then(x => setDescription(x));
+            data.subCategories().then(x => setSubcategories(x));
+            data.superCategories().then(x => setSupercategories(x));
+            data.items().then(x => setItems(x));
+        });
+    }
     return (
         <>
             <h2>Folder: <span lang={locale}>{title}</span></h2>

@@ -12,22 +12,22 @@ function parseItemRef(itemId: string): ItemRef {
     return {canister: Principal.fromText(a[1]), id: parseInt(a[0])};
 }
 
-// TODO
-export class BaseItemData {
+export class ItemData {
     itemRef: ItemRef;
     item: Item;
     streams: Streams | null;
     protected constructor(itemId: string) {
         this.itemRef = parseItemRef(itemId);
     }
-    static async create(itemId: string, Creator) {
-        const obj = new Creator(itemId);
+    static async create(itemId: string): Promise<ItemData> {
+        const obj = new ItemData(itemId);
         const client = initializeDirectCanDBPartitionClient(obj.itemRef.canister);
         // TODO: Retrieve both by one call?
         [obj.item, obj.streams] = await Promise.all([
             await client.getItem(obj.itemRef.id),
             await client.getStreams(obj.itemRef.id)
-        ])
+        ]) as [Item, Streams];
+        return obj;
     }
     locale() {
         return this.item.item.locale;
@@ -89,7 +89,4 @@ export class BaseItemData {
             }
         })
     }
-}
-
-export class FolderData extends BaseItemData{
 }
