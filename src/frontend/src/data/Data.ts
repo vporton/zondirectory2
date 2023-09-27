@@ -1,6 +1,7 @@
 import { Principal } from "@dfinity/principal";
 import { Item, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did"
 import { initializeDirectCanDBPartitionClient, initializeDirectNacDBPartitionClient } from "../util/client";
+import { Actor } from "@dfinity/agent";
 
 type ItemRef = {
     canister: Principal;
@@ -45,8 +46,8 @@ export class ItemData {
         if (this.streams === null) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB
-        const client = initializeDirectNacDBPartitionClient(Principal.from(outerCanister)); // FIXME: Does `from` work?
+        const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB;
+        const client = initializeDirectNacDBPartitionClient(Actor.canisterIdOf(outerCanister)); // FIXME: Does `from` work?
         const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: 'fwd', limit: 10}) as // TODO: limit
             Array<[string, number]>; // FIXME: correct type?
         const items2 = items.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
