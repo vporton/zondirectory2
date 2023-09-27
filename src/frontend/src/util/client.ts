@@ -12,7 +12,7 @@ import { Actor, HttpAgent } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
 export function getIsLocal() {
-  return process.env.IS_LOCAL !== '' && process.env.IS_LOCAL !== '0';
+  return process.env.REACT_APP_IS_LOCAL !== '' && process.env.REACT_APP_IS_LOCAL !== '0';
 }
 
 const isLocal = getIsLocal();
