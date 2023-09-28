@@ -39,7 +39,7 @@ shared actor class ZonBackend() = this {
 
   stable var initialized: Bool = false;
 
-  public shared({ caller }) func init(subaccount : ?ICRC1Types.Subaccount): async () {
+  public shared({ caller }) func init(): async () {
     ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
 
     if (initialized) {

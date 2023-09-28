@@ -40,8 +40,6 @@ shared actor class NacDBIndex(
     stable var initialized = false;
 
     public shared({caller}) func init() : async () {
-        checkCaller(caller);
-
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
         if (initialized) {
             Debug.trap("already initialized");

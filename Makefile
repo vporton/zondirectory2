@@ -1,12 +1,15 @@
 #!/usr/bin/make -f
 
+# For `. .env` to work, even if /bin/sh is Dash:
+SHELL=/bin/bash
+
+FOUNDER = $(shell dfx identity get-wallet)
+
 .PHONY: build
 build:
 
 .PHONY: deploy
 deploy: deploy-backend deploy-frontend
-
-FOUNDER = principal "racnx-sccpy-mgfgr-rgb67-bvwyx-gjkad-lyw33-prq23-yw24r-eb65i-oqe"
 
 .PHONY: build
 build:
@@ -14,20 +17,23 @@ build:
 
 .PHONY: deploy-backend
 deploy-backend:
-	# TODO: correct principal
-	dfx deploy pst --argument 'record { owner = $(FOUNDER); subaccount = null; }'
-	dfx deploy NacDBIndex --argument 'vec { $(FOUNDER) }'
+	source .env && dfx deploy pst --argument "record { owner = principal \"$(FOUNDER)\"; subaccount = null; }"
+	# TODO: Check canisters used
+	source .env && dfx deploy CanDBIndex --argument "vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" }"
+	source .env && dfx deploy NacDBIndex --argument "vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" }"
 #	dfx deploy CanDBIndex
 #	dfx deploy pst
 #	dfx deploy payments
 	dfx deploy main
-	dfx ledger fabricate-cycles --amount 1000000000 --canister main
 
 .PHONY: deploy-frontend
-deploy-frontend:
+deploy-frontend: deploy-backend
 	dfx deploy frontend
 
 .PHONY: init
 init:
-	dfx canister call main init '(null)'
-	# TODO: Initialize other canisters.
+	dfx ledger fabricate-cycles --amount 1000000000 --canister main
+	dfx canister call main init '()'
+	dfx canister call payments init '()'
+	dfx canister call CanDBIndex init '()'
+	dfx canister call NacDBIndex init '()'

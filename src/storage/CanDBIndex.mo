@@ -19,17 +19,16 @@ import CanDB "mo:candb/CanDB";
 import Entity "mo:candb/Entity";
 import Canister "mo:matchers/Canister";
 
-actor class CanDBIndex() = this {
-  stable var owners: [Principal] = [];
+actor class CanDBIndex(initialOwners: [Principal]) = this {
+  stable var owners: [Principal] = initialOwners;
 
   stable var initialized: Bool = false;
 
-  public shared func init(initialOwners: [Principal]): async () {
+  public shared func init(): async () {
     if (initialized) {
       Debug.trap("already initialized");
     };
 
-    owners := initialOwners;
     ignore await* createStorageCanister("main", ownersOrSelf());
     ignore await* createStorageCanister("user", ownersOrSelf()); // user data
 

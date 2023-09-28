@@ -16,7 +16,7 @@ actor class Payments() = this {
 
   /// Incoming Payments ///
 
-  public shared({ caller }) func init(subaccount : ?ICRC1Types.Subaccount): async () {
+  public shared({ caller }) func init(): async () {
     if (initialized) {
       Debug.trap("already initialized");
     };
@@ -217,7 +217,7 @@ actor class Payments() = this {
 
   // TODO: On non-existent payment it proceeds successful. Is it OK?
   func processPayment(paymentCanisterId: Principal, userId: Principal, _buyerAffiliate: ?Principal, _sellerAffiliate: ?Principal): async () {
-    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(paymentCanisterId));
+    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(paymentCanisterId)); // FIXME
     switch (BTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
       case (?payment) {
         let itemKey = "i/" # lib.encodeInt(payment.itemId);
