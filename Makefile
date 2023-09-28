@@ -37,3 +37,6 @@ init:
 	dfx canister call payments init '()'
 	dfx canister call CanDBIndex init '()'
 	dfx canister call NacDBIndex init '()'
+	mainItem=`dfx canister call main createItemData \
+	  '(record { price = 0.0; locale = "en"; title = "The homepage"; description = ""; details = variant { communalCategory = null } })'`; \
+	  dfx canister call main setRootItem "$$mainItem"

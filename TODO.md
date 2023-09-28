@@ -1,5 +1,7 @@
 - Locale-specific streams.
 
+- No more than one communal category with a given name (requires a centralized registry).
+
 - `lib.encodeInt` produces too long identifiers.
 
 - Prevent making a folder its own subfolder.

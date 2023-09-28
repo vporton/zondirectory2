@@ -185,6 +185,20 @@ shared actor class ZonBackend() = this {
 
   /// Items ///
 
+  stable var rootItem: ?(CanDBPartition.CanDBPartition, Nat) = null;
+
+  public shared({caller}) func setRootItem(part: CanDBPartition.CanDBPartition, id: Nat)
+    : async ()
+  {
+    onlyMainOwner(caller);
+
+    rootItem := ?(part, id);
+  };
+
+  public query func getRootItem(): async ?(CanDBPartition.CanDBPartition, Nat) {
+    rootItem;
+  };
+
   // FIXME: Uncomment.
   // public shared func getItemData(canisterId: Principal, _itemId: Nat): async ?lib.ItemWithoutOwner {
   //   var part: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
@@ -192,18 +206,19 @@ shared actor class ZonBackend() = this {
   //   lib.deserializeItem(await part.get({sk = key}));
   // };
 
-  public shared({caller}) func createItemData(canisterId: Principal, _item: lib.ItemWithoutOwner)
-    : async (Principal, Text)
+  public shared({caller}) func createItemData(_item: lib.ItemWithoutOwner)
+    : async (CanDBPartition.CanDBPartition, Nat)
   {
     await* lib.checkSybil(caller);
 
     let item2: lib.Item = { creator = caller; item = _item; };
-    let _itemId = maxId;
+    let _itemId = maxId; // TODO: Use per-canister IDs instead.
     maxId += 1;
-    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
+    // var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # lib.encodeInt(_itemId);
-    await db.putAttribute(key, "i", lib.serializeItem(item2));
-    (canisterId, key);
+    let canisterId = await CanDBIndex.putAttrubuteWithHint({
+      pk = "main"; sk = key; subkey = "i"; value = lib.serializeItem(item2); hint = null});
+    (canisterId, _itemId);
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.

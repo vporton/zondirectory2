@@ -35,9 +35,7 @@ export default function EditItemItem() {
             const canDBIndexClient = intializeCanDBIndexClient();
             // const canDBPartitionClient = initializeCanDBPartitionClient(canDBIndexClient);
             const backend = initializeMainClient();
-            const canisters = await canDBIndexClient.getCanistersForPK("main");
-            const lastCanister = canisters[canisters.length - 1];
-            let result = await backend.createItemData(Principal.fromText(lastCanister), item);
+            let result = await backend.createItemData(item);
             console.log('XXX:', result); // TODO
         }
         await submitItem(itemData());

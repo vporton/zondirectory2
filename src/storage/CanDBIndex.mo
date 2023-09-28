@@ -206,7 +206,7 @@ actor class CanDBIndex(initialOwners: [Principal]) = this {
     subkey: Text;
     value: Entity.AttributeValue;
     hint: ?Principal;
-  }): async () {
+  }): async CanDBPartition.CanDBPartition {
     checkCaller(caller);
  
     let partition = await* lastCanister(pk);
@@ -228,6 +228,7 @@ actor class CanDBIndex(initialOwners: [Principal]) = this {
       };
     };
     await partition.put({sk; attributes = new});
+    partition;
   };
 
   public shared({caller}) func transformAttrubuteWithHint({

@@ -8,9 +8,14 @@ type ItemRef = {
     id: number;
 };
 
-function parseItemRef(itemId: string): ItemRef {
+// TODO: This and the following functions probably should be not here.
+export function parseItemRef(itemId: string): ItemRef {
     const a = itemId.split('@', 2);
     return {canister: Principal.fromText(a[1]), id: parseInt(a[0])};
+}
+
+export function serializeItemRef(item: ItemRef): string {
+    return item.id + "@" + item.canister;
 }
 
 export class ItemData {
