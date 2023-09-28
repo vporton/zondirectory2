@@ -47,7 +47,7 @@ export class ItemData {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB;
-        const client = initializeDirectNacDBPartitionClient(Actor.canisterIdOf(outerCanister)); // FIXME: Does `from` work?
+        const client = initializeDirectNacDBPartitionClient(Actor.canisterIdOf(outerCanister)); // FIXME: https://github.com/dfinity/agent-js/issues/775
         const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: 'fwd', limit: 10}) as // TODO: limit
             Array<[string, number]>; // FIXME: correct type?
         const items2 = items.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
@@ -75,7 +75,7 @@ export class ItemData {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB
-        const client = initializeDirectNacDBPartitionClient(Principal.from(outerCanister)); // FIXME: Does `from` work?
+        const client = initializeDirectNacDBPartitionClient(Actor.canisterIdOf(outerCanister)); // FIXME: https://github.com/dfinity/agent-js/issues/775
         const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: 'fwd', limit: 10}) as // TODO: limit
             Array<[string, number]>; // FIXME: correct type?
         const items2 = items.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
