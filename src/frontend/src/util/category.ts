@@ -4,8 +4,12 @@ import { Actor, HttpAgent } from "@dfinity/agent";
 import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { getIsLocal } from "./client";
 import { ItemId } from './types';
+import { Principal } from "@dfinity/principal";
 
 export async function addToCategory(catId: ItemId, itemId: ItemId) {
     const orderClient = initializeOrderClient();
-    await orderClient.addToCategory([catId.partition, catId.id], [itemId.partition, itemId.id]);
+    await orderClient.addItemToCategory(
+        [Principal.fromText(catId.partition), BigInt(catId.id)],
+        [Principal.fromText(itemId.partition), BigInt(itemId.id)],
+    );
 }

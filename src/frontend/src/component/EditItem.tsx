@@ -7,6 +7,7 @@ import 'react-tabs/style/react-tabs.css';
 import { initializeMainClient, intializeCanDBIndexClient } from "../util/client";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import Categories from "./Categories";
+import { Principal } from "@dfinity/principal";
 
 export default function EditItemItem() {
     const routeParams = useParams();
@@ -36,7 +37,7 @@ export default function EditItemItem() {
             const backend = initializeMainClient();
             const canisters = await canDBIndexClient.getCanistersForPK("main");
             const lastCanister = canisters[canisters.length - 1];
-            let result = await backend.createItemData(lastCanister, item);
+            let result = await backend.createItemData(Principal.fromText(lastCanister), item);
             console.log('XXX:', result); // TODO
         }
         await submitItem(itemData());

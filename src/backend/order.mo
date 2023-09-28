@@ -102,7 +102,6 @@ shared actor class Orders() = this {
   public shared({caller}) func addItemToCategory(
     catId: (CanDBPartition.CanDBPartition, Nat),
     itemId: (CanDBPartition.CanDBPartition, Nat),
-    sybilCanister: Principal,
   ): async () {
     await* lib.checkSybil(caller);
 
