@@ -63,7 +63,7 @@ function MyRouted() {
     useEffect(() => navigate("/item/"+root), [root]);
     let main = initializeMainClient();
     main.getRootItem().then(([data]) => {
-        let [part, id] = data! as [Principal, bigint];
+        let [part, id] = data! as [Principal, bigint]; // We assume that it's initialized.
         let item = { canister: Actor.canisterIdOf(part as unknown as Actor), id: Number(id) };
         setRoot(serializeItemRef(item));
     });
