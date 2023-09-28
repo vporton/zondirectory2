@@ -1,13 +1,14 @@
 import { IndexClient } from "candb-client-typescript/dist/IndexClient";
 import { ActorClient } from "candb-client-typescript/dist/ActorClient";
 
-import { idlFactory as CanDBIndexIDL } from "../../../declarations/CanDBIndex/index";
-import { idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition/index";
-import { idlFactory as NacDBPartitionIDL } from "../../../declarations/NacDBPartition/index";
-import { idlFactory as MainIDL } from "../../../declarations/main/index";
-import { idlFactory as OrderIDL } from "../../../declarations/order/index";
+import { idlFactory as CanDBIndexIDL } from "../../../declarations/CanDBIndex";
+import { idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition";
+import { idlFactory as NacDBPartitionIDL } from "../../../declarations/NacDBPartition";
+import { main as MainCanister } from "../../../declarations/main";
+import { order as OrderCanister } from "../../../declarations/order";
 import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { CanDBIndex } from "../../../declarations/CanDBIndex/CanDBIndex.did";
+// import { CanDBIndex as CanDBIndexCanister } from "../../../declarations/CanDBIndex";
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
@@ -61,16 +62,10 @@ export function initializeDirectNacDBPartitionClient(canisterId: Principal)
 
 export function initializeMainClient()
 {
-  const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
-  const agent = new HttpAgent({ host });
-  const canisterId = isLocal ? process.env.MAIN_CANISTER_ID : "<prod_canister_id>"; // TODO
-  return Actor.createActor(MainIDL, { agent, canisterId });
+  return MainCanister;
 };
 
 export function initializeOrderClient()
 {
-  const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
-  const agent = new HttpAgent({ host });
-  const canisterId = isLocal ? process.env.ORDER_CANISTER_ID : "<prod_canister_id>"; // TODO
-  return Actor.createActor(OrderIDL, { agent, canisterId });
+  return OrderCanister;
 };
