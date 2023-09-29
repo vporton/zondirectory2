@@ -27,7 +27,7 @@ deploy-backend:
 	dfx deploy main
 
 .PHONY: deploy-frontend
-deploy-frontend:
+deploy-frontend: deploy-backend
 	dfx deploy frontend
 
 .PHONY: deploy-all

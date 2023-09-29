@@ -21,7 +21,7 @@ export function serializeItemRef(item: ItemRef): string {
 export class ItemData {
     itemRef: ItemRef;
     item: Item;
-    streams: Streams | null;
+    streams: Streams | undefined;
     protected constructor(itemId: string) {
         this.itemRef = parseItemRef(itemId);
     }

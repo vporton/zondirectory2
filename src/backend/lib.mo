@@ -190,7 +190,6 @@ module {
     var creator: ?Principal = null;
     var price = 0.0;
     var locale = "";
-    var nick = "";
     var title = "";
     var description = "";
     var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none;
@@ -222,13 +221,6 @@ module {
         switch (arr[pos]) {
           case (#text v) {
             locale := v;
-          };
-          case _ { break r false; };
-        };
-        pos += 1;
-        switch (arr[pos]) {
-          case (#text v) {
-            nick := v;
           };
           case _ { break r false; };
         };
@@ -272,7 +264,6 @@ module {
       item = {
         price = price;
         locale = locale;
-        nick = nick;
         title = title;
         description = description;
         details = switch (kind) {
