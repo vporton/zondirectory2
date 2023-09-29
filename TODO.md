@@ -1,3 +1,5 @@
+- Remove `candb-client-typescript`.
+
 - Deploy partition canisters from `Makefile`.
 
 - Locale-specific streams.

@@ -4,7 +4,7 @@ import { Button } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import { initializeMainClient, intializeCanDBIndexClient } from "../util/client";
+import { initializeMainClient } from "../util/client";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import Categories from "./Categories";
 import { Principal } from "@dfinity/principal";
@@ -32,7 +32,7 @@ export default function EditItemItem() {
             };
         }
         async function submitItem(item: ItemWithoutOwner) {
-            const canDBIndexClient = intializeCanDBIndexClient();
+            // const canDBIndexClient = intializeCanDBIndexClient();
             // const canDBPartitionClient = initializeCanDBPartitionClient(canDBIndexClient);
             const backend = initializeMainClient();
             let result = await backend.createItemData(item);

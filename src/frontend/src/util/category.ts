@@ -1,7 +1,6 @@
-import { initializeCanDBPartitionClient, intializeCanDBIndexClient, initializeMainClient, initializeOrderClient } from "./client";
-import { idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition/index";
+import { initializeOrderClient } from "./client";
+// import { idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition/index";
 import { Actor, HttpAgent } from "@dfinity/agent";
-import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { getIsLocal } from "./client";
 import { ItemId } from './types';
 import { Principal } from "@dfinity/principal";

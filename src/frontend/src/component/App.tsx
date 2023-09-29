@@ -18,7 +18,7 @@ import EditCategory from "./EditCategory";
 import { getIsLocal, initializeMainClient } from "../util/client";
 import { Actor } from "@dfinity/agent";
 import { serializeItemRef } from '../data/Data'
-import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
+// import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { Principal } from "@dfinity/principal";
  
 export default function App() {
@@ -61,14 +61,15 @@ function MyRouted() {
     const navigate = useNavigate();
     const [root, setRoot] = useState("");
     let main = initializeMainClient();
-    async function readRootItem() {
+    async function fetchRootItem() {
         const data0 = await main.getRootItem();
         const [data] = data0; // TODO: We assume that it's initialized.
         let [part, id] = data! as [Principal, bigint];
         let item = { canister: part, id: Number(id) };
+        console.log("ZZ", item)
         setRoot(serializeItemRef(item));
     }
-    readRootItem().then(() => {});
+    fetchRootItem().then(() => {});
     function RootRedirector(props: {root: string}) {
         useEffect(() => {
             if (root !== "") {

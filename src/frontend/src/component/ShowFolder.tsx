@@ -26,6 +26,7 @@ export default function ShowFolder() {
     const [supercategories, setSupercategories] = useState([] as Item[]);
     const [items, setItems] = useState([] as Item[]);
     if (id !== undefined) {
+        console.log("A1", id);
         AppData.create(id).then(data => {
             data.locale().then(x => setLocale(x));
             data.title().then(x => setTitle(x));

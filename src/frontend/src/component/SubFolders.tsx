@@ -22,6 +22,7 @@ export default function SubFolders(props) {
     const [subcategories, setSubcategories] = useState([] as Item[]);
     const [supercategories, setSupercategories] = useState([] as Item[]);
     if (id !== undefined) {
+        console.log("A2", id);
         AppData.create(id).then(data => {
             data.title().then(x => setTitle(x));
             data.subCategories().then(x => setSubcategories(x));
