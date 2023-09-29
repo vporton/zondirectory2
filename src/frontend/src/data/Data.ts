@@ -39,13 +39,13 @@ export class ItemData {
         obj.streams = streams.length !== 0 ? streams[0] : undefined;
         return obj;
     }
-    locale() {
+    async locale() {
         return this.item.item.locale;
     }
-    title() {
+    async title() {
         return this.item.item.title;
     }
-    description() {
+    async description() {
         return this.item.item.description;
     }
     // FIXME below
