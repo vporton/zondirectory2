@@ -29,16 +29,14 @@ export class ItemData {
         const obj = new ItemData(itemId);
         const client = initializeDirectCanDBPartitionClient(obj.itemRef.canister);
         // TODO: Retrieve both by one call?
-        // FIXME: Use this:
-        // [obj.item, obj.streams] = await Promise.all([
-        //     client.getItem(obj.itemRef.id),
-        //     client.getStreams(obj.itemRef.id),
-        // ]) as [Item, Streams] | undefined;
-        const item = await client.getItem(BigInt(obj.itemRef.id)) as any;
-        obj.item = item; // TODO: if no such item
-        const streams = await client.getStreams(BigInt(obj.itemRef.id)) as any;
-        console.log('QQ1', streams);
-        obj.streams = streams;
+        const [item, streams] = await Promise.all([
+            client.getItem(obj.itemRef.id),
+            client.getStreams(obj.itemRef.id),
+        ]) as [Item[] | [], Streams[] | []];
+        // const item = await client.getItem(BigInt(obj.itemRef.id)) as any;
+        // const streams = await client.getStreams(BigInt(obj.itemRef.id)) as any;
+        obj.item = item[0]; // TODO: if no such item
+        obj.streams = streams.length !== 0 ? streams[0] : undefined;
         return obj;
     }
     locale() {
