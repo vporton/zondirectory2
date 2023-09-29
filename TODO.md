@@ -8,6 +8,8 @@
 
 - `lib.encodeInt` produces too long identifiers.
 
+- Prevent duplicated messages (how to organize the DB of hashes in multiple canisters?)
+
 - Prevent making a folder its own subfolder.
 
 - It seems that `CanDB{Index,Partition}` have superfluous (not used) shared functions.
