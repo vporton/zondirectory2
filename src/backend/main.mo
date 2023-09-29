@@ -187,16 +187,19 @@ shared actor class ZonBackend() = this {
 
   stable var rootItem: ?(CanDBPartition.CanDBPartition, Nat) = null;
 
-  public shared({caller}) func setRootItem(part: CanDBPartition.CanDBPartition, id: Nat)
+  public shared({caller}) func setRootItem(part: Principal, id: Nat)
     : async ()
   {
     onlyMainOwner(caller);
 
-    rootItem := ?(part, id);
+    rootItem := ?(actor(Principal.toText(part)), id);
   };
 
-  public query func getRootItem(): async ?(CanDBPartition.CanDBPartition, Nat) {
-    rootItem;
+  public query func getRootItem(): async ?(Principal, Nat) {
+    do ? {
+      let (part, n) = rootItem!;
+      (Principal.fromActor(part), n);
+    };
   };
 
   // FIXME: Uncomment.
@@ -207,7 +210,7 @@ shared actor class ZonBackend() = this {
   // };
 
   public shared({caller}) func createItemData(_item: lib.ItemWithoutOwner)
-    : async (CanDBPartition.CanDBPartition, Nat)
+    : async (Principal, Nat)
   {
     await* lib.checkSybil(caller);
 
@@ -215,7 +218,7 @@ shared actor class ZonBackend() = this {
     let _itemId = maxId; // TODO: Use per-canister IDs instead.
     maxId += 1;
     // var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # lib.encodeInt(_itemId);
+    let key = "i/" # Nat.toText(_itemId);
     let canisterId = await CanDBIndex.putAttrubuteWithHint({
       pk = "main"; sk = key; subkey = "i"; value = lib.serializeItem(item2); hint = null});
     (canisterId, _itemId);
@@ -224,7 +227,7 @@ shared actor class ZonBackend() = this {
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
   public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat, item: lib.ItemWithoutOwner) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # lib.encodeInt(_itemId);
+    let key = "i/" # Nat.toText(_itemId); // TODO: better encoding
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);

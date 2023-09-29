@@ -9,6 +9,7 @@ import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Buffer "mo:base/Buffer";
 import Iter "mo:base/Iter";
+import Nat "mo:base/Nat";
 import lib "../backend/lib";
 
 shared actor class CanDBPartition({
@@ -181,12 +182,12 @@ shared actor class CanDBPartition({
   // Application-specific code //
 
   public query func getItem(itemId: Nat): async ?lib.Item {
-    let data = _getAttribute({sk = "i/" # lib.encodeInt(itemId)}, "i");
+    let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "i");
     do ? { lib.deserializeItem(data!) };
   };
 
   public query func getStreams(itemId: Nat): async ?lib.Streams {
-    let data = _getAttribute({sk = "i/" # lib.encodeInt(itemId)}, "s");
+    let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "s");
     do ? { lib.deserializeStreams(data!) };
   };
 }

@@ -60,19 +60,35 @@ export default function App() {
 function MyRouted() {
     const navigate = useNavigate();
     const [root, setRoot] = useState("");
-    useEffect(() => navigate("/item/"+root), [root]);
     let main = initializeMainClient();
-    main.getRootItem().then(([data]) => {
-        let [part, id] = data! as [Principal, bigint]; // We assume that it's initialized.
-        let item = { canister: Actor.canisterIdOf(part as unknown as Actor), id: Number(id) };
+    async function readRootItem() {
+        const data0 = await main.getRootItem();
+        const [data] = data0; // TODO: We assume that it's initialized.
+        let [part, id] = data! as [Principal, bigint];
+        let item = { canister: part, id: Number(id) };
         setRoot(serializeItemRef(item));
-    });
+    }
+    readRootItem().then(() => {});
+    function RootRedirector(props: {root: string}) {
+        useEffect(() => {
+            if (root !== "") {
+                navigate("/item/"+root);
+            }
+        }, [root]);
+        return (
+            <p>Loading...</p>
+        );
+    }
     return (
         <>
             <nav>
-                <NavLink to={"/item/"+root}>Main item</NavLink>
+                <NavLink to={"/item/"+root}>Main folder</NavLink>
             </nav>
             <Routes>
+                <Route
+                    path=""
+                    element={<RootRedirector root={root}/>}
+                />
                 <Route
                     path="/item/:id"
                     element={<ShowFolder/>}

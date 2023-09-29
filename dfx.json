@@ -16,12 +16,12 @@
       "type": "motoko"
     },
     "frontend": {
-      "dependencies": [
-        "main"
-      ],
       "frontend": {
         "entrypoint": "src/frontend/src/index.html"
       },
+      "dependencies": [
+        "main"
+      ],
       "source": [
         "src/frontend/assets",
         "dist/frontend/"
