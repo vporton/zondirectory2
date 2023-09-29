@@ -35,9 +35,10 @@ export class ItemData {
         //     client.getStreams(obj.itemRef.id),
         // ]) as [Item, Streams] | undefined;
         const item = await client.getItem(BigInt(obj.itemRef.id)) as any;
-        console.log('QQ', item);
-        obj.item = item
-        obj.streams = await client.getStreams(BigInt(obj.itemRef.id)) as any;
+        obj.item = item; // TODO: if no such item
+        const streams = await client.getStreams(BigInt(obj.itemRef.id)) as any;
+        console.log('QQ1', streams);
+        obj.streams = streams;
         return obj;
     }
     locale() {
