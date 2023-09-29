@@ -16,7 +16,7 @@ type Item = {
 };
 
 export default function SubFolders(props) {
-    const { id } = useParams();
+    const { id } = useParams(); // TODO: a dynamic value
     const [data, setData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
     const [subcategories, setSubcategories] = useState([] as Item[]);

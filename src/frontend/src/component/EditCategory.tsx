@@ -8,7 +8,7 @@ import { initializeMainClient, intializeCanDBIndexClient } from "../util/client"
 import { Principal } from "@dfinity/principal";
 
 export default function EditCategory() {
-    const routeParams = useParams();
+    const routeParams = useParams(); // TODO: a dynamic value
     const superCategory: string | undefined = routeParams.cat;
     enum CategoryKind { owned, communal };
     const [categoryKind, setCategoryKind] = useState<CategoryKind>(CategoryKind.owned);

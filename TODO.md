@@ -1,3 +1,5 @@
+- Deploy partition canisters from `Makefile`.
+
 - Locale-specific streams.
 
 - No more than one communal category with a given name (requires a centralized registry).

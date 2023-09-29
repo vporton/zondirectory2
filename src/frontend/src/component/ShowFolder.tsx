@@ -18,7 +18,7 @@ type Item = {
 };
 
 export default function ShowFolder() {
-    const { id } = useParams();
+    const { id } = useParams(); // TODO: a dynamic value
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");

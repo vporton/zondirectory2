@@ -105,6 +105,7 @@ shared actor class CanDBPartition({
 
   func _getAttribute(options: CanDB.GetOptions, subkey: Text): ?Entity.AttributeValue {
     let all = CanDB.get(db, options);
+    Debug.print("all=" # debug_show(all)); // FIXME: Remove.
     do ? { RBT.get(all!.attributes, Text.compare, subkey)! };
   };
 
@@ -183,6 +184,7 @@ shared actor class CanDBPartition({
 
   public query func getItem(itemId: Nat): async ?lib.Item {
     let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "i");
+    Debug.print("data=" # debug_show(data)); // FIXME: Remove.
     do ? { lib.deserializeItem(data!) };
   };
 
