@@ -27,7 +27,7 @@ export default function Categories(props: { defaultCategories?: string[], onChan
             <ul id="categoriesList">
                 {categoriesList.map((cat, i) => {
                     return (
-                        <li key={i}><input type="number" value={cat} onChange={updateCategoriesList}/></li>
+                        <li key={i}><input value={cat} onChange={updateCategoriesList}/></li>
                     );
                 })}
             </ul>
