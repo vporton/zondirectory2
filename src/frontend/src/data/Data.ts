@@ -52,7 +52,7 @@ export class ItemData {
     // FIXME: For non-folders, no distinction between `subCategories` and `items` (or better no subcategories?)
     async subCategories() {
         // TODO: duplicate code
-        if (this.streams === null) {
+        if (this.streams === undefined) {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB;
@@ -80,7 +80,7 @@ export class ItemData {
     }
     async items() {
         // TODO: duplicate code
-        if (this.streams === null) {
+        if (this.streams === undefined) {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB
