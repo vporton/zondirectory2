@@ -117,6 +117,7 @@ shared actor class Orders() = this {
       case (#ownedCategory) {
         lib.onlyItemOwner(caller, categoryItem);
       };
+      case (#communalCategory) {};
       case _ {
         // TODO: Keep doing for other categories after a trap?
         Debug.trap("not a category");

@@ -28,7 +28,8 @@ shared actor class CanDBPartition({
 
   func checkCaller(caller: Principal) {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
-      Debug.trap("not allowed");
+      Debug.print("CanDBParition owners = " # debug_show(owners));
+      Debug.trap("CanDBParition: not allowed");
     }
   };
 
@@ -105,7 +106,6 @@ shared actor class CanDBPartition({
 
   func _getAttribute(options: CanDB.GetOptions, subkey: Text): ?Entity.AttributeValue {
     let all = CanDB.get(db, options);
-    Debug.print("all=" # debug_show(all)); // FIXME: Remove.
     do ? { RBT.get(all!.attributes, Text.compare, subkey)! };
   };
 

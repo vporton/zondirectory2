@@ -19,7 +19,7 @@ shared({caller}) actor class Partition(
 
     func checkCaller(caller: Principal) {
         if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
-            Debug.trap("not allowed");
+            Debug.trap("NacDBPartition: not allowed from " # Principal.toText(caller));
         }
     };
 
@@ -31,11 +31,11 @@ shared({caller}) actor class Partition(
 
     public query func getOwners(): async [Principal] { owners };
 
-    func ownersOrSelf(): [Principal] {
-        let buf = Buffer.fromArray<Principal>(owners);
-        Buffer.add(buf, Principal.fromActor(this));
-        Buffer.toArray(buf);
-    };
+    // func ownersOrSelf(): [Principal] {
+    //     let buf = Buffer.fromArray<Principal>(owners);
+    //     Buffer.add(buf, Principal.fromActor(this));
+    //     Buffer.toArray(buf);
+    // };
     
     stable let index: Nac.IndexCanister = actor(Principal.toText(caller));
 
