@@ -18,6 +18,9 @@ shared({caller}) actor class Partition(
     stable var owners = initialOwners;
 
     func checkCaller(caller: Principal) {
+        if (caller == Principal.fromActor(this)) { // FIXME: Also eliminate inter-canister calls between partitions.
+            return;
+        };
         if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
             Debug.trap("NacDBPartition: not allowed from " # Principal.toText(caller));
         }
