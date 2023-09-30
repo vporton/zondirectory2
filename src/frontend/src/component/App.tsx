@@ -35,7 +35,7 @@ export default function App() {
                     console.log('identity:',
                         authClient.getIdentity().getPrincipal().toString(),
                         '/',
-                        authClient.getIdentity().getPrincipal().toText()
+                        authClient.getIdentity().getPrincipal().toText(),
                     )
                 },
                 onError: (error) => {
