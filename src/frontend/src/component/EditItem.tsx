@@ -1,16 +1,18 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { initializeMainClient } from "../util/client";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import Categories from "./Categories";
 import { Principal } from "@dfinity/principal";
+import { serializeItemRef } from "../data/Data";
 
 export default function EditItemItem() {
     const routeParams = useParams();
+    const navigate = useNavigate();
     const [mainCategory, setMainCategory] = useState<string | undefined>(undefined);
     useEffect(() => {
         setMainCategory(routeParams.cat);
@@ -35,11 +37,10 @@ export default function EditItemItem() {
             };
         }
         async function submitItem(item: ItemWithoutOwner) {
-            // const canDBIndexClient = intializeCanDBIndexClient();
-            // const canDBPartitionClient = initializeCanDBPartitionClient(canDBIndexClient);
             const backend = initializeMainClient();
-            let result = await backend.createItemData(item);
-            console.log('XXX:', result); // TODO
+            const [part, n] = await backend.createItemData(item);
+            const ref = serializeItemRef({canister: part, id: Number(n)});
+            navigate("/item/"+ref);
         }
         await submitItem(itemData());
     }

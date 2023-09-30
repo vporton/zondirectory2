@@ -1,15 +1,18 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { initializeMainClient } from "../util/client";
 import Categories from "./Categories";
+import { canisterId } from "../../../declarations/CanDBIndex";
+import { serializeItemRef } from "../data/Data";
 // import { Principal } from "@dfinity/principal";
 
 export default function EditCategory() {
     const routeParams = useParams(); // TODO: a dynamic value
+    const navigate = useNavigate();
     const [superCategory, setSuperCategory] = useState<string | undefined>();
     useEffect(() => {
         setSuperCategory(routeParams.cat);
@@ -40,10 +43,10 @@ export default function EditCategory() {
             };
         }
         async function submitItem(item: ItemWithoutOwner) {
-            // const canDBIndexClient = intializeCanDBIndexClient();
-            // const canDBPartitionClient = initializeCanDBPartitionClient(canDBIndexClient);
             const backend = initializeMainClient();
-            await backend.createItemData(item);
+            const [part, n] = await backend.createItemData(item);
+            const ref = serializeItemRef({canister: part, id: Number(n)});
+            navigate("/item/"+ref);
         }
         await submitItem(itemData());
     }
