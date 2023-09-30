@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useParams } from "react-router-dom";
 // import { backend } from "../../../declarations/backend";
@@ -16,19 +16,21 @@ type Item = {
 };
 
 export default function SubFolders(props) {
-    const { id } = useParams(); // TODO: a dynamic value
+    const { id } = useParams();
     const [data, setData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
     const [subcategories, setSubcategories] = useState([] as Item[]);
     const [supercategories, setSupercategories] = useState([] as Item[]);
-    if (id !== undefined) {
-        console.log("A2", id);
-        AppData.create(id).then(data => {
-            data.title().then(x => setTitle(x));
-            data.subCategories().then(x => setSubcategories(x));
-            data.superCategories().then(x => setSupercategories(x));
-        });
-    }
+    useEffect(() => {
+        if (id !== undefined) {
+            console.log("A2", id);
+            AppData.create(id).then(data => {
+                data.title().then(x => setTitle(x));
+                data.subCategories().then(x => setSubcategories(x));
+                data.superCategories().then(x => setSupercategories(x));
+            });
+        }
+    }, [id]);
 
     return (
         <>

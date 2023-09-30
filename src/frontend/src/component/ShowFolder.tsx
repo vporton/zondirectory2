@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useParams } from "react-router-dom";
 import { take } from "../util/iterators";
@@ -18,24 +18,26 @@ type Item = {
 };
 
 export default function ShowFolder() {
-    const { id } = useParams(); // TODO: a dynamic value
+    const { id } = useParams();
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [subcategories, setSubcategories] = useState([] as Item[]);
     const [supercategories, setSupercategories] = useState([] as Item[]);
     const [items, setItems] = useState([] as Item[]);
-    if (id !== undefined) {
-        console.log("A1", id);
-        AppData.create(id).then(data => {
-            data.locale().then(x => setLocale(x));
-            data.title().then(x => setTitle(x));
-            data.description().then(x => setDescription(x));
-            data.subCategories().then(x => setSubcategories(x));
-            data.superCategories().then(x => setSupercategories(x));
-            data.items().then(x => setItems(x));
-        });
-    }
+    useEffect(() => {
+        if (id !== undefined) {
+            console.log("A1", id);
+            AppData.create(id).then(data => {
+                data.locale().then(x => setLocale(x));
+                data.title().then(x => setTitle(x));
+                data.description().then(x => setDescription(x));
+                data.subCategories().then(x => setSubcategories(x));
+                data.superCategories().then(x => setSupercategories(x));
+                data.items().then(x => setItems(x));
+            });
+        }
+    }, [id]);
     return (
         <>
             <h2>Folder: <span lang={locale}>{title}</span></h2>

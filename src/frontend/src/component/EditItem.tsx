@@ -10,8 +10,11 @@ import Categories from "./Categories";
 import { Principal } from "@dfinity/principal";
 
 export default function EditItemItem() {
-    const routeParams = useParams(); // TODO: a dynamic value
-    const mainCategory: string | undefined = routeParams.cat;
+    const routeParams = useParams();
+    const [mainCategory, setMainCategory] = useState<string | undefined>(undefined);
+    useEffect(() => {
+        setMainCategory(routeParams.cat);
+    }, [routeParams.cat]);    
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");

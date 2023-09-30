@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
@@ -9,7 +9,10 @@ import { initializeMainClient } from "../util/client";
 
 export default function EditCategory() {
     const routeParams = useParams(); // TODO: a dynamic value
-    const superCategory: string | undefined = routeParams.cat;
+    const [superCategory, setSuperCategory] = useState<string | undefined>();
+    useEffect(() => {
+        setSuperCategory(routeParams.cat);
+    }, [routeParams.cat])
     enum CategoryKind { owned, communal };
     const [categoryKind, setCategoryKind] = useState<CategoryKind>(CategoryKind.owned);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
