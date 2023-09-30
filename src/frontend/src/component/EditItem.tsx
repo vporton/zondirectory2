@@ -6,7 +6,7 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { initializeMainClient } from "../util/client";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
-import Categories from "./Categories";
+import EditCategoriesList from "./EditCategoriesList";
 import { Principal } from "@dfinity/principal";
 import { serializeItemRef } from "../data/Data";
 
@@ -75,7 +75,7 @@ export default function EditItemItem() {
                     <p>Text: <textarea style={{height: "10ex"}} onChange={e => setPost(e.target.value)}/></p>
                 </TabPanel>
             </Tabs>
-            <Categories defaultCategories={mainCategory === undefined ? [] : [mainCategory]}/>
+            <EditCategoriesList defaultCategories={mainCategory === undefined ? [] : [mainCategory]}/>
             <p><Button onClick={submit}>Submit</Button></p>
         </>
     );

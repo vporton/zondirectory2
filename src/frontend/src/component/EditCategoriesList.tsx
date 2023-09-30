@@ -2,7 +2,7 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 
-export default function Categories(props: { defaultCategories?: string[], onChange?: (categories: string[]) => void }) {
+export default function EditCategoriesList(props: { defaultCategories?: string[], onChange?: (categories: string[]) => void }) {
     const [categories, setCategories] = useState<string[]>([]);
     useEffect(() => {
         setCategories(props.defaultCategories ?? []);
