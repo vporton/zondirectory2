@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { initializeMainClient } from "../util/client";
+import Categories from "./Categories";
 // import { Principal } from "@dfinity/principal";
 
 export default function EditCategory() {
@@ -67,6 +68,7 @@ export default function EditCategory() {
                     <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
                 </TabPanel>
             </Tabs>
+            <Categories defaultCategories={superCategory === undefined ? [] : [superCategory]}/>
             <Button onClick={submit}>Save</Button> {/* TODO */}
         </>
     );
