@@ -16,11 +16,7 @@ build:
 	dfx build main
 
 .PHONY: deploy-backend
-deploy-backend: deploy-backend-without-main
-	dfx deploy main
-
-.PHONY: deploy-backend-without-main
-deploy-backend-without-main:
+deploy-backend:
 	source .env && dfx deploy pst --argument "record { owner = principal \"$(FOUNDER)\"; subaccount = null; }"
 	# TODO: Check principals used
 	source .env && dfx deploy CanDBIndex --argument "vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" }"
@@ -28,9 +24,10 @@ deploy-backend-without-main:
 #	dfx deploy CanDBIndex
 #	dfx deploy pst
 #	dfx deploy payments
+	dfx deploy main
 
 .PHONY: deploy-frontend
-deploy-frontend: deploy-backend-without-main
+deploy-frontend: deploy-backend
 	dfx deploy frontend
 
 .PHONY: init
