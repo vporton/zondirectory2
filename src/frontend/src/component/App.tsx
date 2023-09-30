@@ -26,9 +26,10 @@ export default function App() {
         async function doIt() {
             const authClient = await AuthClient.create();
 
+            const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
             authClient.login({
-                identityProvider: getIsLocal() ? 'http://localhost:8000/?canisterId=b77ix-eeaaa-aaaaa-qaada-cai' : undefined,
-                maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week
+                identityProvider: getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : undefined,
+                maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week // TODO
                 windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
                 onSuccess: () => {
                     console.log('Login Successful!');
