@@ -66,7 +66,6 @@ function MyRouted() {
         const [data] = data0; // TODO: We assume that it's initialized.
         let [part, id] = data! as [Principal, bigint];
         let item = { canister: part, id: Number(id) };
-        console.log("ZZ", item)
         setRoot(serializeItemRef(item));
     }
     fetchRootItem().then(() => {});
