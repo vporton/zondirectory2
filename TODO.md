@@ -1,5 +1,11 @@
 - FIXME: calling shared functions of index from partition (NacDB)?
 
+- why don't you use the TS library that @CanScale wrote for upgrades? I normally use that and it has everything you need. Take a look at the Hello CanDB with upgrades ==> https://github.com/ORIGYN-SA/hello-candb/tree/beta/extended_examples/hello_world_with_upgrades
+For other projects I have use this library that let you write command line (DFX commands) in a JS type. Take a look: https://github.com/google/zx
+Take a look at this example ==> https://gist.github.com/atengberg/7a698218112615517969247f762d92fd --
+https://discord.com/channels/990830443521789952/999858362932006984/1157676585802023012
+
+
 - `checkSybil` should prevent even on localhost to authenticate.
 
 - Remove `candb-client-typescript`.
