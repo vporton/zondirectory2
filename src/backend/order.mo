@@ -162,8 +162,8 @@ shared actor class Orders() = this {
 
     ignore await theSubDB2.insert({
       guid = Blob.toArray(guid);
-      indexCanister = NacDBIndex;
-      outerCanister = theSubDB2;
+      indexCanister = Principal.fromActor(NacDBIndex);
+      outerCanister = Principal.fromActor(theSubDB2);
       outerKey = theSubDB.1;
       sk = lib.encodeInt(timeScanSK);
       value = timeScanItemInfo;

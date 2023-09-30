@@ -37,12 +37,13 @@ actor class CanDBIndex(initialOwners: [Principal]) = this {
 
   func checkCaller(caller: Principal) {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
+      Debug.print("owners=" # debug_show(owners));
       Debug.trap("CanDBIndex: not allowed");
     }
   };
 
   public shared({caller = caller}) func setOwners(_owners: [Principal]): async () {
-    checkCaller(caller);
+    checkCaller(caller); // FIXME
 
     owners := _owners;
   };
