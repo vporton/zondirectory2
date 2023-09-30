@@ -139,7 +139,8 @@ shared actor class Orders() = this {
       case (#communalCategory or #ownedCategory) { categoriesTimeOrderSubDB };
       case _ { itemsTimeOrderSubDB };
     };
-    let timeScanResult = await theSubDB.0.scanLimitOuter({
+    let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
+    let timeScanResult = await theSubDB2.scanLimitOuter({
       dir = #bwd;
       outerKey = theSubDB.1;
       lowerBound = "";
@@ -158,10 +159,11 @@ shared actor class Orders() = this {
     let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId1))), #int(itemId.1)]);
     
     let guid = GUID.nextGuid(guidGen);
-    ignore await theSubDB.0.insert({
+
+    ignore await theSubDB2.insert({
       guid = Blob.toArray(guid);
       indexCanister = NacDBIndex;
-      outerCanister = theSubDB.0;
+      outerCanister = theSubDB2;
       outerKey = theSubDB.1;
       sk = lib.encodeInt(timeScanSK);
       value = timeScanItemInfo;
@@ -171,11 +173,11 @@ shared actor class Orders() = this {
   // Create streams for a folder identified by `itemId`, if they were not yet created.
   func obtainStreams(itemId: (CanDBPartition.CanDBPartition, Nat)): async {
     itemsTimeOrderSubDB: (
-      Nac.OuterCanister,
+      Principal,
       Nac.OuterSubDBKey,
     );
     categoriesTimeOrderSubDB: (
-      Nac.OuterCanister,
+      Principal,
       Nac.OuterSubDBKey,
     );
     // votesOrderSubDB: ( // TODO

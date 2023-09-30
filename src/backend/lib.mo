@@ -138,15 +138,15 @@ module {
 
   public type Streams = {
     itemsTimeOrderSubDB: (
-      Nac.OuterCanister,
+      Principal,
       Nac.OuterSubDBKey,
     );
     categoriesTimeOrderSubDB: (
-      Nac.OuterCanister,
+      Principal,
       Nac.OuterSubDBKey,
     );
     // votesOrderSubDB: ( // TODO
-    //   Nac.OuterCanister
+    //   Principal,
     //   Nac.OuterSubDBKey,
     // );
   };
@@ -178,9 +178,9 @@ module {
 
   public func serializeStreams(streams: Streams): Entity.AttributeValue {
     var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(4);
-    buf.add(#text(Principal.toText(Principal.fromActor(streams.itemsTimeOrderSubDB.0))));
+    buf.add(#text(Principal.toText(streams.itemsTimeOrderSubDB.0)));
     buf.add(#int(streams.itemsTimeOrderSubDB.1));
-    buf.add(#text(Principal.toText(Principal.fromActor(streams.categoriesTimeOrderSubDB.0))));
+    buf.add(#text(Principal.toText(streams.categoriesTimeOrderSubDB.0)));
     buf.add(#int(streams.categoriesTimeOrderSubDB.1));
     #tuple(Buffer.toArray(buf));
   };
@@ -284,11 +284,11 @@ module {
         var pos = 0;
         return {
           itemsTimeOrderSubDB = switch(arr[0], arr[1]) {
-            case (#text p, #int n) { (actor(p), Int.abs(n)) };
+            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };
           categoriesTimeOrderSubDB = switch(arr[2], arr[3]) {
-            case (#text p, #int n) { (actor(p), Int.abs(n)) };
+            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };
         };
