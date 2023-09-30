@@ -27,7 +27,6 @@ export default function ShowFolder() {
     const [items, setItems] = useState([] as Item[]);
     useEffect(() => {
         if (id !== undefined) {
-            console.log("A1", id);
             AppData.create(id).then(data => {
                 data.locale().then(x => setLocale(x));
                 data.title().then(x => setTitle(x));
