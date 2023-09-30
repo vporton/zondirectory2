@@ -10,6 +10,7 @@ import Nat64 "mo:base/Nat64";
 import Int "mo:base/Int";
 import fractions "./fractions";
 import Debug "mo:base/Debug";
+import Nat "mo:base/Nat";
 
 actor class Payments() = this {
   stable var initialized: Bool = false;
