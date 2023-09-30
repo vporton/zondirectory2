@@ -9,11 +9,13 @@ import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import EditCategoriesList from "./EditCategoriesList";
 import { Principal } from "@dfinity/principal";
 import { serializeItemRef } from "../data/Data";
+import { addToMultipleCategories } from "../util/category";
 
 export default function EditItemItem() {
     const routeParams = useParams();
     const navigate = useNavigate();
     const [mainCategory, setMainCategory] = useState<string | undefined>(undefined);
+    const [categoriesList, setCategoriesList] = useState<string[]>([]);
     useEffect(() => {
         setMainCategory(routeParams.cat);
     }, [routeParams.cat]);
@@ -40,6 +42,7 @@ export default function EditItemItem() {
             const backend = initializeMainClient();
             const [part, n] = await backend.createItemData(item);
             const ref = serializeItemRef({canister: part, id: Number(n)});
+            await addToMultipleCategories(categoriesList, {canister: part, id: Number(n)});
             navigate("/item/"+ref);
         }
         await submitItem(itemData());
@@ -75,7 +78,10 @@ export default function EditItemItem() {
                     <p>Text: <textarea style={{height: "10ex"}} onChange={e => setPost(e.target.value)}/></p>
                 </TabPanel>
             </Tabs>
-            <EditCategoriesList defaultCategories={mainCategory === undefined ? [] : [mainCategory]}/>
+            <EditCategoriesList
+                defaultCategories={mainCategory === undefined ? [] : [mainCategory]}
+                onChange={setCategoriesList}
+            />
             <p><Button onClick={submit}>Submit</Button></p>
         </>
     );

@@ -6,14 +6,15 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { initializeMainClient } from "../util/client";
 import EditCategoriesList from "./EditCategoriesList";
+import { addToMultipleCategories } from "../util/category";
 import { canisterId } from "../../../declarations/CanDBIndex";
 import { serializeItemRef } from "../data/Data";
-// import { Principal } from "@dfinity/principal";
 
 export default function EditCategory() {
     const routeParams = useParams(); // TODO: a dynamic value
     const navigate = useNavigate();
     const [superCategory, setSuperCategory] = useState<string | undefined>();
+    const [categoriesList, setCategoriesList] = useState<string[]>([]);
     useEffect(() => {
         setSuperCategory(routeParams.cat);
     }, [routeParams.cat])
@@ -46,6 +47,7 @@ export default function EditCategory() {
             const backend = initializeMainClient();
             const [part, n] = await backend.createItemData(item);
             const ref = serializeItemRef({canister: part, id: Number(n)});
+            await addToMultipleCategories(categoriesList, {canister: part, id: Number(n)});
             navigate("/item/"+ref);
         }
         await submitItem(itemData());
@@ -71,7 +73,10 @@ export default function EditCategory() {
                     <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
                 </TabPanel>
             </Tabs>
-            <EditCategoriesList defaultCategories={superCategory === undefined ? [] : [superCategory]}/>
+            <EditCategoriesList
+                defaultCategories={superCategory === undefined ? [] : [superCategory]}
+                onChange={setCategoriesList}
+            />
             <Button onClick={submit}>Save</Button> {/* TODO */}
         </>
     );

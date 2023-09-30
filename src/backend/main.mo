@@ -205,7 +205,7 @@ shared actor class ZonBackend() = this {
   // FIXME: Uncomment.
   // public shared func getItemData(canisterId: Principal, _itemId: Nat): async ?lib.ItemWithoutOwner {
   //   var part: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-  //   let key = "i/" # lib.encodeInt(_itemId);
+  //   let key = "i/" # Nat.toText(_itemId);
   //   lib.deserializeItem(await part.get({sk = key}));
   // };
 
@@ -254,7 +254,7 @@ shared actor class ZonBackend() = this {
   // TODO: Also remove voting data.
   public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # lib.encodeInt(_itemId);
+    let key = "i/" # Nat.toText(_itemId);
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);

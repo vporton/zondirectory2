@@ -100,12 +100,15 @@ shared actor class Orders() = this {
   // Public API //
 
   public shared({caller}) func addItemToCategory(
-    catId: (CanDBPartition.CanDBPartition, Nat),
-    itemId: (CanDBPartition.CanDBPartition, Nat),
+    catId: (Principal, Nat),
+    itemId: (Principal, Nat),
   ): async () {
     await* lib.checkSybil(caller);
 
-    let ?categoryItemData = await catId.0.getAttribute({sk = "i/" # lib.encodeInt(catId.1)}, "i") else {
+    let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
+    let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
+
+    let ?categoryItemData = await catId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "i") else {
       Debug.trap("cannot get category item");
     };
     let categoryItem = lib.deserializeItem(categoryItemData);
@@ -124,13 +127,13 @@ shared actor class Orders() = this {
     //       need to make multi-hash instead of just hash.
     // For now, I implement a simple hash-map, time-order does not need moving items around.
 
-    let ?childItemData = await itemId.0.getAttribute({sk = "i/" # lib.encodeInt(itemId.1)}, "i") else {
+    let ?childItemData = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "i") else {
       Debug.trap("cannot get child item");
     };
     let childItem = lib.deserializeItem(categoryItemData);
 
     // Put into the beginning of time order.
-    let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB } = await obtainStreams(catId);
+    let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB } = await obtainStreams((catId1, catId.1));
     let theSubDB = switch (childItem.item.details) {
       case (#communalCategory or #ownedCategory) { categoriesTimeOrderSubDB };
       case _ { itemsTimeOrderSubDB };
@@ -151,7 +154,7 @@ shared actor class Orders() = this {
       };
       n + 1;
     };
-    let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId.0))), #int(itemId.1)]);
+    let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId1))), #int(itemId.1)]);
     
     let guid = GUID.nextGuid(guidGen);
     ignore await theSubDB.0.insert({
@@ -179,7 +182,7 @@ shared actor class Orders() = this {
     //   Nat,
     // );
   } {
-    let streamsData = await itemId.0.getAttribute({sk = "i/" # lib.encodeInt(itemId.1)}, "s");
+    let streamsData = await itemId.0.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "s");
     let guid = GUID.nextGuid(guidGen);
     switch (streamsData) {
       case (?data) {
@@ -190,7 +193,7 @@ shared actor class Orders() = this {
         let { outer = categoriesTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""});
         let streams = {itemsTimeOrderSubDB; categoriesTimeOrderSubDB};
         let itemData = lib.serializeStreams(streams);
-        await itemId.0.putAttribute("i/" # lib.encodeInt(itemId.1), "s", itemData);
+        await itemId.0.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData);
         streams;
       }
     };

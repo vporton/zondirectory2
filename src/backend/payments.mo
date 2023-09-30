@@ -220,7 +220,7 @@ actor class Payments() = this {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(paymentCanisterId)); // FIXME
     switch (BTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
       case (?payment) {
-        let itemKey = "i/" # lib.encodeInt(payment.itemId);
+        let itemKey = "i/" # Nat.toText(payment.itemId);
         switch (await db.getAttribute({sk = itemKey}, "i")) {
           case (?itemRepr) {
             let item = lib.deserializeItem(itemRepr);

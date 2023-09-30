@@ -3,7 +3,7 @@ import { Item, Streams } from "../../../declarations/CanDBPartition/CanDBPartiti
 import { initializeDirectCanDBPartitionClient, initializeDirectNacDBPartitionClient } from "../util/client";
 import { Actor } from "@dfinity/agent";
 
-type ItemRef = {
+export type ItemRef = {
     canister: Principal;
     id: number;
 };

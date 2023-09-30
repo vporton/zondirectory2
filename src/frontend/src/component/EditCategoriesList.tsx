@@ -5,7 +5,9 @@ import { Button } from "react-bootstrap";
 export default function EditCategoriesList(props: { defaultCategories?: string[], onChange?: (categories: string[]) => void }) {
     const [categories, setCategories] = useState<string[]>([]);
     useEffect(() => {
-        setCategories(props.defaultCategories ?? []);
+        if (categories.length === 0) { // TODO: hack
+            setCategories(props.defaultCategories ?? []);
+        }
     }, [props.defaultCategories])
     function updateCategories() {
         if (props.onChange !== undefined && categories !== undefined) {
@@ -15,8 +17,12 @@ export default function EditCategoriesList(props: { defaultCategories?: string[]
     useEffect(updateCategories, [categories]);
     function updateCategoriesList() {
         const list: string[] = [];
+        // TODO: validation
         for (const e of document.querySelectorAll('#categoriesList input') as any) {
-            list.push((e as HTMLInputElement).value)
+            const value = (e as HTMLInputElement).value;
+            if (value !== "") {
+                list.push(value)
+            }
         }
         setCategories(list);
     }
