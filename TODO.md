@@ -1,3 +1,5 @@
+- FIXME: calling shared functions of index from partition (NacDB)?
+
 - `checkSybil` should prevent even on localhost to authenticate.
 
 - Remove `candb-client-typescript`.
