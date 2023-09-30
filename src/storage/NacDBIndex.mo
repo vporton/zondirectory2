@@ -17,7 +17,7 @@ shared actor class NacDBIndex(
 
     func checkCaller(caller: Principal) {
         if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
-            Debug.trap("not allowed");
+            Debug.trap("NacDBIndex: not allowed");
         }
     };
 

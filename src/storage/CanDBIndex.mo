@@ -37,7 +37,7 @@ actor class CanDBIndex(initialOwners: [Principal]) = this {
 
   func checkCaller(caller: Principal) {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
-      Debug.trap("not allowed");
+      Debug.trap("CanDBIndex: not allowed");
     }
   };
 
