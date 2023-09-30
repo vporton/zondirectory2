@@ -16,7 +16,6 @@ import SubFolders from "./SubFolders";
 import EditItem from "./EditItem";
 import EditCategory from "./EditCategory";
 import { getIsLocal, initializeMainClient } from "../util/client";
-import { Actor } from "@dfinity/agent";
 import { serializeItemRef } from '../data/Data'
 // import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { Principal } from "@dfinity/principal";

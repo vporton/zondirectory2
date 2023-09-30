@@ -8,5 +8,6 @@
       "module": "nodenext",
       "skipLibCheck": true,
     },
-    "include": ["src/**/*.ts"],
+    // TODO: ./src/custom.d.ts does not work :-~
+    "include": ["src/**/*.ts", "./src/custom.d.ts"],
 }
