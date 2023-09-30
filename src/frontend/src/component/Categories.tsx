@@ -34,7 +34,7 @@ export default function Categories(props: { defaultCategories?: string[], onChan
                     );
                 })}
             </ul>
-            <p><Button onClick={() => setCategoriesList(categoriesList.concat([""]))}>Add</Button></p>
+            <p><Button onClick={() => setCategoriesList((categoriesList ?? []).concat([""]))}>Add</Button></p>
         </>
     );
 }
