@@ -20,7 +20,7 @@ export function getIsLocal() {
 const isLocal = getIsLocal();
 
 // export function intializeCanDBIndexClient(): IndexClient<CanDBIndex> {
-//   const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
+//   const host = isLocal ? "http://localhost:8000" : "https://ic0.app";
 //   const canisterId = isLocal ? process.env.INDEX_CANISTER_ID : "<prod_canister_id>"; // TODO
 //   return new IndexClient<CanDBIndex>({
 //     IDL: CanDBIndexIDL,
@@ -35,7 +35,7 @@ const isLocal = getIsLocal();
 // export function initializeCanDBPartitionClient(indexClient: IndexClient<CanDBIndex>)
 //     : ActorClient<CanDBIndex, CanDBPartition>
 // {
-//   const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
+//   const host = isLocal ? "http://localhost:8000" : "https://ic0.app";
 //   return new ActorClient<CanDBIndex, CanDBPartition>({
 //     actorOptions: {
 //       IDL: CanDBPartitionIDL,
@@ -49,21 +49,21 @@ const isLocal = getIsLocal();
 
 export function initializeDirectCanDBPartitionClient(canisterId: Principal)
 {
-  const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
+  const host = isLocal ? "http://localhost:8000" : "https://ic0.app";
   const agent = new HttpAgent({ host });
   return Actor.createActor(CanDBPartitionIDL, { agent, canisterId });
 };
 
 export function initializeDirectNacDBPartitionClient(canisterId: Principal)
 {
-  const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
+  const host = isLocal ? "http://localhost:8000" : "https://ic0.app";
   const agent = new HttpAgent({ host });
   return Actor.createActor(NacDBPartitionIDL, { agent, canisterId });
 };
 
 export function initializeMainClient()
 {
-  // const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
+  // const host = isLocal ? "http://localhost:8000" : "https://ic0.app";
   // const agent = new HttpAgent({ host });
   // const canisterId = process.env.CANISTER_ID_MAIN;
   // return Actor.createActor(MainPartitionIDL, { agent, canisterId });

@@ -23,29 +23,29 @@ import { Principal } from "@dfinity/principal";
  
 export default function App() {
     // TODO
-    // useEffect(() => {
-    //     async function doIt() {
-    //         const authClient = await AuthClient.create();
+    useEffect(() => {
+        async function doIt() {
+            const authClient = await AuthClient.create();
 
-    //         authClient.login({
-    //             identityProvider: getIsLocal() ? 'http://127.0.0.1:8000/?canisterId=asrmz-lmaaa-aaaaa-qaaeq-cai' : undefined,
-    //             maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week
-    //             windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
-    //             onSuccess: () => {
-    //                 console.log('Login Successful!');
-    //                 console.log('identity:',
-    //                     authClient.getIdentity().getPrincipal().toString(),
-    //                     '/',
-    //                     authClient.getIdentity().getPrincipal().toText()
-    //                 )
-    //             },
-    //             onError: (error) => {
-    //                 console.error('Login Failed: ', error);
-    //             }
-    //         });
-    //     }
-    //     doIt().then(()=>{});
-    // }, []);
+            authClient.login({
+                identityProvider: getIsLocal() ? 'http://localhost:8000/?canisterId=b77ix-eeaaa-aaaaa-qaada-cai' : undefined,
+                maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week
+                windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
+                onSuccess: () => {
+                    console.log('Login Successful!');
+                    console.log('identity:',
+                        authClient.getIdentity().getPrincipal().toString(),
+                        '/',
+                        authClient.getIdentity().getPrincipal().toText()
+                    )
+                },
+                onError: (error) => {
+                    console.error('Login Failed: ', error);
+                }
+            });
+        }
+        doIt().then(()=>{});
+    }, []);
 
     return (
         <>

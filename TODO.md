@@ -1,3 +1,5 @@
+- `checkSybil` should prevent even on localhost to authenticate.
+
 - Remove `candb-client-typescript`.
 
 - Deploy partition canisters from `Makefile`.
