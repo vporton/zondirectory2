@@ -13,8 +13,9 @@ export default function EditItemItem() {
     const routeParams = useParams();
     const [mainCategory, setMainCategory] = useState<string | undefined>(undefined);
     useEffect(() => {
+        console.log('OOO', routeParams.cat)
         setMainCategory(routeParams.cat);
-    }, [routeParams.cat]);    
+    }, [routeParams.cat]);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
