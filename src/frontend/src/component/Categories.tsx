@@ -4,7 +4,7 @@ import { Button } from "react-bootstrap";
 
 export default function Categories(props: { defaultCategories?: string[], onChange?: (categories: string[]) => void }) {
     const [categories, setCategories] = useState<string[] | undefined>();
-    const [categoriesList, setCategoriesList] = useState(categories !== undefined ? categories.map(c => c.toString()) ?? [] : undefined);
+    const [categoriesList, setCategoriesList] = useState((categories ?? []).map(c => c.toString()));
     useEffect(() => {
         setCategoriesList(props.defaultCategories ?? []);
     }, [props.defaultCategories])
@@ -28,13 +28,16 @@ export default function Categories(props: { defaultCategories?: string[], onChan
             <h2>Post to categories (TODO: Limited to ?? posts per day)</h2>
             <p>TODO: Visual editor of categories</p>
             <ul id="categoriesList">
-                {(categoriesList ?? []).map((cat, i) => {
+                {categoriesList.map((cat, i) => {
                     return (
-                        <li key={i}><input value={cat} onChange={updateCategoriesList}/></li>
+                        <li key={i}>
+                            <input value={cat} onChange={updateCategoriesList}/>
+                            <Button onClick={() => setCategoriesList(categoriesList.filter((item) => item !== cat))}>Delete</Button>
+                        </li>
                     );
                 })}
             </ul>
-            <p><Button onClick={() => setCategoriesList((categoriesList ?? []).concat([""]))}>Add</Button></p>
+            <p><Button onClick={() => setCategoriesList(categoriesList.concat([""]))}>Add</Button></p>
         </>
     );
 }
