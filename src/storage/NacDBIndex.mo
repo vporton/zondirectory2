@@ -6,6 +6,7 @@ import Debug "mo:base/Debug";
 import MyCycles "mo:nacdb/Cycles";
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
+import Iter "mo:base/Iter";
 import Buffer "mo:stable-buffer/StableBuffer";
 import Partition "./NacDBPartition";
 import Common "common";
@@ -49,17 +50,20 @@ shared actor class NacDBIndex(
         initialized := true;
     };
 
-    public query func getCanisters(): async [Nac.PartitionCanister] {
+    public query func getCanisters(): async [Principal] {
         // ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        Nac.getCanisters(dbIndex);
+        let iter = Iter.map(Nac.getCanisters(dbIndex).vals(), func(x: Nac.PartitionCanister): Principal {
+            Principal.fromActor(x);
+        });
+        Iter.toArray(iter);
     };
 
-    public shared({caller}) func createPartition(): async Nac.PartitionCanister {
+    public shared({caller}) func createPartition(): async Principal {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
         MyCycles.addPart(Common.dbOptions.partitionCycles);
-        await Partition.Partition(ownersOrSelf());
+        Principal.fromActor(await Partition.Partition(ownersOrSelf()));
     };
 
     public shared({caller}) func createPartitionImpl(): async Principal {
