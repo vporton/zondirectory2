@@ -7,6 +7,7 @@ import { AuthContext } from "./auth/use-auth-client";
 import { Agent, HttpAgent } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import { getIsLocal } from "../util/client";
+import { serializeItemRef } from "../data/Data";
 // import { backend } from "../../../declarations/backend";
 // import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did"
 
@@ -59,9 +60,9 @@ export default function ShowFolder() {
             {description !== null ? <p lang={locale}>{description}</p> : ""}
             <h3>Sub-categories</h3>
             <ul>
-                {take(subcategories, 3).map(x => <li lang={x.locale} key={x.id}>
+                {take(subcategories, 3).map((x: any) => <li lang={x.locale} key={x.id}>
                     {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
-                    <a href={`#/item/${x.id}`}>{x.title}</a>
+                    <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
                 </li>)}
             </ul>
             <p><a href={`#/subfolders-of/${id}`}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
