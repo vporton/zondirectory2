@@ -76,7 +76,6 @@ export default function App() {
 function MyRouted() {
     const navigate = useNavigate();
     const [root, setRoot] = useState("");
-    console.log('PP', process.env.CANISTER_ID_MAIN)
     let main = initializeMainClient();
     async function fetchRootItem() {
         const data0 = await main.getRootItem();
