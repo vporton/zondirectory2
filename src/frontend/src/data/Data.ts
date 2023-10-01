@@ -101,7 +101,7 @@ export class ItemData {
         if (this.streams === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB
+        const [outerCanister, outerKey] = this.streams.itemsTimeOrderSubDB
         const client = Actor.createActor(NacDBPartitionIDL, { // TODO
             agent,
             canisterId: outerCanister,

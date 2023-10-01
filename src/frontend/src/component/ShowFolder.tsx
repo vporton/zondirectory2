@@ -60,7 +60,7 @@ export default function ShowFolder() {
             {description !== null ? <p lang={locale}>{description}</p> : ""}
             <h3>Sub-categories</h3>
             <ul>
-                {take(subcategories, 3).map((x: any) => <li lang={x.locale} key={x.id}>
+                {take(subcategories, 3).map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
                     {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
                     <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
                 </li>)}
@@ -68,7 +68,7 @@ export default function ShowFolder() {
             <p><a href={`#/subfolders-of/${id}`}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
             <h3>Super-categories</h3>
             <ul>
-                {take(supercategories, 3).map(x => <li lang={x.locale} key={x.id}>
+                {take(supercategories, 3).map(x => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
                     {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
                     <a href={`#/item/${x.id}`}>{x.title}</a>
                 </li>)}
@@ -82,7 +82,7 @@ export default function ShowFolder() {
                         {item.link ? <a href={item.link}>{item.title}</a> : item.title}
                         {" "}<a href={`#/item/${serializeItemRef(item.id as any)}`} title="Homepage">[H]</a>
                     </p>
-                    <p lang={item.locale} key={item.id+'a'} style={{marginLeft: '1em'}}>{item.description}</p>
+                    <p lang={item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.description}</p>
                 </div>
             )}
             <p><a href={`#`}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
