@@ -74,7 +74,6 @@ export const useAuthClient = (initialOptions = defaultOptions) => {
     setPrincipal(principal);
 
     setAuthClient(client);
-    console.log("AuthClient set: ", client)
   }
 
   // async function logoutImpl() {
