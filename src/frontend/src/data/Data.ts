@@ -60,10 +60,11 @@ export class ItemData {
         
         // const client = initializeDirectNacDBPartitionClient(outerCanister); // FIXME: https://github.com/dfinity/agent-js/issues/775
         const agent = new HttpAgent({}); // TODO
+        agent.replaceIdentity(await agent.getIdentity() as Identity);
         const client = Actor.createActor(NacDBPartitionIDL, {
             agent,
             canisterId: outerCanister,
-            agentOptions: { identity: await agent.getIdentity() },
+            // agentOptions: { identity:  }, // TODO: why `as Identity`?
         });
 
         const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: 10}) as // TODO: limit
