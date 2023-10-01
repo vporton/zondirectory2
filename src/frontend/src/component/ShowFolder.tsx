@@ -79,7 +79,9 @@ export default function ShowFolder() {
                 <div key={item.id}>
                     <p lang={item.locale} key={item.id}>
                         {item.price ? <>({item.price} ICP) </> : ""}
-                        {item.link ? <a href={item.link}>{item.title}</a> : item.title}</p>
+                        {item.link ? <a href={item.link}>{item.title}</a> : item.title}
+                        {" "}<a href={`#/item/${serializeItemRef(item.id as any)}`} title="Homepage">[H]</a>
+                    </p>
                     <p lang={item.locale} key={item.id+'a'} style={{marginLeft: '1em'}}>{item.description}</p>
                 </div>
             )}
