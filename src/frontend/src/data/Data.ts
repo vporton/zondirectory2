@@ -1,8 +1,10 @@
 import { Principal } from "@dfinity/principal";
 import { Item, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did"
 import { initializeDirectCanDBPartitionClient, initializeDirectNacDBPartitionClient } from "../util/client";
-import { Actor, HttpAgent } from "@dfinity/agent";
+import { Actor, Agent, HttpAgent } from "@dfinity/agent";
 import { idlFactory as NacDBPartitionIDL } from "../../../declarations/NacDBPartition";
+import { idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition";
+import { AuthClient } from "@dfinity/auth-client";
 
 export type ItemRef = {
     canister: Principal;
@@ -51,36 +53,39 @@ export class ItemData {
     }
     // FIXME below
     // FIXME: For non-folders, no distinction between `subCategories` and `items` (or better no subcategories?)
-    async subCategories() {
+    async subCategories(agent: Agent) {
+        if (!agent) { // FIXME
+            return [];
+        }
         // TODO: duplicate code
         if (this.streams === undefined) {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB;
         
-        const main = initializeDirectNacDBPartitionClient(outerCanister); // FIXME: https://github.com/dfinity/agent-js/issues/775
-        // TODO
-        // const agent = new HttpAgent({}); // TODO
-        // agent.replaceIdentity(await agent.getIdentity() as Identity);
-        // const client = Actor.createActor(NacDBPartitionIDL, {
-        //     agent,
-        //     canisterId: outerCanister,
-        //     // agentOptions: { identity:  }, // TODO: why `as Identity`?
-        // });
+        const client = Actor.createActor(NacDBPartitionIDL, { // TODO
+            agent,
+            canisterId: outerCanister,
+        });
 
-        const items = []; // FIXME
-        // const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: 10}) as // TODO: limit
-        //     Array<[string, number]>; // FIXME: correct type?
-        
-        const items2 = items.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
-        const items3 = items2.map(id => async () => [id, await main.getItem(id)]);
-        const items4 = (await Promise.all(items3)) as unknown as [number, Item][]; // TODO: correct?
+        const items = (client ? ((await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: BigInt(10)})) as any).results : undefined) as // TODO: limit
+            Array<[any, number]>; // FIXME: correct type?
+        const items1a = items.map((x: any) => [x[1].tuple[0].text, x[1].tuple[1].int]);
+        const items2 = items1a.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
+        const items3 = items2.map(id => (async () => {
+            const part = Actor.createActor(CanDBPartitionIDL, { // TODO
+                agent,
+                canisterId: id.canister,
+            });
+            return [id, await part.getItem(id.id)];
+        })());
+        const items4: any = (await Promise.all(items3)); // TODO: correct?
         return items4.map(([id, item]) => {
             return {
                 id,
-                locale: item.item.locale,
-                title: item.item.title,
-                description: item.item.description,
+                locale: item[0].item.locale,
+                title: item[0].item.title,
+                description: item[0].item.description,
                 type: 'public', // FIXME
             }
         });
@@ -91,26 +96,36 @@ export class ItemData {
             {id: 4, locale: "en", title: "John's notes", type: 'private', description: "John writes about everything, including the content of The Homepage."},
         ];
     }
-    async items() {
+    async items(agent) {
         // TODO: duplicate code
         if (this.streams === undefined) {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB
-        const client = initializeDirectNacDBPartitionClient(outerCanister); // FIXME: https://github.com/dfinity/agent-js/issues/775
-        const items = []; // FIXME
-        // const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: 10}) as // TODO: limit
-        //     Array<[string, number]>; // FIXME: correct type?
-        const items2 = items.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
-        const items3 = items2.map(id => async () => [id, await client.getItem(id)]);
-        const items4 = (await Promise.all(items3)) as unknown as [number, Item][]; // TODO: correct?
+        const client = Actor.createActor(NacDBPartitionIDL, { // TODO
+            agent,
+            canisterId: outerCanister,
+        });
+        const items = (client ? ((await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: BigInt(10)})) as any).results : undefined) as // TODO: limit
+            Array<[any, number]>; // FIXME: correct type?
+        const items1a = items.map((x: any) => [x[1].tuple[0].text, x[1].tuple[1].int]);
+        const items2 = items1a.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
+        const items3 = items2.map(id => (async () => {
+            const part = Actor.createActor(CanDBPartitionIDL, { // TODO
+                agent,
+                canisterId: id.canister,
+            });
+            return [id, await part.getItem(id.id)];
+        })());
+        const items4: any = (await Promise.all(items3)); // TODO: correct?
         return items4.map(([id, item]) => {
             return {
                 id,
-                locale: item.item.locale,
-                title: item.item.title,
-                description: item.item.description,
+                locale: item[0].item.locale,
+                title: item[0].item.title,
+                description: item[0].item.description,
+                type: 'public', // FIXME
             }
-        })
+        });
     }
 }

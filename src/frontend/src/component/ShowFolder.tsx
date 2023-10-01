@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useParams } from "react-router-dom";
 import { take } from "../util/iterators";
+import { AuthContext } from "./auth/use-auth-client";
+import { Agent, HttpAgent } from "@dfinity/agent";
+import { AuthClient } from "@dfinity/auth-client";
+import { getIsLocal } from "../util/client";
 // import { backend } from "../../../declarations/backend";
 // import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did"
 
@@ -25,20 +29,32 @@ export default function ShowFolder() {
     const [subcategories, setSubcategories] = useState([] as Item[]);
     const [supercategories, setSupercategories] = useState([] as Item[]);
     const [items, setItems] = useState([] as Item[]);
-    useEffect(() => {
+    const [client, setClient] = useState<AuthClient | undefined>(undefined);
+    useEffect(() => { // TODO
         if (id !== undefined) {
+            const agent = new HttpAgent({identity: client?.getIdentity()});
+            if (getIsLocal()) {
+                agent.fetchRootKey(); // TODO: For all other agents.
+            }
             AppData.create(id).then(data => {
+                // TODO: Passing `agent` here is a hack!
                 data.locale().then(x => setLocale(x));
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
-                data.subCategories().then(x => setSubcategories(x));
+                data.subCategories(agent).then(x => setSubcategories(x));
                 data.superCategories().then(x => setSupercategories(x));
-                data.items().then(x => setItems(x));
+                data.items(agent).then(x => setItems(x));
             });
         }
-    }, [id]);
+    }, [id, client]); // TODO: more tight choice
     return (
         <>
+            <AuthContext.Consumer>
+                {({authClient}) => {
+                    setClient(authClient);
+                    return "";
+                }}
+            </AuthContext.Consumer>
             <h2>Folder: <span lang={locale}>{title}</span></h2>
             {description !== null ? <p lang={locale}>{description}</p> : ""}
             <h3>Sub-categories</h3>

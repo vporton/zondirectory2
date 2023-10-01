@@ -11,7 +11,7 @@ import {
     useNavigate,
     HashRouter,
 } from "react-router-dom";
-import { AuthClient } from '@dfinity/auth-client';
+import { Agent } from '@dfinity/agent';
 import SubFolders from "./SubFolders";
 import EditItem from "./EditItem";
 import EditCategory from "./EditCategory";
@@ -101,7 +101,6 @@ function MyRouted() {
             <AuthContext.Consumer>
                 {({isAuthenticated, principal, authClient, options}) => {
                     const signin = () => {
-                        console.log('II', options?.loginOptions)
                         authClient?.login(options?.loginOptions);
                     };
                     return <p>
