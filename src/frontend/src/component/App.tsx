@@ -19,8 +19,10 @@ import { getIsLocal, initializeMainClient } from "../util/client";
 import { serializeItemRef } from '../data/Data'
 // import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { Principal } from "@dfinity/principal";
+import { AuthProvider, useAuth } from './auth/use-auth-client'
  
 export default function App() {
+    const { isAuthenticated, identity } = useAuth();
     // TODO
     // useEffect(() => {
     //     async function doIt() {
@@ -50,9 +52,11 @@ export default function App() {
     return (
         <>
             <h1>Zon Dir</h1>
-            <HashRouter>
-                <MyRouted/>
-            </HashRouter>
+            <AuthProvider>
+                <HashRouter>
+                    <MyRouted/>
+                </HashRouter>
+            </AuthProvider>
         </>
     );
 }
