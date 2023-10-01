@@ -58,20 +58,22 @@ export class ItemData {
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB;
         
-        // const client = initializeDirectNacDBPartitionClient(outerCanister); // FIXME: https://github.com/dfinity/agent-js/issues/775
-        const agent = new HttpAgent({}); // TODO
-        agent.replaceIdentity(await agent.getIdentity() as Identity);
-        const client = Actor.createActor(NacDBPartitionIDL, {
-            agent,
-            canisterId: outerCanister,
-            // agentOptions: { identity:  }, // TODO: why `as Identity`?
-        });
+        const main = initializeDirectNacDBPartitionClient(outerCanister); // FIXME: https://github.com/dfinity/agent-js/issues/775
+        // TODO
+        // const agent = new HttpAgent({}); // TODO
+        // agent.replaceIdentity(await agent.getIdentity() as Identity);
+        // const client = Actor.createActor(NacDBPartitionIDL, {
+        //     agent,
+        //     canisterId: outerCanister,
+        //     // agentOptions: { identity:  }, // TODO: why `as Identity`?
+        // });
 
-        const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: 10}) as // TODO: limit
-            Array<[string, number]>; // FIXME: correct type?
+        const items = []; // FIXME
+        // const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: 10}) as // TODO: limit
+        //     Array<[string, number]>; // FIXME: correct type?
         
         const items2 = items.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
-        const items3 = items2.map(id => async () => [id, await client.getItem(id)]);
+        const items3 = items2.map(id => async () => [id, await main.getItem(id)]);
         const items4 = (await Promise.all(items3)) as unknown as [number, Item][]; // TODO: correct?
         return items4.map(([id, item]) => {
             return {
@@ -96,8 +98,9 @@ export class ItemData {
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB
         const client = initializeDirectNacDBPartitionClient(outerCanister); // FIXME: https://github.com/dfinity/agent-js/issues/775
-        const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: 10}) as // TODO: limit
-            Array<[string, number]>; // FIXME: correct type?
+        const items = []; // FIXME
+        // const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: 10}) as // TODO: limit
+        //     Array<[string, number]>; // FIXME: correct type?
         const items2 = items.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
         const items3 = items2.map(id => async () => [id, await client.getItem(id)]);
         const items4 = (await Promise.all(items3)) as unknown as [number, Item][]; // TODO: correct?

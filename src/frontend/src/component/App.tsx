@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 // import { backend } from "../../../declarations/backend";
-import { Nav } from 'react-bootstrap';
+import { Button, Nav } from 'react-bootstrap';
 import ShowFolder from "./ShowFolder";
 import {
     BrowserRouter as Router,
@@ -22,7 +22,7 @@ import { Principal } from "@dfinity/principal";
 import { AuthProvider, useAuth } from './auth/use-auth-client'
  
 export default function App() {
-    const { isAuthenticated, identity } = useAuth();
+    const { isAuthenticated, principal, authClient } = useAuth();
     // TODO
     // useEffect(() => {
     //     async function doIt() {
@@ -49,9 +49,18 @@ export default function App() {
     //     doIt().then(()=>{});
     // }, []);
 
+    function login() {
+        console.log("LL", authClient)
+        authClient!.login();
+    }
+
     return (
         <>
             <h1>Zon Dir</h1>
+            <p>
+                Logged in as: {isAuthenticated ? principal?.toString() : "(none)"}{" "}
+                <Button onClick={login}>Login</Button>
+            </p>
             <AuthProvider>
                 <HashRouter>
                     <MyRouted/>

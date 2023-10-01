@@ -6,7 +6,7 @@
       "jsx": "react",            /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
       "moduleResolution": "nodenext",
       "module": "nodenext",
-      "skipLibCheck": false,
+      "skipLibCheck": true,
     },
     // TODO: ./src/custom.d.ts does not work :-~
     "include": ["src/**/*.ts", "./src/custom.d.ts"],
