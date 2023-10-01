@@ -3,7 +3,7 @@ import { AuthClient } from "@dfinity/auth-client";
 import { Principal } from "@dfinity/principal";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-const AuthContext = createContext<{
+export const AuthContext = createContext<{
   isAuthenticated: boolean,
   authClient?: AuthClient,
   identity?: Identity,
