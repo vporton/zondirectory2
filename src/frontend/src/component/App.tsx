@@ -48,10 +48,23 @@ export default function App() {
     //     doIt().then(()=>{});
     // }, []);
 
+    const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
+    const identityProvider = getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : undefined;
+    console.log('identityProvider', identityProvider)
     return (
         <>
             <h1>Zon Dir</h1>
-            <AuthProvider>
+            <AuthProvider options={{loginOptions: {
+                identityProvider: (getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : undefined),
+                maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week // TODO
+                windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
+                onSuccess: () => {
+                    console.log('Login Successful!');
+                },
+                onError: (error) => {
+                    console.error('Login Failed: ', error);
+                }
+            }}}>
                 <HashRouter>
                     <MyRouted/>
                 </HashRouter>
@@ -87,9 +100,10 @@ function MyRouted() {
     return (
         <>
             <AuthContext.Consumer>
-                {({isAuthenticated, principal, authClient}) => {
+                {({isAuthenticated, principal, authClient, options}) => {
                     const signin = () => {
-                        authClient?.login();
+                        console.log('II', options?.loginOptions)
+                        authClient?.login(options?.loginOptions);
                     };
                     return <p>
                         Logged in as: {isAuthenticated ? principal?.toString() : "(none)"}{" "}

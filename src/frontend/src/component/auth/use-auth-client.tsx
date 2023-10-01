@@ -1,5 +1,5 @@
 import { Identity } from "@dfinity/agent";
-import { AuthClient } from "@dfinity/auth-client";
+import { AuthClient, AuthClientCreateOptions, AuthClientLoginOptions } from "@dfinity/auth-client";
 import { Principal } from "@dfinity/principal";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
@@ -10,21 +10,21 @@ export const AuthContext = createContext<{
   principal?: Principal,
   login?: () => void,
   logout?: () => Promise<void>,
+  options?: UseAuthClientOptions,
 }>({isAuthenticated: false});
 
-const defaultOptions = {
-  /**
-   *  @type {import("@dfinity/auth-client").AuthClientCreateOptions}
-   */
+type UseAuthClientOptions = {
+  createOptions?: AuthClientCreateOptions;
+  loginOptions?: AuthClientLoginOptions;
+}
+
+const defaultOptions: UseAuthClientOptions = {
   createOptions: {
     idleOptions: {
       // Set to true if you do not want idle functionality
       disableIdle: true,
     },
   },
-  /**
-   * @type {import("@dfinity/auth-client").AuthClientLoginOptions}
-   */
   loginOptions: {
     identityProvider: // FIXME: NFID
       process.env.DFX_NETWORK === "ic"
@@ -40,11 +40,12 @@ const defaultOptions = {
  * @param {AuthClientLoginOptions} options.loginOptions - Options for the AuthClient.login() method
  * @returns
  */
-export const useAuthClient = (options = defaultOptions) => {
+export const useAuthClient = (initialOptions = defaultOptions) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authClient, setAuthClient] = useState<AuthClient | undefined>();
   const [identity, setIdentity] = useState<Identity | undefined>(undefined);
   const [principal, setPrincipal] = useState<Principal | undefined>(undefined);
+  const [options, setOptions] = useState<UseAuthClientOptions>(initialOptions);
 
   useEffect(() => {
     // Initialize AuthClient
@@ -88,14 +89,15 @@ export const useAuthClient = (options = defaultOptions) => {
     authClient,
     identity,
     principal,
+    options,
   };
 };
 
 /**
  * @type {React.FC}
  */
-export function AuthProvider(props: { children: any }) {
-  const auth = useAuthClient();
+export function AuthProvider(props: { children: any, options?: UseAuthClientOptions }) {
+  const auth = useAuthClient(props.options);
   return <AuthContext.Provider value={auth}>{props.children}</AuthContext.Provider>;
 };
 
