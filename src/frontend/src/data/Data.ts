@@ -1,7 +1,8 @@
 import { Principal } from "@dfinity/principal";
 import { Item, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did"
 import { initializeDirectCanDBPartitionClient, initializeDirectNacDBPartitionClient } from "../util/client";
-import { Actor } from "@dfinity/agent";
+import { Actor, HttpAgent } from "@dfinity/agent";
+import { idlFactory as NacDBPartitionIDL } from "../../../declarations/NacDBPartition";
 
 export type ItemRef = {
     canister: Principal;
@@ -56,9 +57,18 @@ export class ItemData {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB;
-        const client = initializeDirectNacDBPartitionClient(outerCanister); // FIXME: https://github.com/dfinity/agent-js/issues/775
-        const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: 'fwd', limit: 10}) as // TODO: limit
+        
+        // const client = initializeDirectNacDBPartitionClient(outerCanister); // FIXME: https://github.com/dfinity/agent-js/issues/775
+        const agent = new HttpAgent({}); // TODO
+        const client = Actor.createActor(NacDBPartitionIDL, {
+            agent,
+            canisterId: outerCanister,
+            agentOptions: { identity: await agent.getIdentity() },
+        });
+
+        const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: 10}) as // TODO: limit
             Array<[string, number]>; // FIXME: correct type?
+        
         const items2 = items.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
         const items3 = items2.map(id => async () => [id, await client.getItem(id)]);
         const items4 = (await Promise.all(items3)) as unknown as [number, Item][]; // TODO: correct?
@@ -85,7 +95,7 @@ export class ItemData {
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB
         const client = initializeDirectNacDBPartitionClient(outerCanister); // FIXME: https://github.com/dfinity/agent-js/issues/775
-        const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: 'fwd', limit: 10}) as // TODO: limit
+        const items = await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: 10}) as // TODO: limit
             Array<[string, number]>; // FIXME: correct type?
         const items2 = items.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
         const items3 = items2.map(id => async () => [id, await client.getItem(id)]);

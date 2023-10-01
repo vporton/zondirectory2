@@ -20,6 +20,7 @@ import Entity "mo:candb/Entity";
 import Canister "mo:matchers/Canister";
 
 actor class CanDBIndex(initialOwners: [Principal]) = this {
+  Debug.print("initialOwners=" # debug_show(initialOwners)); // FIXME: It weirdly includes `payments` and `frontend` but not `main`!
   stable var owners: [Principal] = initialOwners;
 
   stable var initialized: Bool = false;
@@ -37,7 +38,7 @@ actor class CanDBIndex(initialOwners: [Principal]) = this {
 
   func checkCaller(caller: Principal) {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
-      Debug.print("owners=" # debug_show(owners)); // FIXME: It weirdly includes `payments` and `frontend` but not `main`!
+      Debug.print("allowed owners=" # debug_show(owners)); // FIXME: It weirdly includes `payments` and `frontend` but not `main`!
       Debug.trap("CanDBIndex: not allowed");
     }
   };

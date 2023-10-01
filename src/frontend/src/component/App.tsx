@@ -22,30 +22,30 @@ import { Principal } from "@dfinity/principal";
  
 export default function App() {
     // TODO
-    useEffect(() => {
-        async function doIt() {
-            const authClient = await AuthClient.create();
+    // useEffect(() => {
+    //     async function doIt() {
+    //         const authClient = await AuthClient.create();
 
-            const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
-            authClient.login({
-                identityProvider: getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : undefined,
-                maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week // TODO
-                windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
-                onSuccess: () => {
-                    console.log('Login Successful!');
-                    console.log('identity:',
-                        authClient.getIdentity().getPrincipal().toString(),
-                        '/',
-                        authClient.getIdentity().getPrincipal().toText(),
-                    )
-                },
-                onError: (error) => {
-                    console.error('Login Failed: ', error);
-                }
-            });
-        }
-        doIt().then(()=>{});
-    }, []);
+    //         const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
+    //         authClient.login({
+    //             identityProvider: getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : undefined,
+    //             maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week // TODO
+    //             windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
+    //             onSuccess: () => {
+    //                 console.log('Login Successful!');
+    //                 console.log('identity:',
+    //                     authClient.getIdentity().getPrincipal().toString(),
+    //                     '/',
+    //                     authClient.getIdentity().getPrincipal().toText(),
+    //                 )
+    //             },
+    //             onError: (error) => {
+    //                 console.error('Login Failed: ', error);
+    //             }
+    //         });
+    //     }
+    //     doIt().then(()=>{});
+    // }, []);
 
     return (
         <>
@@ -60,6 +60,7 @@ export default function App() {
 function MyRouted() {
     const navigate = useNavigate();
     const [root, setRoot] = useState("");
+    console.log('PP', process.env.CANISTER_ID_MAIN)
     let main = initializeMainClient();
     async function fetchRootItem() {
         const data0 = await main.getRootItem();
