@@ -151,7 +151,10 @@ shared actor class Orders() = this {
     let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
       0;
     } else {
-      let #int n = timeScanResult.results[0].1 else {
+      let #tuple t = timeScanResult.results[0].1 else {
+        Debug.trap("wrong stream");
+      };
+      let #int n = t[1] else {
         Debug.trap("wrong stream");
       };
       n + 1;
