@@ -75,10 +75,10 @@ function MyRouted() {
             <AuthContext.Consumer>
                 {({isAuthenticated, principal, authClient, options, login, logout}) => {
                     const signin = () => {
-                        login!();
+                        login!(); // TODO: `!`
                     };
                     const signout = async () => {
-                        await logout!();
+                        await logout!(); // TODO: `!`
                     };
                     return <p>
                         Logged in as: {isAuthenticated ? principal?.toString() : "(none)"}{" "}
