@@ -146,7 +146,7 @@ shared actor class Orders() = this {
       lowerBound = "";
       upperBound = "x";
       limit = 1;
-      ascending = ?false;
+      ascending = ?true;
     });
     let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
       0;

@@ -88,12 +88,13 @@ module {
     Nat64.toNat(result);
   };
 
+  // For integers less than 2**64 have the same lexigraphical sort order as the argument.
   public func encodeInt(n: Int): Text {
-    let a = encodeNat(Int.abs(n));
+    assert n < 2**64;
     if (n >= 0) {
-      a;
+      encodeNat(Int.abs(n));
     } else {
-      "-" # a;
+      "-" # encodeNat(2**64 - Int.abs(n));
     };
   };
 
