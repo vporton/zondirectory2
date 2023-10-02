@@ -1,4 +1,4 @@
-import { HttpAgent, Identity } from "@dfinity/agent";
+import { Agent, HttpAgent, Identity } from "@dfinity/agent";
 import { AuthClient, AuthClientCreateOptions, AuthClientLoginOptions } from "@dfinity/auth-client";
 import { Principal } from "@dfinity/principal";
 import React, { createContext, useContext, useEffect, useState } from "react";
@@ -7,11 +7,12 @@ import { getIsLocal } from "../../util/client";
 export const AuthContext = createContext<{
   isAuthenticated: boolean,
   authClient?: AuthClient,
+  agent?: Agent,
   defaultAgent?: AuthClient,
   identity?: Identity,
   principal?: Principal,
   options?: UseAuthClientOptions,
-  login?: () => void,
+  login?: (callback?: () => Promise<void>) => void,
   logout?: () => Promise<void>,
 }>({isAuthenticated: false});
 
@@ -57,12 +58,16 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
     const isAuthenticated = await client.isAuthenticated();
     const identity = client.getIdentity();
     const principal = identity.getPrincipal();
+    console.log(identity)
+    const agent = new HttpAgent({identity});
+    if (getIsLocal()) {
+      agent.fetchRootKey();
+    }
 
-    setAuth({authClient: client, isAuthenticated, identity, principal, options: props.options});
+    setAuth({authClient: client, agent, isAuthenticated, identity, principal, options: props.options});
   }
 
-  const login = () => {
-    console.log("setAuth options2", props.options);
+  const login = async () => {
     auth.authClient!.login({
       ...auth.options.loginOptions,
       onSuccess: () => {
@@ -75,7 +80,6 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
   };
 
   const logout = async () => {
-    console.log(auth)
     await auth.authClient?.logout();
     await updateClient(auth.authClient);
   }

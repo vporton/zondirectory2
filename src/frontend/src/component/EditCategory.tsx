@@ -9,6 +9,7 @@ import EditCategoriesList from "./EditCategoriesList";
 import { addToMultipleCategories } from "../util/category";
 import { canisterId } from "../../../declarations/CanDBIndex";
 import { serializeItemRef } from "../data/Data";
+import { AuthContext } from "./auth/use-auth-client";
 
 export default function EditCategory() {
     const routeParams = useParams(); // TODO: a dynamic value
@@ -33,51 +34,55 @@ export default function EditCategory() {
                 break;
             }
     }
-    async function submit() {
-        function itemData(): ItemWithoutOwner {
-            return {
-                locale,
-                title,
-                description: shortDescription,
-                details: categoryKind == CategoryKind.owned ? {ownedCategory: null} : {communalCategory: null},
-                price: 0.0, // TODO
-            };
-        }
-        async function submitItem(item: ItemWithoutOwner) {
-            const backend = initializeMainClient();
-            const [part, n] = await backend.createItemData(item);
-            const ref = serializeItemRef({canister: part, id: Number(n)});
-            await addToMultipleCategories(categoriesList, {canister: part, id: Number(n)});
-            navigate("/item/"+ref);
-        }
-        await submitItem(itemData());
-    }
     return (
-        <>
-            <Tabs onSelect={onSelectTab}>
-                <TabList>
-                    <Tab>Owned</Tab>
-                    <Tab>Communal</Tab>
-                </TabList>
-                <TabPanel>
-                    <p>Owned categories have an owner (you). Only the owner can add, delete, and reoder items in an owned category,{" "}
-                        or rename the category.</p>
-                    <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
-                    <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
-                    <p>Short (meta) description: <textarea onChange={e => setShortDescription(e.target.value)}/></p>
-                </TabPanel>
-                <TabPanel>
-                    <p>Communal categories have no owner. Anybody can add an item to a communal category.{" "}
-                        Nobody can delete an item from a communal category or rename the category. Ordering is determined by voting.</p>
-                    <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
-                    <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
-                </TabPanel>
-            </Tabs>
-            <EditCategoriesList
-                defaultCategories={superCategory === undefined ? [] : [superCategory]}
-                onChange={setCategoriesList}
-            />
-            <Button onClick={submit}>Save</Button> {/* TODO */}
-        </>
+        <AuthContext.Consumer>
+            {({agent, isAuthenticated}) => {
+                async function submit() {
+                    function itemData(): ItemWithoutOwner {
+                        return {
+                            locale,
+                            title,
+                            description: shortDescription,
+                            details: categoryKind == CategoryKind.owned ? {ownedCategory: null} : {communalCategory: null},
+                            price: 0.0, // TODO
+                        };
+                    }
+                    async function submitItem(item: ItemWithoutOwner) {
+                        const backend = initializeMainClient();
+                        const [part, n] = await backend.createItemData(item);
+                        const ref = serializeItemRef({canister: part, id: Number(n)});
+                        await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)});
+                        navigate("/item/"+ref);
+                    }
+                    await submitItem(itemData());
+                }
+                return <>
+                    <Tabs onSelect={onSelectTab}>
+                        <TabList>
+                            <Tab>Owned</Tab>
+                            <Tab>Communal</Tab>
+                        </TabList>
+                        <TabPanel>
+                            <p>Owned categories have an owner (you). Only the owner can add, delete, and reoder items in an owned category,{" "}
+                                or rename the category.</p>
+                            <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
+                            <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
+                            <p>Short (meta) description: <textarea onChange={e => setShortDescription(e.target.value)}/></p>
+                        </TabPanel>
+                        <TabPanel>
+                            <p>Communal categories have no owner. Anybody can add an item to a communal category.{" "}
+                                Nobody can delete an item from a communal category or rename the category. Ordering is determined by voting.</p>
+                            <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
+                            <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
+                        </TabPanel>
+                    </Tabs>
+                    <EditCategoriesList
+                        defaultCategories={superCategory === undefined ? [] : [superCategory]}
+                        onChange={setCategoriesList}
+                    />
+                    <Button onClick={submit} disabled={!isAuthenticated}>Save</Button>
+                </>
+            }}
+        </AuthContext.Consumer>
     );
 }
