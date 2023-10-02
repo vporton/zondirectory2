@@ -9,7 +9,7 @@ FOUNDER = $(shell dfx identity get-wallet)
 build:
 
 .PHONY: deploy
-deploy: deploy-backend deploy-frontend
+deploy: deploy-frontend
 
 .PHONY: build
 build:
