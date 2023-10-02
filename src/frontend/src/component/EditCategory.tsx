@@ -4,7 +4,7 @@ import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
-import { initializeMainClient } from "../util/client";
+import { createActor as mainActor } from "../../../declarations/main";
 import EditCategoriesList from "./EditCategoriesList";
 import { addToMultipleCategories } from "../util/category";
 import { canisterId } from "../../../declarations/CanDBIndex";
@@ -48,7 +48,7 @@ export default function EditCategory() {
                         };
                     }
                     async function submitItem(item: ItemWithoutOwner) {
-                        const backend = initializeMainClient();
+                        const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
                         const [part, n] = await backend.createItemData(item);
                         const ref = serializeItemRef({canister: part, id: Number(n)});
                         await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)});

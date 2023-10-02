@@ -40,6 +40,7 @@ function ShowFolderContent(props: {defaultAgent}) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [type, setType] = useState<string | undefined>(undefined);
+    const [creator, setCreator] = useState("");
     const [subcategories, setSubcategories] = useState([] as Item[]);
     const [supercategories, setSupercategories] = useState([] as Item[]);
     const [items, setItems] = useState([] as Item[]);
@@ -49,6 +50,7 @@ function ShowFolderContent(props: {defaultAgent}) {
                 data.locale().then(x => setLocale(x));
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
+                data.creator().then(x => setCreator(x));
                 data.subCategories().then(x => setSubcategories(x));
                 data.superCategories().then(x => setSupercategories(x));
                 data.items().then(x => setItems(x));
@@ -60,7 +62,8 @@ function ShowFolderContent(props: {defaultAgent}) {
     }, [id, props.defaultAgent]); // TODO: more tight choice
     return <>
         <h2>{type === 'ownedCategory' || type === 'communalCategory' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
-        {description !== null ? <p lang={locale}>{description}</p> : ""}
+        <p>Creator: {creator.toString()}</p>
+        <p>{description !== null ? <p lang={locale}>{description}</p> : ""}</p>
         <h3>Sub-categories</h3>
         <ul>
             {take(subcategories, 4).map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>

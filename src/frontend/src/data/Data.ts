@@ -56,6 +56,9 @@ export class ItemData {
     async details() {
         return this.item.item.details;
     }
+    async creator() {
+        return this.item.creator;
+    }
     // FIXME below
     // FIXME: For non-folders, no distinction between `subCategories` and `items` (or better no subcategories?)
     async subCategories() {

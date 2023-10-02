@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 
 export default function EditCategoriesList(props: { defaultCategories?: string[], onChange?: (categories: string[]) => void }) {
-    const [categories, setCategories] = useState<string[]>([]);
+    const [categories, setCategories] = useState<string[] | undefined>(undefined);
     useEffect(() => {
-        if (categories.length === 0) { // TODO: hack
+        if (categories === undefined && props.defaultCategories?.length !== 0) {
+            console.log("props.defaultCategories", props.defaultCategories)
             setCategories(props.defaultCategories ?? []);
         }
     }, [props.defaultCategories])
@@ -32,7 +33,7 @@ export default function EditCategoriesList(props: { defaultCategories?: string[]
             <h2>Post to categories (TODO: Limited to ?? posts per day)</h2>
             <p>TODO: Visual editor of categories</p>
             <ul id="categoriesList">
-                {categories.map((cat, i) => {
+                {(categories ?? []).map((cat, i) => {
                     return (
                         <li key={i}>
                             <input value={cat} onChange={updateCategoriesList}/>

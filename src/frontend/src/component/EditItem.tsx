@@ -6,6 +6,7 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { initializeMainClient } from "../util/client";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
+import { createActor as mainActor } from "../../../declarations/main";
 import EditCategoriesList from "./EditCategoriesList";
 import { Principal } from "@dfinity/principal";
 import { serializeItemRef } from "../data/Data";
@@ -53,7 +54,7 @@ export default function EditItemItem() {
                         };
                     }
                     async function submitItem(item: ItemWithoutOwner) {
-                        const backend = initializeMainClient();
+                        const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
                         const [part, n] = await backend.createItemData(item);
                         const ref = serializeItemRef({canister: part, id: Number(n)});
                         await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)});
