@@ -26,15 +26,15 @@ export default function ShowFolder() {
     return (
         <>
             <AuthContext.Consumer>
-                {({authClient}) => {
-                    return <ShowFolderContent authClient={authClient}/>
+                {({defaultAgent}) => {
+                    return <ShowFolderContent defaultAgent={defaultAgent}/>
                 }}
             </AuthContext.Consumer>
         </>
     );
 }
 
-function ShowFolderContent(props: {authClient}) {
+function ShowFolderContent(props: {defaultAgent}) {
     const { id } = useParams();
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
@@ -45,24 +45,20 @@ function ShowFolderContent(props: {authClient}) {
     const [items, setItems] = useState([] as Item[]);
     useEffect(() => { // TODO
         if (id !== undefined) {
-            const agent = new HttpAgent({identity: props.authClient?.getIdentity()});
-            if (getIsLocal()) {
-                agent.fetchRootKey(); // TODO: For all other agents.
-            }
             AppData.create(id).then(data => {
                 // TODO: Passing `agent` here is a hack!
                 data.locale().then(x => setLocale(x));
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
-                data.subCategories(agent).then(x => setSubcategories(x));
+                data.subCategories(props.defaultAgent).then(x => setSubcategories(x));
                 data.superCategories().then(x => setSupercategories(x));
-                data.items(agent).then(x => setItems(x));
+                data.items(props.defaultAgent).then(x => setItems(x));
                 data.details().then((x) => {
                     setType(Object.keys(x)[0])
                 })
             });
         }
-    }, [id, props.authClient]); // TODO: more tight choice
+    }, [id, props.defaultAgent]); // TODO: more tight choice
     return <>
         <h2>{type === 'ownedCategory' || type === 'communalCategory' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         {description !== null ? <p lang={locale}>{description}</p> : ""}

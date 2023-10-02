@@ -1,16 +1,18 @@
-import { Identity } from "@dfinity/agent";
+import { HttpAgent, Identity } from "@dfinity/agent";
 import { AuthClient, AuthClientCreateOptions, AuthClientLoginOptions } from "@dfinity/auth-client";
 import { Principal } from "@dfinity/principal";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { getIsLocal } from "../../util/client";
 
 export const AuthContext = createContext<{
   isAuthenticated: boolean,
   authClient?: AuthClient,
+  defaultAgent?: AuthClient,
   identity?: Identity,
   principal?: Principal,
+  options?: UseAuthClientOptions,
   login?: () => void,
   logout?: () => Promise<void>,
-  options?: UseAuthClientOptions,
 }>({isAuthenticated: false});
 
 type UseAuthClientOptions = {
@@ -65,6 +67,9 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
       ...auth.options.loginOptions,
       onSuccess: () => {
         updateClient(auth.authClient);
+        if (getIsLocal()) {
+          auth.authClient.fetchRootKey();
+        }
       },
     });
   };
@@ -75,7 +80,12 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
     await updateClient(auth.authClient);
   }
 
-  return <AuthContext.Provider value={{...auth, login, logout}}>{props.children}</AuthContext.Provider>;
+  const defaultAgent = new HttpAgent(); // TODO: options
+  if (getIsLocal()) {
+    defaultAgent.fetchRootKey();
+  }
+
+  return <AuthContext.Provider value={{...auth, login, logout, defaultAgent}}>{props.children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);
