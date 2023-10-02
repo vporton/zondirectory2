@@ -65,11 +65,11 @@ function ShowFolderContent(props: {authClient}) {
         }
     }, [id, props.authClient]); // TODO: more tight choice
     return <>
-        <h2>{type === 'ownedFolder' || type === 'communalFolder' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
+        <h2>{type === 'ownedCategory' || type === 'communalCategory' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         <h3>Sub-categories</h3>
         <ul>
-            {take(subcategories, 3).map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
+            {take(subcategories, 4).map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
                 {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
                 <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
             </li>)}
@@ -84,7 +84,7 @@ function ShowFolderContent(props: {authClient}) {
         </ul>
         {/* TODO: Create super-category */}
         <p><a href={`#/superfolders-of/${id}`}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
-        <h3>{type === 'ownedFolder' || type === 'communalFolder' ? "Items" : "Comments"}</h3>
+        <h3>{type === 'ownedCategory' || type === 'communalCategory' ? "Items" : "Comments"}</h3>
         {items.map(item => 
             <div key={item.id}>
                 <p lang={item.locale} key={item.id}>

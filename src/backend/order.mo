@@ -131,10 +131,11 @@ shared actor class Orders() = this {
     let ?childItemData = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "i") else {
       Debug.trap("cannot get child item");
     };
-    let childItem = lib.deserializeItem(categoryItemData);
+    let childItem = lib.deserializeItem(childItemData);
 
     // Put into the beginning of time order.
     let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB } = await obtainStreams((catId1, catId.1));
+    Debug.print("DETAILS: " # debug_show(childItem.item.details));
     let theSubDB = switch (childItem.item.details) {
       case (#communalCategory or #ownedCategory) { categoriesTimeOrderSubDB };
       case _ { itemsTimeOrderSubDB };
