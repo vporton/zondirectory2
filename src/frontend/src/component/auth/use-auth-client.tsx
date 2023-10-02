@@ -37,55 +37,45 @@ const defaultOptions: UseAuthClientOptions = {
  * @type {React.FC}
  */
 export function AuthProvider(props: { children: any, options?: UseAuthClientOptions }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authClient, setAuthClient] = useState<AuthClient | undefined>();
-  const [identity, setIdentity] = useState<Identity | undefined>(undefined);
-  const [principal, setPrincipal] = useState<Principal | undefined>(undefined);
-  const [options, setOptions] = useState<UseAuthClientOptions>(props.options ?? defaultOptions);
+  const [auth, setAuth] = useState<any>({options: props.options});
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // const [authClient, setAuthClient] = useState<AuthClient | undefined>();
+  // const [identity, setIdentity] = useState<Identity | undefined>(undefined);
+  // const [principal, setPrincipal] = useState<Principal | undefined>(undefined);
+  // const [options, setOptions] = useState<UseAuthClientOptions>(props.options ?? defaultOptions);
 
   useEffect(() => {
     // Initialize AuthClient
-    AuthClient.create(options.createOptions).then(async (client) => {
+    AuthClient.create(props.options!.createOptions).then(async (client) => { // FIXME: `!`?
       updateClient(client);
     });
   }, []);
 
-  // const loginImpl = () => {
-  //   authClient!.login({
-  //     ...options.loginOptions,
-  //     onSuccess: () => {
-  //       updateClient(authClient);
-  //     },
-  //   });
-  // };
-
   async function updateClient(client) {
     const isAuthenticated = await client.isAuthenticated();
-    setIsAuthenticated(isAuthenticated);
-
     const identity = client.getIdentity();
-    setIdentity(identity);
-
     const principal = identity.getPrincipal();
-    setPrincipal(principal);
 
-    setAuthClient(client);
+    setAuth({authClient: client, isAuthenticated, identity, principal, options: props.options});
   }
 
-  // async function logoutImpl() {
-  //   await authClient?.logout();
-  //   await updateClient(authClient);
-  // }
+  const login = () => {
+    console.log("setAuth options2", props.options);
+    auth.authClient!.login({
+      ...auth.options.loginOptions,
+      onSuccess: () => {
+        updateClient(auth.authClient);
+      },
+    });
+  };
 
-  return <AuthContext.Provider value={{
-    isAuthenticated,
-    // login,
-    // logout,
-    authClient,
-    identity,
-    principal,
-    options,
-  }}>{props.children}</AuthContext.Provider>;
+  const logout = async () => {
+    console.log(auth)
+    await auth.authClient?.logout();
+    await updateClient(auth.authClient);
+  }
+
+  return <AuthContext.Provider value={{...auth, login, logout}}>{props.children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);
