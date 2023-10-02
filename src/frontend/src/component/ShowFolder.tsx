@@ -80,7 +80,7 @@ function ShowFolderContent(props: {defaultAgent}) {
         <p><a href={`#/superfolders-of/${id}`}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
         <h3>{type === 'ownedCategory' || type === 'communalCategory' ? "Items" : "Comments"}</h3>
         {items.map(item => 
-            <div key={item.id}>
+            <div key={serializeItemRef(item.id as any)}>
                 <p lang={item.locale} key={item.id}>
                     {item.price ? <>({item.price} ICP) </> : ""}
                     {item.link ? <a href={item.link}>{item.title}</a> : item.title}
