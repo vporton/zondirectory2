@@ -67,7 +67,7 @@ function ShowFolderContent(props: {defaultAgent}) {
         <h2><ItemType item={data}/>{type === 'ownedCategory' || type === 'communalCategory' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         <p>Creator: <small>{creator.toString()}</small></p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
-        <h3>Sub-categories</h3>
+        <h3>Sub-folders</h3>
         <ul>
             {take(subcategories, 4).map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
                 <ItemType item={x}/>
@@ -75,7 +75,7 @@ function ShowFolderContent(props: {defaultAgent}) {
             </li>)}
         </ul>
         <p><a href={`#/subfolders-of/${id}`}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
-        <h3>Super-categories</h3>
+        <h3>Super-folders</h3>
         <ul>
             {take(supercategories, 3).map(x => <li lang={x.locale} key={x.id}>
                 <a href={`#/item/${x.id}`}>{x.title}</a>
