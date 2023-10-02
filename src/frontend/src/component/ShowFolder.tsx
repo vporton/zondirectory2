@@ -72,7 +72,7 @@ function ShowFolderContent(props: {authClient}) {
         <p><a href={`#/subfolders-of/${id}`}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
         <h3>Super-categories</h3>
         <ul>
-            {take(supercategories, 3).map(x => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
+            {take(supercategories, 3).map(x => <li lang={x.locale} key={x.id}>
                 {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
                 <a href={`#/item/${x.id}`}>{x.title}</a>
             </li>)}
