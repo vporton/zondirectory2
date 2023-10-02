@@ -82,8 +82,7 @@ function MyRouted() {
                     };
                     return <p>
                         Logged in as: {isAuthenticated ? principal?.toString() : "(none)"}{" "}
-                        <Button onClick={signin}>Login</Button>
-                        {isAuthenticated && <>{" "}<Button onClick={signout}>Logout</Button></>}
+                        {isAuthenticated ? <Button onClick={signout}>Logout</Button> : <Button onClick={signin}>Login</Button>}
                     </p>
             }}
             </AuthContext.Consumer>
