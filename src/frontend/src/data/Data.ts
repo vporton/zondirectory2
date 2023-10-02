@@ -94,7 +94,9 @@ export class ItemData {
                 locale: item[0].item.locale,
                 title: item[0].item.title,
                 description: item[0].item.description,
-                type: 'public', // FIXME
+                item: { // TODO: BAD hack
+                    details: item[0].item.details,
+                },
             }
         });
     }

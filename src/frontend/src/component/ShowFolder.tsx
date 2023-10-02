@@ -8,6 +8,7 @@ import { Agent, HttpAgent } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import { getIsLocal } from "../util/client";
 import { serializeItemRef } from "../data/Data";
+import ItemType from "./misc/ItemType";
 // import { backend } from "../../../declarations/backend";
 // import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did"
 
@@ -44,9 +45,11 @@ function ShowFolderContent(props: {defaultAgent}) {
     const [subcategories, setSubcategories] = useState([] as Item[]);
     const [supercategories, setSupercategories] = useState([] as Item[]);
     const [items, setItems] = useState([] as Item[]);
+    const [data, setData] = useState<any>(undefined); // TODO: hack
     useEffect(() => { // TODO
         if (id !== undefined) {
             AppData.create(props.defaultAgent, id).then(data => {
+                setData(data.item);
                 data.locale().then(x => setLocale(x));
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
@@ -61,13 +64,13 @@ function ShowFolderContent(props: {defaultAgent}) {
         }
     }, [id, props.defaultAgent]); // TODO: more tight choice
     return <>
-        <h2>{type === 'ownedCategory' || type === 'communalCategory' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
+        <h2><ItemType item={data}/>{type === 'ownedCategory' || type === 'communalCategory' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         <p>Creator: <small>{creator.toString()}</small></p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         <h3>Sub-categories</h3>
         <ul>
             {take(subcategories, 4).map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
-                {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
+                <ItemType item={x}/>
                 <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
             </li>)}
         </ul>
@@ -75,7 +78,6 @@ function ShowFolderContent(props: {defaultAgent}) {
         <h3>Super-categories</h3>
         <ul>
             {take(supercategories, 3).map(x => <li lang={x.locale} key={x.id}>
-                {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
                 <a href={`#/item/${x.id}`}>{x.title}</a>
             </li>)}
         </ul>
