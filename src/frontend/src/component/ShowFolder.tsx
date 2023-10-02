@@ -39,6 +39,7 @@ function ShowFolderContent(props: {authClient}) {
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [type, setType] = useState<string | undefined>(undefined);
     const [subcategories, setSubcategories] = useState([] as Item[]);
     const [supercategories, setSupercategories] = useState([] as Item[]);
     const [items, setItems] = useState([] as Item[]);
@@ -56,11 +57,15 @@ function ShowFolderContent(props: {authClient}) {
                 data.subCategories(agent).then(x => setSubcategories(x));
                 data.superCategories().then(x => setSupercategories(x));
                 data.items(agent).then(x => setItems(x));
+                data.details().then((x) => {
+                    console.log('XX', x)
+                    setType(Object.keys(x)[0])
+                })
             });
         }
     }, [id, props.authClient]); // TODO: more tight choice
     return <>
-        <h2>Folder: <span lang={locale}>{title}</span></h2>
+        <h2>{type === 'ownedFolder' || type === 'communalFolder' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         <h3>Sub-categories</h3>
         <ul>
