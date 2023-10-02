@@ -1,3 +1,7 @@
+- FIXME in NacDB.
+
+- `-XXX` keys in NacDB ordered reverse to their proper order.
+
 - Create items under logged in user, not `defaultAgent`.
 
 - Show "loading" widget, while loading a page.
