@@ -23,6 +23,18 @@ type Item = {
 };
 
 export default function ShowFolder() {
+    return (
+        <>
+            <AuthContext.Consumer>
+                {({authClient}) => {
+                    return <ShowFolderContent authClient={authClient}/>
+                }}
+            </AuthContext.Consumer>
+        </>
+    );
+}
+
+function ShowFolderContent(props: {authClient}) {
     const { id } = useParams();
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
@@ -30,10 +42,9 @@ export default function ShowFolder() {
     const [subcategories, setSubcategories] = useState([] as Item[]);
     const [supercategories, setSupercategories] = useState([] as Item[]);
     const [items, setItems] = useState([] as Item[]);
-    const [client, setClient] = useState<AuthClient | undefined>(undefined);
     useEffect(() => { // TODO
         if (id !== undefined) {
-            const agent = new HttpAgent({identity: client?.getIdentity()});
+            const agent = new HttpAgent({identity: props.authClient?.getIdentity()});
             if (getIsLocal()) {
                 agent.fetchRootKey(); // TODO: For all other agents.
             }
@@ -47,45 +58,38 @@ export default function ShowFolder() {
                 data.items(agent).then(x => setItems(x));
             });
         }
-    }, [id, client]); // TODO: more tight choice
-    return (
-        <>
-            <AuthContext.Consumer>
-                {({authClient}) => {
-                    setClient(authClient);
-                    return "";
-                }}
-            </AuthContext.Consumer>
-            <h2>Folder: <span lang={locale}>{title}</span></h2>
-            {description !== null ? <p lang={locale}>{description}</p> : ""}
-            <h3>Sub-categories</h3>
-            <ul>
-                {take(subcategories, 3).map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
-                    {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
-                    <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
-                </li>)}
-            </ul>
-            <p><a href={`#/subfolders-of/${id}`}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
-            <h3>Super-categories</h3>
-            <ul>
-                {take(supercategories, 3).map(x => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
-                    {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
-                    <a href={`#/item/${x.id}`}>{x.title}</a>
-                </li>)}
-            </ul>
-            {/* TODO: Create super-category */}
-            <p><a href={`#/superfolders-of/${id}`}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
-            {items.map(item => 
-                <div key={item.id}>
-                    <p lang={item.locale} key={item.id}>
-                        {item.price ? <>({item.price} ICP) </> : ""}
-                        {item.link ? <a href={item.link}>{item.title}</a> : item.title}
-                        {" "}<a href={`#/item/${serializeItemRef(item.id as any)}`} title="Homepage">[H]</a>
-                    </p>
-                    <p lang={item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.description}</p>
-                </div>
-            )}
-            <p><a href={`#`}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
-        </>
-    );
+    }, [id, props.authClient]); // TODO: more tight choice
+    return <>
+        <h2>Folder: <span lang={locale}>{title}</span></h2>
+        {description !== null ? <p lang={locale}>{description}</p> : ""}
+        <h3>Sub-categories</h3>
+        <ul>
+            {take(subcategories, 3).map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
+                {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
+                <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
+            </li>)}
+        </ul>
+        <p><a href={`#/subfolders-of/${id}`}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
+        <h3>Super-categories</h3>
+        <ul>
+            {take(supercategories, 3).map(x => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
+                {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
+                <a href={`#/item/${x.id}`}>{x.title}</a>
+            </li>)}
+        </ul>
+        {/* TODO: Create super-category */}
+        <p><a href={`#/superfolders-of/${id}`}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
+        {items.map(item => 
+            <div key={item.id}>
+                <p lang={item.locale} key={item.id}>
+                    {item.price ? <>({item.price} ICP) </> : ""}
+                    {item.link ? <a href={item.link}>{item.title}</a> : item.title}
+                    {" "}<a href={`#/item/${serializeItemRef(item.id as any)}`} title="Homepage">[H]</a>
+                </p>
+                <p lang={item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.description}</p>
+            </div>
+        )}
+        <p><a href={`#`}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
+    </>
+
 }
