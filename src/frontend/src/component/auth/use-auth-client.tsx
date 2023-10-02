@@ -58,7 +58,6 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
     const isAuthenticated = await client.isAuthenticated();
     const identity = client.getIdentity();
     const principal = identity.getPrincipal();
-    console.log(identity)
     const agent = new HttpAgent({identity});
     if (getIsLocal()) {
       agent.fetchRootKey();

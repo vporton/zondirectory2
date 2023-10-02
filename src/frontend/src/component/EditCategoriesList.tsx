@@ -6,7 +6,6 @@ export default function EditCategoriesList(props: { defaultCategories?: string[]
     const [categories, setCategories] = useState<string[] | undefined>(undefined);
     useEffect(() => {
         if (categories === undefined && props.defaultCategories?.length !== 0) {
-            console.log("props.defaultCategories", props.defaultCategories)
             setCategories(props.defaultCategories ?? []);
         }
     }, [props.defaultCategories])
