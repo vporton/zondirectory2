@@ -1,3 +1,5 @@
+- Create items under logged in user, not `defaultAgent`.
+
 - FIXME: calling shared functions of index from partition (NacDB)?
 
 - why don't you use the TS library that @CanScale wrote for upgrades? I normally use that and it has everything you need. Take a look at the Hello CanDB with upgrades ==> https://github.com/ORIGYN-SA/hello-candb/tree/beta/extended_examples/hello_world_with_upgrades
