@@ -103,9 +103,13 @@ function MyRouted() {
                     const signin = () => {
                         authClient?.login(options?.loginOptions);
                     };
+                    const signout = async () => {
+                        await authClient?.logout();
+                    };
                     return <p>
                         Logged in as: {isAuthenticated ? principal?.toString() : "(none)"}{" "}
                         <Button onClick={signin}>Login</Button>
+                        {isAuthenticated && <>{" "}<Button onClick={signout}>Logout</Button></>}
                     </p>
             }}
             </AuthContext.Consumer>
