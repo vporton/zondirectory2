@@ -38,7 +38,6 @@ actor class CanDBIndex(initialOwners: [Principal]) = this {
 
   func checkCaller(caller: Principal) {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
-      Debug.print("allowed owners=" # debug_show(owners)); // FIXME: It weirdly includes `payments` and `frontend` but not `main`!
       Debug.trap("CanDBIndex: not allowed");
     }
   };

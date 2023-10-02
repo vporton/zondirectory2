@@ -56,10 +56,10 @@ module {
     let c = t.chars();
     label r loop {
       let ?upper = c.next() else {
-        Debug.trap("programming error");
+        break r;
       };
       let ?lower = c.next() else {
-        break r;
+        Debug.trap("decodeBlob: wrong hex number");
       };
       let b = Nat8.fromNat(_fromLowerHexDigit(upper) * 16 + _fromLowerHexDigit(lower));
       buf.add(b);
@@ -259,7 +259,7 @@ module {
     if (not res) {
       Debug.trap("wrong item format");
     };
-    let ?creator2 = creator else { Debug.trap("programming error"); };
+    let ?creator2 = creator else { Debug.trap("creator2: programming error"); };
     {
       creator = creator2;
       item = {

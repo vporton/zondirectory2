@@ -151,18 +151,15 @@ shared actor class Orders() = this {
     let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
       0;
     } else {
-      let #tuple t = timeScanResult.results[0].1 else {
-        Debug.trap("wrong stream");
-      };
-      let #int n = t[1] else {
-        Debug.trap("wrong stream");
-      };
+      let t = timeScanResult.results[0].0;
+      let n = lib.decodeInt(t);
       n - 1;
     };
     let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId1))), #int(itemId.1)]);
     
     let guid = GUID.nextGuid(guidGen);
 
+    // FIXME: race condition
     ignore await theSubDB2.insert({
       guid = Blob.toArray(guid);
       indexCanister = Principal.fromActor(NacDBIndex);
