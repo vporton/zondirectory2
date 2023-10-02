@@ -34,18 +34,14 @@ const defaultOptions: UseAuthClientOptions = {
 };
 
 /**
- *
- * @param options - Options for the AuthClient
- * @param {AuthClientCreateOptions} options.createOptions - Options for the AuthClient.create() method
- * @param {AuthClientLoginOptions} options.loginOptions - Options for the AuthClient.login() method
- * @returns
+ * @type {React.FC}
  */
-export const useAuthClient = (initialOptions = defaultOptions) => {
+export function AuthProvider(props: { children: any, options?: UseAuthClientOptions }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authClient, setAuthClient] = useState<AuthClient | undefined>();
   const [identity, setIdentity] = useState<Identity | undefined>(undefined);
   const [principal, setPrincipal] = useState<Principal | undefined>(undefined);
-  const [options, setOptions] = useState<UseAuthClientOptions>(initialOptions);
+  const [options, setOptions] = useState<UseAuthClientOptions>(props.options ?? defaultOptions);
 
   useEffect(() => {
     // Initialize AuthClient
@@ -81,7 +77,7 @@ export const useAuthClient = (initialOptions = defaultOptions) => {
   //   await updateClient(authClient);
   // }
 
-  return {
+  return <AuthContext.Provider value={{
     isAuthenticated,
     // login,
     // logout,
@@ -89,15 +85,7 @@ export const useAuthClient = (initialOptions = defaultOptions) => {
     identity,
     principal,
     options,
-  };
-};
-
-/**
- * @type {React.FC}
- */
-export function AuthProvider(props: { children: any, options?: UseAuthClientOptions }) {
-  const auth = useAuthClient(props.options);
-  return <AuthContext.Provider value={auth}>{props.children}</AuthContext.Provider>;
+  }}>{props.children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);
