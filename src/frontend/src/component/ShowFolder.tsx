@@ -84,6 +84,7 @@ function ShowFolderContent(props: {authClient}) {
         </ul>
         {/* TODO: Create super-category */}
         <p><a href={`#/superfolders-of/${id}`}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
+        <h3>{type === 'ownedFolder' || type === 'communalFolder' ? "Items" : "Comments"}</h3>
         {items.map(item => 
             <div key={item.id}>
                 <p lang={item.locale} key={item.id}>
