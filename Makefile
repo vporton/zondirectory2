@@ -17,13 +17,6 @@ build:
 
 .PHONY: deploy-backend
 deploy-backend:
-	source .env && dfx deploy pst --argument "record { owner = principal \"$(FOUNDER)\"; subaccount = null; }"
-	# TODO: Check principals used
-	source .env && dfx deploy CanDBIndex --argument "vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" }"
-	source .env && dfx deploy NacDBIndex --argument "vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" }"
-#	dfx deploy CanDBIndex
-#	dfx deploy pst
-#	dfx deploy payments
 	dfx deploy main
 
 .PHONY: deploy-frontend
@@ -35,8 +28,8 @@ init:
 	dfx ledger fabricate-cycles --amount 1000000000 --canister main
 	dfx canister call main init '()'
 	dfx canister call payments init '()'
-	dfx canister call CanDBIndex init '()'
-	dfx canister call NacDBIndex init '()'
+	. .env && dfx canister call CanDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
+	. .env && dfx canister call NacDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
 	mainItem=`dfx canister call main createItemData \
 	  '(record { price = 0.0; locale = "en"; title = "The homepage"; description = ""; details = variant { communalCategory = null } })'`; \
 	  dfx canister call main setRootItem "$$mainItem"

@@ -101,7 +101,7 @@ module {
   public func decodeInt(t: Text): Int {
     let iter = t.chars();
     if (iter.next() == ?'-') {
-      -decodeNat(Text.fromIter(iter));
+      -(2**64 - decodeNat(Text.fromIter(iter)));
     } else {
       decodeNat(t);
     }

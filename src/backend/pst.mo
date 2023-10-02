@@ -7,16 +7,14 @@ import ICRC1Types "mo:icrc1/ICRC1/Types";
 import Array "mo:base/Array";
 import Principal "mo:base/Principal";
 
-shared ({ caller = _owner }) actor class PST(
-    creator : {owner : Principal; subaccount : ?ICRC1Types.Subaccount},
-) : async ICRC1.FullInterface {
+shared ({ caller = initialOwner }) actor class PST() : async ICRC1.FullInterface {
     stable var initialized: Bool = false;
 
     stable let token = ICRC1.init({
         advanced_settings = null;
         decimals = 5;
         fee = 10_000;
-        initial_balances = [(creator, 10_000_000_000)];
+        initial_balances = [({owner : initialOwner; subaccount : ?ICRC1Types.Subaccount}, 10_000_000_000)];
         max_supply = 10_000_000_000;
         min_burn_amount = 100_000;
         minting_account = { owner = Principal.fromText("aaaaa-aa"); subaccount = null; }; // nobody

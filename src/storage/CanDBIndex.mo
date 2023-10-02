@@ -19,17 +19,17 @@ import CanDB "mo:candb/CanDB";
 import Entity "mo:candb/Entity";
 import Canister "mo:matchers/Canister";
 
-actor class CanDBIndex(initialOwners: [Principal]) = this {
-  Debug.print("initialOwners=" # debug_show(initialOwners)); // FIXME: It weirdly includes `payments` and `frontend` but not `main`!
-  stable var owners: [Principal] = initialOwners;
+shared({caller = initialOwner}) actor class CanDBIndex() = this {
+  stable var owners: [Principal] = [initialOwner];
 
   stable var initialized: Bool = false;
 
-  public shared func init(): async () {
+  public shared func init(_owners: [Principal]): async () {
     if (initialized) {
       Debug.trap("already initialized");
     };
 
+    owners := _owners;
     ignore await* createStorageCanister("main", ownersOrSelf());
     ignore await* createStorageCanister("user", ownersOrSelf()); // user data
 

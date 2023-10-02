@@ -141,7 +141,7 @@ shared actor class Orders() = this {
     };
     let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
     let timeScanResult = await theSubDB2.scanLimitOuter({
-      dir = #bwd;
+      dir = #fwd;
       outerKey = theSubDB.1;
       lowerBound = "";
       upperBound = "x";
@@ -152,9 +152,12 @@ shared actor class Orders() = this {
       0;
     } else {
       let t = timeScanResult.results[0].0;
+      Debug.print("T: " # t);
       let n = lib.decodeInt(t);
+      Debug.print("N: " # debug_show(n));
       n - 1;
     };
+    Debug.print("N2: " # debug_show(timeScanSK) # " " # lib.encodeInt(timeScanSK));
     let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId1))), #int(itemId.1)]);
     
     let guid = GUID.nextGuid(guidGen);

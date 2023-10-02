@@ -11,10 +11,8 @@ import Buffer "mo:stable-buffer/StableBuffer";
 import Partition "./NacDBPartition";
 import Common "common";
 
-shared actor class NacDBIndex(
-    initialOwners: [Principal],
-) = this {
-    stable var owners = initialOwners;
+shared({caller = initialOwner}) actor class NacDBIndex() = this {
+    stable var owners = [initialOwner];
 
     func checkCaller(caller: Principal) {
         if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
@@ -40,11 +38,12 @@ shared actor class NacDBIndex(
 
     stable var initialized = false;
 
-    public shared({caller}) func init() : async () {
+    public shared({caller}) func init(_owners: [Principal]) : async () {
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
         if (initialized) {
             Debug.trap("already initialized");
         };
+        owners := _owners;
         MyCycles.addPart(Common.dbOptions.partitionCycles);
         StableBuffer.add(dbIndex.canisters, await Partition.Partition(ownersOrSelf()));
         initialized := true;
