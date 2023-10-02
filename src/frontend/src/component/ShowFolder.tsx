@@ -62,7 +62,7 @@ function ShowFolderContent(props: {defaultAgent}) {
     }, [id, props.defaultAgent]); // TODO: more tight choice
     return <>
         <h2>{type === 'ownedCategory' || type === 'communalCategory' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
-        <p>Creator: {creator.toString()}</p>
+        <p>Creator: <small>{creator.toString()}</small></p>
         <p>{description !== null ? <p lang={locale}>{description}</p> : ""}</p>
         <h3>Sub-categories</h3>
         <ul>
