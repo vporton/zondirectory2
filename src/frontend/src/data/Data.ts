@@ -22,14 +22,16 @@ export function serializeItemRef(item: ItemRef): string {
 }
 
 export class ItemData {
+    agent: Agent; // should be `defaultAgent`
     itemRef: ItemRef;
     item: Item;
     streams: Streams | undefined;
-    protected constructor(itemId: string) {
+    protected constructor(agent: Agent, itemId: string) {
+        this.agent = agent;
         this.itemRef = parseItemRef(itemId);
     }
-    static async create(itemId: string): Promise<ItemData> {
-        const obj = new ItemData(itemId);
+    static async create(agent: Agent, itemId: string): Promise<ItemData> {
+        const obj = new ItemData(agent, itemId);
         const client = initializeDirectCanDBPartitionClient(obj.itemRef.canister);
         // TODO: Retrieve both by one call?
         const [item, streams] = await Promise.all([
@@ -56,8 +58,8 @@ export class ItemData {
     }
     // FIXME below
     // FIXME: For non-folders, no distinction between `subCategories` and `items` (or better no subcategories?)
-    async subCategories(agent: Agent) {
-        if (!agent) { // FIXME
+    async subCategories() {
+        if (!this.agent) { // FIXME
             return [];
         }
         // TODO: duplicate code
@@ -67,7 +69,7 @@ export class ItemData {
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB;
         
         const client = Actor.createActor(NacDBPartitionIDL, { // TODO
-            agent,
+            agent: this.agent,
             canisterId: outerCanister,
         });
 
@@ -77,7 +79,7 @@ export class ItemData {
         const items2 = items1a.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
         const items3 = items2.map(id => (async () => {
             const part = Actor.createActor(CanDBPartitionIDL, { // TODO
-                agent,
+                agent: this.agent,
                 canisterId: id.canister,
             });
             return [id, await part.getItem(id.id)];
@@ -99,14 +101,14 @@ export class ItemData {
             {id: 4, locale: "en", title: "John's notes", type: 'private', description: "John writes about everything, including the content of The Homepage."},
         ];
     }
-    async items(agent) {
+    async items() {
         // TODO: duplicate code
         if (this.streams === undefined) {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.itemsTimeOrderSubDB
         const client = Actor.createActor(NacDBPartitionIDL, { // TODO
-            agent,
+            agent: this.agent,
             canisterId: outerCanister,
         });
         const items = ((await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: BigInt(10)})) as any).results as // TODO: limit
@@ -115,7 +117,7 @@ export class ItemData {
         const items2 = items1a.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
         const items3 = items2.map(id => (async () => {
             const part = Actor.createActor(CanDBPartitionIDL, { // TODO
-                agent,
+                agent: this.agent,
                 canisterId: id.canister,
             });
             return [id, await part.getItem(id.id)];

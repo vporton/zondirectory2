@@ -45,14 +45,13 @@ function ShowFolderContent(props: {defaultAgent}) {
     const [items, setItems] = useState([] as Item[]);
     useEffect(() => { // TODO
         if (id !== undefined) {
-            AppData.create(id).then(data => {
-                // TODO: Passing `agent` here is a hack!
+            AppData.create(props.defaultAgent, id).then(data => {
                 data.locale().then(x => setLocale(x));
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
-                data.subCategories(props.defaultAgent).then(x => setSubcategories(x));
+                data.subCategories().then(x => setSubcategories(x));
                 data.superCategories().then(x => setSupercategories(x));
-                data.items(props.defaultAgent).then(x => setItems(x));
+                data.items().then(x => setItems(x));
                 data.details().then((x) => {
                     setType(Object.keys(x)[0])
                 })

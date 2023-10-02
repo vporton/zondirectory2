@@ -23,13 +23,13 @@ export default function SubFolders(props) {
     const [supercategories, setSupercategories] = useState([] as Item[]);
     useEffect(() => {
         if (id !== undefined) {
-            AppData.create(id).then(data => {
+            AppData.create(props.defaultAgent, id).then(data => {
                 data.title().then(x => setTitle(x));
                 data.subCategories().then(x => setSubcategories(x));
                 data.superCategories().then(x => setSupercategories(x));
             });
         }
-    }, [id]);
+    }, [id, props.defaultAgent]);
 
     return (
         <>

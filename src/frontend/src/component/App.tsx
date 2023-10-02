@@ -73,52 +73,53 @@ function MyRouted() {
     return (
         <>
             <AuthContext.Consumer>
-                {({isAuthenticated, principal, authClient, options, login, logout}) => {
+                {({isAuthenticated, principal, authClient, defaultAgent, options, login, logout}) => {
                     const signin = () => {
                         login!(); // TODO: `!`
                     };
                     const signout = async () => {
                         await logout!(); // TODO: `!`
                     };
-                    return <p>
-                        Logged in as: {isAuthenticated ? <small>{principal?.toString()}</small> : "(none)"}{" "}
-                        {isAuthenticated ? <Button onClick={signout}>Logout</Button> : <Button onClick={signin}>Login</Button>}
-                    </p>
+                    return <><p>
+                            Logged in as: {isAuthenticated ? <small>{principal?.toString()}</small> : "(none)"}{" "}
+                            {isAuthenticated ? <Button onClick={signout}>Logout</Button> : <Button onClick={signin}>Login</Button>}
+                        </p>
+                        <nav>
+                            <NavLink to={"/item/"+root}>Main folder</NavLink>
+                        </nav>
+                        <Routes>
+                            <Route
+                                path=""
+                                element={<RootRedirector root={root}/>}
+                            />
+                            <Route
+                                path="/item/:id"
+                                element={<ShowFolder/>}
+                            />
+                            <Route
+                                path="/subfolders-of/:id"
+                                element={<SubFolders data-dir="sub" defaultAgent={defaultAgent}/>}
+                            />
+                            <Route
+                                path="/superfolders-of/:id"
+                                element={<SubFolders data-dir="super" defaultAgent={defaultAgent}/>}
+                            />
+                            <Route
+                                path="/create/"
+                                element={<EditItem/>}
+                            />
+                            <Route
+                                path="/create/for-category/:cat"
+                                element={<EditItem/>}
+                            />
+                            <Route
+                                path="/create-subcategory/for-category/:cat"
+                                element={<EditCategory/>}
+                            />
+                        </Routes>
+                    </>
             }}
             </AuthContext.Consumer>
-            <nav>
-                <NavLink to={"/item/"+root}>Main folder</NavLink>
-            </nav>
-            <Routes>
-                <Route
-                    path=""
-                    element={<RootRedirector root={root}/>}
-                />
-                <Route
-                    path="/item/:id"
-                    element={<ShowFolder/>}
-                />
-                <Route
-                    path="/subfolders-of/:id"
-                    element={<SubFolders data-dir="sub"/>}
-                />
-                <Route
-                    path="/superfolders-of/:id"
-                    element={<SubFolders data-dir="super"/>}
-                />
-                <Route
-                    path="/create/"
-                    element={<EditItem/>}
-                />
-                <Route
-                    path="/create/for-category/:cat"
-                    element={<EditItem/>}
-                />
-                <Route
-                    path="/create-subcategory/for-category/:cat"
-                    element={<EditCategory/>}
-                />
-            </Routes>
         </>
     );
 }
