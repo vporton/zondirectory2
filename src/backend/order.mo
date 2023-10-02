@@ -135,7 +135,6 @@ shared actor class Orders() = this {
 
     // Put into the beginning of time order.
     let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB } = await obtainStreams((catId1, catId.1));
-    Debug.print("DETAILS: " # debug_show(childItem.item.details));
     let theSubDB = switch (childItem.item.details) {
       case (#communalCategory or #ownedCategory) { categoriesTimeOrderSubDB };
       case _ { itemsTimeOrderSubDB };
