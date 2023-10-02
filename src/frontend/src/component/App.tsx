@@ -74,7 +74,6 @@ function MyRouted() {
         <>
             <AuthContext.Consumer>
                 {({isAuthenticated, principal, authClient, options, login, logout}) => {
-                    console.log('isAuthenticated', isAuthenticated)
                     const signin = () => {
                         login!();
                     };
