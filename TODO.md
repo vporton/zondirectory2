@@ -1,6 +1,6 @@
 - FIXME in NacDB.
 
-- `-XXX` keys in NacDB ordered reverse to their proper order.
+- Make `init()` methods callable only from the founder account.
 
 - Create items under logged in user, not `defaultAgent`.
 
