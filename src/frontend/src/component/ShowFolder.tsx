@@ -55,7 +55,7 @@ function ShowFolderContent(props: {defaultAgent}) {
                 data.superCategories().then(x => setSupercategories(x));
                 data.items().then(x => setItems(x));
                 data.details().then((x) => {
-                    setType(Object.keys(x)[0])
+                    setType(Object.keys(x)[0]);
                 });
             });
         }
