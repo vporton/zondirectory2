@@ -58,7 +58,6 @@ function ShowFolderContent(props: {authClient}) {
                 data.superCategories().then(x => setSupercategories(x));
                 data.items(agent).then(x => setItems(x));
                 data.details().then((x) => {
-                    console.log('XX', x)
                     setType(Object.keys(x)[0])
                 })
             });

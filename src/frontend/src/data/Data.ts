@@ -111,7 +111,6 @@ export class ItemData {
         });
         const items = ((await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: BigInt(10)})) as any).results as // TODO: limit
             Array<[any, number]>; // FIXME: correct type?
-        console.log("EEE|", items)
         const items1a = items.map((x: any) => [x[1].tuple[0].text, x[1].tuple[1].int]);
         const items2 = items1a.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
         const items3 = items2.map(id => (async () => {
