@@ -56,7 +56,7 @@ function ShowFolderContent(props: {defaultAgent}) {
                 data.items().then(x => setItems(x));
                 data.details().then((x) => {
                     setType(Object.keys(x)[0])
-                })
+                });
             });
         }
     }, [id, props.defaultAgent]); // TODO: more tight choice
