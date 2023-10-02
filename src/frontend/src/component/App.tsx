@@ -81,7 +81,7 @@ function MyRouted() {
                         await logout!(); // TODO: `!`
                     };
                     return <p>
-                        Logged in as: {isAuthenticated ? principal?.toString() : "(none)"}{" "}
+                        Logged in as: {isAuthenticated ? <small>{principal?.toString()}</small> : "(none)"}{" "}
                         {isAuthenticated ? <Button onClick={signout}>Logout</Button> : <Button onClick={signin}>Login</Button>}
                     </p>
             }}
