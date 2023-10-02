@@ -14,7 +14,7 @@ shared ({ caller = initialOwner }) actor class PST() : async ICRC1.FullInterface
         advanced_settings = null;
         decimals = 5;
         fee = 10_000;
-        initial_balances = [({owner : initialOwner; subaccount : ?ICRC1Types.Subaccount}, 10_000_000_000)];
+        initial_balances = [({owner = initialOwner; subaccount = null}, 10_000_000_000)];
         max_supply = 10_000_000_000;
         min_burn_amount = 100_000;
         minting_account = { owner = Principal.fromText("aaaaa-aa"); subaccount = null; }; // nobody

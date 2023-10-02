@@ -20,7 +20,7 @@ deploy-backend:
 	dfx deploy main
 
 .PHONY: deploy-frontend
-deploy-frontend: deploy-backend
+deploy-frontend:
 	dfx deploy frontend
 
 .PHONY: init
