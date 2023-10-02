@@ -24,7 +24,6 @@ import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
 export default function App() {
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
     const identityProvider = getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : undefined;
-    console.log('identityProvider', identityProvider)
     return (
         <>
             <h1>Zon Dir</h1>
