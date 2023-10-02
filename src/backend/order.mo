@@ -157,7 +157,7 @@ shared actor class Orders() = this {
       let #int n = t[1] else {
         Debug.trap("wrong stream");
       };
-      n + 1;
+      n - 1;
     };
     let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId1))), #int(itemId.1)]);
     
