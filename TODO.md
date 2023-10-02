@@ -1,5 +1,7 @@
 - FIXME in NacDB.
 
+- Rename categories to folders also in Motoko source.
+
 - Make `init()` methods callable only from the founder account.
 
 - Create items under logged in user, not `defaultAgent`.
