@@ -189,14 +189,13 @@ shared actor class Orders() = this {
     // );
   } {
     let streamsData = await itemId.0.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "s");
-    let guid = GUID.nextGuid(guidGen);
     switch (streamsData) {
       case (?data) {
         lib.deserializeStreams(data);
       };
       case null {
-        let { outer = itemsTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""});
-        let { outer = categoriesTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(guid); userData = ""});
+        let { outer = itemsTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
+        let { outer = categoriesTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
         let streams = {itemsTimeOrderSubDB; categoriesTimeOrderSubDB};
         let itemData = lib.serializeStreams(streams);
         await itemId.0.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData);
