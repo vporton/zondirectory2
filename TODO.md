@@ -1,5 +1,7 @@
 - FIXME in NacDB.
 
+- Check what happens if adding an item to a directory twice.
+
 - Rename categories to folders also in Motoko source.
 
 - Make `init()` methods callable only from the founder account.
