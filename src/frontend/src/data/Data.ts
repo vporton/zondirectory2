@@ -4,7 +4,6 @@ import { initializeDirectCanDBPartitionClient, initializeDirectNacDBPartitionCli
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
 import { idlFactory as NacDBPartitionIDL } from "../../../declarations/NacDBPartition";
 import { idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition";
-import { AuthClient } from "@dfinity/auth-client";
 
 export type ItemRef = {
     canister: Principal;
@@ -101,10 +100,15 @@ export class ItemData {
         return this.aList(outerCanister, outerKey)
     }
     async superCategories() { // TODO
-        return [
-            {id: 1, locale: "en", title: "All the World", type: 'public'},
-            {id: 4, locale: "en", title: "John's notes", type: 'private', description: "John writes about everything, including the content of The Homepage."},
-        ];
+        if (!this.agent) {
+            return []; // TODO: or better `undefined`?
+        }
+        // TODO: duplicate code
+        if (this.streams === undefined) {
+            return [];
+        }
+        const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSuperDB;
+        return this.aList(outerCanister, outerKey)
     }
     async items() {
         if (!this.agent) {

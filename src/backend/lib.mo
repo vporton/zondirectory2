@@ -146,6 +146,10 @@ module {
       Principal,
       Nac.OuterSubDBKey,
     );
+    categoriesTimeOrderSuperDB: (
+      Principal,
+      Nac.OuterSubDBKey,
+    );
     // votesOrderSubDB: ( // TODO
     //   Principal,
     //   Nac.OuterSubDBKey,
@@ -183,6 +187,8 @@ module {
     buf.add(#int(streams.itemsTimeOrderSubDB.1));
     buf.add(#text(Principal.toText(streams.categoriesTimeOrderSubDB.0)));
     buf.add(#int(streams.categoriesTimeOrderSubDB.1));
+    buf.add(#text(Principal.toText(streams.categoriesTimeOrderSuperDB.0)));
+    buf.add(#int(streams.categoriesTimeOrderSuperDB.1));
     #tuple(Buffer.toArray(buf));
   };
 
@@ -289,6 +295,10 @@ module {
             case _ { break r; };
           };
           categoriesTimeOrderSubDB = switch(arr[2], arr[3]) {
+            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
+            case _ { break r; };
+          };
+          categoriesTimeOrderSuperDB = switch(arr[4], arr[5]) {
             case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };

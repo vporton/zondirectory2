@@ -1,5 +1,7 @@
 - FIXME in NacDB.
 
+- Note that an item was edited if it was edited since inception.
+
 - Check what happens if adding an item to a directory twice.
 
 - Rename categories to folders also in Motoko source.

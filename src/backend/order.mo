@@ -80,43 +80,74 @@ shared actor class Orders() = this {
     let childItem = lib.deserializeItem(childItemData);
 
     // Put into the beginning of time order.
-    let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB } = await obtainStreams((catId1, catId.1));
-    let theSubDB = switch (childItem.item.details) {
-      case (#communalCategory or #ownedCategory) { categoriesTimeOrderSubDB };
-      case _ { itemsTimeOrderSubDB };
-    };
-    let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
-    let timeScanResult = await theSubDB2.scanLimitOuter({
-      dir = #fwd;
-      outerKey = theSubDB.1;
-      lowerBound = "";
-      upperBound = "x";
-      limit = 1;
-      ascending = ?true;
-    });
-    let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
-      0;
-    } else {
-      let t = timeScanResult.results[0].0;
-      Debug.print("T: " # t);
-      let n = lib.decodeInt(t);
-      Debug.print("N: " # debug_show(n));
-      n - 1;
-    };
-    Debug.print("N2: " # debug_show(timeScanSK) # " " # lib.encodeInt(timeScanSK));
-    let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId1))), #int(itemId.1)]);
-    
-    let guid = GUID.nextGuid(guidGen);
+    let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB; categoriesTimeOrderSuperDB } = await obtainStreams((catId1, catId.1));
+    do { // block
+      let theSubDB = switch (childItem.item.details) {
+        case (#communalCategory or #ownedCategory) { categoriesTimeOrderSubDB };
+        case _ { itemsTimeOrderSubDB };
+      };
+      let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
+      let timeScanResult = await theSubDB2.scanLimitOuter({
+        dir = #fwd;
+        outerKey = theSubDB.1;
+        lowerBound = "";
+        upperBound = "x";
+        limit = 1;
+        ascending = ?true;
+      });
+      let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
+        0;
+      } else {
+        let t = timeScanResult.results[0].0;
+        let n = lib.decodeInt(t);
+        n - 1;
+      };
+      let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId1))), #int(itemId.1)]);
+      
+      let guid = GUID.nextGuid(guidGen);
 
-    // FIXME: race condition
-    ignore await theSubDB2.insert({
-      guid = Blob.toArray(guid);
-      indexCanister = Principal.fromActor(NacDBIndex);
-      outerCanister = Principal.fromActor(theSubDB2);
-      outerKey = theSubDB.1;
-      sk = lib.encodeInt(timeScanSK);
-      value = timeScanItemInfo;
-    });
+      // FIXME: race condition
+      ignore await theSubDB2.insert({
+        guid = Blob.toArray(guid);
+        indexCanister = Principal.fromActor(NacDBIndex);
+        outerCanister = Principal.fromActor(theSubDB2);
+        outerKey = theSubDB.1;
+        sk = lib.encodeInt(timeScanSK);
+        value = timeScanItemInfo;
+      });
+    };
+    do { // block
+      let theSubDB = categoriesTimeOrderSuperDB;
+      let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
+      let timeScanResult = await theSubDB2.scanLimitOuter({
+        dir = #fwd;
+        outerKey = theSubDB.1;
+        lowerBound = "";
+        upperBound = "x";
+        limit = 1;
+        ascending = ?true;
+      });
+      let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
+        0;
+      } else {
+        let t = timeScanResult.results[0].0;
+        let n = lib.decodeInt(t);
+        n - 1;
+      };
+      let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(catId1))), #int(catId.1)]);
+      
+      let guid = GUID.nextGuid(guidGen);
+
+      // FIXME: race condition
+      ignore await theSubDB2.insert({
+        guid = Blob.toArray(guid);
+        indexCanister = Principal.fromActor(NacDBIndex);
+        outerCanister = Principal.fromActor(theSubDB2);
+        outerKey = theSubDB.1;
+        sk = lib.encodeInt(timeScanSK);
+        value = timeScanItemInfo;
+      });
+    };
   };
 
   // Create streams for a folder identified by `itemId`, if they were not yet created.
@@ -126,6 +157,10 @@ shared actor class Orders() = this {
       Nac.OuterSubDBKey,
     );
     categoriesTimeOrderSubDB: (
+      Principal,
+      Nac.OuterSubDBKey,
+    );
+    categoriesTimeOrderSuperDB: (
       Principal,
       Nac.OuterSubDBKey,
     );
@@ -142,7 +177,8 @@ shared actor class Orders() = this {
       case null {
         let { outer = itemsTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
         let { outer = categoriesTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
-        let streams = {itemsTimeOrderSubDB; categoriesTimeOrderSubDB};
+        let { outer = categoriesTimeOrderSuperDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
+        let streams = {itemsTimeOrderSubDB; categoriesTimeOrderSubDB; categoriesTimeOrderSuperDB};
         let itemData = lib.serializeStreams(streams);
         await itemId.0.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData);
         streams;
