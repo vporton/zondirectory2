@@ -26,6 +26,9 @@ export default function App() {
     const identityProvider = getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : undefined;
     return (
         <>
+            <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
+                It is a preliminary alpha-test version. All data is likely to be deleted before the release.
+            </p>
             <h1>Zon Dir</h1>
             <AuthProvider options={{loginOptions: {
                 identityProvider: (getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : undefined),
