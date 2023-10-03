@@ -42,9 +42,9 @@ function ShowItemContent(props: {defaultAgent}) {
     const [description, setDescription] = useState("");
     const [type, setType] = useState<string | undefined>(undefined);
     const [creator, setCreator] = useState("");
-    const [subcategories, setSubcategories] = useState([] as Item[]);
-    const [supercategories, setSupercategories] = useState([] as Item[]);
-    const [items, setItems] = useState([] as Item[]);
+    const [subcategories, setSubcategories] = useState(undefined as Item[] | undefined);
+    const [supercategories, setSupercategories] = useState(undefined as Item[] | undefined);
+    const [items, setItems] = useState(undefined as Item[] | undefined);
     const [data, setData] = useState<any>(undefined); // TODO: hack
     useEffect(() => { // TODO
         if (id !== undefined) {
@@ -73,23 +73,25 @@ function ShowItemContent(props: {defaultAgent}) {
             <label title="Not implemented yet"><input type="radio" disabled={true}/> amount paid</label>
         </p>
         <h3>Sub-folders</h3>
+        {subcategories === undefined ? <p>Loading...</p> :
         <ul>
             {take(subcategories, 4).map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
                 <ItemType item={x}/>
                 <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
             </li>)}
-        </ul>
+        </ul>}
         <p><a href={`#/subfolders-of/${id}`}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
         <h3>Super-folders</h3>
+        {supercategories === undefined ? <p>Loading...</p> :
         <ul>
             {take(supercategories, 3).map(x => <li lang={x.locale} key={x.id}>
                 <a href={`#/item/${x.id}`}>{x.title}</a>
             </li>)}
-        </ul>
+        </ul>}
         {/* TODO: Create super-category */}
         <p><a href={`#/superfolders-of/${id}`}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
         <h3>{type === 'ownedCategory' || type === 'communalCategory' ? "Items" : "Comments"}</h3>
-        {items.map(item => 
+        {items === undefined ? <p>Loading...</p> : items.map(item => 
             <div key={serializeItemRef(item.id as any)}>
                 <p lang={item.locale} key={item.id}>
                     {item.price ? <>({item.price} ICP) </> : ""}
