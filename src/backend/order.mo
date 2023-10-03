@@ -80,8 +80,8 @@ shared actor class Orders() = this {
     let childItem = lib.deserializeItem(childItemData);
 
     // Put into the beginning of time order.
-    let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB; categoriesTimeOrderSuperDB } = await obtainStreams((catId1, catId.1));
     do { // block
+      let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB; categoriesInvTimeOrderSubDB } = await obtainStreams((catId1, catId.1));
       let theSubDB = switch (childItem.item.details) {
         case (#communalCategory or #ownedCategory) { categoriesTimeOrderSubDB };
         case _ { itemsTimeOrderSubDB };
@@ -117,7 +117,8 @@ shared actor class Orders() = this {
       });
     };
     do { // block
-      let theSubDB = categoriesTimeOrderSuperDB;
+      let { categoriesInvTimeOrderSubDB } = await obtainStreams((itemId1, itemId.1));
+      let theSubDB = categoriesInvTimeOrderSubDB;
       let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
       let timeScanResult = await theSubDB2.scanLimitOuter({
         dir = #fwd;
@@ -160,7 +161,7 @@ shared actor class Orders() = this {
       Principal,
       Nac.OuterSubDBKey,
     );
-    categoriesTimeOrderSuperDB: (
+    categoriesInvTimeOrderSubDB: (
       Principal,
       Nac.OuterSubDBKey,
     );
@@ -177,8 +178,8 @@ shared actor class Orders() = this {
       case null {
         let { outer = itemsTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
         let { outer = categoriesTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
-        let { outer = categoriesTimeOrderSuperDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
-        let streams = {itemsTimeOrderSubDB; categoriesTimeOrderSubDB; categoriesTimeOrderSuperDB};
+        let { outer = categoriesInvTimeOrderSubDB } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
+        let streams = {itemsTimeOrderSubDB; categoriesTimeOrderSubDB; categoriesInvTimeOrderSubDB};
         let itemData = lib.serializeStreams(streams);
         await itemId.0.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData);
         streams;

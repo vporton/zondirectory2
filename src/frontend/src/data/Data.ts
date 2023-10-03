@@ -97,7 +97,7 @@ export class ItemData {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB;
-        return this.aList(outerCanister, outerKey)
+        return await this.aList(outerCanister, outerKey)
     }
     async superCategories() { // TODO
         if (!this.agent) {
@@ -107,8 +107,8 @@ export class ItemData {
         if (this.streams === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSuperDB;
-        return this.aList(outerCanister, outerKey)
+        const [outerCanister, outerKey] = this.streams.categoriesInvTimeOrderSubDB;
+        return await this.aList(outerCanister, outerKey)
     }
     async items() {
         if (!this.agent) {
@@ -118,6 +118,6 @@ export class ItemData {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.itemsTimeOrderSubDB
-        return this.aList(outerCanister, outerKey)
+        return await this.aList(outerCanister, outerKey)
     }
 }

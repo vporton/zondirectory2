@@ -146,7 +146,7 @@ module {
       Principal,
       Nac.OuterSubDBKey,
     );
-    categoriesTimeOrderSuperDB: (
+    categoriesInvTimeOrderSubDB: (
       Principal,
       Nac.OuterSubDBKey,
     );
@@ -187,8 +187,8 @@ module {
     buf.add(#int(streams.itemsTimeOrderSubDB.1));
     buf.add(#text(Principal.toText(streams.categoriesTimeOrderSubDB.0)));
     buf.add(#int(streams.categoriesTimeOrderSubDB.1));
-    buf.add(#text(Principal.toText(streams.categoriesTimeOrderSuperDB.0)));
-    buf.add(#int(streams.categoriesTimeOrderSuperDB.1));
+    buf.add(#text(Principal.toText(streams.categoriesInvTimeOrderSubDB.0)));
+    buf.add(#int(streams.categoriesInvTimeOrderSubDB.1));
     #tuple(Buffer.toArray(buf));
   };
 
@@ -297,7 +297,7 @@ module {
             case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };
-          categoriesTimeOrderSuperDB = switch(arr[4], arr[5]) {
+          categoriesInvTimeOrderSubDB = switch(arr[4], arr[5]) {
             case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };

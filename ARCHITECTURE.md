@@ -13,7 +13,7 @@ TODO: Should have separate attribute post text.
 ## NacDB database structure
 * `itemsTimeOrderSubDB`: category -> sub-items
 * `categoriesTimeOrderSubDB`: category -> sub-categories, item -> replies
-* `categoriesTimeOrderSuperDB`: category -> super-categories, reply -> items (to be implemented)
+* `categoriesInvTimeOrderSubDB`: category -> super-categories, reply -> items (to be implemented)
 
 ## Misc
 

@@ -46,6 +46,11 @@ function ShowItemContent(props: {defaultAgent}) {
     const [supercategories, setSupercategories] = useState(undefined as Item[] | undefined);
     const [items, setItems] = useState(undefined as Item[] | undefined);
     const [data, setData] = useState<any>(undefined); // TODO: hack
+    useEffect(() => {
+        setSubcategories(undefined);
+        setSupercategories(undefined);
+        setItems(undefined);
+    }, [id]);
     useEffect(() => { // TODO
         if (id !== undefined) {
             AppData.create(props.defaultAgent, id).then(data => {
@@ -54,8 +59,10 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
                 data.creator().then(x => setCreator(x));
-                data.subCategories().then(x => setSubcategories(x));
-                data.superCategories().then(x => setSupercategories(x));
+                data.subCategories().then(x => setSubcategories(x))
+                    .then(() => { // FIXME: Why is this `then` needed?
+                        data.superCategories().then(x => setSupercategories(x));
+                    })
                 data.items().then(x => setItems(x));
                 data.details().then((x) => {
                     setType(Object.keys(x)[0]);
@@ -68,7 +75,7 @@ function ShowItemContent(props: {defaultAgent}) {
         <p>Creator: <small>{creator.toString()}</small></p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         <p>Sort by:{" "}
-            <label><input type="radio" checked={true}/> time</label>
+            <label><input type="radio" defaultChecked={true}/> time</label>
             <label title="Not implemented yet"><input type="radio" disabled={true}/> votes</label>
             <label title="Not implemented yet"><input type="radio" disabled={true}/> amount paid</label>
         </p>
@@ -84,8 +91,9 @@ function ShowItemContent(props: {defaultAgent}) {
         <h3>Super-folders</h3>
         {supercategories === undefined ? <p>Loading...</p> :
         <ul>
-            {take(supercategories, 3).map(x => <li lang={x.locale} key={x.id}>
-                <a href={`#/item/${x.id}`}>{x.title}</a>
+            {take(supercategories, 3).map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
+                <ItemType item={x}/>
+                <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
             </li>)}
         </ul>}
         {/* TODO: Create super-category */}
