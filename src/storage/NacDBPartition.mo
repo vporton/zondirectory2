@@ -281,5 +281,13 @@ shared({caller}) actor class Partition(
         Nac.getSubDBUserDataInner({superDB; subDBKey = options.innerKey});
     };
 
+    // TODO: Add this function to the public interface in NacDB?
+    public shared func getInner(outerKey: Nac.OuterSubDBKey) : async ?(Principal, Nac.InnerSubDBKey) {
+        do ? {
+            let (part, key) = Nac.getInner(superDB, outerKey)!;
+            (Principal.fromActor(part), key);
+        };
+    }
+
     // TODO: Remove superfluous functions from above.
 }

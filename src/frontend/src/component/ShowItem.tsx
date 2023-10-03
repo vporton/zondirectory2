@@ -60,9 +60,9 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.description().then(x => setDescription(x));
                 data.creator().then(x => setCreator(x));
                 data.subCategories().then(x => setSubcategories(x))
-                    .then(() => { // FIXME: Why is this `then` needed?
+                    // .then(() => { // FIXME: Why is this `then` needed?
                         data.superCategories().then(x => setSupercategories(x));
-                    })
+                    // })
                 data.items().then(x => setItems(x));
                 data.details().then((x) => {
                     setType(Object.keys(x)[0]);

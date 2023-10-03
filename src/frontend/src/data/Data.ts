@@ -63,8 +63,12 @@ export class ItemData {
             agent: this.agent,
             canisterId: outerCanister,
         });
-
-        const items = ((await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: BigInt(10)})) as any).results as // TODO: limit
+        const [innerPart, innerKey] = (await client.getInner(outerKey) as any)[0]; // TODO: error handling
+        const client2 = Actor.createActor(NacDBPartitionIDL, { // TODO
+            agent: this.agent,
+            canisterId: innerPart,
+        });
+        const items = ((await client2.scanLimitInner({innerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: BigInt(10)})) as any).results as // TODO: limit
             Array<[any, number]>; // FIXME: correct type?
         const items1a = items.map((x: any) => [x[1].tuple[0].text, x[1].tuple[1].int]);
         const items2 = items1a.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
