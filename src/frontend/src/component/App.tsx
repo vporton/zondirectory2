@@ -2,7 +2,7 @@ import * as React from "react";
 import { useContext, useEffect, useState } from "react";
 // import { backend } from "../../../declarations/backend";
 import { Button, Nav } from 'react-bootstrap';
-import ShowFolder from "./ShowFolder";
+import ShowItem from "./ShowItem";
 import {
     BrowserRouter as Router,
     Route,
@@ -93,7 +93,7 @@ function MyRouted() {
                             />
                             <Route
                                 path="/item/:id"
-                                element={<ShowFolder/>}
+                                element={<ShowItem/>}
                             />
                             <Route
                                 path="/subfolders-of/:id"

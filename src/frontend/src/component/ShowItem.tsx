@@ -23,19 +23,19 @@ type Item = {
     link?: string; // TODO: URL type
 };
 
-export default function ShowFolder() {
+export default function ShowItem() {
     return (
         <>
             <AuthContext.Consumer>
                 {({defaultAgent}) => {
-                    return <ShowFolderContent defaultAgent={defaultAgent}/>
+                    return <ShowItemContent defaultAgent={defaultAgent}/>
                 }}
             </AuthContext.Consumer>
         </>
     );
 }
 
-function ShowFolderContent(props: {defaultAgent}) {
+function ShowItemContent(props: {defaultAgent}) {
     const { id } = useParams();
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
