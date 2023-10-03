@@ -43,60 +43,6 @@ shared actor class Orders() = this {
     initialized := true;
   };
 
-  // TODO: It seems that below there are many unused functions.
-
-  // func _serializePointer(ptr: ?(CanDBPartition.CanDBPartition, GUID)): [Entity.AttributeValuePrimitive] {
-  //   switch (ptr) {
-  //     case (?(part, guid)) {
-  //       [
-  //         #int 2,
-  //         #text(Principal.toText(Principal.fromActor(part))),
-  //         #text(encodeGuid(guid)), // TODO: space-inefficient
-  //       ];
-  //     };
-  //     case (null) { [#int 0] };
-  //   }
-  // };
-
-  // The argument is a slice of an array, starting from the size of the fragment of the array to use.
-  // func _deserializePointer(e: [Entity.AttributeValuePrimitive])
-  //   : (?(CanDBPartition.CanDBPartition, GUID), [Entity.AttributeValuePrimitive])
-  // {
-  //   switch (e.size()) {
-  //     case (0) { (null, Array.subArray(e, 1, Int.abs(e.size()-1))) };
-  //     case (2) {
-  //       let (#text(part), #text(guid)) = (e[1], e[2]) else {
-  //         Debug.trap("wrong linked list pointer format");
-  //       };
-  //       (?(actor(part), decodeGuid(guid)), Array.subArray(e, 3, Int.abs(e.size()-3)));
-  //     };
-  //     case _ {
-  //       Debug.trap("wrong linked list pointer format");
-  //     }
-  //   }
-  // };
-
-  // func serializeItemNode(node: ItemDListNode): [Entity.AttributeValuePrimitive] {
-  //   let result = Buffer.Buffer<Entity.AttributeValuePrimitive>(7);
-  //   result.append(Buffer.fromArray(_serializePointer(node.fwd)));
-  //   result.append(Buffer.fromArray(_serializePointer(node.bwd)));
-  //   result.add(#int(node.itemId));
-  //   Buffer.toArray(result);
-  // };
-
-  // Returns deserialization of item and remaining data.
-  // func deserializeItemNode(e: [Entity.AttributeValuePrimitive]): (ItemDListNode, [Entity.AttributeValuePrimitive]) {
-  //   let (fwd, e1) = _deserializePointer(e);
-  //   let (bwd, e2) = _deserializePointer(e1);
-  //   let #int itemId = e2[0] else {
-  //     Debug.trap("wrong linked list pointer format");
-  //   };
-  //   (
-  //     {var fwd; var bwd; itemId = Int.abs(itemId)},
-  //     Array.subArray(e2, 1, Int.abs(e2.size()-1)),
-  //   );
-  // };
-
   // Public API //
 
   public shared({caller}) func addItemToCategory(
