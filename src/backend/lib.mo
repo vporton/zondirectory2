@@ -182,7 +182,7 @@ module {
   };
 
   public func serializeStreams(streams: Streams): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(4);
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
     buf.add(#text(Principal.toText(streams.itemsTimeOrderSubDB.0)));
     buf.add(#int(streams.itemsTimeOrderSubDB.1));
     buf.add(#text(Principal.toText(streams.categoriesTimeOrderSubDB.0)));
