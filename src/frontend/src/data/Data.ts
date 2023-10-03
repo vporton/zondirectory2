@@ -59,18 +59,7 @@ export class ItemData {
     async creator() {
         return this.item.creator;
     }
-    // FIXME below
-    // FIXME: For non-folders, no distinction between `subCategories` and `items` (or better no subcategories?)
-    async subCategories() {
-        if (!this.agent) { // FIXME
-            return [];
-        }
-        // TODO: duplicate code
-        if (this.streams === undefined) {
-            return [];
-        }
-        const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB;
-        
+    private async aList(outerCanister, outerKey) {
         const client = Actor.createActor(NacDBPartitionIDL, { // TODO
             agent: this.agent,
             canisterId: outerCanister,
@@ -100,6 +89,17 @@ export class ItemData {
             }
         });
     }
+    async subCategories() {
+        if (!this.agent) {
+            return []; // TODO: or better `undefined`?
+        }
+        // TODO: duplicate code
+        if (this.streams === undefined) {
+            return [];
+        }
+        const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB;
+        return this.aList(outerCanister, outerKey)
+    }
     async superCategories() { // TODO
         return [
             {id: 1, locale: "en", title: "All the World", type: 'public'},
@@ -107,35 +107,13 @@ export class ItemData {
         ];
     }
     async items() {
-        // TODO: duplicate code
+        if (!this.agent) {
+            return []; // TODO: or better `undefined`?
+        }
         if (this.streams === undefined) {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.itemsTimeOrderSubDB
-        const client = Actor.createActor(NacDBPartitionIDL, { // TODO
-            agent: this.agent,
-            canisterId: outerCanister,
-        });
-        const items = ((await client.scanLimitOuter({outerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: BigInt(10)})) as any).results as // TODO: limit
-            Array<[any, number]>; // FIXME: correct type?
-        const items1a = items.map((x: any) => [x[1].tuple[0].text, x[1].tuple[1].int]);
-        const items2 = items1a.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
-        const items3 = items2.map(id => (async () => {
-            const part = Actor.createActor(CanDBPartitionIDL, { // TODO
-                agent: this.agent,
-                canisterId: id.canister,
-            });
-            return [id, await part.getItem(id.id)];
-        })());
-        const items4: any = (await Promise.all(items3)); // TODO: correct?
-        return items4.map(([id, item]) => {
-            return {
-                id,
-                locale: item[0].item.locale,
-                title: item[0].item.title,
-                description: item[0].item.description,
-                type: 'public', // FIXME
-            }
-        });
+        return this.aList(outerCanister, outerKey)
     }
 }
