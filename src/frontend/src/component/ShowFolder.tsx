@@ -67,6 +67,11 @@ function ShowFolderContent(props: {defaultAgent}) {
         <h2><ItemType item={data}/>{type === 'ownedCategory' || type === 'communalCategory' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         <p>Creator: <small>{creator.toString()}</small></p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
+        <p>Sort by:{" "}
+            <label><input type="radio" checked={true}/> time</label>
+            <label title="Not implemented yet"><input type="radio" disabled={true}/> votes</label>
+            <label title="Not implemented yet"><input type="radio" disabled={true}/> amount paid</label>
+        </p>
         <h3>Sub-folders</h3>
         <ul>
             {take(subcategories, 4).map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
