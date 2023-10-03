@@ -288,7 +288,6 @@ module {
   public func deserializeStreams(attr: Entity.AttributeValue): Streams {
     label r switch (attr) {
       case (#tuple arr) {
-        var pos = 0;
         return {
           itemsTimeOrderSubDB = switch(arr[0], arr[1]) {
             case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
