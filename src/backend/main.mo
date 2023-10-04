@@ -251,6 +251,26 @@ shared actor class ZonBackend() = this {
     };
   };
 
+  public shared({caller}) func setPostText(canisterId: Principal, _itemId: Nat, text: Text) {
+    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
+    let key = "i/" # Nat.toText(_itemId); // TODO: better encoding
+    switch (await db.getAttribute({sk = key}, "i")) {
+      case (?oldItemRepr) {
+        let oldItem = lib.deserializeItem(oldItemRepr);
+        if (caller != oldItem.creator) {
+          Debug.trap("can't change item owner");
+        };
+        lib.onlyItemOwner(caller, oldItem);
+        switch(oldItem.item.details) {
+          case (#post) {};
+          case _ { Debug.trap("not a post"); };
+        };
+        await db.putAttribute(key, "t", #text(text));
+      };
+      case _ { Debug.trap("no item") };
+    };
+  };
+
   // TODO: Also remove voting data.
   public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));

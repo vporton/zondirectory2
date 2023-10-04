@@ -40,6 +40,7 @@ function ShowItemContent(props: {defaultAgent}) {
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [postText, setPostText] = useState("");
     const [type, setType] = useState<string | undefined>(undefined);
     const [creator, setCreator] = useState("");
     const [subcategories, setSubcategories] = useState(undefined as Item[] | undefined);
@@ -58,11 +59,10 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.locale().then(x => setLocale(x));
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
+                data.postText().then(x => setPostText(x));
                 data.creator().then(x => setCreator(x));
                 data.subCategories().then(x => setSubcategories(x))
-                    // .then(() => { // FIXME: Why is this `then` needed?
-                        data.superCategories().then(x => setSupercategories(x));
-                    // })
+                data.superCategories().then(x => setSupercategories(x));
                 data.items().then(x => setItems(x));
                 data.details().then((x) => {
                     setType(Object.keys(x)[0]);
@@ -74,6 +74,7 @@ function ShowItemContent(props: {defaultAgent}) {
         <h2><ItemType item={data}/>{type === 'ownedCategory' || type === 'communalCategory' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         <p>Creator: <small>{creator.toString()}</small></p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
+        {postText !== "" ? <p lang={locale}>{postText}</p> : ""}
         <p>Sort by:{" "}
             <label><input type="radio" defaultChecked={true}/> time</label>
             <label title="Not implemented yet"><input type="radio" disabled={true}/> votes</label>

@@ -31,7 +31,7 @@ export default function EditItemItem() {
             case 0:
                 setSelectedTab(SelectedTab.selectedLink);
                 break;
-            case 0:
+            case 1:
                 setSelectedTab(SelectedTab.selectedOther);
                 break;
             }
@@ -42,18 +42,21 @@ export default function EditItemItem() {
                 async function submit() {
                     function itemData(): ItemWithoutOwner {
                         // TODO: Differentiating post and message by `post === ""` is unreliable.
+                        const isPost = selectedTab == SelectedTab.selectedOther && post !== "";
                         return {
                             locale,
                             title,
                             description: shortDescription,
                             details: selectedTab == SelectedTab.selectedLink ? {link: link} :
-                                (post === "" ? {message: null} : {post: null/* FIXME */}),
+                                isPost ? {post: null} : {message: null},
                             price: 0.0, // TODO
                         };
                     }
                     async function submitItem(item: ItemWithoutOwner) {
                         const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
                         const [part, n] = await backend.createItemData(item);
+                        await backend.setPostText(part, n, post);
+                        console.log("post:", post);
                         const ref = serializeItemRef({canister: part, id: Number(n)});
                         await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)});
                         navigate("/item/"+ref);

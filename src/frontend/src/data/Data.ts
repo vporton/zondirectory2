@@ -30,6 +30,7 @@ export class ItemData {
     }
     static async create(agent: Agent, itemId: string): Promise<ItemData> {
         const obj = new ItemData(agent, itemId);
+        // console.log(obj)
         const client = canDBPartitionActor(obj.itemRef.canister);
         // TODO: Retrieve both by one call?
         const [item, streams] = await Promise.all([
@@ -56,6 +57,11 @@ export class ItemData {
     }
     async creator() {
         return this.item.creator;
+    }
+    async postText() {
+        const client = canDBPartitionActor(this.itemRef.canister);
+        const t = (await client.getAttribute({sk: "i/" + this.itemRef.id}, "t") as any)[0]; // TODO: error handling
+        return t === undefined ? undefined : Object.values(t)[0];
     }
     private async aList(outerCanister, outerKey) {
         const client = nacDBPartitionActor(outerCanister, { agent: this.agent });
