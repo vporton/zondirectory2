@@ -63,10 +63,10 @@ shared actor class Orders() = this {
       case (#ownedCategory) {
         lib.onlyItemOwner(caller, categoryItem);
       };
-      case (#communalCategory) {};
+      // case (#communalCategory) {};
       case _ {
-        // TODO: Keep doing for other categories after a trap?
-        Debug.trap("not a category");
+        // We allow to post a subitem not of a category, it's called comments.
+        // Debug.trap("not a category");
       };
     };
 
@@ -75,6 +75,7 @@ shared actor class Orders() = this {
     // For now, I implement a simple hash-map, time-order does not need moving items around.
 
     let ?childItemData = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "i") else {
+      // TODO: Keep doing for other categories after a trap?
       Debug.trap("cannot get child item");
     };
     let childItem = lib.deserializeItem(childItemData);
