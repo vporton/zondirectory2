@@ -54,7 +54,7 @@ function MyRouted() {
     const navigate = useNavigate();
     const [root, setRoot] = useState("");
     async function fetchRootItem() {
-        const data0 = await main.getRootItem();
+        const data0 = await MainCanister.getRootItem();
         const [data] = data0; // TODO: We assume that it's initialized.
         let [part, id] = data! as [Principal, bigint];
         let item = { canister: part, id: Number(id) };

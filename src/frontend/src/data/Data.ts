@@ -1,6 +1,5 @@
 import { Principal } from "@dfinity/principal";
 import { Item, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did"
-import { createActor as canDBPartitionActor } "../../../declarations/CanDBPartition"
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
 import { createActor as nacDBPartitionActor } from "../../../declarations/NacDBPartition";
 import { createActor as canDBPartitionActor } from "../../../declarations/CanDBPartition";
@@ -34,8 +33,8 @@ export class ItemData {
         const client = canDBPartitionActor(obj.itemRef.canister);
         // TODO: Retrieve both by one call?
         const [item, streams] = await Promise.all([
-            client.getItem(obj.itemRef.id),
-            client.getStreams(obj.itemRef.id),
+            client.getItem(BigInt(obj.itemRef.id)),
+            client.getStreams(BigInt(obj.itemRef.id)),
         ]) as [Item[] | [], Streams[] | []];
         // const item = await client.getItem(BigInt(obj.itemRef.id)) as any;
         // const streams = await client.getStreams(BigInt(obj.itemRef.id)) as any;
