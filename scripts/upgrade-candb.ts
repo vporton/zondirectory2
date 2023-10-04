@@ -11,7 +11,7 @@ const flag = process.argv[2]
 const isLocal = flag !== "--ic"
 
 async function upgradePartitions() {
-    const serviceWasmModulePath = `.dfx/local/canisters/CanDBIndex/CanDBPartition.wasm`
+    const serviceWasmModulePath = `.dfx/local/canisters/CanDBPartition/CanDBPartition.wasm`
     const serviceWasm = loadWasm(serviceWasmModulePath);
 
     const identity = decodeFile(process.env.HOME+"/.config/dfx/identity/default/identity.pem");

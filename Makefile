@@ -18,8 +18,8 @@ build:
 .PHONY: deploy-backend
 deploy-backend:
 	dfx deploy main
-	npx ts-node scripts/upgrade-candb.ts
-	npx ts-node scripts/upgrade-nacdb.ts
+#	npx ts-node scripts/upgrade-candb.ts
+#	npx ts-node scripts/upgrade-nacdb.ts
 
 .PHONY: deploy-frontend
 deploy-frontend:

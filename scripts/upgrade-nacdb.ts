@@ -14,7 +14,7 @@ const isLocal = flag !== "--ic"
 const MANAGEMENT_CANISTER_ID = Principal.fromText('aaaaa-aa');
 
 async function upgradePartitions() {
-    const serviceWasmModulePath = `.dfx/local/canisters/NacDBIndex/NacDBPartition.wasm`
+    const serviceWasmModulePath = `.dfx/local/canisters/NacDBPartition/NacDBPartition.wasm`
     const serviceWasm = loadWasm(serviceWasmModulePath);
 
     const identity = decodeFile(process.env.HOME+"/.config/dfx/identity/default/identity.pem");
