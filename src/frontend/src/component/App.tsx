@@ -15,11 +15,12 @@ import { Agent } from '@dfinity/agent';
 import SubFolders from "./SubFolders";
 import EditItem from "./EditItem";
 import EditCategory from "./EditCategory";
-import { getIsLocal, initializeMainClient } from "../util/client";
+import { getIsLocal } from "../util/client";
 import { serializeItemRef } from '../data/Data'
 // import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { Principal } from "@dfinity/principal";
 import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
+import { main as MainCanister } from "../../../declarations/main";
  
 export default function App() {
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
@@ -52,7 +53,6 @@ export default function App() {
 function MyRouted() {
     const navigate = useNavigate();
     const [root, setRoot] = useState("");
-    let main = initializeMainClient();
     async function fetchRootItem() {
         const data0 = await main.getRootItem();
         const [data] = data0; // TODO: We assume that it's initialized.

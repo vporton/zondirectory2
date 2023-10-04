@@ -1,9 +1,9 @@
 import { Principal } from "@dfinity/principal";
 import { Item, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did"
-import { initializeDirectCanDBPartitionClient, initializeDirectNacDBPartitionClient } from "../util/client";
+import { createActor as canDBPartitionActor } "../../../declarations/CanDBPartition"
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
-import { idlFactory as NacDBPartitionIDL } from "../../../declarations/NacDBPartition";
-import { idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition";
+import { createActor as nacDBPartitionActor } from "../../../declarations/NacDBPartition";
+import { createActor as canDBPartitionActor } from "../../../declarations/CanDBPartition";
 
 export type ItemRef = {
     canister: Principal;
@@ -31,7 +31,7 @@ export class ItemData {
     }
     static async create(agent: Agent, itemId: string): Promise<ItemData> {
         const obj = new ItemData(agent, itemId);
-        const client = initializeDirectCanDBPartitionClient(obj.itemRef.canister);
+        const client = canDBPartitionActor(obj.itemRef.canister);
         // TODO: Retrieve both by one call?
         const [item, streams] = await Promise.all([
             client.getItem(obj.itemRef.id),
@@ -59,27 +59,18 @@ export class ItemData {
         return this.item.creator;
     }
     private async aList(outerCanister, outerKey) {
-        const client = Actor.createActor(NacDBPartitionIDL, { // TODO
-            agent: this.agent,
-            canisterId: outerCanister,
-        });
+        const client = nacDBPartitionActor(outerCanister, { agent: this.agent });
         const [innerPart, innerKey] = (await client.getInner(outerKey) as any)[0]; // TODO: error handling
-        const client2 = Actor.createActor(NacDBPartitionIDL, { // TODO
-            agent: this.agent,
-            canisterId: innerPart,
-        });
+        const client2 = nacDBPartitionActor(innerPart, { agent: this.agent });
         const items = ((await client2.scanLimitInner({innerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: BigInt(10)})) as any).results as // TODO: limit
-            Array<[any, number]>; // FIXME: correct type?
+            Array<[any, number]>; // TODO: correct type?
         const items1a = items.map((x: any) => [x[1].tuple[0].text, x[1].tuple[1].int]);
         const items2 = items1a.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
         const items3 = items2.map(id => (async () => {
-            const part = Actor.createActor(CanDBPartitionIDL, { // TODO
-                agent: this.agent,
-                canisterId: id.canister,
-            });
+            const part = canDBPartitionActor(id.canister, { agent: this.agent });
             return [id, await part.getItem(id.id)];
         })());
-        const items4: any = (await Promise.all(items3)); // TODO: correct?
+        const items4: any = (await Promise.all(items3));
         return items4.map(([id, item]) => {
             return {
                 id,
