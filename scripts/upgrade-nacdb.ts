@@ -4,7 +4,6 @@ global.fetch = fetch;
 require("dotenv").config();
 import { loadWasm } from "candb-client-typescript/dist/ClientUtil";
 import { createActor as createNacDBIndex } from "../src/declarations/NacDBIndex";
-import { idlFactory as icIdlFactory } from "./lib/ic.did";
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { decodeFile } from "./lib/key";
@@ -15,7 +14,7 @@ const isLocal = flag !== "--ic"
 const MANAGEMENT_CANISTER_ID = Principal.fromText('aaaaa-aa');
 
 async function upgradePartitions() {
-    const serviceWasmModulePath = `.dfx/local/canisters/NacDBIndex/NacDBIndex.wasm`
+    const serviceWasmModulePath = `.dfx/local/canisters/NacDBIndex/NacDBPartition.wasm`
     const serviceWasm = loadWasm(serviceWasmModulePath);
 
     const identity = decodeFile(process.env.HOME+"/.config/dfx/identity/default/identity.pem");
