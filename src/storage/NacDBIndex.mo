@@ -81,4 +81,38 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         let r = await* Nac.createSubDB({guid = Blob.fromArray(guid); index = this; dbIndex; dbOptions = Common.dbOptions; userData});
         { inner = (Principal.fromActor(r.inner.0), r.inner.1); outer = (Principal.fromActor(r.outer.0), r.outer.1) };
     };
+
+    // Management methods //
+
+    type CanisterId = Principal;
+
+    type Management = actor {
+        // create_canister : ({ settings : ?CanisterSettings }) -> async ({
+        //   canister_id : CanisterId;
+        // });
+        install_code : ({
+        mode : { #install; #reinstall; #upgrade };
+            canister_id : CanisterId;
+            wasm_module : Blob;
+            arg : Blob;
+        }) -> async ();
+        // update_settings : ({ canister_id : CanisterId; settings : CanisterSettings }) -> async (); // TODO
+        deposit_cycles : ({ canister_id : Principal }) -> async ();
+    };
+
+    public shared({caller}) func upgradeCanistersInRange(wasm: Blob, inclusiveBottom: Nat, exclusiveTop: Nat) : async ()
+    {
+        checkCaller(caller);
+
+        let canisters = Nac.getCanisters(dbIndex);
+        let ic : Management = actor ("aaaaa-aa");
+        for (i in Iter.range(inclusiveBottom, exclusiveTop-1)) {
+            await ic.install_code({
+                arg = "";
+                wasm_module = wasm;
+                mode = #upgrade;
+                canister_id = Principal.fromActor(canisters[i]);
+            });
+        }
+    }
 }

@@ -3,7 +3,7 @@
 # For `. .env` to work, even if /bin/sh is Dash:
 SHELL=/bin/bash
 
-FOUNDER = $(shell dfx identity get-wallet)
+FOUNDER = $(shell dfx identity get-principal)
 
 .PHONY: build
 build:
@@ -18,6 +18,8 @@ build:
 .PHONY: deploy-backend
 deploy-backend:
 	dfx deploy main
+	npx ts-node scripts/upgrade-candb.ts
+	npx ts-node scripts/upgrade-nacdb.ts
 
 .PHONY: deploy-frontend
 deploy-frontend:
