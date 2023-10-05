@@ -24,9 +24,11 @@ deploy-backend: deploy-my-wasm
 .PHONY: deploy-my-wasm
 deploy-my-wasm: CanDBPartition.wasm NacDBPartition.wasm
 
+.PHONY: CanDBPartition.wasm
 CanDBPartition.wasm:
 	moc `vessel sources` src/storage/CanDBPartition.mo
 
+.PHONY: NacDBPartition.wasm
 NacDBPartition.wasm:
 	moc `vessel sources` src/storage/NacDBPartition.mo
 

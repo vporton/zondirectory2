@@ -108,7 +108,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         let ic : Management = actor ("aaaaa-aa");
         for (i in Iter.range(inclusiveBottom, exclusiveTop-1)) {
             await ic.install_code({
-                arg = "";
+                arg = to_candid([]);
                 wasm_module = wasm;
                 mode = #upgrade;
                 canister_id = Principal.fromActor(canisters[i]);

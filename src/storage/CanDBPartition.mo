@@ -12,17 +12,20 @@ import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import lib "../backend/lib";
 
-shared actor class CanDBPartition({
-  primaryKey: Text;
+shared actor class CanDBPartition(options: {
+  partitionKey: Text;
   scalingOptions: CanDB.ScalingOptions;
-  initialOwners: [Principal];
+  owners: ?[Principal];
 }) {
-  stable var owners = initialOwners;
+  stable var owners = switch (options.owners) {
+    case (?p) { p };
+    case _ { [] };
+  };
 
   /// @required (may wrap, but must be present in some form in the canister)
   stable let db = CanDB.init({
-    pk = primaryKey;
-    scalingOptions = scalingOptions;
+    pk = options.partitionKey;
+    scalingOptions = options.scalingOptions;
     btreeOrder = null;
   });
 

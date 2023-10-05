@@ -11,7 +11,7 @@ const flag = process.argv[2]
 const isLocal = flag !== "--ic"
 
 async function upgradePartitions() {
-    const serviceWasmModulePath = `.dfx/local/canisters/CanDBPartition/CanDBPartition.wasm`
+    const serviceWasmModulePath = `CanDBPartition.wasm`
     const serviceWasm = loadWasm(serviceWasmModulePath);
 
     const identity = decodeFile(process.env.HOME+"/.config/dfx/identity/default/identity.pem");
@@ -21,8 +21,13 @@ async function upgradePartitions() {
       agent.fetchRootKey();
     }
     const CanDBIndex = Actor.createActor(canDBIndexIdl, {agent, canisterId: process.env.CANDBINDEX_CANISTER_ID!});
-    const upgradeResult = await CanDBIndex.upgradeAllPartitionCanisters(serviceWasm);
-    console.log("result", JSON.stringify(upgradeResult));
+    try {
+      const upgradeResult = await CanDBIndex.upgradeAllPartitionCanisters(serviceWasm);
+      console.log("result", JSON.stringify(upgradeResult));
+    } catch (e) {
+      console.log("Error upgrading: " + e);
+      process.exit(1);
+    }
 
     console.log("upgrade complete")
 };

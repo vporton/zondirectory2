@@ -118,12 +118,12 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     // left over for the new canister when it is created
     Cycles.add(300_000_000_000); // TODO: Choose the number.
     let newStorageCanister = await CanDBPartition.CanDBPartition({
-      primaryKey = pk;
+      partitionKey = pk;
       scalingOptions = {
         autoScalingHook = autoScaleCanister;
         sizeLimit = maxSize;
       };
-      initialOwners = controllers;
+      owners = ?controllers;
     });
     let newStorageCanisterPrincipal = Principal.fromActor(newStorageCanister);
     await CA.updateCanisterSettings({
