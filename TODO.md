@@ -1,3 +1,6 @@
+- Before deleting an item, delete all links between it and folders.
+  All folder/item relations should be reflexive.
+
 - FIXME in NacDB.
 
 - Should specify locale for communal folders?
