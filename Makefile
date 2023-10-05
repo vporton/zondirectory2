@@ -16,10 +16,19 @@ build:
 	dfx build main
 
 .PHONY: deploy-backend
-deploy-backend:
+deploy-backend: deploy-my-wasm
 	dfx deploy main
-#	npx ts-node scripts/upgrade-candb.ts
-#	npx ts-node scripts/upgrade-nacdb.ts
+	npx ts-node scripts/upgrade-candb.ts
+	npx ts-node scripts/upgrade-nacdb.ts
+
+.PHONY: deploy-my-wasm
+deploy-my-wasm: CanDBPartition.wasm NacDBPartition.wasm
+
+CanDBPartition.wasm:
+	moc `vessel sources` src/storage/CanDBPartition.mo
+
+NacDBPartition.wasm:
+	moc `vessel sources` src/storage/NacDBPartition.mo
 
 .PHONY: deploy-frontend
 deploy-frontend:
