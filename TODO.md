@@ -1,5 +1,7 @@
 - FIXME in NacDB.
 
+- Should specify locale for communal folders?
+
 - Proper error handling.
 
 - Note that an item was edited if it was edited since inception.
