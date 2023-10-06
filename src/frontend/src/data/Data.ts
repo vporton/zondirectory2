@@ -96,7 +96,7 @@ export class ItemData {
         if (this.streams === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams.categoriesTimeOrderSubDB;
+        const [outerCanister, outerKey] = this.streams.categoriesTimeOrder;
         return await this.aList(outerCanister, outerKey)
     }
     async superCategories() { // TODO
@@ -107,7 +107,7 @@ export class ItemData {
         if (this.streams === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams.categoriesInvTimeOrderSubDB;
+        const [outerCanister, outerKey] = this.streams.categoriesInvTimeOrder;
         return await this.aList(outerCanister, outerKey)
     }
     async items() {
@@ -117,7 +117,7 @@ export class ItemData {
         if (this.streams === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams.itemsTimeOrderSubDB
+        const [outerCanister, outerKey] = this.streams.itemsTimeOrder
         return await this.aList(outerCanister, outerKey)
     }
 }
