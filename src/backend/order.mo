@@ -45,6 +45,38 @@ shared actor class Orders() = this {
 
   // Public API //
 
+  func addItemToList(theSubDB: (Principal, Nac.OuterSubDBKey), itemToAdd: (Principal, Nat)): async* () {
+    let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
+    let timeScanResult = await theSubDB2.scanLimitOuter({
+      dir = #fwd;
+      outerKey = theSubDB.1;
+      lowerBound = "";
+      upperBound = "x";
+      limit = 1;
+      ascending = ?true;
+    });
+    let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
+      0;
+    } else {
+      let t = timeScanResult.results[0].0;
+      let n = lib.decodeInt(t);
+      n - 1;
+    };
+    let timeScanItemInfo = #tuple([#text(Principal.toText(itemToAdd.0)), #int(itemToAdd.1)]);
+    
+    let guid = GUID.nextGuid(guidGen);
+
+    // FIXME: race condition
+    ignore await theSubDB2.insert({
+      guid = Blob.toArray(guid);
+      indexCanister = Principal.fromActor(NacDBIndex);
+      outerCanister = Principal.fromActor(theSubDB2);
+      outerKey = theSubDB.1;
+      sk = lib.encodeInt(timeScanSK);
+      value = timeScanItemInfo;
+    });
+  };
+
   public shared({caller}) func addItemToCategory(
     catId: (Principal, Nat),
     itemId: (Principal, Nat),
@@ -81,73 +113,18 @@ shared actor class Orders() = this {
     let childItem = lib.deserializeItem(childItemData);
 
     // Put into the beginning of time order.
-    let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB; categoriesInvTimeOrderSubDB } = await obtainStreams((catId1, catId.1));
     do { // block
+      let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB } = await obtainStreams((catId1, catId.1));
       let theSubDB = switch (childItem.item.details) {
         case (#communalCategory or #ownedCategory) { categoriesTimeOrderSubDB };
         case _ { itemsTimeOrderSubDB };
       };
-      let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
-      let timeScanResult = await theSubDB2.scanLimitOuter({
-        dir = #fwd;
-        outerKey = theSubDB.1;
-        lowerBound = "";
-        upperBound = "x";
-        limit = 1;
-        ascending = ?true;
-      });
-      let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
-        0;
-      } else {
-        let t = timeScanResult.results[0].0;
-        let n = lib.decodeInt(t);
-        n - 1;
-      };
-      let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(itemId1))), #int(itemId.1)]);
-      
-      let guid = GUID.nextGuid(guidGen);
-
-      // FIXME: race condition
-      ignore await theSubDB2.insert({
-        guid = Blob.toArray(guid);
-        indexCanister = Principal.fromActor(NacDBIndex);
-        outerCanister = Principal.fromActor(theSubDB2);
-        outerKey = theSubDB.1;
-        sk = lib.encodeInt(timeScanSK);
-        value = timeScanItemInfo;
-      });
+      await* addItemToList(theSubDB, itemId);
     };
     do { // block
+      let { categoriesInvTimeOrderSubDB } = await obtainStreams((itemId1, itemId.1));
       let theSubDB = categoriesInvTimeOrderSubDB;
-      let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
-      let timeScanResult = await theSubDB2.scanLimitOuter({
-        dir = #fwd;
-        outerKey = theSubDB.1;
-        lowerBound = "";
-        upperBound = "x";
-        limit = 1;
-        ascending = ?true;
-      });
-      let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
-        0;
-      } else {
-        let t = timeScanResult.results[0].0;
-        let n = lib.decodeInt(t);
-        n - 1;
-      };
-      let timeScanItemInfo = #tuple([#text(Principal.toText(Principal.fromActor(catId1))), #int(catId.1)]);
-      
-      let guid = GUID.nextGuid(guidGen);
-
-      // FIXME: race condition
-      ignore await theSubDB2.insert({
-        guid = Blob.toArray(guid);
-        indexCanister = Principal.fromActor(NacDBIndex);
-        outerCanister = Principal.fromActor(theSubDB2);
-        outerKey = theSubDB.1;
-        sk = lib.encodeInt(timeScanSK);
-        value = timeScanItemInfo;
-      });
+      await* addItemToList(theSubDB, catId);
     };
   };
 
