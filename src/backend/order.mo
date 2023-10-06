@@ -123,8 +123,7 @@ shared actor class Orders() = this {
     };
     do { // block
       let { categoriesInvTimeOrder } = await obtainStreams((itemId1, itemId.1));
-      let theSubDB = categoriesInvTimeOrder;
-      await* addItemToList(theSubDB, catId);
+      await* addItemToList(categoriesInvTimeOrder, catId);
     };
   };
 
