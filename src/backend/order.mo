@@ -81,8 +81,8 @@ shared actor class Orders() = this {
     let childItem = lib.deserializeItem(childItemData);
 
     // Put into the beginning of time order.
+    let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB; categoriesInvTimeOrderSubDB } = await obtainStreams((catId1, catId.1));
     do { // block
-      let { itemsTimeOrderSubDB; categoriesTimeOrderSubDB; categoriesInvTimeOrderSubDB } = await obtainStreams((catId1, catId.1));
       let theSubDB = switch (childItem.item.details) {
         case (#communalCategory or #ownedCategory) { categoriesTimeOrderSubDB };
         case _ { itemsTimeOrderSubDB };
@@ -118,7 +118,6 @@ shared actor class Orders() = this {
       });
     };
     do { // block
-      let { categoriesInvTimeOrderSubDB } = await obtainStreams((itemId1, itemId.1));
       let theSubDB = categoriesInvTimeOrderSubDB;
       let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
       let timeScanResult = await theSubDB2.scanLimitOuter({
