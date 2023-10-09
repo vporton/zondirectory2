@@ -21,6 +21,7 @@ type UseAuthClientOptions = {
   loginOptions?: AuthClientLoginOptions;
 }
 
+console.log("process.env", process.env.DFX_NETWORK)
 const defaultOptions: UseAuthClientOptions = {
   createOptions: {
     idleOptions: {
