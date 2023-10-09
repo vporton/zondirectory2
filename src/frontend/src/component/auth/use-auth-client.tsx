@@ -98,7 +98,7 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
       });
       const delegationIdentity: Identity = await nfid.getDelegation({
         // optional targets ICRC-28 implementation, but required to support universal NFID Wallet auth
-        targets: [process.env.CANISTER_ID_MAIN!], // FIXME: needed?
+        targets: [], // FIXME: needed?
         // optional derivationOrigin in case you're running on a custom domain
         derivationOrigin: `https://${process.env.CANISTER_ID_frontend!}.icp0.app`,
         // optional maxTimeToLive defaults to 8 hours in nanoseconds;
