@@ -116,7 +116,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     // Pre-load 300 billion cycles for the creation of a new storage canister
     // Note that canister creation costs 100 billion cycles, meaning there are 200 billion
     // left over for the new canister when it is created
-    Cycles.add(110_000_000_000); // TODO: Choose the number.
+    Cycles.add(210_000_000_000); // TODO: Choose the number.
     let newStorageCanister = await CanDBPartition.CanDBPartition({
       partitionKey = pk;
       scalingOptions = {
