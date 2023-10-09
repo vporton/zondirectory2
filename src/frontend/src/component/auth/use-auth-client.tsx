@@ -68,7 +68,7 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
 
   const login = async () => {
     auth.authClient!.login({
-      ...auth.options.loginOptions,
+      ...defaultOptions, ...auth.options.loginOptions,
       onSuccess: () => {
         updateClient(auth.authClient);
         if (getIsLocal()) {
