@@ -28,7 +28,6 @@ For other projects I have use this library that let you write command line (DFX 
 Take a look at this example ==> https://gist.github.com/atengberg/7a698218112615517969247f762d92fd --
 https://discord.com/channels/990830443521789952/999858362932006984/1157676585802023012
 
-
 - `checkSybil` should prevent even on localhost to authenticate.
 
 - Remove `candb-client-typescript`.
