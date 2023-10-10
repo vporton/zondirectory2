@@ -3,8 +3,6 @@
 
 - FIXME in NacDB.
 
-- Should specify locale for communal folders?
-
 - Proper error handling.
 
 - Note that an item was edited if it was edited since inception.
@@ -37,7 +35,8 @@ https://discord.com/channels/990830443521789952/999858362932006984/1157676585802
 
 - Locale-specific streams.
 
-- No more than one communal category with a given name (requires a centralized registry).
+- No more than one communal category with a given name + locale (requires a centralized registry).
+  Locale should be displayed.
 
 - `lib.encodeInt` produces too long identifiers.
 
