@@ -3,6 +3,8 @@
 
 - FIXME in NacDB.
 
+- Join one communal folder to another by a community voting.
+
 - Proper error handling.
 
 - Note that an item was edited if it was edited since inception.
