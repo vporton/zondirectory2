@@ -1,3 +1,7 @@
+- Race conditions of reading an entry and saving it with a modified subkey.
+  Solve by blocking by setting a special attribute.
+  But how to reset it reliably?
+
 - Before deleting an item, delete all links between it and folders.
   All folder/item relations should be reflexive.
 
