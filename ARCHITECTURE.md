@@ -13,8 +13,11 @@ TODO: Should have separate attribute post text.
 
 ## NacDB database structure
 * `itemsTimeOrder`: category -> sub-items
-* `categoriesTimeOrder`: category -> sub-categories, item -> replies
-* `categoriesInvTimeOrder`: category -> super-categories, reply -> items (to be implemented)
+* `categoriesTimeOrder`: category -> sub-categories
+* item -> replies
+
+When displaying, needs pairs like `XXX`/`XXXInv`. When saving, needs all pairs.
+Therefore, store grouped by pairs. How to save several pairs?
 
 ## Misc
 
