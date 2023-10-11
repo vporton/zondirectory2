@@ -1,6 +1,7 @@
 - Race conditions of reading an entry and saving it with a modified subkey.
   Solve by blocking by setting a special attribute.
   But how to reset it reliably?
+  The best solution is to move the code to `NacDBPartition` (it can grow 7 times).
 
 - Before deleting an item, delete all links between it and folders.
   All folder/item relations should be reflexive.
