@@ -138,15 +138,15 @@ module {
   };
 
   public type Streams = {
-    itemsTimeOrderSubDB: (
+    itemsTimeOrder: (
       Principal,
       Nac.OuterSubDBKey,
     );
-    categoriesTimeOrderSubDB: (
+    categoriesTimeOrder: (
       Principal,
       Nac.OuterSubDBKey,
     );
-    categoriesInvTimeOrderSubDB: (
+    categoriesInvTimeOrder: (
       Principal,
       Nac.OuterSubDBKey,
     );
@@ -183,12 +183,12 @@ module {
 
   public func serializeStreams(streams: Streams): Entity.AttributeValue {
     var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
-    buf.add(#text(Principal.toText(streams.itemsTimeOrderSubDB.0)));
-    buf.add(#int(streams.itemsTimeOrderSubDB.1));
-    buf.add(#text(Principal.toText(streams.categoriesTimeOrderSubDB.0)));
-    buf.add(#int(streams.categoriesTimeOrderSubDB.1));
-    buf.add(#text(Principal.toText(streams.categoriesInvTimeOrderSubDB.0)));
-    buf.add(#int(streams.categoriesInvTimeOrderSubDB.1));
+    buf.add(#text(Principal.toText(streams.itemsTimeOrder.0)));
+    buf.add(#int(streams.itemsTimeOrder.1));
+    buf.add(#text(Principal.toText(streams.categoriesTimeOrder.0)));
+    buf.add(#int(streams.categoriesTimeOrder.1));
+    buf.add(#text(Principal.toText(streams.categoriesInvTimeOrder.0)));
+    buf.add(#int(streams.categoriesInvTimeOrder.1));
     #tuple(Buffer.toArray(buf));
   };
 
@@ -289,15 +289,15 @@ module {
     label r switch (attr) {
       case (#tuple arr) {
         return {
-          itemsTimeOrderSubDB = switch(arr[0], arr[1]) {
+          itemsTimeOrder = switch(arr[0], arr[1]) {
             case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };
-          categoriesTimeOrderSubDB = switch(arr[2], arr[3]) {
+          categoriesTimeOrder = switch(arr[2], arr[3]) {
             case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };
-          categoriesInvTimeOrderSubDB = switch(arr[4], arr[5]) {
+          categoriesInvTimeOrder = switch(arr[4], arr[5]) {
             case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };

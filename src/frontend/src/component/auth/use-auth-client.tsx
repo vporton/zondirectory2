@@ -3,6 +3,7 @@ import { AuthClient, AuthClientCreateOptions, AuthClientLoginOptions } from "@df
 import { Principal } from "@dfinity/principal";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getIsLocal } from "../../util/client";
+import { NFID } from "@nfid/embed";
 
 export const AuthContext = createContext<{
   isAuthenticated: boolean,
@@ -29,9 +30,9 @@ const defaultOptions: UseAuthClientOptions = {
     },
   },
   loginOptions: {
-    identityProvider: // FIXME: NFID
+    identityProvider:
       process.env.DFX_NETWORK === "ic"
-        ? undefined
+        ? `https://nfid.one`
         : `http://localhost:8000/?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY}`,
   },
 };
@@ -66,16 +67,48 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
     setAuth({authClient: client, agent, isAuthenticated, identity, principal, options: props.options});
   }
 
+  function updateClientNfid(identity) {
+    const isAuthenticated = identity.isAuthenticated;
+    const principal = identity.getPrincipal();
+    const agent = new HttpAgent({identity});
+    if (getIsLocal()) {
+      agent.fetchRootKey();
+    }
+
+    setAuth({agent, isAuthenticated, identity, principal, options: props.options});
+  }
+
   const login = async () => {
-    auth.authClient!.login({
-      ...auth.options.loginOptions,
-      onSuccess: () => {
-        updateClient(auth.authClient);
-        if (getIsLocal()) {
-          auth.authClient.fetchRootKey();
-        }
-      },
-    });
+    if (getIsLocal()) {
+      auth.authClient!.login({
+        ...defaultOptions, ...auth.options.loginOptions,
+        onSuccess: () => {
+          updateClient(auth.authClient);
+          if (getIsLocal()) {
+            auth.authClient.fetchRootKey();
+          }
+        },
+      });
+    } else {
+      const nfid = await NFID.init({
+        application: {
+          name: "Zon",
+          // logo: "https://dev.nfid.one/static/media/id.300eb72f3335b50f5653a7d6ad5467b3.svg" // TODO
+        },
+      });
+      const delegationIdentity: Identity = await nfid.getDelegation({
+        // optional targets ICRC-28 implementation, but required to support universal NFID Wallet auth
+        targets: [], // FIXME: needed?
+        // optional derivationOrigin in case you're running on a custom domain
+        derivationOrigin: `https://${process.env.CANISTER_ID_frontend!}.icp0.io`,
+        // optional maxTimeToLive defaults to 8 hours in nanoseconds;
+        maxTimeToLive: BigInt(8) * BigInt(3_600_000_000_000) // TODO
+      });
+      updateClientNfid(delegationIdentity);
+      if (getIsLocal()) {
+        auth.authClient.fetchRootKey();
+      }
+    }
   };
 
   const logout = async () => {

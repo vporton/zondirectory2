@@ -311,4 +311,8 @@ shared actor class ZonBackend() = this {
   //   // FIXME:
   //   await db.put({sk = "a/" # Principal.toText(caller); attributes = [("v", #text (buyerAffiliateStr # "/" # sellerAffiliateStr))]});
   // };
+
+  public shared func get_trusted_origins(): async [Text] {
+    return [];
+  }
 }

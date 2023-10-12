@@ -12,9 +12,9 @@ TODO: Should have separate attribute post text.
 ### [TODO: seems superfluous] "r/<CATEGORY>/<ITEM>" - which items were addeded to which categories (both time and votes streams)
 
 ## NacDB database structure
-* `itemsTimeOrderSubDB`: category -> sub-items
-* `categoriesTimeOrderSubDB`: category -> sub-categories, item -> replies
-* `categoriesInvTimeOrderSubDB`: category -> super-categories, reply -> items (to be implemented)
+* `itemsTimeOrder`: category -> sub-items
+* `categoriesTimeOrder`: category -> sub-categories, item -> replies
+* `categoriesInvTimeOrder`: category -> super-categories, reply -> items (to be implemented)
 
 ## Misc
 

@@ -24,7 +24,7 @@ import { main as MainCanister } from "../../../declarations/main";
  
 export default function App() {
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
-    const identityProvider = getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : undefined;
+    const identityProvider = getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : `https://nfid.one`;
     return (
         <>
             <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
@@ -32,7 +32,7 @@ export default function App() {
             </p>
             <h1>Zon Dir</h1>
             <AuthProvider options={{loginOptions: {
-                identityProvider: (getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : undefined),
+                identityProvider,
                 maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week // TODO
                 windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
                 onSuccess: () => {

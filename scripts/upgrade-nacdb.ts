@@ -8,8 +8,7 @@ import { Actor, HttpAgent } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { decodeFile } from "./lib/key";
 
-const flag = process.argv[2]
-const isLocal = flag !== "--ic"
+const isLocal = process.env.DFX_NETWORK !== "ic";
 
 const MANAGEMENT_CANISTER_ID = Principal.fromText('aaaaa-aa');
 
