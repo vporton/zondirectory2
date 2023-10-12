@@ -100,7 +100,7 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
         // optional targets ICRC-28 implementation, but required to support universal NFID Wallet auth
         targets: [], // FIXME: needed?
         // optional derivationOrigin in case you're running on a custom domain
-        derivationOrigin: `https://${process.env.CANISTER_ID_frontend!}.icp0.app`,
+        derivationOrigin: `https://${process.env.CANISTER_ID_frontend!}.icp0.io`,
         // optional maxTimeToLive defaults to 8 hours in nanoseconds;
         maxTimeToLive: BigInt(8) * BigInt(3_600_000_000_000) // TODO
       });
