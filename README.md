@@ -26,7 +26,11 @@ dfx canister --help
 
 ## Running the project locally
 
-If you want to test your project locally, you can use the following commands:
+If you want to test your project locally:
+
+Set `REACT_APP_IS_LOCAL=1` in `.env`.
+
+Use the following commands:
 
 ```bash
 # Starts the replica, running in the background
