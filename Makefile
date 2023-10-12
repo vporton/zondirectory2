@@ -41,9 +41,9 @@ deploy-frontend:
 
 .PHONY: init
 init:
-#	dfx ledger fabricate-cycles --amount 1000000000 --canister main
-	# dfx canister --network $(NETWORK) call main init '()'
-	# dfx canister call --network $(NETWORK) payments init '()'
+	dfx ledger fabricate-cycles --amount 1000000000 --canister main
+	dfx canister --network $(NETWORK) call main init '()'
+	dfx canister call --network $(NETWORK) payments init '()'
 	. .env && dfx canister call --network $(NETWORK) CanDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
 	. .env && dfx canister call --network $(NETWORK) NacDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
 	mainItem=`dfx canister call --network $(NETWORK) main createItemData \
