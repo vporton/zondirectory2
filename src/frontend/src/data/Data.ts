@@ -20,7 +20,7 @@ export function serializeItemRef(item: ItemRef): string {
 }
 
 export class ItemData {
-    agent: Agent; // should be `defaultAgent`
+    agent?: Agent; // should be `defaultAgent`
     itemRef: ItemRef;
     item: Item;
     streams: Streams | undefined;
@@ -89,21 +89,19 @@ export class ItemData {
         });
     }
     async subCategories() {
-        if (!this.agent) {
-            return []; // TODO: or better `undefined`?
+        if (this.agent === undefined) {
+            return undefined;
         }
-        // TODO: duplicate code
         if (this.streams === undefined) {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrder;
         return await this.aList(outerCanister, outerKey)
     }
-    async superCategories() { // TODO
-        if (!this.agent) {
-            return []; // TODO: or better `undefined`?
+    async superCategories() {
+        if (this.agent === undefined) {
+            return undefined;
         }
-        // TODO: duplicate code
         if (this.streams === undefined) {
             return [];
         }
@@ -111,8 +109,8 @@ export class ItemData {
         return await this.aList(outerCanister, outerKey)
     }
     async items() {
-        if (!this.agent) {
-            return []; // TODO: or better `undefined`?
+        if (this.agent === undefined) {
+            return undefined;
         }
         if (this.streams === undefined) {
             return [];
