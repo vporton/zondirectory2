@@ -63,21 +63,23 @@ export class ItemData {
         const t = (await client.getAttribute({sk: "i/" + this.itemRef.id}, "t") as any)[0]; // TODO: error handling
         return t === undefined ? undefined : Object.values(t)[0];
     }
-    private async aList(outerCanister, outerKey) {
+    private async aList(outerCanister, outerKey, opts?: {lowerBound?: string, limit?: number}) {
+        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         const client = nacDBPartitionActor(outerCanister, { agent: this.agent });
         const [innerPart, innerKey] = (await client.getInner(outerKey) as any)[0]; // TODO: error handling
         const client2 = nacDBPartitionActor(innerPart, { agent: this.agent });
-        const items = ((await client2.scanLimitInner({innerKey, lowerBound: "", upperBound: "x", dir: {fwd: null}, limit: BigInt(10)})) as any).results as // TODO: limit
+        const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as // TODO: limit
             Array<[any, number]>; // TODO: correct type?
-        const items1a = items.map((x: any) => [x[1].tuple[0].text, x[1].tuple[1].int]);
-        const items2 = items1a.map(([principalStr, id]) => { return {canister: Principal.from(principalStr), id: id} });
+        const items1a = items.map((x: any) => [x[0], x[1].tuple[0].text, x[1].tuple[1].int]);
+        const items2 = items1a.map(([order, principalStr, id]) => { return {canister: Principal.from(principalStr), id, order} });
         const items3 = items2.map(id => (async () => {
             const part = canDBPartitionActor(id.canister, { agent: this.agent });
-            return [id, await part.getItem(id.id)];
+            return [id.order, id, await part.getItem(id.id)];
         })());
         const items4: any = (await Promise.all(items3));
-        return items4.map(([id, item]) => {
+        return items4.map(([order, id, item]) => {
             return {
+                order,
                 id,
                 locale: item[0].item.locale,
                 title: item[0].item.title,
@@ -88,7 +90,8 @@ export class ItemData {
             }
         });
     }
-    async subCategories() {
+    async subCategories(opts?: {lowerBound?: string, limit?: number}) {
+        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
         }
@@ -96,9 +99,10 @@ export class ItemData {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.categoriesTimeOrder;
-        return await this.aList(outerCanister, outerKey)
+        return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
-    async superCategories() {
+    async superCategories(opts?: {lowerBound?: string, limit?: number}) {
+        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
         }
@@ -106,9 +110,10 @@ export class ItemData {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.categoriesInvTimeOrder;
-        return await this.aList(outerCanister, outerKey)
+        return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
-    async items() {
+    async items(opts?: {lowerBound?: string, limit?: number}) {
+        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
         }
@@ -116,6 +121,6 @@ export class ItemData {
             return [];
         }
         const [outerCanister, outerKey] = this.streams.itemsTimeOrder
-        return await this.aList(outerCanister, outerKey)
+        return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
 }
