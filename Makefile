@@ -17,11 +17,15 @@ build:
 	dfx build main
 
 .PHONY: deploy-backend
-deploy-backend: compile-my-wasm deploy-main
+deploy-backend: compile-my-wasm deploy-main upgrade-partitions
+
+.PHONY: upgrade-partitions
+upgrade-partitions:
 	npx ts-node scripts/upgrade-candb.ts
 	npx ts-node scripts/upgrade-nacdb.ts
 
 .PHONY: deploy-main
+deploy-main:
 	dfx deploy main
 
 .PHONY: compile-my-wasm
@@ -36,7 +40,10 @@ NacDBPartition.wasm:
 	moc `vessel sources` src/storage/NacDBPartition.mo
 
 .PHONY: deploy-frontend
-deploy-frontend:
+deploy-frontend: compile-my-wasm do-deploy-frontend upgrade-partitions
+
+.PHONY: do-deploy-frontend
+do-deploy-frontend:
 	dfx deploy frontend
 
 .PHONY: init
