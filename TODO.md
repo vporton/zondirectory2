@@ -1,3 +1,5 @@
+- One folder having several editors, like as in Dmoz.
+
 - Race conditions of reading an entry and saving it with a modified subkey.
   Solve by blocking by setting a special attribute.
   But how to reset it reliably?
