@@ -91,6 +91,7 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
       });
     } else {
       const nfid = await NFID.init({
+        // origin: `https://${process.env.CANISTER_ID_frontend!}.icp0.io`, // FIXME: another canister
         application: {
           name: "Zon",
           // logo: "https://dev.nfid.one/static/media/id.300eb72f3335b50f5653a7d6ad5467b3.svg" // TODO
