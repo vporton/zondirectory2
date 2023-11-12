@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
-import { createActor as mainActor } from "../../../declarations/main";
+import { createActor as mainActor, main as backend } from "../../../declarations/main";
 import EditCategoriesList from "./EditCategoriesList";
 import { serializeItemRef } from "../data/Data";
 import { addToMultipleCategories } from "../util/category";
@@ -53,7 +53,6 @@ export default function EditItemItem() {
                         };
                     }
                     async function submitItem(item: ItemWithoutOwner) {
-                        const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
                         const [part, n] = await backend.createItemData(item);
                         await backend.setPostText(part, n, post);
                         console.log("post:", post);
