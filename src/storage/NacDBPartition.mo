@@ -19,7 +19,6 @@ shared({caller}) actor class Partition(
     stable var owners = initialOwners;
 
     func checkCaller(caller: Principal) {
-        // FIXME: Also eliminate inter-canister calls between partitions; what's about calls from partition to index?
         if (caller == Principal.fromActor(this)) {
             return;
         };
