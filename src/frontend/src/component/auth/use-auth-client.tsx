@@ -68,8 +68,12 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
   }
 
   function updateClientNfid(identity) {
-    const isAuthenticated = identity.isAuthenticated;
-    const principal = identity.getPrincipal();
+    console.log("IDENTITY", identity); // TODO: Remove.
+    console.log("IDENTITY2", identity.getPublicKey()); // TODO: returns ""
+    const pubkey = identity.getDelegation().delegations[0].delegation.pubkey; // TODO: correct?
+    console.log("IDENTITY3", pubkey); // TODO: Remove.
+    const isAuthenticated = true; // FIXME
+    const principal = Principal.fromUint8Array(pubkey);
     const agent = new HttpAgent({identity});
     if (getIsLocal()) {
       agent.fetchRootKey();
@@ -114,7 +118,11 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
 
   const logout = async () => {
     await auth.authClient?.logout();
-    await updateClient(auth.authClient);
+    if (getIsLocal()) {
+      await updateClient(auth.authClient);
+    } else {
+      updateClientNfid(auth.authClient); // FIXME
+    }
   }
 
   const defaultAgent = new HttpAgent(); // TODO: options
