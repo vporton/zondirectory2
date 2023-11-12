@@ -1,5 +1,4 @@
 import * as React from "react";
-import { ItemWithoutOwner } from "../../../../declarations/main/main.did";
 import { Item } from "../../../../declarations/CanDBPartition/CanDBPartition.did";
 
 export default function ItemType(props: {item: Item}) { // TODO: Is it the right type of argument?

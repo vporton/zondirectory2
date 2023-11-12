@@ -1,6 +1,5 @@
 import * as React from "react";
 import { useContext, useEffect, useState } from "react";
-// import { backend } from "../../../declarations/backend";
 import { Button, Nav } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
@@ -17,7 +16,6 @@ import EditItem from "./EditItem";
 import EditCategory from "./EditCategory";
 import { getIsLocal } from "../util/client";
 import { serializeItemRef } from '../data/Data'
-// import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { Principal } from "@dfinity/principal";
 import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
 import { main as MainCanister } from "../../../declarations/main";

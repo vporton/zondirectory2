@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useParams } from "react-router-dom";
 import { serializeItemRef } from "../data/Data";
-// import { backend } from "../../../declarations/backend";
 
 // TODO: a stricter type
 type Item = {
