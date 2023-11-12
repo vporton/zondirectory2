@@ -6,6 +6,10 @@
 - Before deleting an item, delete all links between it and folders.
   All folder/item relations should be reflexive.
 
+- Shows a wrong logged-in user's principal.
+
+- Logout on page reload shouldn't happen.
+
 - FIXME in NacDB.
 
 - Join one communal folder to another by a community voting.
