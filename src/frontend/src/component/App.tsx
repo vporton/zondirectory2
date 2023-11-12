@@ -87,7 +87,8 @@ function MyRouted() {
                             {isAuthenticated ? <Button onClick={signout}>Logout</Button> : <Button onClick={signin}>Login</Button>}
                         </p>
                         <nav>
-                            <NavLink to={"/item/"+root}>Main folder</NavLink>
+                            <NavLink to={"/item/"+root}>Main folder</NavLink>{" "}
+                            <NavLink target="_blank" to="https://docs.zoncircle.com">Our site</NavLink>
                         </nav>
                         <Routes>
                             <Route
