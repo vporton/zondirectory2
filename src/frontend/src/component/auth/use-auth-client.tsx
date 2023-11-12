@@ -4,6 +4,8 @@ import { Principal } from "@dfinity/principal";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getIsLocal } from "../../util/client";
 import { NFID } from "@nfid/embed";
+import sha256 from 'crypto-js/sha256';
+import * as base64 from 'base64-js';
 
 export const AuthContext = createContext<{
   isAuthenticated: boolean,
@@ -73,7 +75,10 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
     const pubkey = identity.getDelegation().delegations[0].delegation.pubkey; // TODO: correct?
     console.log("IDENTITY3", pubkey); // TODO: Remove.
     const isAuthenticated = true; // FIXME
-    const principal = Principal.fromUint8Array(pubkey);
+    const principal = Principal.fromUint8Array(pubkey); // FIXME: wrong
+    // const hash = sha256(pubkey);
+    // const prefixedHash = new Uint8Array([0x02, ...hash]);
+    // const principal = Principal.fromUint8Array(prefixedHash); //base64.encode(prefixedHash);
     const agent = new HttpAgent({identity});
     if (getIsLocal()) {
       agent.fetchRootKey();
@@ -121,7 +126,9 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
     if (getIsLocal()) {
       await updateClient(auth.authClient);
     } else {
-      updateClientNfid(auth.authClient); // FIXME
+      console.log("IDENITY0", auth);
+      // updateClientNfid(auth.authClient); // FIXME
+      setAuth({...auth, isAuthenticated: false}); // FIXME: Check correctness.
     }
   }
 
