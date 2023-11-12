@@ -74,13 +74,13 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         await Nac.createPartitionImpl(this, dbIndex);
     };
 
-    public shared({caller}) func createSubDB({guid: [Nat8]; userData: Text})
+    public shared({caller}) func createSubDB(guid: [Nat8], {userData: Text})
         : async {inner: (Principal, Nac.InnerSubDBKey); outer: (Principal, Nac.OuterSubDBKey)}
     {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        let r = await* Nac.createSubDB({guid = Blob.fromArray(guid); index = this; dbIndex; dbOptions = Common.dbOptions; userData});
+        let r = await* Nac.createSubDB(Blob.fromArray(guid), {index = this; dbIndex; dbOptions = Common.dbOptions; userData});
         { inner = (Principal.fromActor(r.inner.0), r.inner.1); outer = (Principal.fromActor(r.outer.0), r.outer.1) };
     };
 
