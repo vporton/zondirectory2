@@ -4,6 +4,8 @@ import { Principal } from "@dfinity/principal";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getIsLocal } from "../../util/client";
 import { NFID } from "@nfid/embed";
+import sha256 from 'crypto-js/sha256';
+import * as base64 from 'base64-js';
 
 export const AuthContext = createContext<{
   isAuthenticated: boolean,
@@ -68,8 +70,15 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
   }
 
   function updateClientNfid(identity) {
-    const isAuthenticated = identity.isAuthenticated;
-    const principal = identity.getPrincipal();
+    console.log("IDENTITY", identity); // TODO: Remove.
+    console.log("IDENTITY2", identity.getPublicKey()); // TODO: returns ""
+    const pubkey = identity.getDelegation().delegations[0].delegation.pubkey; // TODO: correct?
+    console.log("IDENTITY3", pubkey); // TODO: Remove.
+    const isAuthenticated = true; // FIXME
+    const principal = Principal.fromUint8Array(pubkey); // FIXME: wrong
+    // const hash = sha256(pubkey);
+    // const prefixedHash = new Uint8Array([0x02, ...hash]);
+    // const principal = Principal.fromUint8Array(prefixedHash); //base64.encode(prefixedHash);
     const agent = new HttpAgent({identity});
     if (getIsLocal()) {
       agent.fetchRootKey();
@@ -91,6 +100,7 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
       });
     } else {
       const nfid = await NFID.init({
+        // origin: `https://${process.env.CANISTER_ID_frontend!}.icp0.io`, // FIXME: another canister
         application: {
           name: "Zon",
           // logo: "https://dev.nfid.one/static/media/id.300eb72f3335b50f5653a7d6ad5467b3.svg" // TODO
@@ -113,7 +123,13 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
 
   const logout = async () => {
     await auth.authClient?.logout();
-    await updateClient(auth.authClient);
+    if (getIsLocal()) {
+      await updateClient(auth.authClient);
+    } else {
+      console.log("IDENITY0", auth);
+      // updateClientNfid(auth.authClient); // FIXME
+      setAuth({...auth, isAuthenticated: false}); // FIXME: Check correctness.
+    }
   }
 
   const defaultAgent = new HttpAgent(); // TODO: options
