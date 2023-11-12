@@ -39,10 +39,12 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     stable var initialized = false;
 
     public shared({caller}) func init(_owners: [Principal]) : async () {
+        checkCaller(caller);
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
         if (initialized) {
             Debug.trap("already initialized");
         };
+
         owners := _owners;
         MyCycles.addPart(Common.dbOptions.partitionCycles);
         StableBuffer.add(dbIndex.canisters, await Partition.Partition(ownersOrSelf()));
