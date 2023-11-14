@@ -131,4 +131,34 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
         await* Nac.delete({outerSuperDB = superDB; outerKey; sk; guid = Blob.fromArray(guid)});
     };
+
+    public shared({caller}) func insert(guid: [Nat8], {
+        indexCanister: Principal;
+        outerCanister: Principal;
+        outerKey: Nac.OuterSubDBKey;
+        sk: Nac.SK;
+        value: Nac.AttributeValue;
+    }) : async {inner: (Principal, Nac.InnerSubDBKey); outer: (Principal, Nac.OuterSubDBKey)} {
+        checkCaller(caller);
+
+        ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
+        let result = await* Nac.insert(Blob.fromArray(guid), {
+            indexCanister = indexCanister;
+            outerCanister = outerCanister;
+            dbIndex;
+            outerKey;
+            sk;
+            value;
+        });
+        switch (result) {
+            case (#ok { inner; outer }) {
+                let innerx: Principal = Principal.fromActor(inner.0);
+                let outerx: Principal = Principal.fromActor(outer.0);
+                #ok { inner = (innerx, inner.1); outer = (outerx, outer.1) };
+            };
+            case (#err err) {
+                #err err;
+            }
+        };
+    };
 }
