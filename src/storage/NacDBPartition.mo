@@ -48,7 +48,7 @@ shared({caller}) actor class Partition(
     // Mandatory methods //
 
     public shared({caller}) func rawInsertSubDB(map: [(Nac.SK, Nac.AttributeValue)], inner: ?Nac.InnerSubDBKey, userData: Text)
-        : async {inner: Nac.OuterSubDBKey}
+        : async {inner: Nac.InnerSubDBKey}
     {
         checkCaller(caller);
 
@@ -220,12 +220,29 @@ shared({caller}) actor class Partition(
     };
 
     // TODO: Add this function to the public interface in NacDB?
-    public shared func getInner(outerKey: Nac.OuterSubDBKey) : async ?(Principal, Nac.InnerSubDBKey) {
+    public query func getInner(outerKey: Nac.OuterSubDBKey) : async ?(Principal, Nac.InnerSubDBKey) {
         do ? {
             let (part, key) = Nac.getInner(superDB, outerKey)!;
             (Principal.fromActor(part), key);
         };
-    }
+    };
+
+    public shared({caller}) func deleteSubDBOuter({outerKey: Nac.OuterSubDBKey}) : async () {
+        checkCaller(caller);
+        await* Nac.deleteSubDBOuter({superDB; outerKey});
+    };
+
+    public shared func rawDeleteSubDB({innerKey: Nac.InnerSubDBKey}): async () {
+        checkCaller(caller);
+
+        ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
+        Nac.rawDeleteSubDB(superDB, innerKey);
+    };
+
+    public query func rawGetSubDB({innerKey: Nac.InnerSubDBKey}): async ?{map: [(Nac.SK, Nac.AttributeValue)]; userData: Text} {
+        // ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
+        Nac.rawGetSubDB(superDB, innerKey);
+    };
 
     // TODO: Remove superfluous functions from above.
 }

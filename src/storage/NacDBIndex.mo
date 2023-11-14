@@ -71,7 +71,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        await Nac.createPartitionImpl(this, dbIndex);
+        await* Nac.createPartitionImpl(this, dbIndex);
     };
 
     public shared({caller}) func createSubDB(guid: [Nat8], {userData: Text})
@@ -118,11 +118,12 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         }
     };
 
-    public shared({caller}) func deleteSubDB(guid: [Nat8], {outerKey: Nac.OuterSubDBKey}) : async () {
+    public shared({caller}) func deleteSubDB(guid: [Nat8], {outerCanister: Principal; outerKey: Nac.OuterSubDBKey}) : async () {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        await* Nac.deleteSubDB(Blob.fromArray(guid), {dbOptions = Common.dbOptions; outerSuperDB = superDB; outerKey});
+        let outer: Nac.OuterCanister = actor (Principal.toText(outerCanister));
+        await* Nac.deleteSubDB(Blob.fromArray(guid), {dbOptions = Common.dbOptions; dbIndex; outerCanister = outer; outerKey});
     };
 
     public shared({caller}) func delete(guid: [Nat8], {outerKey: Nac.OuterSubDBKey; sk: Nac.SK}): async () {
