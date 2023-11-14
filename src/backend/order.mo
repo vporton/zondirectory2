@@ -23,6 +23,7 @@ import RBT "mo:stable-rbtree/StableRBTree";
 import Prng "mo:prng";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 import lib "lib";
+import main "main";
 
 // TODO: Delete "hanging" items (as soon, as they found)
 
@@ -31,6 +32,8 @@ shared actor class Orders() = this {
 
   // stable var rng: Prng.Seiran128 = Prng.Seiran128(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
   stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
+
+  // var main: ?(main.ZonBackend) = null;
 
   // TODO: Remove this function?
   public shared({ caller }) func init(): async () {
@@ -46,6 +49,7 @@ shared actor class Orders() = this {
   // Public API //
 
   func addItemToList(theSubDB: (Principal, Nac.OuterSubDBKey), itemToAdd: (Principal, Nat)): async* () {
+    // FIXME: Check caller.
     let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
     let timeScanResult = await theSubDB2.scanLimitOuter({
       dir = #fwd;
@@ -67,14 +71,15 @@ shared actor class Orders() = this {
     let guid = GUID.nextGuid(guidGen);
 
     // FIXME: race condition
-    ignore await theSubDB2.insert({
-      guid = Blob.toArray(guid);
-      indexCanister = Principal.fromActor(NacDBIndex);
-      outerCanister = Principal.fromActor(theSubDB2);
-      outerKey = theSubDB.1;
-      sk = lib.encodeInt(timeScanSK);
-      value = timeScanItemInfo;
-    });
+    // FIXME: Uncomment.
+    // ignore await theSubDB2.insert({
+    //   guid = Blob.toArray(guid);
+    //   indexCanister = Principal.fromActor(NacDBIndex);
+    //   outerCanister = Principal.fromActor(theSubDB2);
+    //   outerKey = theSubDB.1;
+    //   sk = lib.encodeInt(timeScanSK);
+    //   value = timeScanItemInfo;
+    // });
   };
 
   public shared({caller}) func addItemToCategory(
@@ -152,9 +157,9 @@ shared actor class Orders() = this {
         lib.deserializeStreams(data);
       };
       case null {
-        let { outer = itemsTimeOrder } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
-        let { outer = categoriesTimeOrder } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
-        let { outer = categoriesInvTimeOrder } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
+        let { outer = itemsTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
+        let { outer = categoriesTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
+        let { outer = categoriesInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
         let streams = {itemsTimeOrder; categoriesTimeOrder; categoriesInvTimeOrder};
         let itemData = lib.serializeStreams(streams);
         await itemId.0.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData);

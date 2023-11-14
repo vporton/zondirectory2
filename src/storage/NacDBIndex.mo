@@ -7,6 +7,7 @@ import MyCycles "mo:nacdb/Cycles";
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
+import Result "mo:base/Result";
 import Buffer "mo:stable-buffer/StableBuffer";
 import Partition "./NacDBPartition";
 import Common "common";
@@ -126,11 +127,12 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         await* Nac.deleteSubDB(Blob.fromArray(guid), {dbOptions = Common.dbOptions; dbIndex; outerCanister = outer; outerKey});
     };
 
-    public shared({caller}) func delete(guid: [Nat8], {outerKey: Nac.OuterSubDBKey; sk: Nac.SK}): async () {
+    public shared({caller}) func delete(guid: [Nat8], {outerCanister: Principal; outerKey: Nac.OuterSubDBKey; sk: Nac.SK}): async () {
         checkCaller(caller);
 
+        let outer: Nac.OuterCanister = actor (Principal.toText(outerCanister));
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        await* Nac.delete({outerSuperDB = superDB; outerKey; sk; guid = Blob.fromArray(guid)});
+        await* Nac.delete(Blob.fromArray(guid), {dbIndex; outerCanister = outer; outerKey; sk});
     };
 
     public shared({caller}) func insert(guid: [Nat8], {
@@ -139,7 +141,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         outerKey: Nac.OuterSubDBKey;
         sk: Nac.SK;
         value: Nac.AttributeValue;
-    }) : async {inner: (Principal, Nac.InnerSubDBKey); outer: (Principal, Nac.OuterSubDBKey)} {
+    }) : async Result.Result<{inner: (Principal, Nac.InnerSubDBKey); outer: (Principal, Nac.OuterSubDBKey)}, Text> {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
