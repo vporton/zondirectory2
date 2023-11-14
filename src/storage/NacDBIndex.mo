@@ -116,5 +116,19 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
                 canister_id = Principal.fromActor(canisters[i]);
             });
         }
-    }
+    };
+
+    public shared({caller}) func deleteSubDB(guid: [Nat8], {outerKey: Nac.OuterSubDBKey}) : async () {
+        checkCaller(caller);
+
+        ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
+        await* Nac.deleteSubDB(Blob.fromArray(guid), {dbOptions = Common.dbOptions; outerSuperDB = superDB; outerKey});
+    };
+
+    public shared({caller}) func delete(guid: [Nat8], {outerKey: Nac.OuterSubDBKey; sk: Nac.SK}): async () {
+        checkCaller(caller);
+
+        ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
+        await* Nac.delete({outerSuperDB = superDB; outerKey; sk; guid = Blob.fromArray(guid)});
+    };
 }

@@ -84,13 +84,6 @@ shared({caller}) actor class Partition(
         Nac.superDBSize(superDB);
     };
 
-    public shared({caller}) func deleteSubDB({outerKey: Nac.OuterSubDBKey; guid: [Nat8]}) : async () {
-        checkCaller(caller);
-
-        ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        await* Nac.deleteSubDB({dbOptions = Common.dbOptions; outerSuperDB = superDB; outerKey; guid = Blob.fromArray(guid)});
-    };
-
     public shared({caller}) func deleteSubDBInner({innerKey: Nac.InnerSubDBKey}) : async () {
         checkCaller(caller);
 
@@ -99,7 +92,6 @@ shared({caller}) actor class Partition(
     };
 
     public shared({caller}) func finishMovingSubDBImpl({
-        guid: [Nat8];
         index: Principal;
         outerCanister: Principal;
         outerKey: Nac.OuterSubDBKey;
@@ -112,7 +104,6 @@ shared({caller}) actor class Partition(
         let outer: Nac.OuterCanister = actor(Principal.toText(outerCanister));
         let (part, key) = await* Nac.finishMovingSubDBImpl({
             oldInnerSuperDB = superDB;
-            guid = Blob.fromArray(guid);
             index = indexCanister;
             outerCanister = outer;
             outerKey;
@@ -121,8 +112,7 @@ shared({caller}) actor class Partition(
         (Principal.fromActor(part), key);
     };
 
-    public shared({caller}) func insert({
-        guid: [Nat8];
+    public shared({caller}) func insert(guid: [Nat8], {
         indexCanister: Principal;
         outerCanister: Principal;
         outerKey: Nac.OuterSubDBKey;
@@ -165,12 +155,6 @@ shared({caller}) actor class Partition(
         { inner = (Principal.fromActor(inner.0), inner.1); outer = (Principal.fromActor(outer.0), outer.1) };
     };
 
-    public shared({caller}) func delete({outerKey: Nac.OuterSubDBKey; sk: Nac.SK; guid: [Nat8]}): async () {
-        checkCaller(caller);
-
-        ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        await* Nac.delete({outerSuperDB = superDB; outerKey; sk; guid = Blob.fromArray(guid)});
-    };
 
     public shared({caller}) func deleteInner({innerKey: Nac.InnerSubDBKey; sk: Nac.SK}): async () {
         checkCaller(caller);
