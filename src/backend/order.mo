@@ -50,6 +50,7 @@ shared actor class Orders() = this {
 
   func addItemToList(theSubDB: (Principal, Nac.OuterSubDBKey), itemToAdd: (Principal, Nat)): async* () {
     // FIXME: Check caller.
+    // FIXME: Prevent duplicate entries.
     let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
     let timeScanResult = await theSubDB2.scanLimitOuter({
       dir = #fwd;
