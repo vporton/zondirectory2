@@ -19,7 +19,6 @@ shared({caller}) actor class Partition(
     stable var owners = initialOwners;
 
     func checkCaller(caller: Principal) {
-        // FIXME: Also eliminate inter-canister calls between partitions; what's about calls from partition to index?
         if (caller == Principal.fromActor(this)) {
             return;
         };
@@ -49,7 +48,7 @@ shared({caller}) actor class Partition(
     // Mandatory methods //
 
     public shared({caller}) func rawInsertSubDB(map: [(Nac.SK, Nac.AttributeValue)], inner: ?Nac.InnerSubDBKey, userData: Text)
-        : async {inner: Nac.OuterSubDBKey}
+        : async {inner: Nac.InnerSubDBKey}
     {
         checkCaller(caller);
 
@@ -85,66 +84,11 @@ shared({caller}) actor class Partition(
         Nac.superDBSize(superDB);
     };
 
-    public shared({caller}) func deleteSubDB({outerKey: Nac.OuterSubDBKey; guid: [Nat8]}) : async () {
-        checkCaller(caller);
-
-        ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        await* Nac.deleteSubDB({dbOptions = Common.dbOptions; outerSuperDB = superDB; outerKey; guid = Blob.fromArray(guid)});
-    };
-
     public shared({caller}) func deleteSubDBInner({innerKey: Nac.InnerSubDBKey}) : async () {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
         await* Nac.deleteSubDBInner({superDB; innerKey});
-    };
-
-    public shared({caller}) func finishMovingSubDBImpl({
-        guid: [Nat8];
-        index: Principal;
-        outerCanister: Principal;
-        outerKey: Nac.OuterSubDBKey;
-        oldInnerKey: Nac.InnerSubDBKey;
-    }) : async (Principal, Nac.InnerSubDBKey) {
-        checkCaller(caller);
-
-        ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        let indexCanister: Nac.IndexCanister = actor(Principal.toText(index));
-        let outer: Nac.OuterCanister = actor(Principal.toText(outerCanister));
-        let (part, key) = await* Nac.finishMovingSubDBImpl({
-            oldInnerSuperDB = superDB;
-            guid = Blob.fromArray(guid);
-            index = indexCanister;
-            outerCanister = outer;
-            outerKey;
-            oldInnerKey;
-        });
-        (Principal.fromActor(part), key);
-    };
-
-    public shared({caller}) func insert({
-        guid: [Nat8];
-        indexCanister: Principal;
-        outerCanister: Principal;
-        outerKey: Nac.OuterSubDBKey;
-        sk: Nac.SK;
-        value: Nac.AttributeValue;
-    }) : async {inner: (Principal, Nac.InnerSubDBKey); outer: (Principal, Nac.OuterSubDBKey)} {
-        checkCaller(caller);
-
-        ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        let { inner; outer } = await* Nac.insert({
-            guid = Blob.fromArray(guid);
-            indexCanister = indexCanister;
-            outerCanister = outerCanister;
-            outerSuperDB = superDB;
-            outerKey;
-            sk;
-            value;
-        });
-        let innerx: Principal = Principal.fromActor(inner.0);
-        let outerx: Principal = Principal.fromActor(outer.0);
-        { inner = (innerx, inner.1); outer = (outerx, outer.1) };
     };
 
     public shared({caller}) func putLocation(outerKey: Nac.OuterSubDBKey, innerCanister: Principal, newInnerSubDBKey: Nac.InnerSubDBKey) : async () {
@@ -166,12 +110,6 @@ shared({caller}) actor class Partition(
         { inner = (Principal.fromActor(inner.0), inner.1); outer = (Principal.fromActor(outer.0), outer.1) };
     };
 
-    public shared({caller}) func delete({outerKey: Nac.OuterSubDBKey; sk: Nac.SK; guid: [Nat8]}): async () {
-        checkCaller(caller);
-
-        ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-        await* Nac.delete({outerSuperDB = superDB; outerKey; sk; guid = Blob.fromArray(guid)});
-    };
 
     public shared({caller}) func deleteInner({innerKey: Nac.InnerSubDBKey; sk: Nac.SK}): async () {
         checkCaller(caller);
@@ -282,12 +220,29 @@ shared({caller}) actor class Partition(
     };
 
     // TODO: Add this function to the public interface in NacDB?
-    public shared func getInner(outerKey: Nac.OuterSubDBKey) : async ?(Principal, Nac.InnerSubDBKey) {
+    public query func getInner(outerKey: Nac.OuterSubDBKey) : async ?(Principal, Nac.InnerSubDBKey) {
         do ? {
             let (part, key) = Nac.getInner(superDB, outerKey)!;
             (Principal.fromActor(part), key);
         };
-    }
+    };
+
+    public shared({caller}) func deleteSubDBOuter({outerKey: Nac.OuterSubDBKey}) : async () {
+        checkCaller(caller);
+        await* Nac.deleteSubDBOuter({superDB; outerKey});
+    };
+
+    public shared func rawDeleteSubDB({innerKey: Nac.InnerSubDBKey}): async () {
+        checkCaller(caller);
+
+        ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
+        Nac.rawDeleteSubDB(superDB, innerKey);
+    };
+
+    public query func rawGetSubDB({innerKey: Nac.InnerSubDBKey}): async ?{map: [(Nac.SK, Nac.AttributeValue)]; userData: Text} {
+        // ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
+        Nac.rawGetSubDB(superDB, innerKey);
+    };
 
     // TODO: Remove superfluous functions from above.
 }

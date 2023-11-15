@@ -7,7 +7,6 @@ import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
 import EditCategoriesList from "./EditCategoriesList";
 import { addToMultipleCategories } from "../util/category";
-import { canisterId } from "../../../declarations/CanDBIndex";
 import { serializeItemRef } from "../data/Data";
 import { AuthContext } from "./auth/use-auth-client";
 

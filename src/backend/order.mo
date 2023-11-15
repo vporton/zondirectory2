@@ -46,6 +46,8 @@ shared actor class Orders() = this {
   // Public API //
 
   func addItemToList(theSubDB: (Principal, Nac.OuterSubDBKey), itemToAdd: (Principal, Nat)): async* () {
+    // FIXME: Check caller.
+    // FIXME: Prevent duplicate entries.
     let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
     let timeScanResult = await theSubDB2.scanLimitOuter({
       dir = #fwd;
@@ -67,9 +69,7 @@ shared actor class Orders() = this {
     let guid = GUID.nextGuid(guidGen);
 
     // FIXME: race condition
-    ignore await theSubDB2.insert({
-      guid = Blob.toArray(guid);
-      indexCanister = Principal.fromActor(NacDBIndex);
+    ignore await NacDBIndex.insert(Blob.toArray(guid), {
       outerCanister = Principal.fromActor(theSubDB2);
       outerKey = theSubDB.1;
       sk = lib.encodeInt(timeScanSK);
@@ -152,9 +152,9 @@ shared actor class Orders() = this {
         lib.deserializeStreams(data);
       };
       case null {
-        let { outer = itemsTimeOrder } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
-        let { outer = categoriesTimeOrder } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
-        let { outer = categoriesInvTimeOrder } = await NacDBIndex.createSubDB({guid = Blob.toArray(GUID.nextGuid(guidGen)); userData = ""});
+        let { outer = itemsTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
+        let { outer = categoriesTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
+        let { outer = categoriesInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
         let streams = {itemsTimeOrder; categoriesTimeOrder; categoriesInvTimeOrder};
         let itemData = lib.serializeStreams(streams);
         await itemId.0.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData);

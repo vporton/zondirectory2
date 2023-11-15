@@ -38,7 +38,7 @@ let
       },
       { name = "nacdb"
       , repo = "git@github.com:vporton/NacDB.git"
-      , version = "main"
+      , version = "proper-calls"
       , dependencies = [ "base" ]
       },
       { name = "icrc1"

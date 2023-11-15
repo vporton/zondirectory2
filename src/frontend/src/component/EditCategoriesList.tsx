@@ -36,12 +36,12 @@ export default function EditCategoriesList(props: { defaultCategories?: string[]
                     return (
                         <li key={i}>
                             <input value={cat} onChange={updateCategoriesList}/>
-                            <Button onClick={() => setCategories(categories.filter((item) => item !== cat))}>Delete</Button>
+                            <Button onClick={() => setCategories(categories!.filter((item) => item !== cat))}>Delete</Button>
                         </li>
                     );
                 })}
             </ul>
-            <p><Button onClick={() => setCategories(categories.concat([""]))}>Add</Button></p>
+            <p><Button disabled={categories === undefined} onClick={() => setCategories(categories!.concat([""]))}>Add</Button></p>
         </>
     );
 }

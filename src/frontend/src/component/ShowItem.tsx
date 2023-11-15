@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "./auth/use-auth-client";
 import { serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
@@ -42,9 +42,10 @@ function ShowItemContent(props: {defaultAgent}) {
     const [items, setItems] = useState(undefined as Item[] | undefined);
     const [data, setData] = useState<any>(undefined); // TODO: hack
     const [xdata, setXData] = useState<any>(undefined); // TODO: hack
-    const [subCategoriesLast, setSubCategoriesLast] = useState("");
-    const [superCategoriesLast, setSuperCategoriesLast] = useState("");
     const [itemsLast, setItemsLast] = useState("");
+    const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
+
+    const navigate = useNavigate();
     useEffect(() => {
         setSubcategories(undefined);
         setSupercategories(undefined);
@@ -62,15 +63,9 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.creator().then(x => setCreator(x));
                 data.subCategories().then(x => {
                     setSubcategories(x);
-                    if (x.length !== 0) {
-                        setSubCategoriesLast(x[x.length - 1].order); // duplicate code
-                    }
                 })
                 data.superCategories().then(x => {
                     setSupercategories(x);
-                    if (x.length !== 0) {
-                        setSuperCategoriesLast(x[x.length - 1].order); // duplicate code
-                    }
                 });
                 data.items().then(x => {
                     setItems(x);
@@ -86,29 +81,11 @@ function ShowItemContent(props: {defaultAgent}) {
     }, [id, props.defaultAgent]); // TODO: more tight choice
     function moreSubcategories(event: any) {
         event.preventDefault();
-        if (subcategories?.length === 0) {
-            return;
-        }
-        const lowerBound = subCategoriesLast + 'x';
-        xdata.subCategories({lowerBound, limit: 10}).then(x => {
-            setSubcategories(subcategories?.concat(x))
-            if (x.length !== 0) {
-                setSubCategoriesLast(x[x.length - 1].order); // duplicate code
-            }
-        });
+        navigate(`/subfolders-of/`+id)
     }
     function moreSupercategories(event: any) {
         event.preventDefault();
-        if (supercategories?.length === 0) {
-            return;
-        }
-        const lowerBound = superCategoriesLast + 'x';
-        xdata.superCategories({lowerBound, limit: 10}).then(x => {
-            setSupercategories(supercategories?.concat(x))
-            if (x.length !== 0) {
-                setSubCategoriesLast(x[x.length - 1].order); // duplicate code
-            }
-        });
+        navigate(`/superfolders-of/`+id)
     }
     function moreItems(event: any) {
         event.preventDefault();
@@ -117,9 +94,11 @@ function ShowItemContent(props: {defaultAgent}) {
         }
         const lowerBound = itemsLast + 'x';
         xdata.items({lowerBound, limit: 10}).then(x => {
-            setItems(items?.concat(x))
+            setItems(items?.concat(x));
             if (x.length !== 0) {
                 setItemsLast(x[x.length - 1].order); // duplicate code
+            } else {
+                setItemsReachedEnd(true);
             }
         });
     }
@@ -163,7 +142,8 @@ function ShowItemContent(props: {defaultAgent}) {
                 <p lang={item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.description}</p>
             </div>
         )}
-        <p><a href="#" onClick={e => moreItems(e)}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
+        <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
+            <a href={`#/create/for-category/${id}`}>Create</a></p>
     </>
 
 }

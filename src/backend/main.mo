@@ -15,7 +15,6 @@ import xNat "mo:xtendedNumbers/NatX";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
 import Nat64 "mo:base/Nat64";
-import Order "mo:base/Order";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 import Payments "payments";
 import NacDbPartition "../storage/NacDBPartition";
