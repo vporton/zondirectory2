@@ -34,8 +34,7 @@ export default function SubFolders(props) {
                         setCategories(x);
                         // TODO: duplicate code
                         if (x.length !== 0) {
-                            console.log('categories', x)
-                            setItemsLast(x[x.length - 1].order); // duplicate code
+                            setItemsLast(x[x.length - 1].order);
                         }
                     });
                 } else {
@@ -43,8 +42,7 @@ export default function SubFolders(props) {
                         setCategories(x);
                         // TODO: duplicate code
                         if (x.length !== 0) {
-                            console.log('categories', x)
-                            setItemsLast(x[x.length - 1].order); // duplicate code
+                            setItemsLast(x[x.length - 1].order);
                         }
                     });
                 }
