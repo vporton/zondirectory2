@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { serializeItemRef } from "../data/Data";
 
 // TODO: a stricter type
@@ -21,6 +21,8 @@ export default function SubFolders(props) {
     const [title, setTitle] = useState("");
     const [subcategories, setSubcategories] = useState([] as Item[]);
     const [supercategories, setSupercategories] = useState([] as Item[]);
+
+    const navigate = useNavigate();
     useEffect(() => {
         if (id !== undefined) {
             AppData.create(props.defaultAgent, id).then(data => {
@@ -33,7 +35,7 @@ export default function SubFolders(props) {
 
     return (
         <>
-            <h2>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: {title}</h2>
+            <h2>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: <a href='#' onClick={() => navigate(`/item/`+id)}>{title}</a></h2>
             <ul>
                 {(props['data-dir'] == 'super' ? supercategories : subcategories).map(x =>
                     <li key={serializeItemRef(x.id as any)}>
