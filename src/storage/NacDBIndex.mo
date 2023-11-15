@@ -136,7 +136,6 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     };
 
     public shared({caller}) func insert(guid: [Nat8], {
-        indexCanister: Principal;
         outerCanister: Principal;
         outerKey: Nac.OuterSubDBKey;
         sk: Nac.SK;
@@ -146,7 +145,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
 
         ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
         let result = await* Nac.insert(Blob.fromArray(guid), {
-            indexCanister = indexCanister;
+            indexCanister = Principal.fromActor(this);
             outerCanister = outerCanister;
             dbIndex;
             outerKey;

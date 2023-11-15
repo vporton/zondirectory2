@@ -70,7 +70,6 @@ shared actor class Orders() = this {
 
     // FIXME: race condition
     ignore await NacDBIndex.insert(Blob.toArray(guid), {
-      indexCanister = Principal.fromActor(NacDBIndex);
       outerCanister = Principal.fromActor(theSubDB2);
       outerKey = theSubDB.1;
       sk = lib.encodeInt(timeScanSK);
