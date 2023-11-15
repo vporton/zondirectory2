@@ -23,7 +23,6 @@ import RBT "mo:stable-rbtree/StableRBTree";
 import Prng "mo:prng";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 import lib "lib";
-import main "main";
 
 // TODO: Delete "hanging" items (as soon, as they found)
 
@@ -32,8 +31,6 @@ shared actor class Orders() = this {
 
   // stable var rng: Prng.Seiran128 = Prng.Seiran128(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
   stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
-
-  // var main: ?(main.ZonBackend) = null;
 
   // TODO: Remove this function?
   public shared({ caller }) func init(): async () {
@@ -72,15 +69,13 @@ shared actor class Orders() = this {
     let guid = GUID.nextGuid(guidGen);
 
     // FIXME: race condition
-    // FIXME: Uncomment.
-    // ignore await theSubDB2.insert({
-    //   guid = Blob.toArray(guid);
-    //   indexCanister = Principal.fromActor(NacDBIndex);
-    //   outerCanister = Principal.fromActor(theSubDB2);
-    //   outerKey = theSubDB.1;
-    //   sk = lib.encodeInt(timeScanSK);
-    //   value = timeScanItemInfo;
-    // });
+    ignore await NacDBIndex.insert(Blob.toArray(guid), {
+      indexCanister = Principal.fromActor(NacDBIndex);
+      outerCanister = Principal.fromActor(theSubDB2);
+      outerKey = theSubDB.1;
+      sk = lib.encodeInt(timeScanSK);
+      value = timeScanItemInfo;
+    });
   };
 
   public shared({caller}) func addItemToCategory(
