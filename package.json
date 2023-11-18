@@ -31,7 +31,7 @@
     "node-fetch": "^2.7.0",
     "pem-file": "^1.0.1",
     "react": "^18.2.0",
-    "react-bootstrap": "^2.7.4",
+    "react-bootstrap": "^2.9.1",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.11.2",
     "react-tabs": "^6.0.2",
