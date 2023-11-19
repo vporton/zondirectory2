@@ -4,8 +4,8 @@ import { Principal } from "@dfinity/principal";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { getIsLocal } from "../../util/client";
 import { NFID } from "@nfid/embed";
-import sha256 from 'crypto-js/sha256';
-import * as base64 from 'base64-js';
+// import sha256 from 'crypto-js/sha256';
+// import * as base64 from 'base64-js';
 
 export const AuthContext = createContext<{
   isAuthenticated: boolean,
