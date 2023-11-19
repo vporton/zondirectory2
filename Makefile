@@ -26,7 +26,7 @@ upgrade-partitions:
 
 .PHONY: deploy-main
 deploy-main:
-	dfx deploy main
+	dfx deploy --network $(NETWORK) main
 
 .PHONY: compile-my-wasm
 compile-my-wasm: CanDBPartition.wasm NacDBPartition.wasm
@@ -44,7 +44,7 @@ deploy-frontend: compile-my-wasm do-deploy-frontend upgrade-partitions
 
 .PHONY: do-deploy-frontend
 do-deploy-frontend:
-	dfx deploy frontend
+	dfx deploy --network $(NETWORK) frontend
 
 .PHONY: init
 init:
