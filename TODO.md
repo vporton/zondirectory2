@@ -8,6 +8,8 @@
 - Before deleting an item, delete all links between it and folders.
   All folder/item relations should be reflexive.
 
+- Transforming owned folders to communal.
+
 - Shows a wrong logged-in user's principal.
 
 - Logout on page reload shouldn't happen.
