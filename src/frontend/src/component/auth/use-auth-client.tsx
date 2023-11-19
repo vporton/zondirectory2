@@ -22,7 +22,7 @@ export const AuthContext = createContext<{
 type UseAuthClientOptions = {
   createOptions?: AuthClientCreateOptions;
   loginOptions?: AuthClientLoginOptions;
-}
+};
 
 const defaultOptions: UseAuthClientOptions = {
   createOptions: {
