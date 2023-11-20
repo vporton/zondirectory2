@@ -6,11 +6,11 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
 import EditCategoriesList from "./EditCategoriesList";
-import { addToMultipleCategories } from "../util/category";
-import { serializeItemRef } from "../data/Data";
+import { addToCategory, addToMultipleCategories } from "../util/category";
+import { parseItemRef, serializeItemRef } from "../data/Data";
 import { AuthContext } from "./auth/use-auth-client";
 
-export default function EditCategory() {
+export default function EditCategory(props: {super?: boolean}) {
     const routeParams = useParams(); // TODO: a dynamic value
     const navigate = useNavigate();
     const [superCategory, setSuperCategory] = useState<string | undefined>();
@@ -51,8 +51,15 @@ export default function EditCategory() {
                         const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
                         const [part, n] = await backend.createItemData(item);
                         const ref = serializeItemRef({canister: part, id: Number(n)});
-                        await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)}, false);
-                        await addToMultipleCategories(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
+                        if (!(props.super === true)) { // noComments
+                            await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)}, false);
+                            await addToMultipleCategories(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
+                        } else {
+                            for (const catStr of categoriesList) {
+                                // TODO: It may fail to parse.
+                                await addToCategory(agent!, {canister: part, id: Number(n)}, parseItemRef(catStr), false);
+                            }
+                        }
                         navigate("/item/"+ref);
                     }
                     await submitItem(itemData());
@@ -81,6 +88,7 @@ export default function EditCategory() {
                         defaultCategories={superCategory === undefined ? [] : [superCategory]}
                         onChangeCategories={setCategoriesList}
                         onChangeAntiComments={setAntiCommentsList}
+                        noComments={props.super === true}
                     />
                     <Button onClick={submit} disabled={!isAuthenticated}>Save</Button>
                 </>
