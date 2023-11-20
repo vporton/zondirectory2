@@ -15,6 +15,7 @@ export default function EditCategory() {
     const navigate = useNavigate();
     const [superCategory, setSuperCategory] = useState<string | undefined>();
     const [categoriesList, setCategoriesList] = useState<string[]>([]);
+    const [antiCommentsList, setAntiCommentsList] = useState<string[]>([]);
     useEffect(() => {
         setSuperCategory(routeParams.cat);
     }, [routeParams.cat])
@@ -50,7 +51,8 @@ export default function EditCategory() {
                         const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
                         const [part, n] = await backend.createItemData(item);
                         const ref = serializeItemRef({canister: part, id: Number(n)});
-                        await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)});
+                        await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)}, false);
+                        await addToMultipleCategories(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
                         navigate("/item/"+ref);
                     }
                     await submitItem(itemData());
@@ -77,7 +79,8 @@ export default function EditCategory() {
                     </Tabs>
                     <EditCategoriesList
                         defaultCategories={superCategory === undefined ? [] : [superCategory]}
-                        onChange={setCategoriesList}
+                        onChangeCategories={setCategoriesList}
+                        onChangeAntiComments={setAntiCommentsList}
                     />
                     <Button onClick={submit} disabled={!isAuthenticated}>Save</Button>
                 </>

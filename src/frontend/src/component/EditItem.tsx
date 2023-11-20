@@ -16,6 +16,7 @@ export default function EditItemItem() {
     const navigate = useNavigate();
     const [mainCategory, setMainCategory] = useState<string | undefined>(undefined);
     const [categoriesList, setCategoriesList] = useState<string[]>([]);
+    const [antiCommentsList, setAntiCommentsList] = useState<string[]>([]);
     useEffect(() => {
         setMainCategory(routeParams.cat);
     }, [routeParams.cat]);
@@ -58,7 +59,8 @@ export default function EditItemItem() {
                         await backend.setPostText(part, n, post);
                         console.log("post:", post);
                         const ref = serializeItemRef({canister: part, id: Number(n)});
-                        await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)});
+                        await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)}, false);
+                        await addToMultipleCategories(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
                         navigate("/item/"+ref);
                     }
                     await submitItem(itemData());
@@ -85,7 +87,8 @@ export default function EditItemItem() {
                     </Tabs>
                     <EditCategoriesList
                         defaultCategories={mainCategory === undefined ? [] : [mainCategory]}
-                        onChange={setCategoriesList}
+                        onChangeCategories={setCategoriesList}
+                        onChangeAntiComments={setAntiCommentsList}
                     />
                     <p><Button onClick={submit} disabled={!isAuthenticated}>Submit</Button></p>
                 </>;

@@ -154,6 +154,14 @@ module {
       Principal,
       Nac.OuterSubDBKey,
     );
+    commentsTimeOrder: (
+      Principal,
+      Nac.OuterSubDBKey,
+    );
+    commentsInvTimeOrder: (
+      Principal,
+      Nac.OuterSubDBKey,
+    );
     // votesOrderSubDB: ( // TODO
     //   Principal,
     //   Nac.OuterSubDBKey,
@@ -195,6 +203,10 @@ module {
     buf.add(#int(streams.categoriesTimeOrder.1));
     buf.add(#text(Principal.toText(streams.categoriesInvTimeOrder.0)));
     buf.add(#int(streams.categoriesInvTimeOrder.1));
+    buf.add(#text(Principal.toText(streams.commentsTimeOrder.0)));
+    buf.add(#int(streams.commentsTimeOrder.1));
+    buf.add(#text(Principal.toText(streams.commentsInvTimeOrder.0)));
+    buf.add(#int(streams.commentsInvTimeOrder.1));
     #tuple(Buffer.toArray(buf));
   };
 
@@ -308,6 +320,14 @@ module {
             case _ { break r; };
           };
           categoriesInvTimeOrder = switch(arr[6], arr[7]) {
+            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
+            case _ { break r; };
+          };
+          commentsTimeOrder = switch(arr[8], arr[9]) {
+            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
+            case _ { break r; };
+          };
+          commentsInvTimeOrder = switch(arr[10], arr[11]) {
             case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };

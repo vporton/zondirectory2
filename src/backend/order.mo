@@ -18,6 +18,7 @@ import Buffer "mo:base/Buffer";
 import Principal "mo:base/Principal";
 import Int "mo:base/Int";
 import Array "mo:base/Array";
+import Bool "mo:base/Bool";
 import Payments "payments";
 import RBT "mo:stable-rbtree/StableRBTree";
 import Prng "mo:prng";
@@ -81,6 +82,7 @@ shared actor class Orders() = this {
   public shared({caller}) func addItemToCategory(
     catId: (Principal, Nat),
     itemId: (Principal, Nat),
+    comment: Bool,
   ): async () {
     await* lib.checkSybil(caller);
 
@@ -115,26 +117,30 @@ shared actor class Orders() = this {
 
     // Put into the beginning of time order.
     do { // block
-      let { itemsTimeOrder; categoriesTimeOrder } = await obtainStreams((catId1, catId.1));
-      let theSubDB = switch (childItem.item.details) {
-        case (#communalCategory or #ownedCategory) { categoriesTimeOrder };
-        case _ { itemsTimeOrder };
+      let { itemsTimeOrder; categoriesTimeOrder; commentsTimeOrder } = await obtainStreams((catId1, catId.1));
+      let theSubDB = if (comment) {
+        commentsTimeOrder;
+      } else {
+        switch (childItem.item.details) {
+          case (#communalCategory or #ownedCategory) { categoriesTimeOrder };
+          case _ { itemsTimeOrder };
+        };
       };
       await* addItemToList(theSubDB, itemId);
     };
     do { // block
-      let { itemsInvTimeOrder; categoriesInvTimeOrder } = await obtainStreams((itemId1, itemId.1));
-      let theSubDB = switch (categoryItem.item.details) {
-        case (#communalCategory or #ownedCategory) { categoriesInvTimeOrder };
-        case _ { itemsInvTimeOrder };
+      let { itemsInvTimeOrder; categoriesInvTimeOrder; commentsInvTimeOrder } = await obtainStreams((itemId1, itemId.1));
+      let theSubDB = if (comment) {
+        commentsInvTimeOrder;
+      } else {
+        switch (categoryItem.item.details) {
+          case (#communalCategory or #ownedCategory) { categoriesInvTimeOrder };
+          case _ { itemsInvTimeOrder };
+        };
       };
       await* addItemToList(theSubDB, catId);
     };
   };
-
-  // func twoSideAdd(direct: (Principal, Nac.OuterSubDBKey), reverse: (Principal, Nac.OuterSubDBKey)) {
-
-  // };
 
   // Create streams for a folder identified by `itemId`, if they were not yet created.
   func obtainStreams(itemId: (CanDBPartition.CanDBPartition, Nat)): async {
@@ -154,6 +160,14 @@ shared actor class Orders() = this {
       Principal,
       Nac.OuterSubDBKey,
     );
+    commentsTimeOrder: (
+      Principal,
+      Nac.OuterSubDBKey,
+    );
+    commentsInvTimeOrder: (
+      Principal,
+      Nac.OuterSubDBKey,
+    );
     // votesOrderSubDB: ( // TODO
     //   NacDBPartition.Partition,
     //   Nat,
@@ -169,7 +183,9 @@ shared actor class Orders() = this {
         let { outer = itemsInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
         let { outer = categoriesTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
         let { outer = categoriesInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
-        let streams = {itemsTimeOrder; itemsInvTimeOrder; categoriesTimeOrder; categoriesInvTimeOrder};
+        let { outer = commentsTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
+        let { outer = commentsInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
+        let streams = {itemsTimeOrder; itemsInvTimeOrder; categoriesTimeOrder; categoriesInvTimeOrder; commentsTimeOrder; commentsInvTimeOrder};
         let itemData = lib.serializeStreams(streams);
         await itemId.0.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData);
         streams;

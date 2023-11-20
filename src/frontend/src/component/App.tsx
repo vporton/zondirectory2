@@ -1,6 +1,7 @@
 import * as React from "react";
+import 'bootstrap/dist/css/bootstrap.min.css';
 import { useContext, useEffect, useState } from "react";
-import { Button, Nav } from 'react-bootstrap';
+import { Button, Container, Nav } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
     BrowserRouter as Router,
@@ -25,25 +26,27 @@ export default function App() {
     const identityProvider = getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : `https://nfid.one`;
     return (
         <>
-            <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
-                It is a preliminary alpha-test version. All data is likely to be deleted before the release.
-            </p>
-            <h1>Zon Dir</h1>
-            <AuthProvider options={{loginOptions: {
-                identityProvider,
-                maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week // TODO
-                windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
-                onSuccess: () => {
-                    console.log('Login Successful!');
-                },
-                onError: (error) => {
-                    console.error('Login Failed: ', error);
-                }
-            }}}>
-                <HashRouter>
-                    <MyRouted/>
-                </HashRouter>
-            </AuthProvider>
+            <Container>
+                <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
+                    It is a preliminary alpha-test version. All data is likely to be deleted before the release.
+                </p>
+                <h1>Zon Dir</h1>
+                <AuthProvider options={{loginOptions: {
+                    identityProvider,
+                    maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week // TODO
+                    windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
+                    onSuccess: () => {
+                        console.log('Login Successful!');
+                    },
+                    onError: (error) => {
+                        console.error('Login Failed: ', error);
+                    }
+                }}}>
+                    <HashRouter>
+                        <MyRouted/>
+                    </HashRouter>
+                </AuthProvider>
+            </Container>
         </>
     );
 }

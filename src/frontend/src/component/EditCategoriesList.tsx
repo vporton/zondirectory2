@@ -1,20 +1,37 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
+import { Button, Col, Container, Row } from "react-bootstrap"; // TODO: Import by one component.
 
-export default function EditCategoriesList(props: { defaultCategories?: string[], onChange?: (categories: string[]) => void }) {
+export default function EditCategoriesList(props: {
+    defaultCategories?: string[],
+    defaultAntiComments?: string[],
+    onChangeCategories?: (categories: string[]) => void, // FIXME
+    onChangeAntiComments?: (categories: string[]) => void,
+}) {
     const [categories, setCategories] = useState<string[] | undefined>(undefined);
+    const [antiComments, setAntiComments] = useState<string[] | undefined>(undefined);
     useEffect(() => {
         if (categories === undefined && props.defaultCategories?.length !== 0) {
             setCategories(props.defaultCategories ?? []);
         }
     }, [props.defaultCategories])
+    useEffect(() => {
+        if (antiComments === undefined && props.defaultAntiComments?.length !== 0) {
+            setAntiComments(props.defaultAntiComments ?? []);
+        }
+    }, [props.defaultAntiComments])
     function updateCategories() {
-        if (props.onChange !== undefined && categories !== undefined) {
-            props.onChange(categories);
+        if (props.onChangeCategories !== undefined && categories !== undefined) {
+            props.onChangeCategories(categories);
+        }
+    }
+    function updateAntiComments() {
+        if (props.onChangeAntiComments !== undefined && antiComments !== undefined) {
+            props.onChangeAntiComments(antiComments);
         }
     }
     useEffect(updateCategories, [categories]);
+    useEffect(updateAntiComments, [antiComments]);
     function updateCategoriesList() {
         const list: string[] = [];
         // TODO: validation
@@ -26,22 +43,54 @@ export default function EditCategoriesList(props: { defaultCategories?: string[]
         }
         setCategories(list);
     }
+    function updateAntiCommentsList() {
+        const list: string[] = [];
+        // TODO: validation
+        for (const e of document.querySelectorAll('#aantiCommentsList input') as any) {
+            const value = (e as HTMLInputElement).value;
+            if (value !== "") {
+                list.push(value)
+            }
+        }
+        setAntiComments(list);
+    }
 
     return (
         <>
             <h2>Post to categories (TODO: Limited to ?? posts per day)</h2>
             <p>TODO: Visual editor of categories</p>
-            <ul id="categoriesList">
-                {(categories ?? []).map((cat, i) => {
-                    return (
-                        <li key={i}>
-                            <input value={cat} onChange={updateCategoriesList}/>
-                            <Button onClick={() => setCategories(categories!.filter((item) => item !== cat))}>Delete</Button>
-                        </li>
-                    );
-                })}
-            </ul>
-            <p><Button disabled={categories === undefined} onClick={() => setCategories(categories!.concat([""]))}>Add</Button></p>
+            <Container>
+                <Row>
+                    <Col>
+                        <h3>Categories</h3>
+                        <ul id="categoriesList">
+                            {(categories ?? []).map((cat, i) => {
+                                return (
+                                    <li key={i}>
+                                        <input value={cat} onChange={updateCategoriesList}/>
+                                        <Button onClick={() => setCategories(categories!.filter((item) => item !== cat))}>Delete</Button>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                        <p><Button disabled={categories === undefined} onClick={() => setCategories(categories!.concat([""]))}>Add</Button></p>
+                    </Col>
+                    <Col>
+                        <h3>Comment to</h3>
+                        <ul id="antiCommentsList">
+                            {(antiComments ?? []).map((cat, i) => {
+                                return (
+                                    <li key={i}>
+                                        <input value={cat} onChange={updateAntiCommentsList}/>
+                                        <Button onClick={() => setAntiComments(antiComments!.filter((item) => item !== cat))}>Delete</Button>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                        <p><Button disabled={antiComments === undefined} onClick={() => setAntiComments(antiComments!.concat([""]))}>Add</Button></p>
+                    </Col>
+                </Row>
+            </Container>
         </>
     );
 }
