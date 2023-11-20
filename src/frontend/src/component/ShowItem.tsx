@@ -40,16 +40,20 @@ function ShowItemContent(props: {defaultAgent}) {
     const [subcategories, setSubcategories] = useState(undefined as Item[] | undefined);
     const [supercategories, setSupercategories] = useState(undefined as Item[] | undefined);
     const [items, setItems] = useState(undefined as Item[] | undefined);
+    const [comments, setComments] = useState(undefined as Item[] | undefined);
     const [data, setData] = useState<any>(undefined); // TODO: hack
     const [xdata, setXData] = useState<any>(undefined); // TODO: hack
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
+    const [commentsLast, setCommentsLast] = useState("");
+    const [commentsReachedEnd, setCommentsReachedEnd] = useState(false);
 
     const navigate = useNavigate();
     useEffect(() => {
         setSubcategories(undefined);
         setSupercategories(undefined);
         setItems(undefined);
+        setComments(undefined);
     }, [id]);
     useEffect(() => { // TODO
         if (id !== undefined) {
@@ -71,6 +75,12 @@ function ShowItemContent(props: {defaultAgent}) {
                     setItems(x);
                     if (x.length !== 0) {
                         setItemsLast(x[x.length - 1].order); // duplicate code
+                    }
+                });
+                data.comments().then(x => {
+                    setComments(x);
+                    if (x.length !== 0) {
+                        setCommentsLast(x[x.length - 1].order); // duplicate code
                     }
                 });
                 data.details().then((x) => {
@@ -102,6 +112,21 @@ function ShowItemContent(props: {defaultAgent}) {
             }
         });
     }
+    function moreComments(event: any) {
+        event.preventDefault();
+        if (comments?.length === 0) {
+            return;
+        }
+        const lowerBound = itemsLast + 'x';
+        xdata.items({lowerBound, limit: 10}).then(x => {
+            setItems(comments?.concat(x));
+            if (x.length !== 0) {
+                setCommentsLast(x[x.length - 1].order); // duplicate code
+            } else {
+                setCommentsReachedEnd(true);
+            }
+        });
+    }
     const isCategory = type === 'ownedCategory' || type === 'communalCategory';
     return <>
         <h2><ItemType item={data}/>{isCategory ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
@@ -121,8 +146,9 @@ function ShowItemContent(props: {defaultAgent}) {
                     <ItemType item={x}/>
                     <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
                 </li>)}
-            </ul>}</>}
-        <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
+            </ul>}
+            <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
+        </>}
         <h3>Super-folders</h3>
         {supercategories === undefined ? <p>Loading...</p> :
         <ul>
@@ -133,8 +159,9 @@ function ShowItemContent(props: {defaultAgent}) {
         </ul>}
         {/* TODO: Create super-category */}
         <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
-        <h3>{isCategory ? "Items" : "Comments"}</h3>
-        {items === undefined ? <p>Loading...</p> : items.map(item => 
+        {!isCategory ? "" : <>
+            <h3>Items</h3>
+            {items === undefined ? <p>Loading...</p> : items.map(item => 
             <div key={serializeItemRef(item.id as any)}>
                 <p lang={item.locale} key={item.id}>
                     {item.price ? <>({item.price} ICP) </> : ""}
@@ -145,7 +172,19 @@ function ShowItemContent(props: {defaultAgent}) {
             </div>
         )}
         <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-            <a href={isCategory ? `#/create/for-category/${id}` : `#/create/comment/${id}`}>Create</a></p>
+            <a href={`#/create/for-category/${id}`}>Create</a></p></>}
+        <h3>Comments</h3>
+        {comments === undefined ? <p>Loading...</p> : comments.map(item => 
+            <div key={serializeItemRef(item.id as any)}>
+                <p lang={item.locale} key={item.id}>
+                    {item.price ? <>({item.price} ICP) </> : ""}
+                    {item.link ? <a href={item.link}>{item.title}</a> : item.title}
+                    {" "}<a href={`#/item/${serializeItemRef(item.id as any)}`} title="Homepage">[H]</a>
+                </p>
+                <p lang={item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.description}</p>
+            </div>
+        )}
+        <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
+            <a href={`#/create/comment/${id}`}>Create</a></p>
     </>
-
 }
