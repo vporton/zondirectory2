@@ -1,3 +1,5 @@
+- Creating a super-folder does not work. What should be "Comment to" section when creating a superfolder?
+
 - One folder having several editors, like as in Dmoz.
 
 - Race conditions of reading an entry and saving it with a modified subkey.
