@@ -30,7 +30,7 @@ export default function App() {
                 <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
                     It is a preliminary alpha-test version. All data is likely to be deleted before the release.
                 </p>
-                <h1>Zon Dir</h1>
+                <h1>Zon Social Network</h1>
                 <AuthProvider options={{loginOptions: {
                     identityProvider,
                     maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week // TODO
