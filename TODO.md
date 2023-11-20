@@ -1,4 +1,4 @@
-- Creating a super-folder does not work. What should be "Comment to" section when creating a superfolder?
+- Counting number of logged-in users, number of items of various kinds.
 
 - One folder having several editors, like as in Dmoz.
 
