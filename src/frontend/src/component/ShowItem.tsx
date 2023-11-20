@@ -199,6 +199,7 @@ function ShowItemContent(props: {defaultAgent}) {
         <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
             <a href={`#/create/for-category/${id}`}>Create</a></p></>}
         <h3>Comments</h3>
+        <p>TODO: Move comments to a separate tab.</p>
         {comments === undefined ? <p>Loading...</p> : comments.map(item => 
             <div key={serializeItemRef(item.id as any)}>
                 <p lang={item.locale} key={item.id}>
