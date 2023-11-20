@@ -102,8 +102,9 @@ function ShowItemContent(props: {defaultAgent}) {
             }
         });
     }
+    const isCategory = type === 'ownedCategory' || type === 'communalCategory';
     return <>
-        <h2><ItemType item={data}/>{type === 'ownedCategory' || type === 'communalCategory' ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
+        <h2><ItemType item={data}/>{isCategory ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         <p>Creator: <small>{creator.toString()}</small></p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         {postText !== "" ? <p lang={locale}>{postText}</p> : ""}
@@ -112,14 +113,15 @@ function ShowItemContent(props: {defaultAgent}) {
             <label title="Not implemented yet"><input type="radio" disabled={true}/> votes</label>
             <label title="Not implemented yet"><input type="radio" disabled={true}/> amount paid</label>
         </p>
-        <h3>Sub-folders</h3>
-        {subcategories === undefined ? <p>Loading...</p> :
-        <ul>
-            {subcategories.map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
-                <ItemType item={x}/>
-                <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
-            </li>)}
-        </ul>}
+        {!isCategory ? "" : <>
+            <h3>Sub-folders</h3>
+            {subcategories === undefined ? <p>Loading...</p> :
+            <ul>
+                {subcategories.map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
+                    <ItemType item={x}/>
+                    <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
+                </li>)}
+            </ul>}</>}
         <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
         <h3>Super-folders</h3>
         {supercategories === undefined ? <p>Loading...</p> :
@@ -131,7 +133,7 @@ function ShowItemContent(props: {defaultAgent}) {
         </ul>}
         {/* TODO: Create super-category */}
         <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
-        <h3>{type === 'ownedCategory' || type === 'communalCategory' ? "Items" : "Comments"}</h3>
+        <h3>{isCategory ? "Items" : "Comments"}</h3>
         {items === undefined ? <p>Loading...</p> : items.map(item => 
             <div key={serializeItemRef(item.id as any)}>
                 <p lang={item.locale} key={item.id}>
@@ -143,7 +145,7 @@ function ShowItemContent(props: {defaultAgent}) {
             </div>
         )}
         <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-            <a href={`#/create/for-category/${id}`}>Create</a></p>
+            <a href={isCategory ? `#/create/for-category/${id}` : `#/create/comment/${id}`}>Create</a></p>
     </>
 
 }

@@ -117,6 +117,10 @@ function MyRouted() {
                                 element={<EditItem/>}
                             />
                             <Route
+                                path="/create/comment/:cat"
+                                element={<EditItem comment={true}/>}
+                            />
+                            <Route
                                 path="/create-subcategory/for-category/:cat"
                                 element={<EditCategory/>}
                             />

@@ -11,10 +11,10 @@ import { serializeItemRef } from "../data/Data";
 import { addToMultipleCategories } from "../util/category";
 import { AuthContext } from "./auth/use-auth-client";
 
-export default function EditItemItem() {
+export default function EditItemItem(props: {comment?: boolean}) {
     const routeParams = useParams();
     const navigate = useNavigate();
-    const [mainCategory, setMainCategory] = useState<string | undefined>(undefined);
+    const [mainCategory, setMainCategory] = useState<string | undefined>(undefined); // TODO: For a comment, it may be not a category.
     const [categoriesList, setCategoriesList] = useState<string[]>([]);
     const [antiCommentsList, setAntiCommentsList] = useState<string[]>([]);
     useEffect(() => {
@@ -86,7 +86,8 @@ export default function EditItemItem() {
                         </TabPanel>
                     </Tabs>
                     <EditCategoriesList
-                        defaultCategories={mainCategory === undefined ? [] : [mainCategory]}
+                        defaultCategories={!(props.comment === true) && mainCategory !== undefined ? [mainCategory] : []}
+                        defaultAntiComments={props.comment === true && mainCategory !== undefined ? [mainCategory] : []}
                         onChangeCategories={setCategoriesList}
                         onChangeAntiComments={setAntiCommentsList}
                     />
