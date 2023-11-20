@@ -5,6 +5,8 @@
   But how to reset it reliably?
   The best solution is to move the code to `NacDBPartition` (it can grow 7 times).
 
+- Can a folder be a comment?
+
 - Before deleting an item, delete all links between it and folders.
   All folder/item relations should be reflexive.
 
