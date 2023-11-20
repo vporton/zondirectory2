@@ -41,12 +41,15 @@ function ShowItemContent(props: {defaultAgent}) {
     const [supercategories, setSupercategories] = useState(undefined as Item[] | undefined);
     const [items, setItems] = useState(undefined as Item[] | undefined);
     const [comments, setComments] = useState(undefined as Item[] | undefined);
+    const [antiComments, setAntiComments] = useState(undefined as Item[] | undefined);
     const [data, setData] = useState<any>(undefined); // TODO: hack
     const [xdata, setXData] = useState<any>(undefined); // TODO: hack
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
     const [commentsLast, setCommentsLast] = useState("");
     const [commentsReachedEnd, setCommentsReachedEnd] = useState(false);
+    const [antiCommentsLast, setAntiCommentsLast] = useState("");
+    const [antiCommentsReachedEnd, setAntiCommentsReachedEnd] = useState(false);
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -54,6 +57,7 @@ function ShowItemContent(props: {defaultAgent}) {
         setSupercategories(undefined);
         setItems(undefined);
         setComments(undefined);
+        setAntiComments(undefined);
     }, [id]);
     useEffect(() => { // TODO
         if (id !== undefined) {
@@ -81,6 +85,12 @@ function ShowItemContent(props: {defaultAgent}) {
                     setComments(x);
                     if (x.length !== 0) {
                         setCommentsLast(x[x.length - 1].order); // duplicate code
+                    }
+                });
+                data.antiComments().then(x => {
+                    setAntiComments(x);
+                    if (x.length !== 0) {
+                        setAntiCommentsLast(x[x.length - 1].order); // duplicate code
                     }
                 });
                 data.details().then((x) => {
@@ -117,13 +127,28 @@ function ShowItemContent(props: {defaultAgent}) {
         if (comments?.length === 0) {
             return;
         }
-        const lowerBound = itemsLast + 'x';
+        const lowerBound = commentsLast + 'x';
         xdata.items({lowerBound, limit: 10}).then(x => {
             setItems(comments?.concat(x));
             if (x.length !== 0) {
                 setCommentsLast(x[x.length - 1].order); // duplicate code
             } else {
                 setCommentsReachedEnd(true);
+            }
+        });
+    }
+    function moreAntiComments(event: any) {
+        event.preventDefault();
+        if (antiComments?.length === 0) {
+            return;
+        }
+        const lowerBound = antiCommentsLast + 'x';
+        xdata.items({lowerBound, limit: 10}).then(x => {
+            setItems(antiComments?.concat(x));
+            if (x.length !== 0) {
+                setAntiCommentsLast(x[x.length - 1].order); // duplicate code
+            } else {
+                setAntiCommentsReachedEnd(true);
             }
         });
     }
@@ -173,7 +198,7 @@ function ShowItemContent(props: {defaultAgent}) {
         )}
         <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
             <a href={`#/create/for-category/${id}`}>Create</a></p></>}
-        <h3>Comments</h3>
+            <h3>Comments</h3>
         {comments === undefined ? <p>Loading...</p> : comments.map(item => 
             <div key={serializeItemRef(item.id as any)}>
                 <p lang={item.locale} key={item.id}>
@@ -186,5 +211,17 @@ function ShowItemContent(props: {defaultAgent}) {
         )}
         <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
             <a href={`#/create/comment/${id}`}>Create</a></p>
+        <h3>Comment on</h3>
+        {antiComments === undefined ? <p>Loading...</p> : antiComments.map(item => 
+            <div key={serializeItemRef(item.id as any)}>
+                <p lang={item.locale} key={item.id}>
+                    {item.price ? <>({item.price} ICP) </> : ""}
+                    {item.link ? <a href={item.link}>{item.title}</a> : item.title}
+                    {" "}<a href={`#/item/${serializeItemRef(item.id as any)}`} title="Homepage">[H]</a>
+                </p>
+                <p lang={item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.description}</p>
+            </div>
+        )}
+        <p><a href="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}</p>
     </>
 }

@@ -136,4 +136,15 @@ export class ItemData {
         const [outerCanister, outerKey] = this.streams.commentsTimeOrder
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
+    async antiComments(opts?: {lowerBound?: string, limit?: number}) {
+        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
+        if (this.agent === undefined) {
+            return undefined;
+        }
+        if (this.streams === undefined) {
+            return [];
+        }
+        const [outerCanister, outerKey] = this.streams.commentsInvTimeOrder
+        return await this.aList(outerCanister, outerKey, {lowerBound, limit})
+    }
 }
