@@ -1,7 +1,7 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useContext, useEffect, useState } from "react";
-import { Button, Container, Nav } from 'react-bootstrap';
+import { Button, Container, Nav, Navbar } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
     BrowserRouter as Router,
@@ -88,8 +88,14 @@ function MyRouted() {
                             {isAuthenticated ? <Button onClick={signout}>Logout</Button> : <Button onClick={signin}>Login</Button>}
                         </p>
                         <nav>
-                            <NavLink to={"/item/"+root}>Main folder</NavLink>{" "}
-                            <NavLink target="_blank" to="https://docs.zoncircle.com">Our site</NavLink>
+                            <Navbar className="bg-body-secondary" style={{width: "auto"}}>
+                                <Nav>
+                                    <Nav.Link onClick={() => navigate("/item/"+root)}>Main folder</Nav.Link>{" "}
+                                </Nav>
+                                <Nav>
+                                    <Nav.Link target="_blank" href="https://docs.zoncircle.com">Our site</Nav.Link>
+                                </Nav>
+                            </Navbar>
                         </nav>
                         <Routes>
                             <Route
