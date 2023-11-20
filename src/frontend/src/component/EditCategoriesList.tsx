@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { Button, Col, Container, Row } from "react-bootstrap"; // TODO: Import by one component.
+import { Button, Col, Container, Form, Row } from "react-bootstrap"; // TODO: Import by one component.
 
 export default function EditCategoriesList(props: {
     defaultCategories?: string[],
@@ -67,7 +67,7 @@ export default function EditCategoriesList(props: {
                             {(categories ?? []).map((cat, i) => {
                                 return (
                                     <li key={i}>
-                                        <input value={cat} onChange={updateCategoriesList}/>
+                                        <Form.Control value={cat} onChange={updateCategoriesList} style={{display: 'inline', width: '15em'}}/>{" "}
                                         <Button onClick={() => setCategories(categories!.filter((item) => item !== cat))}>Delete</Button>
                                     </li>
                                 );
@@ -81,7 +81,7 @@ export default function EditCategoriesList(props: {
                             {(antiComments ?? []).map((cat, i) => {
                                 return (
                                     <li key={i}>
-                                        <input value={cat} onChange={updateAntiCommentsList}/>
+                                        <Form.Control value={cat} onChange={updateAntiCommentsList} style={{display: 'inline', width: '15em'}}/>{" "}
                                         <Button onClick={() => setAntiComments(antiComments!.filter((item) => item !== cat))}>Delete</Button>
                                     </li>
                                 );
