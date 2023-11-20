@@ -8,6 +8,7 @@ export default function EditCategoriesList(props: {
     onChangeCategories?: (categories: string[]) => void,
     onChangeAntiComments?: (categories: string[]) => void,
     noComments?: boolean,
+    reverse?: boolean,
 }) {
     const [categories, setCategories] = useState<string[] | undefined>(undefined);
     const [antiComments, setAntiComments] = useState<string[] | undefined>(undefined);
@@ -58,7 +59,7 @@ export default function EditCategoriesList(props: {
 
     return (
         <>
-            <h2>Post to categories</h2>
+            <h2>{props.reverse ? `Categories to post` : `Post to categories`}</h2>
             <p>TODO: Visual editor of categories; TODO: Limited to ?? posts per day</p>
             <Container>
                 <Row>

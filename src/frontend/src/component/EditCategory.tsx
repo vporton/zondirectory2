@@ -65,6 +65,7 @@ export default function EditCategory(props: {super?: boolean}) {
                     await submitItem(itemData());
                 }
                 return <>
+                    <h1>{props.super === true ? `Create supercategory` : `Create subcategory`}</h1>
                     <Tabs onSelect={onSelectTab}>
                         <TabList>
                             <Tab>Owned</Tab>
@@ -88,6 +89,7 @@ export default function EditCategory(props: {super?: boolean}) {
                         defaultCategories={superCategory === undefined ? [] : [superCategory]}
                         onChangeCategories={setCategoriesList}
                         onChangeAntiComments={setAntiCommentsList}
+                        reverse={props.super === true}
                         noComments={props.super === true}
                     />
                     <Button onClick={submit} disabled={!isAuthenticated}>Save</Button>
