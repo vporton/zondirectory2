@@ -58,8 +58,8 @@ export default function EditCategoriesList(props: {
 
     return (
         <>
-            <h2>Post to categories (TODO: Limited to ?? posts per day)</h2>
-            <p>TODO: Visual editor of categories</p>
+            <h2>Post to categories</h2>
+            <p>TODO: Visual editor of categories; TODO: Limited to ?? posts per day</p>
             <Container>
                 <Row>
                     <Col>
