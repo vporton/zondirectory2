@@ -159,8 +159,8 @@ function ShowItemContent(props: {defaultAgent}) {
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         {postText !== "" ? <p lang={locale}>{postText}</p> : ""}
         <p>Sort by:{" "}
-            <label><input type="radio" defaultChecked={true}/> time</label>
-            <label title="Not implemented yet"><input type="radio" disabled={true}/> votes</label>
+            <label><input type="radio" defaultChecked={true}/> time</label>{" "}
+            <label title="Not implemented yet"><input type="radio" disabled={true}/> votes</label>{" "}
             <label title="Not implemented yet"><input type="radio" disabled={true}/> amount paid</label>
         </p>
         {!isCategory ? "" : <>
