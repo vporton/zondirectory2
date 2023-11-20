@@ -184,7 +184,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 <p lang={item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.description}</p>
             </div>
         )}
-        <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
+        <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
             <a href={`#/create/comment/${id}`}>Create</a></p>
     </>
 }
