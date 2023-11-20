@@ -142,6 +142,10 @@ module {
       Principal,
       Nac.OuterSubDBKey,
     );
+    itemsInvTimeOrder: (
+      Principal,
+      Nac.OuterSubDBKey,
+    );
     categoriesTimeOrder: (
       Principal,
       Nac.OuterSubDBKey,
@@ -182,9 +186,11 @@ module {
   };
 
   public func serializeStreams(streams: Streams): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
     buf.add(#text(Principal.toText(streams.itemsTimeOrder.0)));
     buf.add(#int(streams.itemsTimeOrder.1));
+    buf.add(#text(Principal.toText(streams.itemsInvTimeOrder.0)));
+    buf.add(#int(streams.itemsInvTimeOrder.1));
     buf.add(#text(Principal.toText(streams.categoriesTimeOrder.0)));
     buf.add(#int(streams.categoriesTimeOrder.1));
     buf.add(#text(Principal.toText(streams.categoriesInvTimeOrder.0)));
@@ -293,11 +299,15 @@ module {
             case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };
-          categoriesTimeOrder = switch(arr[2], arr[3]) {
+          itemsInvTimeOrder = switch(arr[2], arr[3]) {
             case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };
-          categoriesInvTimeOrder = switch(arr[4], arr[5]) {
+          categoriesTimeOrder = switch(arr[4], arr[5]) {
+            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
+            case _ { break r; };
+          };
+          categoriesInvTimeOrder = switch(arr[6], arr[7]) {
             case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
             case _ { break r; };
           };

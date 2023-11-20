@@ -49,6 +49,7 @@ shared actor class Orders() = this {
     // FIXME: Check caller.
     // FIXME: Prevent duplicate entries.
     let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
+    // FIXME: There are several streams.
     let timeScanResult = await theSubDB2.scanLimitOuter({
       dir = #fwd;
       outerKey = theSubDB.1;
@@ -122,14 +123,26 @@ shared actor class Orders() = this {
       await* addItemToList(theSubDB, itemId);
     };
     do { // block
-      let { categoriesInvTimeOrder } = await obtainStreams((itemId1, itemId.1));
-      await* addItemToList(categoriesInvTimeOrder, catId);
+      let { itemsInvTimeOrder; categoriesInvTimeOrder } = await obtainStreams((itemId1, itemId.1));
+      let theSubDB = switch (categoryItem.item.details) {
+        case (#communalCategory or #ownedCategory) { categoriesInvTimeOrder };
+        case _ { itemsInvTimeOrder };
+      };
+      await* addItemToList(theSubDB, catId);
     };
   };
+
+  // func twoSideAdd(direct: (Principal, Nac.OuterSubDBKey), reverse: (Principal, Nac.OuterSubDBKey)) {
+
+  // };
 
   // Create streams for a folder identified by `itemId`, if they were not yet created.
   func obtainStreams(itemId: (CanDBPartition.CanDBPartition, Nat)): async {
     itemsTimeOrder: (
+      Principal,
+      Nac.OuterSubDBKey,
+    );
+    itemsInvTimeOrder: (
       Principal,
       Nac.OuterSubDBKey,
     );
@@ -153,9 +166,10 @@ shared actor class Orders() = this {
       };
       case null {
         let { outer = itemsTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
+        let { outer = itemsInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
         let { outer = categoriesTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
         let { outer = categoriesInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
-        let streams = {itemsTimeOrder; categoriesTimeOrder; categoriesInvTimeOrder};
+        let streams = {itemsTimeOrder; itemsInvTimeOrder; categoriesTimeOrder; categoriesInvTimeOrder};
         let itemData = lib.serializeStreams(streams);
         await itemId.0.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData);
         streams;

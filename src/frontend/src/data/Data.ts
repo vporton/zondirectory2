@@ -109,7 +109,9 @@ export class ItemData {
         if (this.streams === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams.categoriesInvTimeOrder;
+        const [outerCanister, outerKey] =
+            (this.item.item.details as any).ownedCategory !== null || (this.item.item.details as any).communalCategory !== null
+            ? this.streams.categoriesInvTimeOrder : this.streams.itemsInvTimeOrder;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async items(opts?: {lowerBound?: string, limit?: number}) {
