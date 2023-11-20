@@ -5,7 +5,7 @@ import { Button, Col, Container, Form, Row } from "react-bootstrap"; // TODO: Im
 export default function EditCategoriesList(props: {
     defaultCategories?: string[],
     defaultAntiComments?: string[],
-    onChangeCategories?: (categories: string[]) => void, // FIXME
+    onChangeCategories?: (categories: string[]) => void,
     onChangeAntiComments?: (categories: string[]) => void,
 }) {
     const [categories, setCategories] = useState<string[] | undefined>(undefined);
