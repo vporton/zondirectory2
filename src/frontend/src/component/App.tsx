@@ -124,6 +124,10 @@ function MyRouted() {
                                 path="/create-subcategory/for-category/:cat"
                                 element={<EditCategory/>}
                             />
+                            <Route
+                                path="/create-supercategory/for-category/:cat"
+                                element={<EditCategory super={true}/>}
+                            />
                         </Routes>
                     </>
             }}

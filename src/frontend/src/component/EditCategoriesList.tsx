@@ -7,6 +7,7 @@ export default function EditCategoriesList(props: {
     defaultAntiComments?: string[],
     onChangeCategories?: (categories: string[]) => void,
     onChangeAntiComments?: (categories: string[]) => void,
+    noComments?: boolean,
 }) {
     const [categories, setCategories] = useState<string[] | undefined>(undefined);
     const [antiComments, setAntiComments] = useState<string[] | undefined>(undefined);
@@ -75,6 +76,7 @@ export default function EditCategoriesList(props: {
                         </ul>
                         <p><Button disabled={categories === undefined} onClick={() => setCategories(categories!.concat([""]))}>Add</Button></p>
                     </Col>
+                    {!props.noComments &&
                     <Col>
                         <h3>Comment to</h3>
                         <ul id="antiCommentsList">
@@ -88,7 +90,7 @@ export default function EditCategoriesList(props: {
                             })}
                         </ul>
                         <p><Button disabled={antiComments === undefined} onClick={() => setAntiComments(antiComments!.concat([""]))}>Add</Button></p>
-                    </Col>
+                    </Col>}
                 </Row>
             </Container>
         </>

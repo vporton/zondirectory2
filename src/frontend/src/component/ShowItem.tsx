@@ -183,7 +183,7 @@ function ShowItemContent(props: {defaultAgent}) {
             </li>)}
         </ul>}
         {/* TODO: Create super-category */}
-        <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create/for-category/${id}`}>Create</a></p>
+        <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create-supercategory/for-category/${id}`}>Create</a></p>
         {!isCategory ? "" : <>
             <h3>Items</h3>
             {items === undefined ? <p>Loading...</p> : items.map(item => 
