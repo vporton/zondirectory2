@@ -1,7 +1,5 @@
 ## Quick notes
 
-For the frontend to work, you need `dfx generate` using https://github.com/vporton/sdk (contains a bug fix),
-
 During the work on this project I also create [NacDB](https://github.com/vporton/NacDB) database.
 During this work I developed a strategy how to accomplish reliable operations over unreliable actors
 in actor model of ICP. I should publish this in peer review. Rewriting NacDB with the new algorithm

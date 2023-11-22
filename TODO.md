@@ -9,6 +9,8 @@
 
 - Can a folder be a comment?
 
+- Option for an owned folder to be ordered by voting?
+
 - Before deleting an item, delete all links between it and folders.
   All folder/item relations should be reflexive.
 
