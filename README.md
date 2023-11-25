@@ -10,9 +10,10 @@ It uses an advanced combination of data structures to add, reorder, and delete i
 
 ## Running the project locally
 
-If you want to test your project locally:
+If you want to test our project locally:
 
-Set `REACT_APP_IS_LOCAL=1` in `.env`.
+Set `REACT_APP_IS_LOCAL=1` in `.env`. (Local version uses the usual II instead of NFID, becuase
+NFID cannot be called from localhost.)
 
 Use the following commands:
 
