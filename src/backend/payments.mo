@@ -61,7 +61,7 @@ actor class Payments() = this {
 
   stable var salesOwnersShare = fractions.fdiv(1, 10); // 10%
   stable var upvotesOwnersShare = fractions.fdiv(1, 2); // 50%
-  stable var uploadOwnersShare = fractions.fdiv(3, 20); // 15%
+  stable var uploadOwnersShare = fractions.fdiv(3, 20); // 15% // FIXME: Delete.
   stable var buyerAffiliateShare = fractions.fdiv(1, 10); // 10%
   stable var sellerAffiliateShare = fractions.fdiv(3, 20); // 15%
 
