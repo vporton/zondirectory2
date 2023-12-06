@@ -20,7 +20,7 @@
   "dependencies": {
     "@dfinity/agent": "^0.19.3",
     "@dfinity/auth-client": "^0.19.3",
-    "@dfinity/identity-secp256k1": "^0.19.3",
+    "@dfinity/identity-secp256k1": "^0.20.0",
     "@dfinity/principal": "^0.19.3",
     "@nfid/embed": "^0.10.0-alpha.2",
     "base64-js": "^1.5.1",
