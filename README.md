@@ -5,6 +5,8 @@ During this work I developed a strategy how to accomplish reliable operations ov
 in actor model of ICP. I should publish this in peer review. Rewriting NacDB with the new algorithm
 is not yet finished.
 
+For the frontend to work, you need `dfx generate` using https://github.com/vporton/sdk (contains a bug fix),
+
 ## Running the project locally
 
 If you want to test your project locally:
