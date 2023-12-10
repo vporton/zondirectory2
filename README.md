@@ -8,6 +8,8 @@ Streams ordering items by voting results will be implemented using
 [NacDBReorder library](https://github.com/vporton/NacDBReorder) (in development).
 It uses an advanced combination of data structures to add, reorder, and delete items.
 
+For the frontend to work, you need `dfx generate` using https://github.com/vporton/sdk (contains a bug fix),
+
 ## Running the project locally
 
 If you want to test our project locally:

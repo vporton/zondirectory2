@@ -24,6 +24,8 @@
 
 - Join one communal folder to another by a community voting.
 
+- Prefix text with format specifier (like `text/plain`). Render markdown at client side.
+
 - Proper error handling.
 
 - Note that an item was edited if it was edited since inception.
