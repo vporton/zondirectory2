@@ -23,7 +23,7 @@ import { main as MainCanister } from "../../../declarations/main";
  
 export default function App() {
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
-    const identityProvider = getIsLocal() ? `http://localhost:8000/?canisterId=${identityCanister}` : `https://nfid.one`;
+    const identityProvider = getIsLocal() ? `http://${identityCanister}.localhost:8000` : `https://nfid.one`;
     return (
         <>
             <Container>

@@ -35,7 +35,7 @@ const defaultOptions: UseAuthClientOptions = {
     identityProvider:
       process.env.DFX_NETWORK === "ic"
         ? `https://nfid.one`
-        : `http://localhost:8000/?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY}`,
+        : `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:8000`,
   },
 };
 
