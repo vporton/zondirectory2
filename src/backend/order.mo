@@ -185,7 +185,9 @@ shared actor class Orders() = this {
         let { outer = categoriesInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
         let { outer = commentsTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
         let { outer = commentsInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
-        let streams = {itemsTimeOrder; itemsInvTimeOrder; categoriesTimeOrder; categoriesInvTimeOrder; commentsTimeOrder; commentsInvTimeOrder};
+        let streams = {
+          itemsTimeOrder; itemsInvTimeOrder; categoriesTimeOrder; categoriesInvTimeOrder; commentsTimeOrder; commentsInvTimeOrder;
+        };
         let itemData = lib.serializeStreams(streams);
         await itemId.0.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData);
         streams;
