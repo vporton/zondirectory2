@@ -21,7 +21,6 @@ import Array "mo:base/Array";
 import Bool "mo:base/Bool";
 import Payments "payments";
 import RBT "mo:stable-rbtree/StableRBTree";
-import Prng "mo:prng";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 import lib "lib";
 
