@@ -6,6 +6,7 @@ import CanDBPartition "../storage/CanDBPartition";
 import NacDBIndex "canister:NacDBIndex";
 import NacDBPartition "../storage/NacDBPartition";
 import Entity "mo:candb/Entity";
+import Reorder "mo:reorder/Reorder";
 import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";

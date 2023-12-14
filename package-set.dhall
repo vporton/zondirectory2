@@ -41,6 +41,11 @@ let
       , version = "main"
       , dependencies = [ "base" ]
       },
+      { name = "reorder"
+      , repo = "git@github.com:vporton/NacDBReorder.git"
+      , version = "main"
+      , dependencies = [ "base" ]
+      },
       { name = "icrc1"
       , repo = "git@github.com:NatLabs/icrc1"
       , version = "0.0.1"
