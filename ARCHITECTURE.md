@@ -12,12 +12,18 @@ TODO: Should have separate attribute post text.
 ### [TODO: seems superfluous] "r/<CATEGORY>/<ITEM>" - which items were addeded to which categories (both time and votes streams)
 
 ## NacDB database structure
-* `itemsTimeOrder`: category -> sub-items
-* `categoriesTimeOrder`: category -> sub-categories
-* item -> comments
+* time/time: category -> sub-items
+* time/time: category -> sub-categories
+* time/time: item -> comments
+* votes/votes: category -> sub-items
+* votes/votes: category -> sub-categories
+* votes/votes: item -> comments
+* paid/time: category -> sub-items
+* paid/time: category -> sub-categories
+* paid/time: item -> comments
 
-When displaying, needs pairs like `XXX`/`XXXInv`. When saving, needs all pairs.
-Therefore, store grouped by pairs. How to save several pairs?
+The `time/time` relations need to be rewritten using `NacDBReorder` in order to
+be deleteable.
 
 ## Misc
 

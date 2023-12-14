@@ -104,40 +104,35 @@ shared actor class Orders() = this {
       };
     };
 
-    // TODO: To reduce cost of moving an item (jumping over several items of the same weight),
-    //       need to make multi-hash instead of just hash.
-    // For now, I implement a simple hash-map, time-order does not need moving items around.
+    // Put into the beginning of time order.
+    let timePair = await* itemsTimeOrderPair(catId, itemId, comment);
+    await* addItemToList(timePair.0, itemId);
+    await* addItemToList(timePair.1, catId);
+  };
 
+  func itemsTimeOrderPair(catId: (Principal, Nat), itemId: (Principal, Nat), comment: Bool)
+    : async* ((Principal, Nac.OuterSubDBKey), (Principal, Nac.OuterSubDBKey))
+  {
+    let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
+    let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
+    // TODO: Ensure that item data is readed once per `addItemToCategory` call.
     let ?childItemData = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "i") else {
       // TODO: Keep doing for other categories after a trap?
       Debug.trap("cannot get child item");
     };
     let childItem = lib.deserializeItem(childItemData);
 
-    // Put into the beginning of time order.
-    do { // block
-      let { itemsTimeOrder; categoriesTimeOrder; commentsTimeOrder } = await obtainStreams((catId1, catId.1));
-      let theSubDB = if (comment) {
-        commentsTimeOrder;
-      } else {
-        switch (childItem.item.details) {
-          case (#communalCategory or #ownedCategory) { categoriesTimeOrder };
-          case _ { itemsTimeOrder };
-        };
+    let {
+      itemsTimeOrder; categoriesTimeOrder; commentsTimeOrder;
+      itemsInvTimeOrder; categoriesInvTimeOrder; commentsInvTimeOrder;
+    } = await obtainStreams((catId1, catId.1));
+    let theSubDB = if (comment) {
+      (commentsTimeOrder, commentsInvTimeOrder);
+    } else {
+      switch (childItem.item.details) {
+        case (#communalCategory or #ownedCategory) { (categoriesTimeOrder, categoriesInvTimeOrder) };
+        case _ { (itemsTimeOrder, itemsInvTimeOrder) };
       };
-      await* addItemToList(theSubDB, itemId);
-    };
-    do { // block
-      let { itemsInvTimeOrder; categoriesInvTimeOrder; commentsInvTimeOrder } = await obtainStreams((itemId1, itemId.1));
-      let theSubDB = if (comment) {
-        commentsInvTimeOrder;
-      } else {
-        switch (categoryItem.item.details) {
-          case (#communalCategory or #ownedCategory) { categoriesInvTimeOrder };
-          case _ { itemsInvTimeOrder };
-        };
-      };
-      await* addItemToList(theSubDB, catId);
     };
   };
 

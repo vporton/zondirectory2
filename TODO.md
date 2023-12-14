@@ -16,6 +16,8 @@
 
 - Transforming owned folders to communal.
 
+- Ask users for phone/email (optionally), for feedback.
+
 - Shows a wrong logged-in user's principal.
 
 - Logout on page reload shouldn't happen.
