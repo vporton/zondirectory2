@@ -80,13 +80,13 @@ export class ItemData {
         const [innerPart, innerKey] = (await client.getInner(outerKey) as any)[0]; // TODO: error handling
         const client2 = nacDBPartitionActor(innerPart, { agent: this.agent });
         const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as // TODO: limit
-            Array<[any, number]>; // TODO: correct type?
-        console.log(items)
-        const items1aa = items.map((x: any) => [x[0], x[1]]);
-        const items1a = items1aa.map((x: any) => [x[0], ...((s) => {
-            const m = s[1].text.match(/^([0-9]*)@(.*)$/);
-            return [m[2], parseInt(m[1])];
-        })(x)])
+            [[string, {text: string}]] | [];
+        const items1aa = items.length === 0 ? [] : items.map(x => [x[0], x[1].text]);
+        const items1a: [string, string, bigint][] = items1aa.map(x => ((s) => {
+            const m = s[1].match(/^([0-9]*)@(.*)$/);
+            return [s[0], m[2], BigInt(m[1])];
+        })(x))
+        console.log(items1a)
         const items2 = items1a.map(([order, principalStr, id]) => { return {canister: Principal.from(principalStr), id, order} });
         const items3 = items2.map(id => (async () => {
             const part = canDBPartitionActor(id.canister, { agent: this.agent });
