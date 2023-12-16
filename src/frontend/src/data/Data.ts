@@ -4,6 +4,11 @@ import { Actor, Agent, HttpAgent } from "@dfinity/agent";
 import { createActor as nacDBPartitionActor } from "../../../declarations/NacDBPartition";
 import { createActor as canDBPartitionActor } from "../../../declarations/CanDBPartition";
 
+const STREAM_LINK_SUBITEMS = 0; // category <-> sub-items
+const STREAM_LINK_SUBCATEGORIES = 1; // category <-> sub-categories
+const STREAM_LINK_COMMENTS = 2; // item <-> comments
+// const STREAM_LINK_MAX = STREAM_LINK_COMMENTS;
+
 export type ItemRef = {
     canister: Principal;
     id: number;
@@ -98,7 +103,7 @@ export class ItemData {
         if (this.streams === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams.categoriesTimeOrder;
+        const [outerCanister, outerKey] = this.streams[STREAM_LINK_SUBCATEGORIES][0][0].order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async superCategories(opts?: {lowerBound?: string, limit?: number}) {
@@ -111,7 +116,7 @@ export class ItemData {
         }
         const [outerCanister, outerKey] =
             (this.item.item.details as any).ownedCategory !== null || (this.item.item.details as any).communalCategory !== null
-            ? this.streams.categoriesInvTimeOrder : this.streams.itemsInvTimeOrder;
+            ? this.streams[STREAM_LINK_SUBCATEGORIES][0][1].order : this.streams[STREAM_LINK_SUBITEMS][0][1].order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async items(opts?: {lowerBound?: string, limit?: number}) {
@@ -122,7 +127,7 @@ export class ItemData {
         if (this.streams === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams.itemsTimeOrder
+        const [outerCanister, outerKey] = this.streams[STREAM_LINK_SUBITEMS][0][0].order
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async comments(opts?: {lowerBound?: string, limit?: number}) {
@@ -133,7 +138,7 @@ export class ItemData {
         if (this.streams === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams.commentsTimeOrder
+        const [outerCanister, outerKey] = this.streams[STREAM_LINK_COMMENTS][0][0].order
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async antiComments(opts?: {lowerBound?: string, limit?: number}) {
@@ -144,7 +149,7 @@ export class ItemData {
         if (this.streams === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams.commentsInvTimeOrder
+        const [outerCanister, outerKey] = this.streams[STREAM_LINK_COMMENTS][0][1].order
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
 }
