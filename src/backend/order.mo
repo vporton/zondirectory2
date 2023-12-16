@@ -33,6 +33,8 @@ shared actor class Orders() = this {
   // stable var rng: Prng.Seiran128 = Prng.Seiran128(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
   stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
 
+  stable let orderer = Reorder.createOrderer(NacDBIndex);
+
   // TODO: Remove this function?
   public shared({ caller }) func init(): async () {
     if (initialized) {
@@ -46,14 +48,14 @@ shared actor class Orders() = this {
 
   // Public API //
 
-  func addItemToList(theSubDB: (Principal, Nac.OuterSubDBKey), itemToAdd: (Principal, Nat)): async* () {
+  func addItemToTimeList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat)): async* () {
     // FIXME: Check caller.
     // FIXME: Prevent duplicate entries.
-    let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(theSubDB.0));
+    let theSubDB2: Nac.OuterCanister = theSubDB.order.0;
     // FIXME: There are several streams.
     let timeScanResult = await theSubDB2.scanLimitOuter({
       dir = #fwd;
-      outerKey = theSubDB.1;
+      outerKey = theSubDB.order.1;
       lowerBound = "";
       upperBound = "x";
       limit = 1;
@@ -66,15 +68,16 @@ shared actor class Orders() = this {
       let n = lib.decodeInt(t);
       n - 1;
     };
-    let timeScanItemInfo = #tuple([#text(Principal.toText(itemToAdd.0)), #int(itemToAdd.1)]);
+    let timeScanItemInfo = Nat.toText(itemToAdd.1) # "@" # Principal.toText(itemToAdd.0);
     
     let guid = GUID.nextGuid(guidGen);
 
     // FIXME: race condition
-    ignore await NacDBIndex.insert(Blob.toArray(guid), {
-      outerCanister = Principal.fromActor(theSubDB2);
-      outerKey = theSubDB.1;
-      sk = lib.encodeInt(timeScanSK);
+    await* Reorder.add(guid, {
+      index = NacDBIndex;
+      orderer;
+      order = theSubDB;
+      key = timeScanSK;
       value = timeScanItemInfo;
     });
   };
@@ -106,13 +109,27 @@ shared actor class Orders() = this {
     };
 
     // Put into the beginning of time order.
-    let timePair = await* itemsTimeOrderPair(catId, itemId, comment);
-    await* addItemToList(timePair.0, itemId);
-    await* addItemToList(timePair.1, catId);
+    let (streams, timePair) = await* itemsTimeOrderPair(catId, itemId, comment);
+    let streams2: [var ?(Reorder.Order, Reorder.Order)] = Array.thaw(streams);
+    let stream = switch (streams[timePair]) {
+      case (?stream) { stream };
+      case null {
+        let pair = (
+          await* Reorder.createOrder(GUID.nextGuid(guidGen), {orderer}),
+          await* Reorder.createOrder(GUID.nextGuid(guidGen), {orderer}),
+        );
+        streams2[timePair] := ?pair;
+        pair;
+      };
+    };
+    await* addItemToTimeList(stream.0, itemId);
+    await* addItemToTimeList(stream.1, catId);
+    let itemData = lib.serializeStreams(Array.freeze(streams2));
+    await itemId1.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData); // FIXME: Get/set by pair folder/item, not by item only.
   };
 
   func itemsTimeOrderPair(catId: (Principal, Nat), itemId: (Principal, Nat), comment: Bool)
-    : async* ((Principal, Nac.OuterSubDBKey), (Principal, Nac.OuterSubDBKey))
+    : async* (lib.Streams, lib.StreamsLinks)
   {
     let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
@@ -123,71 +140,25 @@ shared actor class Orders() = this {
     };
     let childItem = lib.deserializeItem(childItemData);
 
-    let {
-      itemsTimeOrder; categoriesTimeOrder; commentsTimeOrder;
-      itemsInvTimeOrder; categoriesInvTimeOrder; commentsInvTimeOrder;
-    } = await obtainStreams((catId1, catId.1));
-    let theSubDB = if (comment) {
-      (commentsTimeOrder, commentsInvTimeOrder);
-    } else {
-      switch (childItem.item.details) {
-        case (#communalCategory or #ownedCategory) { (categoriesTimeOrder, categoriesInvTimeOrder) };
-        case _ { (itemsTimeOrder, itemsInvTimeOrder) };
-      };
-    };
-  };
-
-  // Create streams for a folder identified by `itemId`, if they were not yet created.
-  func obtainStreams(itemId: (CanDBPartition.CanDBPartition, Nat)): async {
-    itemsTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    itemsInvTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    categoriesTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    categoriesInvTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    commentsTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    commentsInvTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    // votesOrderSubDB: ( // TODO
-    //   NacDBPartition.Partition,
-    //   Nat,
-    // );
-  } {
-    let streamsData = await itemId.0.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "s");
-    switch (streamsData) {
+    let streamsData = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "s"); // FIXME: Get/set by pair folder/item, not by item only.
+    let streams = switch (streamsData) {
       case (?data) {
         lib.deserializeStreams(data);
       };
       case null {
-        let { outer = itemsTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
-        let { outer = itemsInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
-        let { outer = categoriesTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
-        let { outer = categoriesInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
-        let { outer = commentsTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
-        let { outer = commentsInvTimeOrder } = await NacDBIndex.createSubDB(Blob.toArray(GUID.nextGuid(guidGen)), {userData = ""});
-        let streams = {
-          itemsTimeOrder; itemsInvTimeOrder; categoriesTimeOrder; categoriesInvTimeOrder; commentsTimeOrder; commentsInvTimeOrder;
-        };
-        let itemData = lib.serializeStreams(streams);
-        await itemId.0.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData);
-        streams;
+        [null, null, null];
       }
     };
+
+    let streamLink = if (comment) {
+      lib.STREAM_LINK_COMMENTS;
+    } else {
+      switch (childItem.item.details) {
+        case (#communalCategory or #ownedCategory) { lib.STREAM_LINK_SUBCATEGORIES };
+        case _ { lib.STREAM_LINK_SUBITEMS };
+      };
+    };
+    (streams, streamLink);
   };
 
   /// Voting ///

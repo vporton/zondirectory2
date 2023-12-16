@@ -15,6 +15,7 @@ import Char "mo:base/Char";
 import Nat64 "mo:base/Nat64";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
+import Reorder "mo:reorder/Reorder"; // TODO: should be here?
 import config "../../config";
 
 module {
@@ -137,36 +138,14 @@ module {
     item: ItemWithoutOwner;
   };
 
-  public type Streams = {
-    itemsTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    itemsInvTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    categoriesTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    categoriesInvTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    commentsTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    commentsInvTimeOrder: (
-      Principal,
-      Nac.OuterSubDBKey,
-    );
-    // votesOrderSubDB: ( // TODO
-    //   Principal,
-    //   Nac.OuterSubDBKey,
-    // );
-  };
+  // TODO: Does it make sense to keep `Streams` in lib?
+  public type StreamsLinks = Nat;
+  public let STREAM_LINK_SUBITEMS: StreamsLinks = 0; // category <-> sub-items
+  public let STREAM_LINK_SUBCATEGORIES: StreamsLinks = 1; // category <-> sub-categories
+  public let STREAM_LINK_COMMENTS: StreamsLinks = 2; // item <-> comments
+  public let STREAM_LINK_MAX: StreamsLinks = STREAM_LINK_COMMENTS;
+
+  public type Streams = [?(Reorder.Order, Reorder.Order)];
 
   // TODO: messy order of the below functions
 
@@ -194,19 +173,25 @@ module {
   };
 
   public func serializeStreams(streams: Streams): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
-    buf.add(#text(Principal.toText(streams.itemsTimeOrder.0)));
-    buf.add(#int(streams.itemsTimeOrder.1));
-    buf.add(#text(Principal.toText(streams.itemsInvTimeOrder.0)));
-    buf.add(#int(streams.itemsInvTimeOrder.1));
-    buf.add(#text(Principal.toText(streams.categoriesTimeOrder.0)));
-    buf.add(#int(streams.categoriesTimeOrder.1));
-    buf.add(#text(Principal.toText(streams.categoriesInvTimeOrder.0)));
-    buf.add(#int(streams.categoriesInvTimeOrder.1));
-    buf.add(#text(Principal.toText(streams.commentsTimeOrder.0)));
-    buf.add(#int(streams.commentsTimeOrder.1));
-    buf.add(#text(Principal.toText(streams.commentsInvTimeOrder.0)));
-    buf.add(#int(streams.commentsInvTimeOrder.1));
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(36);
+    for(item in streams.vals()) {
+      switch (item) {
+        case (?(r1, r2)) {
+          buf.add(#text(Principal.toText(Principal.fromActor(r1.order.0))));
+          buf.add(#int(r1.order.1));
+          buf.add(#text(Principal.toText(Principal.fromActor(r1.reverse.0))));
+          buf.add(#int(r1.reverse.1));
+
+          buf.add(#text(Principal.toText(Principal.fromActor(r2.order.0))));
+          buf.add(#int(r2.order.1));
+          buf.add(#text(Principal.toText(Principal.fromActor(r2.reverse.0))));
+          buf.add(#int(r2.reverse.1));
+        };
+        case null {
+          buf.add(#int(-1));
+        }
+      }
+    };
     #tuple(Buffer.toArray(buf));
   };
 
@@ -304,38 +289,32 @@ module {
   };
 
   public func deserializeStreams(attr: Entity.AttributeValue): Streams {
-    label r switch (attr) {
-      case (#tuple arr) {
-        return {
-          itemsTimeOrder = switch(arr[0], arr[1]) {
-            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
-            case _ { break r; };
-          };
-          itemsInvTimeOrder = switch(arr[2], arr[3]) {
-            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
-            case _ { break r; };
-          };
-          categoriesTimeOrder = switch(arr[4], arr[5]) {
-            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
-            case _ { break r; };
-          };
-          categoriesInvTimeOrder = switch(arr[6], arr[7]) {
-            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
-            case _ { break r; };
-          };
-          commentsTimeOrder = switch(arr[8], arr[9]) {
-            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
-            case _ { break r; };
-          };
-          commentsInvTimeOrder = switch(arr[10], arr[11]) {
-            case (#text p, #int n) { (Principal.fromText(p), Int.abs(n)) };
-            case _ { break r; };
-          };
-        };
-      };
-      case _ {};
+    let s = Buffer.Buffer<?(Reorder.Order, Reorder.Order)>(36);
+    let #tuple arr = attr else {
+      Debug.trap("programming error");
     };
-    Debug.trap("wrong streams descriptor format");
+    var i = 0;
+    label w while (i != Array.size(arr)) {
+      if (arr[i] == #int(-1)) {
+        s.add(null);
+        i += 1;
+        continue w;
+      };
+      switch (arr[i], arr[i], arr[i], arr[i], arr[i], arr[i], arr[i], arr[i]) {
+        case (#text c0, #int i0, #text c1, #int i1, #text c2, #int i2, #text c3, #int i3) {
+          i += 8;
+          s.add(?(
+            { order = (actor(c0), Int.abs(i0)); reverse = (actor(c1), Int.abs(i1)) },
+            { order = (actor(c2), Int.abs(i2)); reverse = (actor(c3), Int.abs(i3)) }
+          ));
+        };
+        case _ {
+          Debug.trap("programming error");
+        }
+      };
+    };
+
+    Buffer.toArray(s);
   };
 
   public func onlyItemOwner(caller: Principal, _item: Item) {

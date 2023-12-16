@@ -191,6 +191,8 @@ shared actor class CanDBPartition(options: {
   };
 
   public query func getStreams(itemId: Nat): async ?lib.Streams {
+    // FIXME: It belongs to a pair parent/child not just to child.
+    // FIXME: Duplicate code, and "s" varies
     let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "s");
     do ? { lib.deserializeStreams(data!) };
   };

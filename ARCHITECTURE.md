@@ -5,11 +5,10 @@
 - (Unused) Attribute `"s"` - set to true if anti-sybil checking passed.
 ### "i/" - ID -> Item
 - Attribute `"i"` - `Item` record.
-- Attribute `"s"` - `Streams` record.
+- Attribute `"st"` (time), `"sv"` (votes), `"sp"` (paid) - `Streams` record.
 - Attribute `"t"` - post's text.
 TODO: Should have separate attribute post text.
 ### "a/" - user -> <buyer affiliate>/<seller affiliate>
-### [TODO: seems superfluous] "r/<CATEGORY>/<ITEM>" - which items were addeded to which categories (both time and votes streams)
 
 ## NacDB database structure
 * time/time: category -> sub-items
