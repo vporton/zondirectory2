@@ -300,7 +300,7 @@ module {
         i += 1;
         continue w;
       };
-      switch (arr[i], arr[i], arr[i], arr[i], arr[i], arr[i], arr[i], arr[i]) {
+      switch (arr[i], arr[i+1], arr[i+2], arr[i+3], arr[i+4], arr[i+5], arr[i+6], arr[i+7]) {
         case (#text c0, #int i0, #text c1, #int i1, #text c2, #int i2, #text c3, #int i3) {
           i += 8;
           s.add(?(

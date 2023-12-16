@@ -24,6 +24,11 @@ export function serializeItemRef(item: ItemRef): string {
     return item.id + "@" + item.canister;
 }
 
+function _unwrap(v) {
+    // TODO: simplify for greater performance
+    return v === undefined || v.length === 0 ? undefined : v[0];
+}
+
 export class ItemData {
     agent?: Agent; // should be `defaultAgent`
     itemRef: ItemRef;
@@ -42,10 +47,11 @@ export class ItemData {
             client.getItem(BigInt(obj.itemRef.id)),
             client.getStreams(BigInt(obj.itemRef.id)),
         ]) as [Item[] | [], Streams[] | []];
+        console.log('streams', streams)
         // const item = await client.getItem(BigInt(obj.itemRef.id)) as any;
         // const streams = await client.getStreams(BigInt(obj.itemRef.id)) as any;
         obj.item = item[0]; // TODO: if no such item
-        obj.streams = streams.length !== 0 ? streams[0] : undefined;
+        obj.streams = _unwrap(streams);
         return obj;
     }
     async locale() {
@@ -75,7 +81,12 @@ export class ItemData {
         const client2 = nacDBPartitionActor(innerPart, { agent: this.agent });
         const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as // TODO: limit
             Array<[any, number]>; // TODO: correct type?
-        const items1a = items.map((x: any) => [x[0], x[1].tuple[0].text, x[1].tuple[1].int]);
+        console.log(items)
+        const items1aa = items.map((x: any) => [x[0], x[1]]);
+        const items1a = items1aa.map((x: any) => [x[0], ...((s) => {
+            const m = s[1].text.match(/^([0-9]*)@(.*)$/);
+            return [m[2], parseInt(m[1])];
+        })(x)])
         const items2 = items1a.map(([order, principalStr, id]) => { return {canister: Principal.from(principalStr), id, order} });
         const items3 = items2.map(id => (async () => {
             const part = canDBPartitionActor(id.canister, { agent: this.agent });
@@ -100,10 +111,10 @@ export class ItemData {
         if (this.agent === undefined) {
             return undefined;
         }
-        if (this.streams === undefined) {
+        if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_SUBCATEGORIES]) === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams[STREAM_LINK_SUBCATEGORIES][0][0].order;
+        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_SUBCATEGORIES])[0].order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async superCategories(opts?: {lowerBound?: string, limit?: number}) {
@@ -111,12 +122,12 @@ export class ItemData {
         if (this.agent === undefined) {
             return undefined;
         }
-        if (this.streams === undefined) {
+        if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_SUBITEMS]) === undefined) {
             return [];
         }
         const [outerCanister, outerKey] =
             (this.item.item.details as any).ownedCategory !== null || (this.item.item.details as any).communalCategory !== null
-            ? this.streams[STREAM_LINK_SUBCATEGORIES][0][1].order : this.streams[STREAM_LINK_SUBITEMS][0][1].order;
+            ? _unwrap(this.streams[STREAM_LINK_SUBCATEGORIES])[1].order : _unwrap(this.streams[STREAM_LINK_SUBITEMS])[1].order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async items(opts?: {lowerBound?: string, limit?: number}) {
@@ -124,10 +135,10 @@ export class ItemData {
         if (this.agent === undefined) {
             return undefined;
         }
-        if (this.streams === undefined) {
+        if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_SUBITEMS]) === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams[STREAM_LINK_SUBITEMS][0][0].order
+        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_SUBITEMS])[0].order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async comments(opts?: {lowerBound?: string, limit?: number}) {
@@ -135,10 +146,10 @@ export class ItemData {
         if (this.agent === undefined) {
             return undefined;
         }
-        if (this.streams === undefined) {
+        if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_COMMENTS]) === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams[STREAM_LINK_COMMENTS][0][0].order
+        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_COMMENTS])[0].order
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async antiComments(opts?: {lowerBound?: string, limit?: number}) {
@@ -146,10 +157,10 @@ export class ItemData {
         if (this.agent === undefined) {
             return undefined;
         }
-        if (this.streams === undefined) {
+        if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_COMMENTS]) === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = this.streams[STREAM_LINK_COMMENTS][0][1].order
+        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_COMMENTS])[1].order
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
 }
