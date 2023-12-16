@@ -86,7 +86,6 @@ export class ItemData {
             const m = s[1].match(/^([0-9]*)@(.*)$/);
             return [s[0], m[2], BigInt(m[1])];
         })(x))
-        console.log(items1a)
         const items2 = items1a.map(([order, principalStr, id]) => { return {canister: Principal.from(principalStr), id, order} });
         const items3 = items2.map(id => (async () => {
             const part = canDBPartitionActor(id.canister, { agent: this.agent });
