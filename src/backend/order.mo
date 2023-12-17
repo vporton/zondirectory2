@@ -112,11 +112,11 @@ shared actor class Orders() = this {
     let (streams1, streams2, timePair) = await* itemsTimeOrderPair(catId, itemId, comment);
     let streamsVar1: [var ?Reorder.Order] = switch (streams1) {
       case (?streams) { Array.thaw(streams) };
-      case null { [var null, null, null ]};
+      case null { [var null, null, null]};
     };
     let streamsVar2: [var ?Reorder.Order] = switch (streams2) {
       case (?streams) { Array.thaw(streams) };
-      case null { [var null, null, null ]};
+      case null { [var null, null, null]};
     };
     let streams1t = switch (streams1) {
       case (?t) { t[timePair] };
