@@ -41,19 +41,13 @@ export class ItemData {
     }
     static async create(agent: Agent, itemId: string): Promise<ItemData> {
         const obj = new ItemData(agent, itemId);
-        // console.log(obj)
         const client = canDBPartitionActor(obj.itemRef.canister);
         // TODO: Retrieve both by one call?
-        console.log('Y', [
-            client.getItem(BigInt(obj.itemRef.id)),
-            client.getStreams(BigInt(obj.itemRef.id)),
-        ])
         const [item, streams, streamsRev] = await Promise.all([
             client.getItem(BigInt(obj.itemRef.id)),
             client.getStreams(BigInt(obj.itemRef.id)),
             client.getRevStreams(BigInt(obj.itemRef.id)),
         ]) as [Item[] | [], Streams[] | [], Streams[] | []];
-        console.log('X', item)
         // const item = await client.getItem(BigInt(obj.itemRef.id)) as any;
         // const streams = await client.getStreams(BigInt(obj.itemRef.id)) as any;
         obj.item = item[0]; // TODO: if no such item
@@ -88,21 +82,16 @@ export class ItemData {
         const client2 = nacDBPartitionActor(innerPart, { agent: this.agent });
         const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as // TODO: limit
             [[string, {text: string}]] | [];
-        console.log('items', items)
         const items1aa = items.length === 0 ? [] : items.map(x => [x[0], x[1].text]);
-        console.log('items1aa', items1aa)
         const items1a: [string, string, bigint][] = items1aa.map(x => ((s) => {
             const m = s[1].match(/^([0-9]*)@(.*)$/);
             return [s[0], m[2], BigInt(m[1])];
         })(x))
-        console.log('items1a', items1a)
         const items2 = items1a.map(([order, principalStr, id]) => { return {canister: Principal.from(principalStr), id, order} });
-        console.log('items2', items2)
         const items3 = items2.map(id => (async () => {
             const part = canDBPartitionActor(id.canister, { agent: this.agent });
             return [id.order, id, await part.getItem(id.id)];
         })());
-        console.log('items3', items3)
         const items4: any = (await Promise.all(items3));
         return items4.map(([order, id, item]) => {
             return {
@@ -133,7 +122,6 @@ export class ItemData {
         if (this.agent === undefined) {
             return undefined;
         }
-        console.log('this.streamsRev', this.streamsRev)
         if (this.streamsRev === undefined) {
             return [];
         }
