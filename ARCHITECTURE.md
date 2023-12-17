@@ -6,6 +6,7 @@
 ### "i/" - ID -> Item
 - Attribute `"i"` - `Item` record.
 - Attribute `"st"` (time), `"sv"` (votes), `"sp"` (paid) - `Streams` record.
+- Attribute `"srt"` (time), `"srv"` (votes), `"srp"` (paid) - `Streams` record, reverse order.
 - Attribute `"t"` - post's text.
 TODO: Should have separate attribute post text.
 ### "a/" - user -> <buyer affiliate>/<seller affiliate>

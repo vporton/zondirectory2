@@ -142,12 +142,12 @@ shared actor class Orders() = this {
         v;
       };
     };
-    await* addItemToTimeList(stream1, catId);
-    await* addItemToTimeList(stream2, itemId);
+    await* addItemToTimeList(stream1, itemId);
+    await* addItemToTimeList(stream2, catId);
     let itemData1 = lib.serializeStreams(Array.freeze(streamsVar1));
     let itemData2 = lib.serializeStreams(Array.freeze(streamsVar2));
     await itemId1.putAttribute("i/" # Nat.toText(catId.1), "s", itemData1);
-    await itemId1.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData2);
+    await itemId1.putAttribute("i/" # Nat.toText(itemId.1), "sr", itemData2);
   };
 
   // TODO: Return value of this function violates single responsibility principle.
