@@ -145,7 +145,7 @@ module {
   public let STREAM_LINK_COMMENTS: StreamsLinks = 2; // item <-> comments
   public let STREAM_LINK_MAX: StreamsLinks = STREAM_LINK_COMMENTS;
 
-  public type Streams = [?(Reorder.Order, Reorder.Order)];
+  public type Streams = [?Reorder.Order];
 
   // TODO: messy order of the below functions
 
@@ -173,19 +173,14 @@ module {
   };
 
   public func serializeStreams(streams: Streams): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(36);
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(18);
     for(item in streams.vals()) {
       switch (item) {
-        case (?(r1, r2)) {
-          buf.add(#text(Principal.toText(Principal.fromActor(r1.order.0))));
-          buf.add(#int(r1.order.1));
-          buf.add(#text(Principal.toText(Principal.fromActor(r1.reverse.0))));
-          buf.add(#int(r1.reverse.1));
-
-          buf.add(#text(Principal.toText(Principal.fromActor(r2.order.0))));
-          buf.add(#int(r2.order.1));
-          buf.add(#text(Principal.toText(Principal.fromActor(r2.reverse.0))));
-          buf.add(#int(r2.reverse.1));
+        case (?r) {
+          buf.add(#text(Principal.toText(Principal.fromActor(r.order.0))));
+          buf.add(#int(r.order.1));
+          buf.add(#text(Principal.toText(Principal.fromActor(r.reverse.0))));
+          buf.add(#int(r.reverse.1));
         };
         case null {
           buf.add(#int(-1));
@@ -289,7 +284,7 @@ module {
   };
 
   public func deserializeStreams(attr: Entity.AttributeValue): Streams {
-    let s = Buffer.Buffer<?(Reorder.Order, Reorder.Order)>(36);
+    let s = Buffer.Buffer<?Reorder.Order>(36);
     let #tuple arr = attr else {
       Debug.trap("programming error");
     };
@@ -300,13 +295,12 @@ module {
         i += 1;
         continue w;
       };
-      switch (arr[i], arr[i+1], arr[i+2], arr[i+3], arr[i+4], arr[i+5], arr[i+6], arr[i+7]) {
-        case (#text c0, #int i0, #text c1, #int i1, #text c2, #int i2, #text c3, #int i3) {
-          i += 8;
-          s.add(?(
-            { order = (actor(c0), Int.abs(i0)); reverse = (actor(c1), Int.abs(i1)) },
-            { order = (actor(c2), Int.abs(i2)); reverse = (actor(c3), Int.abs(i3)) }
-          ));
+      switch (arr[i], arr[i+1], arr[i+2], arr[i+3]) {
+        case (#text c0, #int i0, #text c1, #int i1) {
+          i += 4;
+          s.add(
+            ?{ order = (actor(c0), Int.abs(i0)); reverse = (actor(c1), Int.abs(i1)) },
+          );
         };
         case _ {
           Debug.trap("programming error");

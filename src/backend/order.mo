@@ -109,27 +109,50 @@ shared actor class Orders() = this {
     };
 
     // Put into the beginning of time order.
-    let (streams, timePair) = await* itemsTimeOrderPair(catId, itemId, comment);
-    let streams2: [var ?(Reorder.Order, Reorder.Order)] = Array.thaw(streams);
-    let stream = switch (streams[timePair]) {
+    let (streams1, streams2, timePair) = await* itemsTimeOrderPair(catId, itemId, comment);
+    let streamsVar1: [var ?Reorder.Order] = switch (streams1) {
+      case (?streams) { Array.thaw(streams) };
+      case null { [var null, null, null ]};
+    };
+    let streamsVar2: [var ?Reorder.Order] = switch (streams2) {
+      case (?streams) { Array.thaw(streams) };
+      case null { [var null, null, null ]};
+    };
+    let streams1t = switch (streams1) {
+      case (?t) { t[timePair] };
+      case (null) { null };
+    };
+    let stream1 = switch (streams1t) {
       case (?stream) { stream };
       case null {
-        let pair = (
-          await* Reorder.createOrder(GUID.nextGuid(guidGen), {orderer}),
-          await* Reorder.createOrder(GUID.nextGuid(guidGen), {orderer}),
-        );
-        streams2[timePair] := ?pair;
-        pair;
+        let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), {orderer});
+        streamsVar1[timePair] := ?v;
+        v;
       };
     };
-    await* addItemToTimeList(stream.0, itemId);
-    await* addItemToTimeList(stream.1, catId);
-    let itemData = lib.serializeStreams(Array.freeze(streams2));
-    await itemId1.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData); // FIXME: Get/set by pair folder/item, not by item only.
+    let streams2t = switch (streams2) {
+      case (?t) { t[timePair] };
+      case (null) { null };
+    };
+    let stream2 = switch (streams2t) {
+      case (?stream) { stream };
+      case null {
+        let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), {orderer});
+        streamsVar2[timePair] := ?v;
+        v;
+      };
+    };
+    await* addItemToTimeList(stream1, catId);
+    await* addItemToTimeList(stream2, itemId);
+    let itemData1 = lib.serializeStreams(Array.freeze(streamsVar1));
+    let itemData2 = lib.serializeStreams(Array.freeze(streamsVar2));
+    await itemId1.putAttribute("i/" # Nat.toText(catId.1), "s", itemData1);
+    await itemId1.putAttribute("i/" # Nat.toText(itemId.1), "s", itemData2);
   };
 
+  // TODO: Return value of this function violates single responsibility principle.
   func itemsTimeOrderPair(catId: (Principal, Nat), itemId: (Principal, Nat), comment: Bool)
-    : async* (lib.Streams, lib.StreamsLinks)
+    : async* (?lib.Streams, ?lib.Streams, lib.StreamsLinks)
   {
     let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
@@ -140,16 +163,30 @@ shared actor class Orders() = this {
     };
     let childItem = lib.deserializeItem(childItemData);
 
-    let streamsData = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "s"); // FIXME: Get/set by pair folder/item, not by item only.
-    let streams = switch (streamsData) {
-      case (?data) {
-        lib.deserializeStreams(data);
+    let streamsData1 = await itemId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "s");
+    let streamsData2 = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "s");
+    func createStreams(streamsData: Nac.AttributeValue): lib.Streams {
+      switch (streamsData1) {
+        case (?data) {
+          lib.deserializeStreams(data);
+        };
+        case null {
+          [null, null, null];
+        };
       };
-      case null {
-        [null, null, null];
-      }
     };
-
+    let streams1 = switch (streamsData1) {
+      case (?data) {
+        ?createStreams(data);
+      };
+      case null { null };
+    };
+    let streams2 = switch (streamsData2) {
+      case (?data) {
+        ?createStreams(data);
+      };
+      case null { null };
+    };
     let streamLink = if (comment) {
       lib.STREAM_LINK_COMMENTS;
     } else {
@@ -158,7 +195,7 @@ shared actor class Orders() = this {
         case _ { lib.STREAM_LINK_SUBITEMS };
       };
     };
-    (streams, streamLink);
+    (streams1, streams2, streamLink);
   };
 
   /// Voting ///

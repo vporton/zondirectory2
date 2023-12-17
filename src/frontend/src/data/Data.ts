@@ -43,10 +43,15 @@ export class ItemData {
         // console.log(obj)
         const client = canDBPartitionActor(obj.itemRef.canister);
         // TODO: Retrieve both by one call?
+        console.log('Y', [
+            client.getItem(BigInt(obj.itemRef.id)),
+            client.getStreams(BigInt(obj.itemRef.id)),
+        ])
         const [item, streams] = await Promise.all([
             client.getItem(BigInt(obj.itemRef.id)),
             client.getStreams(BigInt(obj.itemRef.id)),
         ]) as [Item[] | [], Streams[] | []];
+        console.log('X', item)
         // const item = await client.getItem(BigInt(obj.itemRef.id)) as any;
         // const streams = await client.getStreams(BigInt(obj.itemRef.id)) as any;
         obj.item = item[0]; // TODO: if no such item
@@ -80,16 +85,21 @@ export class ItemData {
         const client2 = nacDBPartitionActor(innerPart, { agent: this.agent });
         const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as // TODO: limit
             [[string, {text: string}]] | [];
+        console.log('items', items)
         const items1aa = items.length === 0 ? [] : items.map(x => [x[0], x[1].text]);
+        console.log('items1aa', items1aa)
         const items1a: [string, string, bigint][] = items1aa.map(x => ((s) => {
             const m = s[1].match(/^([0-9]*)@(.*)$/);
             return [s[0], m[2], BigInt(m[1])];
         })(x))
+        console.log('items1a', items1a)
         const items2 = items1a.map(([order, principalStr, id]) => { return {canister: Principal.from(principalStr), id, order} });
+        console.log('items2', items2)
         const items3 = items2.map(id => (async () => {
             const part = canDBPartitionActor(id.canister, { agent: this.agent });
             return [id.order, id, await part.getItem(id.id)];
         })());
+        console.log('items3', items3)
         const items4: any = (await Promise.all(items3));
         return items4.map(([order, id, item]) => {
             return {
@@ -112,21 +122,22 @@ export class ItemData {
         if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_SUBCATEGORIES]) === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_SUBCATEGORIES])[0].order;
+        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_SUBCATEGORIES]).order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async superCategories(opts?: {lowerBound?: string, limit?: number}) {
-        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
-        if (this.agent === undefined) {
-            return undefined;
-        }
-        if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_SUBITEMS]) === undefined) {
-            return [];
-        }
-        const [outerCanister, outerKey] =
-            (this.item.item.details as any).ownedCategory !== null || (this.item.item.details as any).communalCategory !== null
-            ? _unwrap(this.streams[STREAM_LINK_SUBCATEGORIES])[1].order : _unwrap(this.streams[STREAM_LINK_SUBITEMS])[1].order;
-        return await this.aList(outerCanister, outerKey, {lowerBound, limit})
+        return []; // TODO
+        // const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
+        // if (this.agent === undefined) {
+        //     return undefined;
+        // }
+        // if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_SUBITEMS]) === undefined) {
+        //     return [];
+        // }
+        // const [outerCanister, outerKey] =
+        //     (this.item.item.details as any).ownedCategory !== null || (this.item.item.details as any).communalCategory !== null
+        //     ? _unwrap(this.streams[STREAM_LINK_SUBCATEGORIES])[1].order : _unwrap(this.streams[STREAM_LINK_SUBITEMS])[1].order;
+        // return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async items(opts?: {lowerBound?: string, limit?: number}) {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
@@ -136,7 +147,7 @@ export class ItemData {
         if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_SUBITEMS]) === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_SUBITEMS])[0].order;
+        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_SUBITEMS]).order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async comments(opts?: {lowerBound?: string, limit?: number}) {
@@ -147,18 +158,19 @@ export class ItemData {
         if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_COMMENTS]) === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_COMMENTS])[0].order
+        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_COMMENTS]).order
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async antiComments(opts?: {lowerBound?: string, limit?: number}) {
-        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
-        if (this.agent === undefined) {
-            return undefined;
-        }
-        if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_COMMENTS]) === undefined) {
-            return [];
-        }
-        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_COMMENTS])[1].order
-        return await this.aList(outerCanister, outerKey, {lowerBound, limit})
+        return []; // TODO
+        // const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
+        // if (this.agent === undefined) {
+        //     return undefined;
+        // }
+        // if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_COMMENTS]) === undefined) {
+        //     return [];
+        // }
+        // const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_COMMENTS])[1].order
+        // return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
 }
