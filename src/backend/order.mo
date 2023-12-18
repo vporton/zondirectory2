@@ -180,7 +180,7 @@ shared actor class Orders() = this {
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
 
     let streamsData1 = await itemId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "s");
-    let streamsData2 = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "s");
+    let streamsData2 = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "sr");
     func createStreams(streamsData: Nac.AttributeValue): lib.Streams {
       switch (streamsData1) {
         case (?data) {
