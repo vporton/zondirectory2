@@ -109,7 +109,8 @@ shared actor class Orders() = this {
     };
 
     // Put into the beginning of time order.
-    let (streams1, streams2, timePair) = await* itemsTimeOrderPair(catId, itemId, comment);
+    let (streams1, streams2) = await* itemsTimeOrderPair(catId, itemId);
+    let timePair = await* getStreamLinks(itemId, comment);
     let streamsVar1: [var ?Reorder.Order] = switch (streams1) {
       case (?streams) { Array.thaw(streams) };
       case null { [var null, null, null]};
@@ -150,11 +151,10 @@ shared actor class Orders() = this {
     await itemId1.putAttribute("i/" # Nat.toText(itemId.1), "sr", itemData2);
   };
 
-  // TODO: Return value of this function violates single responsibility principle.
-  func itemsTimeOrderPair(catId: (Principal, Nat), itemId: (Principal, Nat), comment: Bool)
-    : async* (?lib.Streams, ?lib.Streams, lib.StreamsLinks)
+  func getStreamLinks(/*catId: (Principal, Nat),*/ itemId: (Principal, Nat), comment: Bool)
+    : async* lib.StreamsLinks
   {
-    let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
+    // let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
     // TODO: Ensure that item data is readed once per `addItemToCategory` call.
     let ?childItemData = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "i") else {
@@ -162,6 +162,21 @@ shared actor class Orders() = this {
       Debug.trap("cannot get child item");
     };
     let childItem = lib.deserializeItem(childItemData);
+
+    if (comment) {
+      lib.STREAM_LINK_COMMENTS;
+    } else {
+      switch (childItem.item.details) {
+        case (#communalCategory or #ownedCategory) { lib.STREAM_LINK_SUBCATEGORIES };
+        case _ { lib.STREAM_LINK_SUBITEMS };
+      };
+    };
+  };
+
+  func itemsTimeOrderPair(catId: (Principal, Nat), itemId: (Principal, Nat))
+    : async* (?lib.Streams, ?lib.Streams)
+  {
+    let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
 
     let streamsData1 = await itemId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "s");
     let streamsData2 = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "s");
@@ -187,15 +202,7 @@ shared actor class Orders() = this {
       };
       case null { null };
     };
-    let streamLink = if (comment) {
-      lib.STREAM_LINK_COMMENTS;
-    } else {
-      switch (childItem.item.details) {
-        case (#communalCategory or #ownedCategory) { lib.STREAM_LINK_SUBCATEGORIES };
-        case _ { lib.STREAM_LINK_SUBITEMS };
-      };
-    };
-    (streams1, streams2, streamLink);
+    let streamLink = (streams1, streams2);
   };
 
   /// Voting ///
