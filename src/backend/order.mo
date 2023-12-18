@@ -102,10 +102,11 @@ shared actor class Orders() = this {
       case (#ownedCategory) {
         lib.onlyItemOwner(caller, categoryItem);
       };
-      // case (#communalCategory) {};
+      case (#communalCategory) {};
       case _ {
-        // We allow to post a subitem not of a category, it's called comments.
-        // Debug.trap("not a category");
+        if (not comment) {
+          Debug.trap("not a category");
+        };
       };
     };
 
