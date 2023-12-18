@@ -1,5 +1,7 @@
 - Counting number of logged-in users, number of items of various kinds.
 
+- Download a backup of author's items.
+
 - One folder having several editors, like as in Dmoz.
 
 - Race conditions of reading an entry and saving it with a modified subkey.
