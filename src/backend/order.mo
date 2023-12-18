@@ -92,6 +92,7 @@ shared actor class Orders() = this {
     let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
 
+    // TODO: Ensure that it is retrieved once.
     let ?categoryItemData = await catId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "i") else {
       Debug.trap("cannot get category item");
     };
