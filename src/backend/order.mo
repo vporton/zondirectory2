@@ -48,25 +48,25 @@ shared actor class Orders() = this {
 
   // Public API //
 
-  func addItemToTimeList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat)): async* () {
+  func addItemToList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat), side: { #beginning; #end }): async* () {
     // FIXME: Check caller.
     // FIXME: Prevent duplicate entries.
     let theSubDB2: Nac.OuterCanister = theSubDB.order.0;
     // FIXME: There are several streams.
     let timeScanResult = await theSubDB2.scanLimitOuter({
-      dir = #fwd;
+      dir = if (side == #end) { #bwd } else { #fwd };
       outerKey = theSubDB.order.1;
       lowerBound = "";
       upperBound = "x";
       limit = 1;
-      ascending = ?true;
+      ascending = ?(if (side == #end) { false } else { true });
     });
     let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
       0;
     } else {
       let t = timeScanResult.results[0].0;
       let n = lib.decodeInt(t);
-      n - 1;
+      if (side == #end) { n + 1 } else { n - 1 };
     };
     let timeScanItemInfo = Nat.toText(itemToAdd.1) # "@" # Principal.toText(itemToAdd.0);
     
@@ -144,8 +144,8 @@ shared actor class Orders() = this {
         v;
       };
     };
-    await* addItemToTimeList(stream1, itemId);
-    await* addItemToTimeList(stream2, catId);
+    await* addItemToList(stream1, itemId, #beginning);
+    await* addItemToList(stream2, catId, #beginning);
     let itemData1 = lib.serializeStreams(Array.freeze(streamsVar1));
     let itemData2 = lib.serializeStreams(Array.freeze(streamsVar2));
     await itemId1.putAttribute("i/" # Nat.toText(catId.1), "s", itemData1);
