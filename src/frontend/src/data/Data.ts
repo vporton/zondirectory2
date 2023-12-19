@@ -83,6 +83,7 @@ export class ItemData {
         const client2 = nacDBPartitionActor(innerPart, { agent: this.agent });
         const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as // TODO: limit
             [[string, {text: string}]] | [];
+        console.log('items', items)
         const items1aa = items.length === 0 ? [] : items.map(x => [x[0], x[1].text]);
         const items1a: [string, string, bigint][] = items1aa.map(x => ((s) => {
             const m = s[1].match(/^([0-9]*)@(.*)$/);

@@ -69,6 +69,7 @@ shared actor class Orders() = this {
       } else {
         let t = scanResult.results[0].0;
         let n = lib.decodeInt(t);
+        Debug.print("t=" # t # "; n=" # debug_show(n));
         if (side == #end) { n + 1 } else { n - 1 };
       };
       timeScanSK;
