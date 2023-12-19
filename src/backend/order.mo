@@ -24,11 +24,28 @@ import Payments "payments";
 import RBT "mo:stable-rbtree/StableRBTree";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 import Itertools "mo:itertools/Iter";
+import MyCycles "mo:nacdb/Cycles";
 import lib "lib";
 
 // TODO: Delete "hanging" items (as soon, as they found)
 
-shared actor class Orders() = this {
+shared({caller = initialOwner}) actor class Orders() = this {
+  stable var owners = [initialOwner];
+
+  func checkCaller(caller: Principal) {
+    if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
+      Debug.trap("order: not allowed");
+    }
+  };
+
+  public shared({caller = caller}) func setOwners(_owners: [Principal]): async () {
+    checkCaller(caller);
+
+    owners := _owners;
+  };
+
+  public query func getOwners(): async [Principal] { owners };
+
   var initialized: Bool = false;
 
   // stable var rng: Prng.Seiran128 = Prng.Seiran128(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
@@ -37,20 +54,21 @@ shared actor class Orders() = this {
   stable let orderer = Reorder.createOrderer(NacDBIndex);
 
   // TODO: Remove this function?
-  public shared({ caller }) func init(): async () {
+  public shared({ caller }) func init(_owners: [Principal]): async () {
+    checkCaller(caller);
+    ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles); // TODO: another number of cycles?
     if (initialized) {
-      Debug.trap("already initialized");
+        Debug.trap("already initialized");
     };
 
-    // ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
-
+    owners := _owners;
+    MyCycles.addPart(Common.dbOptions.partitionCycles);
     initialized := true;
   };
 
   // Public API //
 
   func addItemToList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat), side: { #beginning; #end; #zero }): async* () {
-    // FIXME: Check caller.
     // FIXME: Prevent duplicate entries.
     let theSubDB2: Nac.OuterCanister = theSubDB.order.0;
     // FIXME: There are several streams.
@@ -95,6 +113,8 @@ shared actor class Orders() = this {
     comment: Bool,
     side: { #beginning; #end }, // ignored unless adding to an owned folder
   ): async () {
+    // TODO: Need both these two checks?
+    checkCaller(caller);
     await* lib.checkSybil(caller);
 
     let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
