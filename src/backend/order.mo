@@ -48,25 +48,30 @@ shared actor class Orders() = this {
 
   // Public API //
 
-  func addItemToList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat), side: { #beginning; #end }): async* () {
+  func addItemToList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat), side: { #beginning; #end; #zero }): async* () {
     // FIXME: Check caller.
     // FIXME: Prevent duplicate entries.
     let theSubDB2: Nac.OuterCanister = theSubDB.order.0;
     // FIXME: There are several streams.
-    let timeScanResult = await theSubDB2.scanLimitOuter({
-      dir = if (side == #end) { #bwd } else { #fwd };
-      outerKey = theSubDB.order.1;
-      lowerBound = "";
-      upperBound = "x";
-      limit = 1;
-      ascending = ?(if (side == #end) { false } else { true });
-    });
-    let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
+    let timeScanSK = if (side == #zero) {
       0;
     } else {
-      let t = timeScanResult.results[0].0;
-      let n = lib.decodeInt(t);
-      if (side == #end) { n + 1 } else { n - 1 };
+      let timeScanResult = await theSubDB2.scanLimitOuter({
+        dir = if (side == #end) { #bwd } else { #fwd };
+        outerKey = theSubDB.order.1;
+        lowerBound = "";
+        upperBound = "x";
+        limit = 1;
+        ascending = ?(if (side == #end) { false } else { true });
+      });
+      let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
+        0;
+      } else {
+        let t = timeScanResult.results[0].0;
+        let n = lib.decodeInt(t);
+        if (side == #end) { n + 1 } else { n - 1 };
+      };
+      timeScanSK;
     };
     let timeScanItemInfo = Nat.toText(itemToAdd.1) # "@" # Principal.toText(itemToAdd.0);
     
@@ -86,6 +91,7 @@ shared actor class Orders() = this {
     catId: (Principal, Nat),
     itemId: (Principal, Nat),
     comment: Bool,
+    side: { #beginning; #end }, // ignored unless adding to an owned folder
   ): async () {
     await* lib.checkSybil(caller);
 
@@ -110,10 +116,29 @@ shared actor class Orders() = this {
         };
       };
     };
+    let links = await* getStreamLinks(itemId, comment);
+    await* addToStreams(catId, itemId, comment, links, itemId1, "s", "sr", #beginning);
+    if (categoryItem.item.details == #ownedCategory) {
+      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", side);
+    } else {
+      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", #end);
+    };
+    await* addToStreams(catId, itemId, comment, links, itemId1, "sp", "srp", #zero);
+  };
 
+  /// `key1` and `key2` are like `"s"` and `"sr"`
+  func addToStreams(
+    catId: (Principal, Nat),
+    itemId: (Principal, Nat),
+    comment: Bool,
+    links: lib.StreamsLinks,
+    itemId1: CanDBPartition.CanDBPartition,
+    key1: Text,
+    key2: Text,
+    side: { #beginning; #end; #zero },
+  ): async* () {
     // Put into the beginning of time order.
-    let (streams1, streams2) = await* itemsOrderPair(catId, itemId, "s", "sr");
-    let timePair = await* getStreamLinks(itemId, comment);
+    let (streams1, streams2) = await* itemsOrderPair(catId, itemId, key1, key2);
     let streamsVar1: [var ?Reorder.Order] = switch (streams1) {
       case (?streams) { Array.thaw(streams) };
       case null { [var null, null, null]};
@@ -123,35 +148,35 @@ shared actor class Orders() = this {
       case null { [var null, null, null]};
     };
     let streams1t = switch (streams1) {
-      case (?t) { t[timePair] };
+      case (?t) { t[links] };
       case (null) { null };
     };
     let stream1 = switch (streams1t) {
       case (?stream) { stream };
       case null {
         let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), {orderer});
-        streamsVar1[timePair] := ?v;
+        streamsVar1[links] := ?v;
         v;
       };
     };
     let streams2t = switch (streams2) {
-      case (?t) { t[timePair] };
+      case (?t) { t[links] };
       case (null) { null };
     };
     let stream2 = switch (streams2t) {
       case (?stream) { stream };
       case null {
         let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), {orderer});
-        streamsVar2[timePair] := ?v;
+        streamsVar2[links] := ?v;
         v;
       };
     };
-    await* addItemToList(stream1, itemId, #beginning);
-    await* addItemToList(stream2, catId, #beginning);
+    await* addItemToList(stream1, itemId, side);
+    await* addItemToList(stream2, catId, side);
     let itemData1 = lib.serializeStreams(Array.freeze(streamsVar1));
     let itemData2 = lib.serializeStreams(Array.freeze(streamsVar2));
-    await itemId1.putAttribute("i/" # Nat.toText(catId.1), "s", itemData1);
-    await itemId1.putAttribute("i/" # Nat.toText(itemId.1), "sr", itemData2);
+    await itemId1.putAttribute("i/" # Nat.toText(catId.1), key1, itemData1);
+    await itemId1.putAttribute("i/" # Nat.toText(itemId.1), key2, itemData2);
   };
 
   func getStreamLinks(/*catId: (Principal, Nat),*/ itemId: (Principal, Nat), comment: Bool)
