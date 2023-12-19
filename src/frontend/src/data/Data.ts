@@ -46,8 +46,8 @@ export class ItemData {
         // TODO: Retrieve both by one call?
         const [item, streams, streamsRev] = await Promise.all([
             client.getItem(BigInt(obj.itemRef.id)),
-            client.getStreams(BigInt(obj.itemRef.id), "s" + kind),
-            client.getStreams(BigInt(obj.itemRef.id), "sr" + kind),
+            client.getStreams(BigInt(obj.itemRef.id), kind),
+            client.getStreams(BigInt(obj.itemRef.id), "r" + kind),
         ]) as [Item[] | [], Streams[] | [], Streams[] | []];
         // const item = await client.getItem(BigInt(obj.itemRef.id)) as any;
         // const streams = await client.getStreams(BigInt(obj.itemRef.id)) as any;

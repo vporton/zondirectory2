@@ -9,6 +9,10 @@
   But how to reset it reliably?
   The best solution is to move the code to `NacDBPartition` (it can grow 7 times).
 
+- Indicate when switching r/v/p stream type.
+
+- "Waiting" overlay widget.
+
 - Can a folder be a comment?
 
 - Option for an owned folder to be ordered by voting?
