@@ -117,7 +117,7 @@ shared actor class Orders() = this {
       };
     };
     let links = await* getStreamLinks(itemId, comment);
-    await* addToStreams(catId, itemId, comment, links, itemId1, "s", "sr", #beginning);
+    await* addToStreams(catId, itemId, comment, links, itemId1, "st", "srt", #beginning);
     if (categoryItem.item.details == #ownedCategory) {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", side);
     } else {

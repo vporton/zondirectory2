@@ -22,11 +22,15 @@ export default function SubFolders(props) {
     const [categories, setCategories] = useState([] as any[]); // TODO: `as Item[]`
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
+    const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("t"); // time, votes, or paid
+    function updateStreamKind(e) {
+        setStreamKind(e.currentTarget.value);
+    }
 
     const navigate = useNavigate();
     useEffect(() => {
         if (id !== undefined) {
-            AppData.create(props.defaultAgent, id).then(data => {
+            AppData.create(props.defaultAgent, id, streamKind).then(data => {
                 data.title().then(x => setTitle(x));
                 let categories;
                 if (props['data-dir'] == 'super') {
@@ -49,7 +53,7 @@ export default function SubFolders(props) {
                 setXData(data);
             });
         }
-    }, [id, props.defaultAgent]);
+    }, [id, props.defaultAgent, streamKind]);
 
     function moreItems(event: any) {
         event.preventDefault();
@@ -74,7 +78,12 @@ export default function SubFolders(props) {
     return (
         <>
             <h2>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: <a href='#' onClick={() => navigate(`/item/`+id)}>{title}</a></h2>
-            <ul>
+            <p>Sort by:{" "}
+                <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
+                <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
+                <label><input type="radio" name="stream" value="p" onChange={updateStreamKind} checked={streamKind == "p"}/> amount paid</label>
+            </p>
+           <ul>
                 {categories.map(x =>
                     <li key={serializeItemRef(x.id as any)}>
                         <p>

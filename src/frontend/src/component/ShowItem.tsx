@@ -50,6 +50,7 @@ function ShowItemContent(props: {defaultAgent}) {
     const [commentsReachedEnd, setCommentsReachedEnd] = useState(false);
     const [antiCommentsLast, setAntiCommentsLast] = useState("");
     const [antiCommentsReachedEnd, setAntiCommentsReachedEnd] = useState(false);
+    const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("t"); // time, votes, or paid
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -61,7 +62,7 @@ function ShowItemContent(props: {defaultAgent}) {
     }, [id]);
     useEffect(() => { // TODO
         if (id !== undefined) {
-            AppData.create(props.defaultAgent, id).then(data => {
+            AppData.create(props.defaultAgent, id, streamKind).then(data => {
                 setXData(data);
                 setData(data.item);
                 data.locale().then(x => setLocale(x));
@@ -98,7 +99,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 });
             });
         }
-    }, [id, props.defaultAgent]); // TODO: more tight choice
+    }, [id, props.defaultAgent, streamKind]); // TODO: more tight choice
     function moreSubcategories(event: any) {
         event.preventDefault();
         navigate(`/subfolders-of/`+id)
@@ -152,6 +153,9 @@ function ShowItemContent(props: {defaultAgent}) {
             }
         });
     }
+    function updateStreamKind(e) {
+        setStreamKind(e.currentTarget.value);
+    }
     const isCategory = type === 'ownedCategory' || type === 'communalCategory';
     return <>
         <h2><ItemType item={data}/>{isCategory ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
@@ -159,9 +163,9 @@ function ShowItemContent(props: {defaultAgent}) {
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         {postText !== "" ? <p lang={locale}>{postText}</p> : ""}
         <p>Sort by:{" "}
-            <label><input type="radio" name="stream" defaultChecked={true}/> time</label>{" "}
-            <label><input type="radio" name="stream"/> votes</label>{" "}
-            <label><input type="radio" name="stream"/> amount paid</label>
+            <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
+            <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
+            <label><input type="radio" name="stream" value="p" onChange={updateStreamKind} checked={streamKind == "p"}/> amount paid</label>
         </p>
         {!isCategory ? "" : <>
             <h3>Sub-folders</h3>

@@ -39,14 +39,15 @@ export class ItemData {
         this.agent = agent;
         this.itemRef = parseItemRef(itemId);
     }
-    static async create(agent: Agent, itemId: string): Promise<ItemData> {
+    /// `"t" | "v" | "p"` - time, votes, or paid.
+    static async create(agent: Agent, itemId: string, kind: "t" | "v" | "p"): Promise<ItemData> {
         const obj = new ItemData(agent, itemId);
         const client = canDBPartitionActor(obj.itemRef.canister);
         // TODO: Retrieve both by one call?
         const [item, streams, streamsRev] = await Promise.all([
             client.getItem(BigInt(obj.itemRef.id)),
-            client.getStreams(BigInt(obj.itemRef.id)),
-            client.getRevStreams(BigInt(obj.itemRef.id)),
+            client.getStreams(BigInt(obj.itemRef.id), "s" + kind),
+            client.getStreams(BigInt(obj.itemRef.id), "sr" + kind),
         ]) as [Item[] | [], Streams[] | [], Streams[] | []];
         // const item = await client.getItem(BigInt(obj.itemRef.id)) as any;
         // const streams = await client.getStreams(BigInt(obj.itemRef.id)) as any;

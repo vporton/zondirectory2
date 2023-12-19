@@ -190,15 +190,9 @@ shared actor class CanDBPartition(options: {
     do ? { lib.deserializeItem(data!) };
   };
 
-  public query func getStreams(itemId: Nat): async ?lib.Streams {
-    // FIXME: Duplicate code, and "s" varies
-    let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "s");
-    do ? { lib.deserializeStreams(data!) };
-  };
-
-  public query func getRevStreams(itemId: Nat): async ?lib.Streams {
-    // FIXME: Duplicate code, and "s" varies
-    let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "sr");
+  public query func getStreams(itemId: Nat, kind: Text): async ?lib.Streams {
+    // TODO: Duplicate code
+    let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "s" # kind);
     do ? { lib.deserializeStreams(data!) };
   };
 }
