@@ -15,8 +15,8 @@ export default function EditItemItem(props: {comment?: boolean}) {
     const routeParams = useParams();
     const navigate = useNavigate();
     const [mainCategory, setMainCategory] = useState<string | undefined>(undefined); // TODO: For a comment, it may be not a category.
-    const [categoriesList, setCategoriesList] = useState<string[]>([]);
-    const [antiCommentsList, setAntiCommentsList] = useState<string[]>([]);
+    const [categoriesList, setCategoriesList] = useState<[string, {beginning: null} | {end: null}][]>([]);
+    const [antiCommentsList, setAntiCommentsList] = useState<[string, {beginning: null} | {end: null}][]>([]);
     useEffect(() => {
         setMainCategory(routeParams.cat);
     }, [routeParams.cat]);
@@ -86,8 +86,8 @@ export default function EditItemItem(props: {comment?: boolean}) {
                         </TabPanel>
                     </Tabs>
                     <EditCategoriesList
-                        defaultCategories={!(props.comment === true) && mainCategory !== undefined ? [mainCategory] : []}
-                        defaultAntiComments={props.comment === true && mainCategory !== undefined ? [mainCategory] : []}
+                        defaultCategories={!(props.comment === true) && mainCategory !== undefined ? [[mainCategory, {beginning: null}]] : []}
+                        defaultAntiComments={props.comment === true && mainCategory !== undefined ? [[mainCategory, {beginning: null}]] : []}
                         onChangeCategories={setCategoriesList}
                         onChangeAntiComments={setAntiCommentsList}
                     />

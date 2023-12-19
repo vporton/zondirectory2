@@ -14,8 +14,8 @@ export default function EditCategory(props: {super?: boolean}) {
     const routeParams = useParams(); // TODO: a dynamic value
     const navigate = useNavigate();
     const [superCategory, setSuperCategory] = useState<string | undefined>();
-    const [categoriesList, setCategoriesList] = useState<string[]>([]);
-    const [antiCommentsList, setAntiCommentsList] = useState<string[]>([]);
+    const [categoriesList, setCategoriesList] = useState<[string, {beginning: null} | {end: null}][]>([]);
+    const [antiCommentsList, setAntiCommentsList] = useState<[string, {beginning: null} | {end: null}][]>([]);
     useEffect(() => {
         setSuperCategory(routeParams.cat);
     }, [routeParams.cat])
@@ -55,9 +55,9 @@ export default function EditCategory(props: {super?: boolean}) {
                             await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)}, false);
                             await addToMultipleCategories(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
                         } else {
-                            for (const catStr of categoriesList) {
+                            for (const cat of categoriesList) {
                                 // TODO: It may fail to parse.
-                                await addToCategory(agent!, {canister: part, id: Number(n)}, parseItemRef(catStr), false);
+                                await addToCategory(agent!, {canister: part, id: Number(n)}, parseItemRef(cat[0]), false, cat[1]);
                             }
                         }
                         navigate("/item/"+ref);
@@ -86,7 +86,7 @@ export default function EditCategory(props: {super?: boolean}) {
                         </TabPanel>
                     </Tabs>
                     <EditCategoriesList
-                        defaultCategories={superCategory === undefined ? [] : [superCategory]}
+                        defaultCategories={superCategory === undefined ? [] : [[superCategory, {beginning: null}]]}
                         onChangeCategories={setCategoriesList}
                         onChangeAntiComments={setAntiCommentsList}
                         reverse={props.super === true}
