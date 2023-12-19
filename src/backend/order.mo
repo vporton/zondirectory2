@@ -74,7 +74,7 @@ shared actor class Orders() = this {
       };
       timeScanSK;
     };
-    let timeScanItemInfo = Nat.toText(itemToAdd.1) # "@" # Principal.toText(itemToAdd.0);
+    let scanItemInfo = Nat.toText(itemToAdd.1) # "@" # Principal.toText(itemToAdd.0);
     
     let guid = GUID.nextGuid(guidGen);
 
@@ -84,7 +84,7 @@ shared actor class Orders() = this {
       orderer;
       order = theSubDB;
       key = timeScanSK;
-      value = timeScanItemInfo;
+      value = scanItemInfo;
     });
   };
 
