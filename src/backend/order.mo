@@ -112,7 +112,7 @@ shared actor class Orders() = this {
     };
 
     // Put into the beginning of time order.
-    let (streams1, streams2) = await* itemsTimeOrderPair(catId, itemId);
+    let (streams1, streams2) = await* itemsOrderPair(catId, itemId, "s", "sr");
     let timePair = await* getStreamLinks(itemId, comment);
     let streamsVar1: [var ?Reorder.Order] = switch (streams1) {
       case (?streams) { Array.thaw(streams) };
@@ -176,13 +176,14 @@ shared actor class Orders() = this {
     };
   };
 
-  func itemsTimeOrderPair(catId: (Principal, Nat), itemId: (Principal, Nat))
+  /// `key1` and `key2` are like `"s"` and `"sr"`
+  func itemsOrderPair(catId: (Principal, Nat), itemId: (Principal, Nat), key1: Text, key2: Text)
     : async* (?lib.Streams, ?lib.Streams)
   {
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
 
-    let streamsData1 = await itemId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "s");
-    let streamsData2 = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "sr");
+    let streamsData1 = await itemId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, key1);
+    let streamsData2 = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, key2);
     func createStreams(streamsData: Nac.AttributeValue): lib.Streams {
       switch (streamsData1) {
         case (?data) {
