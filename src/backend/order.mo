@@ -23,6 +23,7 @@ import Bool "mo:base/Bool";
 import Payments "payments";
 import RBT "mo:stable-rbtree/StableRBTree";
 import StableBuffer "mo:StableBuffer/StableBuffer";
+import Itertools "mo:itertools/Iter";
 import lib "lib";
 
 // TODO: Delete "hanging" items (as soon, as they found)
@@ -68,7 +69,7 @@ shared actor class Orders() = this {
         0;
       } else {
         let t = scanResult.results[0].0;
-        let n = lib.decodeInt(t);
+        let n = lib.decodeInt(Text.fromIter(Itertools.take(t.chars(), 16)));
         Debug.print("t=" # t # "; n=" # debug_show(n));
         if (side == #end) { n + 1 } else { n - 1 };
       };
