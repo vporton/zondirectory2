@@ -56,7 +56,7 @@ shared actor class Orders() = this {
     let timeScanSK = if (side == #zero) {
       0;
     } else {
-      let timeScanResult = await theSubDB2.scanLimitOuter({
+      let scanResult = await theSubDB2.scanLimitOuter({
         dir = if (side == #end) { #bwd } else { #fwd };
         outerKey = theSubDB.order.1;
         lowerBound = "";
@@ -64,10 +64,10 @@ shared actor class Orders() = this {
         limit = 1;
         ascending = ?(if (side == #end) { false } else { true });
       });
-      let timeScanSK = if (timeScanResult.results.size() == 0) { // empty list
+      let timeScanSK = if (scanResult.results.size() == 0) { // empty list
         0;
       } else {
-        let t = timeScanResult.results[0].0;
+        let t = scanResult.results[0].0;
         let n = lib.decodeInt(t);
         if (side == #end) { n + 1 } else { n - 1 };
       };
