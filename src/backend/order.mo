@@ -113,8 +113,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
     comment: Bool,
     side: { #beginning; #end }, // ignored unless adding to an owned folder
   ): async () {
-    // TODO: Need both these two checks?
-    checkCaller(caller);
     await* lib.checkSybil(caller);
 
     let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
