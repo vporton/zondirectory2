@@ -32,32 +32,32 @@ let
       , dependencies = [ "base" ]
       },
       { name = "candb"
-      , repo = "git@github.com:vporton/CanDB.git"
+      , repo = "https://github.com/vporton/CanDB"
       , version = "no-blob"
       , dependencies = [ "base", "candy" ]
       },
       { name = "nacdb"
-      , repo = "git@github.com:vporton/NacDB.git"
+      , repo = "https://github.com/vporton/NacDB"
       , version = "main"
       , dependencies = [ "base" ]
       },
       { name = "reorder"
-      , repo = "git@github.com:vporton/NacDBReorder.git"
+      , repo = "https://github.com/vporton/NacDBReorder"
       , version = "main"
       , dependencies = [ "base" ]
       },
       { name = "icrc1"
-      , repo = "git@github.com:NatLabs/icrc1"
+      , repo = "https://github.com/NatLabs/icrc1"
       , version = "0.0.1"
       , dependencies = [ "base", "itertools" ]
       },
       { name = "itertools"
-      , repo = "git@github.com:NatLabs/itertools"
+      , repo = "https://github.com/NatLabs/itertools"
       , version = "main"
       , dependencies = [ "base" ]
       },
       { name = "StableTrieMap"
-      , repo = "git@github.com:NatLabs/StableTrieMap"
+      , repo = "https://github.com/NatLabs/StableTrieMap"
       , version = "main"
       , dependencies = [ "base" ]
       },

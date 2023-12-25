@@ -33,11 +33,11 @@ compile-my-wasm: CanDBPartition.wasm NacDBPartition.wasm
 
 .PHONY: CanDBPartition.wasm
 CanDBPartition.wasm:
-	moc `vessel sources` src/storage/CanDBPartition.mo
+	moc `mops sources` src/storage/CanDBPartition.mo
 
 .PHONY: NacDBPartition.wasm
 NacDBPartition.wasm:
-	moc `vessel sources` src/storage/NacDBPartition.mo
+	moc `mops sources` src/storage/NacDBPartition.mo
 
 .PHONY: deploy-frontend
 deploy-frontend: compile-my-wasm do-deploy-frontend upgrade-partitions
