@@ -26,7 +26,7 @@ import RBT "mo:stable-rbtree/StableRBTree";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 import Itertools "mo:itertools/Iter";
 import MyCycles "mo:nacdb/Cycles";
-import BTree "mo:btree/BTree";
+import BTree "mo:stableheapbtreemap/BTree";
 import lib "lib";
 
 // TODO: Delete "hanging" items (as soon, as they found)

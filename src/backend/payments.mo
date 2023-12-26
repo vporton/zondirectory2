@@ -1,7 +1,7 @@
 import lib "lib";
 import PST "canister:pst";
 import Token "mo:icrc1/ICRC1/Canisters/Token";
-import BTree "mo:btree/BTree";
+import BTree "mo:stableheapbtreemap/BTree";
 import ICRC1Types "mo:icrc1/ICRC1/Types";
 import Time "mo:base/Time";
 import Principal "mo:base/Principal";

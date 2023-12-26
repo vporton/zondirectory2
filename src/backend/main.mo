@@ -7,7 +7,7 @@ import Principal "mo:base/Principal";
 import Float "mo:base/Float";
 import Debug "mo:base/Debug";
 import Entity "mo:candb/Entity";
-import BTree "mo:btree/BTree";
+import BTree "mo:stableheapbtreemap/BTree";
 import RBT "mo:stable-rbtree/StableRBTree";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
