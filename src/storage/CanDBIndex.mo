@@ -229,7 +229,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
       };
     };
     await partition.put({sk; attributes = new});
-    Principal.fromActor(partition);
+    Principal.fromActor(partition); // FIXME: (Here and in other places) due to insert limit limit, may be another partition.
   };
 
   public shared({caller}) func transformAttrubuteWithHint({
