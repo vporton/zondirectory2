@@ -256,6 +256,12 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   /// Voting ///
 
+  
+
+  public shared({caller}) func voteUp(part: Principal, sk: Entity.SK) {
+
+  }
+
   // FIXME: Below functions?
 
   // func deserializeVoteAttr(attr: Entity.AttributeValue): Float {

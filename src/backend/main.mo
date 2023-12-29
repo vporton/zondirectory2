@@ -168,12 +168,16 @@ shared actor class ZonBackend() = this {
     };    
   };
 
-  // FIXME: Check against duplicate records in different canisters.
-  public shared({caller}) func setUserData(canisterId: Principal, _user: User) {
+  public shared({caller}) func setUserData(partitionId: ?Principal, _user: User) {
     await* lib.checkSybil(caller);
-    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-    await db.putAttribute(key, "u", serializeUser(_user));
+    await CanDBIndex.putAttrubuteNoDuplicates({
+      pk = "main";
+      sk = key;
+      subkey = "u";
+      value = serializeUser(_user);
+      hint = partitionId;
+    });
   };
 
   // TODO: Should also remove all his/her items?
