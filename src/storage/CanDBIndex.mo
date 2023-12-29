@@ -320,6 +320,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     switch (existing) {
       case (?existing) { existing };
       case null {
+        // FIXME: Don't create a new canister everty time, reuse the last canister.
         let newStorageCanisterId = await* createStorageCanister(pk, ownersOrSelf());
         actor(newStorageCanisterId);
       }
