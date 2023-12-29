@@ -168,6 +168,7 @@ shared actor class ZonBackend() = this {
     };    
   };
 
+  // FIXME: Check against duplicate records in different canisters.
   public shared({caller}) func setUserData(canisterId: Principal, _user: User) {
     await* lib.checkSybil(caller);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
