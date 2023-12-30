@@ -22,11 +22,5 @@ TODO: Should have separate attribute post text.
 * paid/time: category -> sub-categories
 * paid/time: item -> comments
 
-The `time/time` relations need to be rewritten using `NacDBReorder` in order to
+FIXME: The `time/time` relations need to be rewritten using `NacDBReorder` in order to
 be deleteable.
-
-## Misc
-
-TODO:
-When creating a new user (`u/`) record, must reliably check that there are no
-records for the same user before it.
