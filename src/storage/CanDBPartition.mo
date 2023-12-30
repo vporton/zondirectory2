@@ -110,6 +110,7 @@ shared actor class CanDBPartition(options: {
 
   func _getAttribute(options: CanDB.GetOptions, subkey: Text): ?Entity.AttributeValue {
     let all = CanDB.get(db, options);
+    Debug.print("ITEM: " # debug_show(all));
     do ? { RBT.get(all!.attributes, Text.compare, subkey)! };
   };
 
@@ -135,7 +136,8 @@ shared actor class CanDBPartition(options: {
 
   public shared({caller}) func putAttribute(options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue }): async () {
     checkCaller(caller);
-    ignore Multi.replaceAttribute(db, options)
+    Debug.print("YYY: CanDBPartition.putAttribute");
+    ignore Multi.replaceAttribute(db, options);
   };
 
   public shared({caller}) func putExisting(options: CanDB.PutOptions): async Bool {
