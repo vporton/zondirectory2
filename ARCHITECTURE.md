@@ -1,7 +1,7 @@
 ## CanDB database structure
 
 ### "u/" - Principal -> User
-- Attribute `"u"` - `User` record.
+- Attribute `"u"`: `"u"` - `User` record, `"v"` - Karma struct.
 - (Unused) Attribute `"s"` - set to true if anti-sybil checking passed.
 ### "i/" - ID -> Item
 - Attribute `"i"` - `Item` record.
@@ -10,6 +10,7 @@
 - Attribute `"t"` - post's text.
 TODO: Should have separate attribute post text.
 ### "a/" - user -> <buyer affiliate>/<seller affiliate>
+### "v/<principal>/<parent>/<child>" -> #int +-1 - votes
 
 ## NacDB database structure
 * time/time: category -> sub-items
@@ -24,3 +25,7 @@ TODO: Should have separate attribute post text.
 
 FIXME: The `time/time` relations need to be rewritten using `NacDBReorder` in order to
 be deleteable.
+
+Allowed number of votes:
+- 10 per day
+- additional 5 votes (not per day) for each message
