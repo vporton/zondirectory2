@@ -212,9 +212,16 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
   public shared({caller}) func putAttributeNoDuplicates(
       pk: Text,
       options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue }
-  ) : async () {
+  ) : async Principal {
     checkCaller(caller);
 
     await* Multi.putAttributeNoDuplicates(pkToCanisterMap, pk, options);
   };
+
+  public shared({caller}) func putAttributeWithPossibleDuplicate(
+    pk: Text,
+    options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue }
+  ) : async Principal {
+    await* Multi.putAttributeWithPossibleDuplicate(pkToCanisterMap, pk, options);
+  }
 }

@@ -249,7 +249,7 @@ shared actor class ZonBackend() = this {
           case _ {};
         };
         lib.onlyItemOwner(caller, oldItem);
-        await db.putAttribute(key, "i", lib.serializeItem(_item));
+        await db.putAttribute({sk = key; key = "i"; value = lib.serializeItem(_item)});
       };
       case _ { Debug.trap("no item") };
     };
@@ -269,7 +269,7 @@ shared actor class ZonBackend() = this {
           case (#post) {};
           case _ { Debug.trap("not a post"); };
         };
-        await db.putAttribute(key, "t", #text(text));
+        await db.putAttribute({ sk = key; key = "t"; value = #text(text) });
       };
       case _ { Debug.trap("no item") };
     };
