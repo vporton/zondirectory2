@@ -136,8 +136,7 @@ shared actor class CanDBPartition(options: {
 
   public shared({caller}) func putAttribute(options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue }): async () {
     checkCaller(caller);
-    Debug.print("YYY: CanDBPartition.putAttribute");
-    ignore Multi.replaceAttribute(db, options);
+    ignore await* Multi.replaceAttribute(db, options);
   };
 
   public shared({caller}) func putExisting(options: CanDB.PutOptions): async Bool {
