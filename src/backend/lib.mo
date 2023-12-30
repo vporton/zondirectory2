@@ -15,6 +15,7 @@ import Char "mo:base/Char";
 import Nat64 "mo:base/Nat64";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
+import Time "mo:base/Time";
 import Reorder "mo:reorder/Reorder"; // TODO: should be here?
 import config "../../config";
 
@@ -309,6 +310,45 @@ module {
     };
 
     Buffer.toArray(s);
+  };
+
+  public type Karma = {
+    earnedVotes: Nat;
+    remainingBonusVotes: Nat;
+    lastBonusUpdated: Time.Time;
+  };
+
+  public func serializeKarma(karma: Karma): Entity.AttributeValue {
+    #tuple([
+      #int(karma.earnedVotes),
+      #int(karma.remainingBonusVotes),
+      #int(karma.lastBonusUpdated),
+    ]);
+  };
+
+  public func deserializeKarma(attr: Entity.AttributeValue): Karma {
+    let res = label r {
+      switch (attr) {
+        case (#tuple arr) {
+          let a: [var Nat] = Array.tabulateVar<Nat>(3, func _ = 0);
+          for (i in Iter.range(0,2)) {
+            switch (arr[i]) {
+              case (#int elt) {
+                a[i] := Int.abs(elt);
+              };
+              case _ { break r; };
+            };
+            return {
+              earnedVotes = a[0];
+              remainingBonusVotes = a[1];
+              lastBonusUpdated = a[2];
+            };
+          };
+        };
+        case _ { break r; };
+      };
+    };
+    Debug.trap("wrong votes format");
   };
 
   public func onlyItemOwner(caller: Principal, _item: Item) {
