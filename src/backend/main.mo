@@ -169,14 +169,15 @@ shared actor class ZonBackend() = this {
   };
 
   public shared({caller}) func setUserData(partitionId: ?Principal, _user: User) {
+    // TODO: Add Hint to CanDBMulti
     await* lib.checkSybil(caller);
-    let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-    await CanDBIndex.putAttributeNoDuplicates("main", {
-        sk = key;
-        key = "u";
-        value = serializeUser(_user);
-      },
-    );
+    // let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
+    // await CanDBIndex.putAttributeNoDuplicates("main", {
+    //     sk = key;
+    //     key = "u";
+    //     value = serializeUser(_user);
+    //   },
+    // );
   };
 
   // TODO: Should also remove all his/her items?
