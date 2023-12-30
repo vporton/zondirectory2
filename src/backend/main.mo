@@ -171,13 +171,12 @@ shared actor class ZonBackend() = this {
   public shared({caller}) func setUserData(partitionId: ?Principal, _user: User) {
     await* lib.checkSybil(caller);
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-    await CanDBIndex.putAttrubuteNoDuplicates({
-      pk = "main";
-      sk = key;
-      subkey = "u";
-      value = serializeUser(_user);
-      hint = partitionId;
-    });
+    await CanDBIndex.putAttributeNoDuplicates("main", {
+        sk = key;
+        key = "u";
+        value = serializeUser(_user);
+      },
+    );
   };
 
   // TODO: Should also remove all his/her items?
@@ -219,12 +218,13 @@ shared actor class ZonBackend() = this {
     await* lib.checkSybil(caller);
 
     let item2: lib.Item = { creator = caller; item = _item; };
-    let _itemId = maxId; // TODO: Use per-canister IDs instead.
+    let _itemId = maxId;
     maxId += 1;
     // var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(_itemId);
-    let canisterId = await CanDBIndex.putAttrubuteWithHint({
-      pk = "main"; sk = key; subkey = "i"; value = lib.serializeItem(item2); hint = null});
+    let canisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
+      "main", { sk = key; key = "i"; value = lib.serializeItem(item2) }
+    );
     (canisterId, _itemId);
   };
 

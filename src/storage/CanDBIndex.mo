@@ -16,6 +16,7 @@ import Array "mo:base/Array";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import CanDB "mo:candb/CanDB";
+import Multi "mo:CanDBMulti/Multi";
 import Entity "mo:candb/Entity";
 import Canister "mo:matchers/Canister";
 
@@ -143,165 +144,6 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     newStorageCanisterId;
   };
 
-  /// Put to a DB. It does not ensure no duplicates.
-  public shared({caller}) func putWithHint(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async () {
-    checkCaller(caller);
-
-    let partition = await* getExistingOrNewCanister(pk, options, hint);
-    await partition.put(options);
-  };
-
-  // FIXME: race conditions?
-  /// This function may be slow, because it tries all canisters in a partition, if `hint == null`.
-  public shared({caller}) func putNoDuplicates(pk: Entity.PK, options: CanDB.PutOptions, hint: ?Principal): async () {
-    checkCaller(caller);
-
-    let partition = await* getExistingOrNewCanister(pk, options, hint);
-    await partition.put({sk = options.sk; attributes = options.attributes});
-  };
-
-  public shared({caller}) func transformWithHint({
-    pk: Entity.PK;
-    sk: Entity.SK;
-    modifier: shared(value: ?Entity.AttributeMap) -> async [(Entity.AttributeKey, Entity.AttributeValue)];
-    hint: ?Principal;
-  }): async () {
-    checkCaller(caller);
- 
-    let partition = await* lastCanister(pk);
-    let all = do ? { (await partition.get({sk}))!.attributes };
-    await partition.put({sk; attributes = await modifier(all)});
-  };
-
-  func _transformAttribute({
-    partition: CanDBPartition.CanDBPartition;
-    sk: Entity.SK;
-    subkey: Text;
-    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue;
-  }): async* () {
-    // TODO: duplicate code
-    let all = do ? { (await partition.get({sk}))!.attributes };
-    let new = switch (all) {
-      case (?all) {
-        let filtered = Iter.filter<(Entity.AttributeKey, Entity.AttributeValue)>(
-          RBT.entries<Entity.AttributeKey, Entity.AttributeValue>(all),
-          func((k,v): (Entity.AttributeKey, Entity.AttributeValue)) { k != subkey });
-        let filteredArray = Iter.toArray(filtered);
-        let newAll = Buffer.fromArray<(Entity.AttributeKey, Entity.AttributeValue)>(filteredArray);
-        let old = RBT.get(all, Text.compare, subkey);
-        let modified = await modifier(old);
-        Buffer.add(newAll, (subkey, modified));
-        Buffer.toArray(newAll);
-      };
-      case null {
-        let modified = await modifier(null);
-        [(subkey, modified)];
-      };
-    };
-    await partition.put({sk; attributes = new});
-  };
-
-  public shared({caller}) func putAttrubuteWithHint({
-    pk: Entity.PK;
-    sk: Entity.SK;
-    subkey: Text;
-    value: Entity.AttributeValue;
-    hint: ?Principal;
-  }): async Principal {
-    checkCaller(caller);
- 
-    let partition = await* lastCanister(pk);
-    // TODO: duplicate code
-    let all = do ? { (await partition.get({sk}))!.attributes };
-    let new = switch (all) {
-      case (?all) {
-        let filtered = Iter.filter<(Entity.AttributeKey, Entity.AttributeValue)>(
-          RBT.entries<Entity.AttributeKey, Entity.AttributeValue>(all),
-          func((k,v): (Entity.AttributeKey, Entity.AttributeValue)) { k != subkey });
-        let filteredArray = Iter.toArray(filtered);
-        let newAll = Buffer.fromArray<(Entity.AttributeKey, Entity.AttributeValue)>(filteredArray);
-        let old = RBT.get(all, Text.compare, subkey);
-        Buffer.add(newAll, (subkey, value));
-        Buffer.toArray(newAll);
-      };
-      case null {
-        [(subkey, value)];
-      };
-    };
-    await partition.put({sk; attributes = new});
-    Principal.fromActor(partition); // FIXME: (Here and in other places) due to insert limit limit, may be another partition.
-  };
-
-  public shared({caller}) func transformAttrubuteWithHint({
-    pk: Entity.PK;
-    sk: Entity.SK;
-    subkey: Text;
-    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue;
-    hint: ?Principal;
-  }): async () {
-    checkCaller(caller);
- 
-    let partition = await* lastCanister(pk);
-    await* _transformAttribute({partition; sk; subkey; modifier});
-  };
-
-  public shared({caller}) func putAttrubuteNoDuplicates({
-    pk: Entity.PK;
-    sk: Entity.SK;
-    subkey: Text;
-    value: Entity.AttributeValue;
-    hint: ?Principal;
-  }): async () {
-    checkCaller(caller);
- 
-    let partition = await* getExistingOrNewCanister(pk, {sk}, hint);
-    // TODO: duplicate code
-    let all = do ? { (await partition.get({sk}))!.attributes };
-    let new = switch (all) {
-      case (?all) {
-        let filtered = Iter.filter<(Entity.AttributeKey, Entity.AttributeValue)>(
-          RBT.entries<Entity.AttributeKey, Entity.AttributeValue>(all),
-          func((k,v): (Entity.AttributeKey, Entity.AttributeValue)) { k != subkey });
-        let filteredArray = Iter.toArray(filtered);
-        let newAll = Buffer.fromArray<(Entity.AttributeKey, Entity.AttributeValue)>(filteredArray);
-        let old = RBT.get(all, Text.compare, subkey);
-        Buffer.add(newAll, (subkey, value));
-        Buffer.toArray(newAll);
-      };
-      case null {
-        [(subkey, value)];
-      };
-    };
-    await partition.put({sk; attributes = new});
-  };
-
-  public shared({caller}) func transformAttrubuteNoDuplicates({
-    pk: Entity.PK;
-    sk: Entity.SK;
-    subkey: Text;
-    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue;
-    hint: ?Principal;
-  }): async () {
-    checkCaller(caller);
- 
-    let partition = await* getExistingOrNewCanister(pk, {sk}, hint);
-    await* _transformAttribute({partition; sk; subkey; modifier});
-  };
-
-  /// This function may be slow, because it tries all canisters in a partition, if `hint == null`.
-  public shared({caller}) func transformNoDuplicates({
-    pk: Entity.PK;
-    sk: Entity.SK;
-    modifier: shared(value: ?Entity.AttributeMap) -> async [(Entity.AttributeKey, Entity.AttributeValue)];
-    hint: ?Principal;
-  }): async () {
-    checkCaller(caller);
- 
-    let partition = await* getExistingOrNewCanister(pk, {sk}, hint);
-    let all = do ? { (await partition.get({sk}))!.attributes };
-    await partition.put({sk; attributes = await modifier(all)});
-  };
-
   // Private functions for getting canisters //
 
   func lastCanister(pk: Entity.PK): async* CanDBPartition.CanDBPartition {
@@ -312,19 +154,6 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
       canisterIds[canisterIds.size() - 1];
     };
     actor(part0);
-  };
-
-  /// This function may be slow, because it tries all canisters in a partition, if `hint == null`.
-  func getExistingOrNewCanister(pk: Entity.PK, options: CanDB.GetOptions, hint: ?Principal): async* CanDBPartition.CanDBPartition {
-    let existing = await* getExistingCanister(pk, options, hint);
-    switch (existing) {
-      case (?existing) { existing };
-      case null {
-        // FIXME: Don't create a new canister everty time, reuse the last canister.
-        let newStorageCanisterId = await* createStorageCanister(pk, ownersOrSelf());
-        actor(newStorageCanisterId);
-      }
-    }
   };
 
   func getExistingCanister(pk: Entity.PK, options: CanDB.GetOptions, hint: ?Principal): async* ?CanDBPartition.CanDBPartition {
@@ -376,5 +205,16 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
         ?(actor(newStorageCanisterId): CanDBPartition.CanDBPartition);
       };
     };
+  };
+
+  // CanDBMulti //
+
+  public shared({caller}) func putAttributeNoDuplicates(
+      pk: Text,
+      options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue }
+  ) : async () {
+    checkCaller(caller);
+
+    await* Multi.putAttributeNoDuplicates(pkToCanisterMap, pk, options);
   };
 }

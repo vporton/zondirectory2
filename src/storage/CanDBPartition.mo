@@ -2,6 +2,7 @@ import Array "mo:base/Array";
 import CA "mo:candb/CanisterActions";
 import Entity "mo:candb/Entity";
 import CanDB "mo:candb/CanDB";
+import Multi "mo:CanDBMulti/Multi";
 import RBT "mo:stable-rbtree/StableRBTree";
 import Principal "mo:base/Principal";
 import Bool "mo:base/Bool";
@@ -16,7 +17,7 @@ shared actor class CanDBPartition(options: {
   partitionKey: Text;
   scalingOptions: CanDB.ScalingOptions;
   owners: ?[Principal];
-}) {
+}) = this {
   stable var owners = switch (options.owners) {
     case (?p) { p };
     case _ { [] };
@@ -117,72 +118,6 @@ shared actor class CanDBPartition(options: {
     _getAttribute(options, subkey);
   };
 
-  // public shared({caller}) func transform(
-  //   sk: Entity.SK,
-  //   modifier: shared(value: ?Entity.AttributeMap) -> async [(Entity.AttributeKey, Entity.AttributeValue)]): async ()
-  // {
-  //   checkCaller(caller);
-
-  //   let all = do ? { CanDB.get(db, {sk})!.attributes };
-  //   await* CanDB.put(db, {sk; attributes = await modifier(all)})
-  // };
-
-  public shared({caller}) func putAttribute(
-    sk: Entity.SK,
-    subkey: Entity.AttributeKey,
-    value: Entity.AttributeValue,
-  ): async () {
-    checkCaller(caller);
-
-    // TODO: duplicate code
-    let all = do ? { CanDB.get(db, {sk})!.attributes };
-    let new = switch (all) {
-      case (?all) {
-        let filtered = Iter.filter<(Entity.AttributeKey, Entity.AttributeValue)>(
-          RBT.entries<Entity.AttributeKey, Entity.AttributeValue>(all),
-          func((k,v): (Entity.AttributeKey, Entity.AttributeValue)) { k != subkey });
-        let filteredArray = Iter.toArray(filtered);
-        let newAll = Buffer.fromArray<(Entity.AttributeKey, Entity.AttributeValue)>(filteredArray);
-        let old = RBT.get(all, Text.compare, subkey);
-        newAll.add((subkey, value));
-        Buffer.toArray(newAll);
-      };
-      case null {
-        [(subkey, value)];
-      };
-    };
-    await* CanDB.put(db, {sk; attributes = new})
-  };
-
-  public shared({caller}) func transformAttribute(
-    sk: Entity.SK,
-    subkey: Entity.AttributeKey,
-    modifier: shared(value: ?Entity.AttributeValue) -> async Entity.AttributeValue
-  ): async () {
-    checkCaller(caller);
-
-    // TODO: duplicate code
-    let all = do ? { CanDB.get(db, {sk})!.attributes };
-    let new = switch (all) {
-      case (?all) {
-        let filtered = Iter.filter<(Entity.AttributeKey, Entity.AttributeValue)>(
-          RBT.entries<Entity.AttributeKey, Entity.AttributeValue>(all),
-          func((k,v): (Entity.AttributeKey, Entity.AttributeValue)) { k != subkey });
-        let filteredArray = Iter.toArray(filtered);
-        let newAll = Buffer.fromArray<(Entity.AttributeKey, Entity.AttributeValue)>(filteredArray);
-        let old = RBT.get(all, Text.compare, subkey);
-        let modified = await modifier(old);
-        newAll.add((subkey, modified));
-        Buffer.toArray(newAll);
-      };
-      case null {
-        let modified = await modifier(null);
-        [(subkey, modified)];
-      };
-    };
-    await* CanDB.put(db, {sk; attributes = new})
-  };
-
   // Application-specific code //
 
   public query func getItem(itemId: Nat): async ?lib.Item {
@@ -194,5 +129,24 @@ shared actor class CanDBPartition(options: {
     // TODO: Duplicate code
     let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "s" # kind);
     do ? { lib.deserializeStreams(data!) };
+  };
+
+  // CanDBMulti //
+
+  public shared({caller}) func putAttribute(options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue }): async () {
+    checkCaller(caller);
+    ignore Multi.replaceAttribute(db, options)
+  };
+
+  public shared({caller}) func putExisting(options: CanDB.PutOptions): async Bool {
+    checkCaller(caller);
+    await* Multi.putExisting(db, options);
+  };
+
+  public shared({caller}) func putExistingAttribute(options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue })
+    : async Bool
+  {
+    checkCaller(caller);
+    await* Multi.putExistingAttribute(db, options);
   };
 }
