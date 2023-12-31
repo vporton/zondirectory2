@@ -12,6 +12,8 @@ TODO: Should have separate attribute post text.
 ### "a/" - user -> <buyer affiliate>/<seller affiliate>
 ### "v/<principal>/<parent>/<child>"
 - Attribute `"v"` -  `#int +-1` - votes
+### "w/<parent>/<child>"
+- Attribute `"v"` - `#tuple [#int <VOTES UP>, #int <VOTES DOWN>]`
 
 ## NacDB database structure
 * time/time: category -> sub-items
