@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "./auth/use-auth-client";
 import { serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
+import { Button } from "react-bootstrap";
 
 // TODO: a stricter type
 type Item = {
@@ -172,6 +173,7 @@ function ShowItemContent(props: {defaultAgent}) {
             {subcategories === undefined ? <p>Loading...</p> :
             <ul>
                 {subcategories.map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
+                    {streamKind === 'v' && <><Button className="thumbs">👍</Button><Button className="thumbs">👎</Button></>}
                     <ItemType item={x}/>
                     <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
                 </li>)}

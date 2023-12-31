@@ -7,3 +7,10 @@ a.active{color:red;}
 input[type=text], input[type=url], textarea {
     width: 100%;
 }
+
+Button.thumbs {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+}
