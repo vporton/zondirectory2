@@ -245,43 +245,58 @@ shared({caller = initialOwner}) actor class Orders() = this {
   /// Voting ///
 
   /// `amount == 0` means canceling the vote.
-  /// FIXME: Uncomment
-  // public shared({caller}) func vote(parentPrincipal: Principal, parent: Nat, child: Nat, amount: Int, comment: Bool): async () {
-  //   await* lib.checkSybil(caller);
-  //   assert amount == -1 or amount == 1 or amount == 0;
-  //   let amount2 = amount * 2**32;
+  public shared({caller}) func vote(parentPrincipal: Principal, parent: Nat, child: Nat, amount: Int, comment: Bool): async () {
+    await* lib.checkSybil(caller);
+    assert amount == -1 or amount == 1 or amount == 0;
+    let amount2 = amount * 2**32;
 
-  //   let sk = Principal.toText(caller) # "/" # parent # "/" # child;
-  //   let oldVotes = await CanDBIndex.getFirstAttribute("main", { sk; key = "v" }); // TODO: race condition
-  //   let (principal, oldValue) = switch (oldVotes) {
-  //     case (?oldVotes) { (?oldVotes.0, oldVotes.1) };
-  //     case null { (null, null) };
-  //   };
-  //   let oldValue2 = switch (oldValue) {
-  //     case (?v) {
-  //       let #int v2 = v else {
-  //         Debug.trap("wrong votes");
-  //       };
-  //       v2;
-  //     };
-  //     case null { 0 };
-  //   };
-  //   let difference = amount2 - oldValue2;
-  //   if (difference == 0) {
-  //     return;
-  //   };
-  //   ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk; key = "v"; value = #int amount2 });
+    let sk = Principal.toText(caller) # "/" # lib.encodeNat(parent) # "/" # lib.encodeNat(child);
+    let oldVotes = await CanDBIndex.getFirstAttribute("main", { sk; key = "v" }); // TODO: race condition
+    let (principal, oldValue) = switch (oldVotes) {
+      case (?oldVotes) { (?oldVotes.0, oldVotes.1) };
+      case null { (null, null) };
+    };
+    let oldValue2 = switch (oldValue) {
+      case (?v) {
+        let #int v2 = v else {
+          Debug.trap("wrong votes");
+        };
+        v2;
+      };
+      case null { 0 };
+    };
+    let difference = amount2 - oldValue2;
+    if (difference == 0) {
+      return;
+    };
+    ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk; key = "v"; value = #int amount2 });
 
-  //   let parentCanister = actor(Principal.toText(parentPrincipal)) : CanDBPartition.CanDBPartition;
-  //   let links = await* getStreamLinks((parentPrincipal, parent), comment);
-  //   let streamsData = await parentCanister.getAttribute({sk = "i/" # Nat.toText(parent)}, "sv");
-  //   await* Reorder.move(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
-  //       order;
-  //       value = child;
-  //       relative = true;
-  //       newKey = difference;
-  //   });
-  // };
+    let parentCanister = actor(Principal.toText(parentPrincipal)) : CanDBPartition.CanDBPartition;
+    let links = await* getStreamLinks((parentPrincipal, parent), comment);
+    let streamsData = await* itemsOrder((parentPrincipal, parent), "sv");
+    let streamsVar: [var ?Reorder.Order] = switch (streamsData) {
+      case (?streams) { Array.thaw(streams) };
+      case null { [var null, null, null]};
+    };
+    let order = switch (streamsVar[links]) {
+      case (?order) { order };
+      case null {
+        let order = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer);
+        streamsVar[links] := ?order;
+        order;
+      };
+    };
+
+    let data = lib.serializeStreams(Array.freeze(streamsVar));
+    await parentCanister.putAttribute({ sk = "i/" # Nat.toText(parent); key = "sv"; value = data });
+
+    await* Reorder.move(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
+        order;
+        value = lib.encodeNat(child);
+        relative = true;
+        newKey = difference;
+    });
+  };
 
   // FIXME: Below functions?
 
