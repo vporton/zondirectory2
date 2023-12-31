@@ -250,7 +250,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
     assert amount == -1 or amount == 1 or amount == 0;
     let amount2 = amount * 2**32;
 
-    // FIXME: Get votes data from NacDB rather that from CanDB.
     let sk = Principal.toText(caller) # "/" # lib.encodeNat(parent) # "/" # lib.encodeNat(child);
     let oldVotes = await CanDBIndex.getFirstAttribute("main", { sk; key = "v" }); // TODO: race condition
     let (principal, oldValue) = switch (oldVotes) {
