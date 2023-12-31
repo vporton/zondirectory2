@@ -223,7 +223,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   };
 
   /// `key1` and `key2` are like `"s"` and `"sr"`
-  /// FIXME: Why do I get streams by two items catId & itemId, rather than only catId.
+  /// FIXME: Why do I get streams by two items catId & itemId, rather than only catId?
   func itemsOrderPair(catId: (Principal, Nat), itemId: (Principal, Nat), key1: Text, key2: Text)
     : async* (?lib.Streams, ?lib.Streams)
   {
