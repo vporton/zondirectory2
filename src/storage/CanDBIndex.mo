@@ -209,6 +209,13 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
 
   // CanDBMulti //
 
+  public shared({caller}) func getFirstAttribute(
+    pk: Text,
+    options: { sk: Entity.SK; key: Entity.AttributeKey }
+  ) : async ?(Principal, ?Entity.AttributeValue) {
+    await* Multi.getFirstAttribute( pkToCanisterMap, pk, options);
+  };
+
   public shared({caller}) func putAttributeNoDuplicates(
       pk: Text,
       options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue }

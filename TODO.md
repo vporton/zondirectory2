@@ -2,6 +2,8 @@
 
 - Download a backup of author's items.
 
+- Count votes up and down for every pair of items.
+
 - One folder having several editors, like as in Dmoz.
 
 - Race conditions of reading an entry and saving it with a modified subkey.

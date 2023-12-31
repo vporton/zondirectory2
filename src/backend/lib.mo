@@ -16,7 +16,7 @@ import Nat64 "mo:base/Nat64";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
 import Time "mo:base/Time";
-import Reorder "mo:reorder/Reorder"; // TODO: should be here?
+import Reorder "mo:NacDBReorder/Reorder"; // TODO: should be here?
 import config "../../config";
 
 module {

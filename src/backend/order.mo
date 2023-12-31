@@ -1,12 +1,15 @@
+import BTree "mo:stableheapbtreemap/BTree"; // TODO: Remove.
 import Nac "mo:nacdb/NacDB";
+import OpsQueue "mo:nacdb/OpsQueue"; // TODO: Remove.
 import GUID "mo:nacdb/GUID";
 import Common "../storage/common";
 import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
 import NacDBIndex "canister:NacDBIndex";
 import NacDBPartition "../storage/NacDBPartition";
+import Multi "mo:CanDBMulti/Multi";
 import Entity "mo:candb/Entity";
-import Reorder "mo:reorder/Reorder";
+import Reorder "mo:NacDBReorder/Reorder";
 import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
@@ -51,7 +54,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   // stable var rng: Prng.Seiran128 = Prng.Seiran128(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
   stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
 
-  stable let orderer = Reorder.createOrderer(NacDBIndex);
+  stable let orderer = Reorder.createOrderer();
 
   // TODO: Remove this function?
   public shared({ caller }) func init(_owners: [Principal]): async () {
@@ -98,9 +101,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let guid = GUID.nextGuid(guidGen);
 
     // FIXME: race condition
-    await* Reorder.add(guid, {
-      index = NacDBIndex;
-      orderer;
+    await* Reorder.add(guid, NacDBIndex, orderer, {
       order = theSubDB;
       key = timeScanSK;
       value = scanItemInfo;
@@ -174,7 +175,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let stream1 = switch (streams1t) {
       case (?stream) { stream };
       case null {
-        let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), {orderer});
+        let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer);
         streamsVar1[links] := ?v;
         v;
       };
@@ -186,7 +187,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let stream2 = switch (streams2t) {
       case (?stream) { stream };
       case null {
-        let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), {orderer});
+        let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer);
         streamsVar2[links] := ?v;
         v;
       };
@@ -222,12 +223,14 @@ shared({caller = initialOwner}) actor class Orders() = this {
   };
 
   /// `key1` and `key2` are like `"s"` and `"sr"`
+  /// FIXME: Why do I get streams by two items catId & itemId, rather than only catId.
   func itemsOrderPair(catId: (Principal, Nat), itemId: (Principal, Nat), key1: Text, key2: Text)
     : async* (?lib.Streams, ?lib.Streams)
   {
+    let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
 
-    let streamsData1 = await itemId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, key1);
+    let streamsData1 = await CatId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, key1);
     let streamsData2 = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, key2);
     func createStreams(streamsData: Nac.AttributeValue): lib.Streams {
       switch (streamsData1) {
@@ -256,11 +259,43 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   /// Voting ///
 
-  
+  /// `amount == 0` means canceling the vote.
+  public shared({caller}) func vote(parentPrincipal: Principal, parent: Nat, child: Nat, amount: Int, comment: Bool): async () {
+    await* lib.checkSybil(caller);
+    assert amount == -1 or amount == 1 or amount == 0;
+    let amount2 = amount * 2**32;
 
-  public shared({caller}) func voteUp(part: Principal, sk: Entity.SK) {
+    let sk = Principal.toText(caller) # "/" # parent # "/" # child;
+    let oldVotes = await CanDBIndex.getFirstAttribute("main", { sk; key = "v" }); // TODO: race condition
+    let (principal, oldValue) = switch (oldVotes) {
+      case (?oldVotes) { (?oldVotes.0, oldVotes.1) };
+      case null { (null, null) };
+    };
+    let oldValue2 = switch (oldValue) {
+      case (?v) {
+        let #int v2 = v else {
+          Debug.trap("wrong votes");
+        };
+        v2;
+      };
+      case null { 0 };
+    };
+    let difference = amount2 - oldValue2;
+    if (difference == 0) {
+      return;
+    };
+    ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk; key = "v"; value = #int amount2 });
 
-  }
+    let parentCanister = actor(Principal.toText(parentPrincipal)) : CanDBPartition.CanDBPartition;
+    let links = await* getStreamLinks((parentPrincipal, parent), comment);
+    let streamsData = await parentCanister.getAttribute({sk = "i/" # Nat.toText(parent)}, "sv");
+    await* Reorder.move(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
+        order;
+        value = child;
+        relative = true;
+        newKey = difference;
+    });
+  };
 
   // FIXME: Below functions?
 
