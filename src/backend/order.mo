@@ -248,9 +248,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
   public shared({caller}) func vote(parentPrincipal: Principal, parent: Nat, child: Nat, amount: Int, comment: Bool): async () {
     await* lib.checkSybil(caller);
     assert amount == -1 or amount == 1 or amount == 0;
-    let amount2 = amount * 2**32;
 
-    let sk = Principal.toText(caller) # "/" # lib.encodeNat(parent) # "/" # lib.encodeNat(child);
+    let sk = "v/" # Principal.toText(caller) # "/" # lib.encodeNat(parent) # "/" # lib.encodeNat(child);
     let oldVotes = await CanDBIndex.getFirstAttribute("main", { sk; key = "v" }); // TODO: race condition
     let (principal, oldValue) = switch (oldVotes) {
       case (?oldVotes) { (?oldVotes.0, oldVotes.1) };
@@ -265,11 +264,45 @@ shared({caller = initialOwner}) actor class Orders() = this {
       };
       case null { 0 };
     };
-    let difference = amount2 - oldValue2;
+    let difference = amount - oldValue2;
     if (difference == 0) {
       return;
     };
-    ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk; key = "v"; value = #int amount2 });
+    ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk; key = "v"; value = #int amount });
+
+    // Update total votes for the given parent/child:
+    let sk2 = "w/" # lib.encodeNat(parent) # "/" # lib.encodeNat(child);
+    let oldTotals = await CanDBIndex.getFirstAttribute("main", { sk = sk2; key = "v" }); // TODO: race condition
+    let (up, down, oldTotalsPrincipal) = switch (oldTotals) {
+      case (?(oldTotalsPrincipal, ?(#tuple(a)))) {
+        let (#int up, #int down) = (a[0], a[1]) else {
+          Debug.trap("votes programming error")
+        };
+        (up, down, ?oldTotalsPrincipal);
+      };
+      case null {
+        (0, 0, null);
+      };
+      case _ {
+        Debug.trap("votes programming error");
+      };
+    };
+
+    // TODO: Check this block of code for errors.
+    let changeUp = (amount == 1 and oldValue2 != 1) or (oldValue2 == 1 and amount != 1);
+    let changeDown = (amount == -1 and oldValue2 != -1) or (oldValue2 == -1 and amount != -1);
+    var up2 = up;
+    var down2 = down;
+    if (changeUp or changeDown) {
+      if (changeUp) {
+        up2 += difference;
+      };
+      if (changeDown) {
+        down2 -= difference;
+      };
+      // TODO: Take advantage of `oldTotalsPrincipal` as a hint:
+      ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk = sk2; key = "v"; value = #tuple([#int up2, #int down2]) }); // TODO: race condition
+    };
 
     let parentCanister = actor(Principal.toText(parentPrincipal)) : CanDBPartition.CanDBPartition;
     let links = await* getStreamLinks((parentPrincipal, parent), comment);
@@ -294,7 +327,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
         order;
         value = lib.encodeNat(child);
         relative = true;
-        newKey = difference;
+        newKey = difference ** 2**32;
     });
   };
 
