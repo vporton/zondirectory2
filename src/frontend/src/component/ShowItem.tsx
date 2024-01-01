@@ -8,6 +8,7 @@ import ItemType from "./misc/ItemType";
 import { Button } from "react-bootstrap";
 import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { order } from "../../../declarations/order";
+import { createActor as orderActor } from "../../../declarations/order";
 
 export default function ShowItem() {
     return (
@@ -23,6 +24,7 @@ export default function ShowItem() {
 
 function ShowItemContent(props: {defaultAgent}) {
     const { id } = useParams();
+    const { agent } = useContext(AuthContext) as any;
     const { principal } = useContext(AuthContext) as any;
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
@@ -183,6 +185,7 @@ function ShowItemContent(props: {defaultAgent}) {
             alert("Login to vote!"); // TODO: a better dialog
             return;
         }
+        const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent})
         await order.vote(parseItemRef(id!).canister, BigInt(parseItemRef(id!).id), BigInt(child.id), BigInt(value), false); // TODO: no parse here
         AppData.create(props.defaultAgent, id!, streamKind).then(data => { // duplicate code
             data.subCategories().then(x => updateSubCategories(x));
