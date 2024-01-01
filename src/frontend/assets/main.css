@@ -8,9 +8,13 @@ input[type=text], input[type=url], textarea {
     width: 100%;
 }
 
-Button.thumbs {
+Button.thumbs, Button.thumbs:hover {
     background: none;
     border: none;
     padding: 0;
     margin: 0;
+}
+
+Button.thumbs.active {
+    background: green;
 }
