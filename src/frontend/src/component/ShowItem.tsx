@@ -203,7 +203,7 @@ function ShowItemContent(props: {defaultAgent}) {
                     {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
                     {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
                 </p>
-                <p lang={item.item.item.locale} key={serializeItemRef(item.id)} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
+                <p lang={item.item.item.locale} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
             </div>
         )}
         <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
