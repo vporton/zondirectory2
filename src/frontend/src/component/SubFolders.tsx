@@ -1,15 +1,16 @@
 import * as React from "react";
-import { Button } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
-import { serializeItemRef } from "../data/Data";
+import { ItemRef, serializeItemRef } from "../data/Data";
+import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
+import ItemType from "./misc/ItemType";
 
 export default function SubFolders(props) {
     const { id } = useParams();
     const [xdata, setXData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
-    const [categories, setCategories] = useState([] as any[]); // TODO: `as Item[]`
+    const [categories, setCategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>([] as any[]);
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
     const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("v"); // time, votes, or paid
@@ -22,7 +23,6 @@ export default function SubFolders(props) {
         if (id !== undefined) {
             AppData.create(props.defaultAgent, id, streamKind).then(data => {
                 data.title().then(x => setTitle(x));
-                let categories;
                 if (props['data-dir'] == 'super') {
                     data.superCategories().then(x => {
                         setCategories(x);
@@ -74,13 +74,13 @@ export default function SubFolders(props) {
                 <label><input type="radio" name="stream" value="p" onChange={updateStreamKind} checked={streamKind == "p"}/> amount paid</label>
             </p>
            <ul>
-                {categories.map(x =>
+                {categories !== undefined && categories.map(x =>
                     <li key={serializeItemRef(x.id as any)}>
                         <p>
-                            {x.type == 'public' ? <span title="Communal folder">&#x1f465;</span> : <span title="Owned folder">&#x1f464;</span>}
-                            <a lang={x.locale} href={`#/item/${serializeItemRef(x.id as any)}`}>{x.title}</a>
+                            <ItemType item={x.item}/>
+                            <a lang={x.item.item.locale} href={`#/item/${serializeItemRef(x.id as any)}`}>{x.item.item.title}</a>
                         </p>
-                        {x.description ? <p lang={x.locale}><small>{x.description}</small></p> : ""}
+                        {x.item.item.description ? <p lang={x.item.item.locale}><small>{x.item.item.description}</small></p> : ""}
                     </li>)}
             </ul>
             <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
