@@ -209,7 +209,7 @@ export class ItemData {
 //     return response === undefined ? {up: 0, down: 0} : { up: response[0], down: response[1] };
 // }
 
-export async function loadVotes(parent: ItemRef, child: ItemRef): Promise<{up: number, down: number}> {
+export async function loadTotalVotes(parent: ItemRef, child: ItemRef): Promise<{up: number, down: number}> {
     let pk = `main`;
     let results = await CanDBIndex.getFirstAttribute(
         pk,

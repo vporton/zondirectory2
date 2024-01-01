@@ -2,7 +2,7 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
-import { ItemRef, parseItemRef, loadVotes, serializeItemRef } from "../data/Data";
+import { ItemRef, serializeItemRef } from "../data/Data";
 import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import ItemType from "./misc/ItemType";
 

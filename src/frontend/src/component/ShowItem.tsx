@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "./auth/use-auth-client";
-import { ItemRef, loadVotes, parseItemRef, serializeItemRef } from "../data/Data";
+import { ItemRef, loadTotalVotes, parseItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
 import { Button } from "react-bootstrap";
 import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
@@ -67,7 +67,7 @@ function ShowItemContent(props: {defaultAgent}) {
                     // TODO: Extract this code for reuse:
                     const votes: {[key: string]: {up: number, down: number}} = {};
                     const promises = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
-                        loadVotes(parseItemRef(id), cat.id).then(res => { // TODO: Should not parse here.
+                        loadTotalVotes(parseItemRef(id), cat.id).then(res => { // TODO: Should not parse here.
                             votes[serializeItemRef(cat.id)] = res;
                         })
                     );
