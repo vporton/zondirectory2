@@ -250,7 +250,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     Debug.print("VOTE: " # debug_show(parent) # "@" # debug_show(parentPrincipal) # "/" # debug_show(child) # " " # debug_show(amount));
     assert amount == -1 or amount == 1 or amount == 0;
 
-    let sk = "v/" # Principal.toText(caller) # "/" # lib.encodeNat(parent) # "/" # lib.encodeNat(child);
+    let sk = "v/" # Principal.toText(caller) # "/" # Nat.toText(parent) # "/" # Nat.toText(child);
     let oldVotes = await CanDBIndex.getFirstAttribute("main", { sk; key = "v" }); // TODO: race condition
     let (principal, oldValue) = switch (oldVotes) {
       case (?oldVotes) { (?oldVotes.0, oldVotes.1) };
@@ -272,7 +272,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk; key = "v"; value = #int amount });
 
     // Update total votes for the given parent/child:
-    let sk2 = "w/" # lib.encodeNat(parent) # "/" # lib.encodeNat(child);
+    let sk2 = "w/" # Nat.toText(parent) # "/" # Nat.toText(child);
     let oldTotals = await CanDBIndex.getFirstAttribute("main", { sk = sk2; key = "v" }); // TODO: race condition
     let (up, down, oldTotalsPrincipal) = switch (oldTotals) {
       case (?(oldTotalsPrincipal, ?(#tuple(a)))) {
