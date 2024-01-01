@@ -184,7 +184,7 @@ function ShowItemContent(props: {defaultAgent}) {
             return;
         }
         await order.vote(principal, BigInt(parseItemRef(id!).id), BigInt(child.id), BigInt(value), false); // TODO: no parse here
-        AppData.create(props.defaultAgent, id, streamKind).then(data => { // duplicate code
+        AppData.create(props.defaultAgent, id!, streamKind).then(data => { // duplicate code
             data.subCategories().then(x => updateSubCategories(x));
         });
     }
