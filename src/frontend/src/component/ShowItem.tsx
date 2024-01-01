@@ -165,7 +165,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 {subcategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
                     {streamKind === 'v' && <><Button className="thumbs">👍</Button><Button className="thumbs">👎</Button></>}
                     <ItemType item={x.item}/>
-                    <a href={`#/item/${x.id}`}>{x.item.item.title}</a>
+                    <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
                 </li>)}
             </ul>}
             <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
