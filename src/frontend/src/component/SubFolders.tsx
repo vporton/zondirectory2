@@ -5,17 +5,6 @@ import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
 import { serializeItemRef } from "../data/Data";
 
-// TODO: a stricter type
-type Item = {
-    id: string;
-    locale: string;
-    title: string;
-    description?: string;
-    type?: string; // TODO: `'private' | 'public'`
-    price?: string; // TODO: `number`
-    link?: string; // TODO: URL type
-};
-
 export default function SubFolders(props) {
     const { id } = useParams();
     const [xdata, setXData] = useState<any>(undefined);

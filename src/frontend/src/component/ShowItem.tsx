@@ -3,20 +3,10 @@ import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "./auth/use-auth-client";
-import { serializeItemRef } from "../data/Data";
+import { ItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
 import { Button } from "react-bootstrap";
-
-// TODO: a stricter type
-type Item = {
-    id: string;
-    locale: string;
-    title: string;
-    description?: string;
-    type?: string; // TODO: `'private' | 'public'`
-    price?: string; // TODO: `number`
-    link?: string; // TODO: URL type
-};
+import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 
 export default function ShowItem() {
     return (
@@ -38,11 +28,11 @@ function ShowItemContent(props: {defaultAgent}) {
     const [postText, setPostText] = useState("");
     const [type, setType] = useState<string | undefined>(undefined);
     const [creator, setCreator] = useState("");
-    const [subcategories, setSubcategories] = useState(undefined as Item[] | undefined);
-    const [supercategories, setSupercategories] = useState(undefined as Item[] | undefined);
-    const [items, setItems] = useState(undefined as Item[] | undefined);
-    const [comments, setComments] = useState(undefined as Item[] | undefined);
-    const [antiComments, setAntiComments] = useState(undefined as Item[] | undefined);
+    const [subcategories, setSubcategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
+    const [supercategories, setSupercategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
+    const [items, setItems] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
+    const [comments, setComments] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
+    const [antiComments, setAntiComments] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
     const [data, setData] = useState<any>(undefined); // TODO: hack
     const [xdata, setXData] = useState<any>(undefined); // TODO: hack
     const [itemsLast, setItemsLast] = useState("");
@@ -172,10 +162,10 @@ function ShowItemContent(props: {defaultAgent}) {
             <h3>Sub-folders</h3>
             {subcategories === undefined ? <p>Loading...</p> :
             <ul>
-                {subcategories.map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
+                {subcategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
                     {streamKind === 'v' && <><Button className="thumbs">👍</Button><Button className="thumbs">👎</Button></>}
-                    <ItemType item={x}/>
-                    <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
+                    <ItemType item={x.item}/>
+                    <a href={`#/item/${x.id}`}>{x.item.item.title}</a>
                 </li>)}
             </ul>}
             <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
@@ -183,23 +173,23 @@ function ShowItemContent(props: {defaultAgent}) {
         <h3>Super-folders</h3>
         {supercategories === undefined ? <p>Loading...</p> :
         <ul>
-            {supercategories.map((x: any) => <li lang={x.locale} key={serializeItemRef(x.id as any)}>
-                <ItemType item={x}/>
-                <a href={`#/item/${serializeItemRef(x.id)}`}>{x.title}</a>
+            {supercategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
+                <ItemType item={x.item}/>
+                <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
             </li>)}
         </ul>}
         {/* TODO: Create super-category */}
         <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create-supercategory/for-category/${id}`}>Create</a></p>
         {!isCategory ? "" : <>
             <h3>Items</h3>
-            {items === undefined ? <p>Loading...</p> : items.map(item => 
+            {items === undefined ? <p>Loading...</p> : items.map((item: {order: string, id: ItemRef, item: Item}) => 
             <div key={serializeItemRef(item.id as any)}>
-                <p lang={item.locale} key={item.id}>
-                    {item.price ? <>({item.price} ICP) </> : ""}
-                    {item.link ? <a href={item.link}>{item.title}</a> : item.title}
+                <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
+                    {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
+                    {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
                     {" "}<a href={`#/item/${serializeItemRef(item.id as any)}`} title="Homepage">[H]</a>
                 </p>
-                <p lang={item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.description}</p>
+                <p lang={item.item.item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
             </div>
         )}
         <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
@@ -208,25 +198,25 @@ function ShowItemContent(props: {defaultAgent}) {
         <p>TODO: Move comments to a separate tab.</p>
         {comments === undefined ? <p>Loading...</p> : comments.map(item => 
             <div key={serializeItemRef(item.id as any)}>
-                <p lang={item.locale} key={item.id}>
-                    {item.price ? <>({item.price} ICP) </> : ""}
-                    {item.link ? <a href={item.link}>{item.title}</a> : item.title}
+                <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
+                    {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
+                    {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
                     {" "}<a href={`#/item/${serializeItemRef(item.id as any)}`} title="Homepage">[H]</a>
                 </p>
-                <p lang={item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.description}</p>
+                <p lang={item.item.item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
             </div>
         )}
         <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
             <a href={`#/create/comment/${id}`}>Create</a></p>
         <h3>Comment on</h3>
-        {antiComments === undefined ? <p>Loading...</p> : antiComments.map(item => 
+        {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: Item}) => 
             <div key={serializeItemRef(item.id as any)}>
-                <p lang={item.locale} key={item.id}>
-                    {item.price ? <>({item.price} ICP) </> : ""}
-                    {item.link ? <a href={item.link}>{item.title}</a> : item.title}
+                <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
+                    {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
+                    {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
                     {" "}<a href={`#/item/${serializeItemRef(item.id as any)}`} title="Homepage">[H]</a>
                 </p>
-                <p lang={item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.description}</p>
+                <p lang={item.item.item.locale} key={serializeItemRef(item.id as any)} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
             </div>
         )}
         <p><a href="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}</p>
