@@ -79,7 +79,7 @@ export class ItemData {
         const client = nacDBPartitionActor(outerCanister, { agent: this.agent });
         const [innerPart, innerKey] = (await client.getInner(outerKey) as any)[0]; // TODO: error handling
         const client2 = nacDBPartitionActor(innerPart, { agent: this.agent });
-        const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as // TODO: limit
+        const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as
             [[string, {text: string}]] | [];
         const items1aa = items.length === 0 ? [] : items.map(x => [x[0], x[1].text]);
         const items1a: {order: string, principal: string, id: bigint}[] = items1aa.map(x => ((s) => {
