@@ -4,6 +4,9 @@
 
 - Count votes up and down for every pair of items.
 
+- When switching from item view to folders list view, preserve t/v/p radiobuttons value.
+  Moreover, store this value in a cookie or local storage.
+
 - One folder having several editors, like as in Dmoz.
 
 - Race conditions of reading an entry and saving it with a modified subkey.
