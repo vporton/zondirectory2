@@ -94,7 +94,7 @@ export class ItemData {
             const part = canDBPartitionActor(id.canister, { agent: this.agent });
             return [id.order, id, await part.getItem(id.id)];
         })());
-        const items4: any = (await Promise.all(items3));
+        const items4: any = await Promise.all(items3);
         return items4.map(([order, id, item]) => {
             return {
                 order,
