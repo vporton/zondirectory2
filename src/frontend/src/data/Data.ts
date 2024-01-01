@@ -49,9 +49,6 @@ export class ItemData {
             client.getStreams(BigInt(obj.itemRef.id), kind),
             client.getStreams(BigInt(obj.itemRef.id), "r" + kind),
         ]) as [Item[] | [], Streams[] | [], Streams[] | []];
-        console.log("ITEM", item)
-        // const item = await client.getItem(BigInt(obj.itemRef.id)) as any;
-        // const streams = await client.getStreams(BigInt(obj.itemRef.id)) as any;
         obj.item = item[0]; // TODO: if no such item
         obj.streams = _unwrap(streams);
         obj.streamsRev = _unwrap(streamsRev);
