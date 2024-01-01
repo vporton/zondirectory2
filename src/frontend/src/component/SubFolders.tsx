@@ -2,7 +2,7 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
-import { ItemRef, serializeItemRef } from "../data/Data";
+import { ItemRef, parseItemRef, loadVotes, serializeItemRef } from "../data/Data";
 import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import ItemType from "./misc/ItemType";
 
@@ -10,7 +10,7 @@ export default function SubFolders(props) {
     const { id } = useParams();
     const [xdata, setXData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
-    const [categories, setCategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>([] as any[]);
+    const [categories, setCategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>([]);
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
     const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("v"); // time, votes, or paid
@@ -25,7 +25,7 @@ export default function SubFolders(props) {
                 data.title().then(x => setTitle(x));
                 if (props['data-dir'] == 'super') {
                     data.superCategories().then(x => {
-                        setCategories(x);
+                        setCategories(x); // FIXME: SUPER-categories
                         // TODO: duplicate code
                         if (x.length !== 0) {
                             setItemsLast(x[x.length - 1].order);

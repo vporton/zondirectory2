@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "./auth/use-auth-client";
-import { ItemRef, serializeItemRef } from "../data/Data";
+import { ItemRef, loadVotes, parseItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
 import { Button } from "react-bootstrap";
 import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
@@ -42,6 +42,7 @@ function ShowItemContent(props: {defaultAgent}) {
     const [antiCommentsLast, setAntiCommentsLast] = useState("");
     const [antiCommentsReachedEnd, setAntiCommentsReachedEnd] = useState(false);
     const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("v"); // time, votes, or paid
+    const [totalVotesSubCategories, setTotalVotesSubCategories] = useState<{[key: string]: {up: number, down: number}}>({});
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -63,7 +64,18 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.creator().then(x => setCreator(x));
                 data.subCategories().then(x => {
                     setSubcategories(x);
-                })
+                    // TODO: Extract this code for reuse:
+                    const votes: {[key: string]: {up: number, down: number}} = {};
+                    const promises = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
+                        loadVotes(parseItemRef(id), cat.id).then(res => { // TODO: Should not parse here.
+                            votes[serializeItemRef(cat.id)] = res;
+                        })
+                    );
+                    Promise.all(promises).then(() => {
+                        // TODO: Remove votes for excluded items?
+                        setTotalVotesSubCategories(votes); // TODO: Set it instead above in the loop for faster results?
+                    });
+                });
                 data.superCategories().then(x => {
                     setSupercategories(x);
                 });
@@ -147,6 +159,10 @@ function ShowItemContent(props: {defaultAgent}) {
     function updateStreamKind(e) {
         setStreamKind(e.currentTarget.value);
     }
+    function votesTitle(id) {
+        const o = totalVotesSubCategories[serializeItemRef(id)];
+        return o ? `Up: ${o.up} Down: ${o.down}` : "";
+    }
     const isCategory = type === 'ownedCategory' || type === 'communalCategory';
     return <>
         <h2><ItemType item={data}/>{isCategory ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
@@ -163,7 +179,10 @@ function ShowItemContent(props: {defaultAgent}) {
             {subcategories === undefined ? <p>Loading...</p> :
             <ul>
                 {subcategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
-                    {streamKind === 'v' && <><Button className="thumbs">👍</Button><Button className="thumbs">👎</Button></>}
+                    {streamKind === 'v' &&
+                        <span title={votesTitle(x.id)}>
+                            <Button className="thumbs">👍</Button><Button className="thumbs">👎</Button>
+                        </span>}
                     <ItemType item={x.item}/>
                     <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
                 </li>)}

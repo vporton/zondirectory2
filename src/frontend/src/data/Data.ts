@@ -1,9 +1,9 @@
 import { Principal } from "@dfinity/principal";
-import { Item, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did"
+import { CanDBPartition, Item, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did"
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
 import { createActor as nacDBPartitionActor } from "../../../declarations/NacDBPartition";
-import { createActor as canDBPartitionActor } from "../../../declarations/CanDBPartition";
-import { text } from "stream/consumers";
+import { createActor as canDBPartitionActor, idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition";
+import { CanDBIndex } from "../../../declarations/CanDBIndex";
 
 const STREAM_LINK_SUBITEMS = 0; // category <-> sub-items
 const STREAM_LINK_SUBCATEGORIES = 1; // category <-> sub-categories
@@ -161,4 +161,60 @@ export class ItemData {
         const [outerCanister, outerKey] = _unwrap(this.streamsRev[STREAM_LINK_COMMENTS]).order
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
+}
+
+// TODO: This API is screwed, develop a new one.
+// export function initializeIndexClient(isLocal: boolean): IndexClient<CanDBIndex> {
+//     const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app"; // TODO
+//     return new IndexClient<CanDBIndex>({
+//       IDL: CanDBIndexIDL,
+//       canisterId: process.env.CANDBINDEX_CANISTER_ID, 
+//       agentOptions: {
+//         host,
+//       },
+//     })
+// };
+  
+// export function initializePartitionClient(isLocal: boolean, indexClient: IndexClient<CanDBIndex>): ActorClient<CanDBIndex, CanDBPartition> {
+//     const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
+//     return new ActorClient<CanDBIndex, CanDBPartition>({
+//       actorOptions: {
+//         IDL: CanDBPartitionIDL,
+//         agentOptions: {
+//           host,
+//         }
+//       },
+//       indexClient, 
+//     })
+// };
+  
+// export async function loadVotes(parent: ItemRef, child: ItemRef): Promise<{up: number, down: number}> {
+//     const isLocal = process.env.REACT_APP_IS_LOCAL === "1";
+//     const indexClient = initializeIndexClient(isLocal);
+//     const partitionClient = initializePartitionClient(isLocal, indexClient);
+//     let pk = `main`;
+//     let results = await partitionClient.query<CanDBPartition["getAttribute"]>(
+//         pk,
+//         (actor) => actor.getAttribute(`w/${parent.id}/${child.id}`, "v"),
+//     );
+//     let response;
+//     for (let settledResult of results) {
+//         if (settledResult.status === "fulfilled" && settledResult.value.length > 0) {
+//             // handle candid returned optional type (string[] or string)
+//             response = Array.isArray(settledResult.value) ? settledResult.value[0] : settledResult.value
+//             break;
+//         } 
+//     }
+//     console.log("RESULTS:", response);
+//     return response === undefined ? {up: 0, down: 0} : { up: response[0], down: response[1] };
+// }
+
+export async function loadVotes(parent: ItemRef, child: ItemRef): Promise<{up: number, down: number}> {
+    let pk = `main`;
+    let results = await CanDBIndex.getFirstAttribute(
+        pk,
+        {sk: `w/${parent.id}/${child.id}`, key: "v"},
+    );
+    console.log("RESULTS:", results);
+    return results.length === 0 ? {up: 0, down: 0} : { up: results[0][0][0], down: results[0][0][1] };
 }
