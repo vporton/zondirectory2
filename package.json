@@ -25,6 +25,7 @@
     "@nfid/embed": "^0.10.0-alpha.2",
     "base64-js": "^1.5.1",
     "bootstrap": "^5.3.2",
+    "candb-client-typescript": "^0.0.0-alpha.1",
     "crypto-js": "^4.2.0",
     "css-loader": "^6.8.1",
     "node-fetch": "^2.7.0",
