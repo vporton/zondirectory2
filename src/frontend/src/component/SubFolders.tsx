@@ -12,7 +12,7 @@ export default function SubFolders(props) {
     const [categories, setCategories] = useState([] as any[]); // TODO: `as Item[]`
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
-    const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("t"); // time, votes, or paid
+    const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("v"); // time, votes, or paid
     function updateStreamKind(e) {
         setStreamKind(e.currentTarget.value);
     }
