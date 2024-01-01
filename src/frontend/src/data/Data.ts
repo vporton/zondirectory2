@@ -217,8 +217,8 @@ export async function loadTotalVotes(parent: ItemRef, child: ItemRef): Promise<{
         pk,
         {sk: `w/${parent.id}/${child.id}`, key: "v"},
     );
-    console.log("RESULTS:", results);
-    return results.length === 0 ? {up: 0, down: 0} : { up: results[0][0][0], down: results[0][0][1] };
+    const tuple = results.length === 0 ? [0, 0] : (results[0][1][0] as any).tuple;
+    return { up: tuple[0].int, down: tuple[1].int };
 }
 
 export async function loadUserVote(principal: Principal, parent: ItemRef, child: ItemRef): Promise<number> {
