@@ -41,7 +41,7 @@ function ShowItemContent(props: {defaultAgent}) {
     const [commentsReachedEnd, setCommentsReachedEnd] = useState(false);
     const [antiCommentsLast, setAntiCommentsLast] = useState("");
     const [antiCommentsReachedEnd, setAntiCommentsReachedEnd] = useState(false);
-    const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("t"); // time, votes, or paid
+    const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("v"); // time, votes, or paid
 
     const navigate = useNavigate();
     useEffect(() => {
