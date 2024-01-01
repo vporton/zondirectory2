@@ -1,12 +1,13 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "./auth/use-auth-client";
-import { ItemRef, loadTotalVotes, parseItemRef, serializeItemRef } from "../data/Data";
+import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
 import { Button } from "react-bootstrap";
 import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
+import { order } from "../../../declarations/order";
 
 export default function ShowItem() {
     return (
@@ -22,6 +23,7 @@ export default function ShowItem() {
 
 function ShowItemContent(props: {defaultAgent}) {
     const { id } = useParams();
+    const { principal } = useContext(AuthContext) as any;
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -43,6 +45,7 @@ function ShowItemContent(props: {defaultAgent}) {
     const [antiCommentsReachedEnd, setAntiCommentsReachedEnd] = useState(false);
     const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("v"); // time, votes, or paid
     const [totalVotesSubCategories, setTotalVotesSubCategories] = useState<{[key: string]: {up: number, down: number}}>({});
+    const [userVoteSubCategories, setUserVoteSubCategories] = useState<{[key: string]: number}>({});
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -52,6 +55,35 @@ function ShowItemContent(props: {defaultAgent}) {
         setComments(undefined);
         setAntiComments(undefined);
     }, [id]);
+    function updateSubCategories(x: {order: string, id: ItemRef, item: Item}[]) {
+        setSubcategories(x);
+
+        // TODO: Extract this code for reuse:
+        const votes: {[key: string]: {up: number, down: number}} = {};
+        const promises = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
+            loadTotalVotes(parseItemRef(id), cat.id).then(res => { // TODO: Should not parse here.
+                votes[serializeItemRef(cat.id)] = res;
+            })
+        );
+        Promise.all(promises).then(() => {
+            // TODO: Remove votes for excluded items?
+            setTotalVotesSubCategories(votes); // TODO: Set it instead above in the loop for faster results?
+        });
+
+        if (principal) { // TODO: Should re-read if logged under a different principal
+            // TODO: Extract this code for reuse:
+            const votes2: {[key: string]: number} = {};
+            const promises2 = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
+                loadUserVote(principal, parseItemRef(id), cat.id).then(res => { // TODO: Should not parse here.
+                    votes2[serializeItemRef(cat.id)] = res;
+                })
+            );
+            Promise.all(promises2).then(() => {
+                // TODO: Remove votes for excluded items?
+                setUserVoteSubCategories(votes2); // TODO: Set it instead above in the loop for faster results?
+            });
+        }
+    }
     useEffect(() => { // TODO
         if (id !== undefined) {
             AppData.create(props.defaultAgent, id, streamKind).then(data => {
@@ -62,20 +94,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.description().then(x => setDescription(x));
                 data.postText().then(x => setPostText(x));
                 data.creator().then(x => setCreator(x));
-                data.subCategories().then(x => {
-                    setSubcategories(x);
-                    // TODO: Extract this code for reuse:
-                    const votes: {[key: string]: {up: number, down: number}} = {};
-                    const promises = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
-                        loadTotalVotes(parseItemRef(id), cat.id).then(res => { // TODO: Should not parse here.
-                            votes[serializeItemRef(cat.id)] = res;
-                        })
-                    );
-                    Promise.all(promises).then(() => {
-                        // TODO: Remove votes for excluded items?
-                        setTotalVotesSubCategories(votes); // TODO: Set it instead above in the loop for faster results?
-                    });
-                });
+                data.subCategories().then(x => updateSubCategories(x)); // duplicate code
                 data.superCategories().then(x => {
                     setSupercategories(x);
                 });
@@ -159,6 +178,16 @@ function ShowItemContent(props: {defaultAgent}) {
     function updateStreamKind(e) {
         setStreamKind(e.currentTarget.value);
     }
+    async function vote(child: ItemRef, value: number) {
+        if (principal === undefined || principal.toString() === "2vxsx-fae") { // TODO: hack
+            alert("Login to vote!"); // TODO: a better dialog
+            return;
+        }
+        await order.vote(principal, BigInt(parseItemRef(id!).id), BigInt(child.id), BigInt(value), false); // TODO: no parse here
+        AppData.create(props.defaultAgent, id, streamKind).then(data => { // duplicate code
+            data.subCategories().then(x => updateSubCategories(x));
+        });
+    }
     function votesTitle(id) {
         const o = totalVotesSubCategories[serializeItemRef(id)];
         return o ? `Up: ${o.up} Down: ${o.down}` : "";
@@ -181,7 +210,8 @@ function ShowItemContent(props: {defaultAgent}) {
                 {subcategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
                     {streamKind === 'v' &&
                         <span title={votesTitle(x.id)}>
-                            <Button className="thumbs">👍</Button><Button className="thumbs">👎</Button>
+                            <Button onClick={async () => await vote(x.id, +1)} className={userVoteSubCategories[serializeItemRef(x.id)] > 0 ? 'thumbs active' : 'thumbs'}>👍</Button>
+                            <Button onClick={async () => await vote(x.id, -1)} className={userVoteSubCategories[serializeItemRef(x.id)] < 0 ? 'thumbs active' : 'thumbs'}>👎</Button>
                         </span>}
                     <ItemType item={x.item}/>
                     <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>

@@ -4,6 +4,8 @@ import { Actor, Agent, HttpAgent } from "@dfinity/agent";
 import { createActor as nacDBPartitionActor } from "../../../declarations/NacDBPartition";
 import { createActor as canDBPartitionActor, idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition";
 import { CanDBIndex } from "../../../declarations/CanDBIndex";
+import { useContext } from "react";
+import { AuthContext } from '../component/auth/use-auth-client';
 
 const STREAM_LINK_SUBITEMS = 0; // category <-> sub-items
 const STREAM_LINK_SUBCATEGORIES = 1; // category <-> sub-categories
@@ -217,4 +219,14 @@ export async function loadTotalVotes(parent: ItemRef, child: ItemRef): Promise<{
     );
     console.log("RESULTS:", results);
     return results.length === 0 ? {up: 0, down: 0} : { up: results[0][0][0], down: results[0][0][1] };
+}
+
+export async function loadUserVote(principal: Principal, parent: ItemRef, child: ItemRef): Promise<number> {
+    let pk = `main`;
+    let results = await CanDBIndex.getFirstAttribute(
+        pk,
+        {sk: `v/${principal.toString()}/${parent.id}/${child.id}`, key: "v"},
+    );
+    console.log("RESULTS2:", results);
+    return results.length === 0 ? 0 : (results[0][1][0] as any).int;
 }
