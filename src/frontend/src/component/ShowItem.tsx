@@ -74,7 +74,7 @@ function ShowItemContent(props: {defaultAgent}) {
             // TODO: Extract this code for reuse:
             const votes2: {[key: string]: number} = {};
             const promises2 = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
-                loadUserVote(principal, parseItemRef(id), cat.id).then(res => { // TODO: Should not parse here.
+                loadUserVote(principal, parseItemRef(id!), cat.id).then(res => { // TODO: Should not parse here.
                     votes2[serializeItemRef(cat.id)] = res;
                 })
             );
@@ -183,7 +183,7 @@ function ShowItemContent(props: {defaultAgent}) {
             alert("Login to vote!"); // TODO: a better dialog
             return;
         }
-        await order.vote(principal, BigInt(parseItemRef(id!).id), BigInt(child.id), BigInt(value), false); // TODO: no parse here
+        await order.vote(parseItemRef(id!).canister, BigInt(parseItemRef(id!).id), BigInt(child.id), BigInt(value), false); // TODO: no parse here
         AppData.create(props.defaultAgent, id!, streamKind).then(data => { // duplicate code
             data.subCategories().then(x => updateSubCategories(x));
         });
