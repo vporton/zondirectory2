@@ -3,6 +3,7 @@ import { Item, Streams } from "../../../declarations/CanDBPartition/CanDBPartiti
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
 import { createActor as nacDBPartitionActor } from "../../../declarations/NacDBPartition";
 import { createActor as canDBPartitionActor } from "../../../declarations/CanDBPartition";
+import { text } from "stream/consumers";
 
 const STREAM_LINK_SUBITEMS = 0; // category <-> sub-items
 const STREAM_LINK_SUBCATEGORIES = 1; // category <-> sub-categories
@@ -81,11 +82,11 @@ export class ItemData {
         const client2 = nacDBPartitionActor(innerPart, { agent: this.agent });
         const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as
             [[string, {text: string}]] | [];
-        const items1aa = items.length === 0 ? [] : items.map(x => [x[0], x[1].text]);
-        const items1a: {order: string, principal: string, id: bigint}[] = items1aa.map(x => ((s) => {
-            const m = s[1].match(/^([0-9]*)@(.*)$/);
-            return {order: s[0], principal: m[2], id: BigInt(m[1])};
-        })(x));
+        const items1aa = items.length === 0 ? [] : items.map(x => ({key: x[0], text: x[1].text}));
+        const items1a: {order: string, principal: string, id: bigint}[] = items1aa.map(x => {
+            const m = x.text.match(/^([0-9]*)@(.*)$/);
+            return {order: x.key, principal: m[2], id: BigInt(m[1])};
+        });
         const items2 = items1a.map(({order, principal, id}) => { return {canister: Principal.from(principal), id, order} });
         const items3 = items2.map(id => (async () => {
             const part = canDBPartitionActor(id.canister, { agent: this.agent });
