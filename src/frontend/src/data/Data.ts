@@ -82,17 +82,17 @@ export class ItemData {
         const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as // TODO: limit
             [[string, {text: string}]] | [];
         const items1aa = items.length === 0 ? [] : items.map(x => [x[0], x[1].text]);
-        const items1a: [string, string, bigint][] = items1aa.map(x => ((s) => {
+        const items1a: {order: string, principal: string, id: bigint}[] = items1aa.map(x => ((s) => {
             const m = s[1].match(/^([0-9]*)@(.*)$/);
-            return [s[0], m[2], BigInt(m[1])];
+            return {order: s[0], principal: m[2], id: BigInt(m[1])};
         })(x));
-        const items2 = items1a.map(([order, principalStr, id]) => { return {canister: Principal.from(principalStr), id, order} });
+        const items2 = items1a.map(({order, principal, id}) => { return {canister: Principal.from(principal), id, order} });
         const items3 = items2.map(id => (async () => {
             const part = canDBPartitionActor(id.canister, { agent: this.agent });
-            return [id.order, id, await part.getItem(id.id)];
+            return {order: id.order, id, item: await part.getItem(id.id)};
         })());
-        const items4: any = await Promise.all(items3);
-        return items4.map(([order, id, item]) => {
+        const items4 = await Promise.all(items3);
+        return items4.map(({order, id, item}) => {
             return {
                 order,
                 id,
