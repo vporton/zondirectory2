@@ -31,6 +31,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     };
 
     owners := _owners;
+    // FIXME: Use `user` instead of main, where appropriate.
     ignore await* createStorageCanister("main", ownersOrSelf());
     ignore await* createStorageCanister("user", ownersOrSelf()); // user data
 
