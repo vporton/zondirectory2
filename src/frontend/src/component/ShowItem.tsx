@@ -63,7 +63,7 @@ function ShowItemContent(props: {defaultAgent}) {
         // TODO: Extract this code for reuse:
         const votes: {[key: string]: {up: number, down: number}} = {};
         const promises = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
-            loadTotalVotes(parseItemRef(id), cat.id).then(res => { // TODO: Should not parse here.
+            loadTotalVotes(parseItemRef(id!), cat.id).then(res => { // TODO: Should not parse here.
                 votes[serializeItemRef(cat.id)] = res;
             })
         );
