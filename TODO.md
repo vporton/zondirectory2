@@ -1,5 +1,3 @@
-- FIXME: In NacDB and NacDBReorder I forgot to unblock, if an exception is caught by try..catch.
-
 - Counting number of logged-in users, number of items of various kinds.
 
 - Download a backup of author's items.
