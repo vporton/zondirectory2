@@ -245,7 +245,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   /// Voting ///
 
   /// `amount == 0` means canceling the vote.
-  public shared({caller}) func vote(parentPrincipal: Principal, parent: Nat, child: Nat, amount: Int, comment: Bool): async () {
+  public shared({caller}) func vote(parentPrincipal: Principal, parent: Nat, childPrincipal: Principal, child: Nat, amount: Int, comment: Bool): async () {
     await* lib.checkSybil(caller);
     Debug.print("VOTE: " # debug_show(parent) # "@" # debug_show(parentPrincipal) # "/" # debug_show(child) # " " # debug_show(amount));
     assert amount == -1 or amount == 1 or amount == 0;
@@ -326,7 +326,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
     await* Reorder.move(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
         order;
-        value = lib.encodeNat(child);
+        value = Nat.toText(child) # "@" # Principal.toText(childPrincipal);
         relative = true;
         newKey = difference ** 2**32;
     });
