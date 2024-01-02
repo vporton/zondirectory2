@@ -2,7 +2,6 @@
 base = "0.10.2"
 candb = "https://github.com/vporton/CanDB#no-blob"
 nacdb = "https://github.com/vporton/NacDB#main"
-reorder = "https://github.com/vporton/NacDBReorder#v0.10.5@7f0bb2fb068ad8405ac8730fd3e90a0961191ff9"
 stable-rbtree = "1.0.0"
 stable-buffer = "https://github.com/canscale/StableBuffer#v0.2.0"
 stablebuffer = "https://github.com/canscale/StableBuffer#v0.2.0"
@@ -20,7 +19,7 @@ map = "9.0.1"
 btree = "https://github.com/canscale/StableHeapBTreeMap#v0.3.3"
 CanDBMulti = "https://github.com/vporton/CanDBMulti#v0.9.12@2785aed4a28651adf1b06f45ec3c6c48e1f4076f"
 xtended-numbers = "0.2.1"
-NacDBReorder = "https://github.com/vporton/NacDBReorder#v1.6.0@c1e5f3a11d04f0970c64cff4b7743930e3bee10f"
+NacDBReorder = "https://github.com/vporton/NacDBReorder#v1.6.1@f6c1719f106ee07d446c32a7d61cd22779f185cd"
 
 [dev-dependencies]
 matchers = "https://github.com/kritzcreek/motoko-matchers#v1.3.0"
