@@ -186,7 +186,7 @@ function ShowItemContent(props: {defaultAgent}) {
             return;
         }
         const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent})
-        await order.vote(parseItemRef(id!).canister, BigInt(parseItemRef(id!).id), parseItemRef(child.id).canister, BigInt(child.id), BigInt(value), false); // TODO: no parse here
+        await order.vote(parseItemRef(id!).canister, BigInt(parseItemRef(id!).id), child.canister, BigInt(child.id), BigInt(value), false); // TODO: no parse here
         AppData.create(props.defaultAgent, id!, streamKind).then(data => { // duplicate code
             data.subCategories().then(x => updateSubCategories(x));
         });
