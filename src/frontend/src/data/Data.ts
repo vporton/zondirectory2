@@ -230,6 +230,5 @@ export async function loadUserVote(principal: Principal, parent: ItemRef, child:
         pk,
         {sk: `v/${principal.toString()}/${parent.id}/${child.id}`, key: "v"},
     );
-    console.log("RESULTS2:", results);
     return results.length === 0 ? 0 : (results[0][1][0] as any).int;
 }
