@@ -328,7 +328,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
         order;
         value = Nat.toText(child) # "@" # Principal.toText(childPrincipal);
         relative = true;
-        newKey = -difference ** 2**32;
+        newKey = difference ** 2**32;
     });
   };
 
