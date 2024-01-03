@@ -1,3 +1,5 @@
+- Give investors 15% of the PST, using a blockchain launchpad.
+
 - Counting number of logged-in users, number of items of various kinds.
 
 - Download a backup of author's items.
