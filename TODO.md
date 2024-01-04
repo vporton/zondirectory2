@@ -1,4 +1,5 @@
 - Give investors 15% of the PST, using a blockchain launchpad.
+  Preserve some PST in rewards fund, make rewards through a DEX.
 
 - Counting number of logged-in users, number of items of various kinds.
 
