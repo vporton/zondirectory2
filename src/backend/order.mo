@@ -248,7 +248,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   public shared({caller}) func vote(parentPrincipal: Principal, parent: Nat, childPrincipal: Principal, child: Nat, amount: Int, comment: Bool): async () {
     await* lib.checkSybil(caller);
     Debug.print("VOTE: " # debug_show(parent) # "@" # debug_show(parentPrincipal) # "/" # debug_show(child) # " " # debug_show(amount));
-    assert amount == -1 or amount == 1 or amount == 0;
+    assert amount == -1 or amount == 1 or amount == 0; // FIXME: Revoting up after voting down creates `amount == 2`.
 
     let sk = "v/" # Principal.toText(caller) # "/" # Nat.toText(parent) # "/" # Nat.toText(child);
     let oldVotes = await CanDBIndex.getFirstAttribute("main", { sk; key = "v" }); // TODO: race condition
