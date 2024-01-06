@@ -245,10 +245,10 @@ shared({caller = initialOwner}) actor class Orders() = this {
   /// Voting ///
 
   /// `amount == 0` means canceling the vote.
-  public shared({caller}) func vote(parentPrincipal: Principal, parent: Nat, childPrincipal: Principal, child: Nat, amount: Int, comment: Bool): async () {
+  public shared({caller}) func vote(parentPrincipal: Principal, parent: Nat, childPrincipal: Principal, child: Nat, value: Int, comment: Bool): async () {
     await* lib.checkSybil(caller);
-    Debug.print("VOTE: " # debug_show(parent) # "@" # debug_show(parentPrincipal) # "/" # debug_show(child) # " " # debug_show(amount));
-    assert amount == -1 or amount == 1 or amount == 0; // FIXME: Revoting up after voting down creates `amount == 2`.
+    Debug.print("VOTE: " # debug_show(parent) # "@" # debug_show(parentPrincipal) # "/" # debug_show(child) # " " # debug_show(value));
+    assert value == -1 or value == 1 or value == 0; // FIXME: Revoting up after voting down creates `value == 2`.
 
     let sk = "v/" # Principal.toText(caller) # "/" # Nat.toText(parent) # "/" # Nat.toText(child);
     let oldVotes = await CanDBIndex.getFirstAttribute("main", { sk; key = "v" }); // TODO: race condition
@@ -265,11 +265,11 @@ shared({caller = initialOwner}) actor class Orders() = this {
       };
       case null { 0 };
     };
-    let difference = amount - oldValue2;
+    let difference = value - oldValue2;
     if (difference == 0) {
       return;
     };
-    ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk; key = "v"; value = #int amount });
+    ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk; key = "v"; value = #int value });
 
     // Update total votes for the given parent/child:
     let sk2 = "w/" # Nat.toText(parent) # "/" # Nat.toText(child);
@@ -290,8 +290,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
 
     // TODO: Check this block of code for errors.
-    let changeUp = (amount == 1 and oldValue2 != 1) or (oldValue2 == 1 and amount != 1);
-    let changeDown = (amount == -1 and oldValue2 != -1) or (oldValue2 == -1 and amount != -1);
+    let changeUp = (value == 1 and oldValue2 != 1) or (oldValue2 == 1 and value != 1);
+    let changeDown = (value == -1 and oldValue2 != -1) or (oldValue2 == -1 and value != -1);
     var up2 = up;
     var down2 = down;
     if (changeUp or changeDown) {
