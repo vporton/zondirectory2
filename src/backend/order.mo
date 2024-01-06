@@ -299,7 +299,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
         up2 += if (difference > 0) { 1 } else { -1 };
       };
       if (changeDown) {
-        down2 -= if (difference > 0) { -1 } else { 1 };
+        down2 += if (difference > 0) { -1 } else { 1 };
       };
       // TODO: Take advantage of `oldTotalsPrincipal` as a hint:
       ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk = totalVotesSK; key = "v"; value = #tuple([#int up2, #int down2]) }); // TODO: race condition
@@ -328,7 +328,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
         order;
         value = Nat.toText(child) # "@" # Principal.toText(childPrincipal);
         relative = true;
-        newKey = difference * 2**16;
+        newKey = -difference * 2**16;
     });
   };
 
