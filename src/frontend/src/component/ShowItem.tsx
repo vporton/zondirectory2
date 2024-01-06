@@ -214,8 +214,8 @@ function ShowItemContent(props: {defaultAgent}) {
                 {subcategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
                     {streamKind === 'v' &&
                         <span title={votesTitle(x.id)}>
-                            <Button onClick={async () => await vote(x.id, +1)} className={userVoteSubCategories[serializeItemRef(x.id)] > 0 ? 'thumbs active' : 'thumbs'}>👍</Button>
-                            <Button onClick={async () => await vote(x.id, -1)} className={userVoteSubCategories[serializeItemRef(x.id)] < 0 ? 'thumbs active' : 'thumbs'}>👎</Button>
+                            <Button onClick={async e => await vote(x.id, (e.target as Element).classList.contains('active') ? -1 : +1)} className={userVoteSubCategories[serializeItemRef(x.id)] > 0 ? 'thumbs active' : 'thumbs'}>👍</Button>
+                            <Button onClick={async e => await vote(x.id, (e.target as Element).classList.contains('active') ? +1 : -1)} className={userVoteSubCategories[serializeItemRef(x.id)] < 0 ? 'thumbs active' : 'thumbs'}>👎</Button>
                         </span>}
                     <ItemType item={x.item}/>
                     <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
