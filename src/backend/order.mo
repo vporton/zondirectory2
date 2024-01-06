@@ -247,7 +247,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
   /// `amount == 0` means canceling the vote.
   public shared({caller}) func vote(parentPrincipal: Principal, parent: Nat, childPrincipal: Principal, child: Nat, value: Int, comment: Bool): async () {
     await* lib.checkSybil(caller);
-    Debug.print("VOTE: " # debug_show(parent) # "@" # debug_show(parentPrincipal) # "/" # debug_show(child) # " " # debug_show(value));
     assert value == -1 or value == 1 or value == 0; // FIXME: Revoting up after voting down creates `value == 2`.
 
     let sk = "v/" # Principal.toText(caller) # "/" # Nat.toText(parent) # "/" # Nat.toText(child);
