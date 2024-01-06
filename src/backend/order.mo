@@ -268,6 +268,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     if (difference == 0) {
       return;
     };
+    // TODO: Take advantage of `principal` as a hint.
     ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk = userVotesSK; key = "v"; value = #int value });
 
     // Update total votes for the given parent/child:
@@ -295,10 +296,10 @@ shared({caller = initialOwner}) actor class Orders() = this {
     var down2 = down;
     if (changeUp or changeDown) {
       if (changeUp) {
-        up2 += difference;
+        up2 += if (difference > 0) { 1 } else { -1 };
       };
       if (changeDown) {
-        down2 -= difference;
+        down2 -= if (difference > 0) { -1 } else { 1 };
       };
       // TODO: Take advantage of `oldTotalsPrincipal` as a hint:
       ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk = totalVotesSK; key = "v"; value = #tuple([#int up2, #int down2]) }); // TODO: race condition
