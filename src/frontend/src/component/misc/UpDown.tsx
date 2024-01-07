@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Item } from "../../../../declarations/CanDBPartition/CanDBPartition.did";
 import { AuthContext } from "../auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../../data/Data";
@@ -17,6 +17,18 @@ export default function UpDown(props: {
     const { principal, agent } = useContext(AuthContext) as any;
     const [userVote, setUserVote] = useState(props.defaultUserVote);
     const [totalVotes, setTotalVotes] = useState(props.defaultTotalVotes);
+
+    // hack
+    useEffect(() => {
+        if (userVote === undefined) {
+            setUserVote(props.defaultUserVote);
+        }
+    }, [props.defaultUserVote]);
+    useEffect(() => {
+        if (totalVotes === undefined) {
+            setTotalVotes(props.defaultTotalVotes);
+        }
+    }, [props.defaultTotalVotes]);
 
     async function vote(child: ItemRef, value: number, clicked: 'up' | 'down') {
         if (principal === undefined || principal.toString() === "2vxsx-fae") { // TODO: hack

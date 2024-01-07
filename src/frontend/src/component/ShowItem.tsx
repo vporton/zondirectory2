@@ -57,7 +57,13 @@ function ShowItemContent(props: {defaultAgent}) {
         setAntiComments(undefined);
     }, [id]);
     function updateSubCategories(x: {order: string, id: ItemRef, item: Item}[]) {
+        const firstTime = subcategories === undefined;
+        
         setSubcategories(x);
+
+        if (!firstTime) {
+            return;
+        }
 
         // TODO: Extract this code for reuse:
         const votes: {[key: string]: {up: number, down: number}} = {};
