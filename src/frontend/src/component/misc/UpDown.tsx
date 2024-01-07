@@ -37,28 +37,28 @@ export default function UpDown(props: {
         }
         const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent})
         await order.vote(props.item.id.canister, BigInt(props.item.id.id), child.canister, BigInt(child.id), BigInt(value), false);
-        // AppData.create(props.agent, serializeItemRef(props.item.id), props.streamKind).then(data => { // duplicate code
-        //     data.subCategories().then(x => updateSubCategories(x));
-        // });
 
-        // FIXME
+        let changeUp = (value == 1 && userVote != 1) || (userVote == 1 && value != 1);
+        let changeDown = (value == -1 && userVote != -1) || (userVote == -1 && value != -1);
+
+        let up = totalVotes.up;
+        let down = totalVotes.down;
+        if (changeUp || changeDown) {
+            if (changeUp) {
+              up += value - userVote > 0 ? 1 : -1;
+            };
+            if (changeDown) {
+              down += value - userVote > 0 ? -1 : 1;
+            };
+        }      
+
         if (clicked === 'up') {
-            setUserVote(1);
-            const diff = totalVotes[child.id].up > 0 ? -1 : 1;
-            setTotalVotes({
-                up: totalVotes[child.id].up + diff,
-                down: 0,
-            });
+            setUserVote(userVote === 1 ? 0 : 1);
         };
         if (clicked === 'down') {
-            setUserVote(-1);
-            const diff = totalVotes[child.id].down > 0 ? -1 : 1;
-            setTotalVotes({
-                up: 0,
-                down: totalVotes[child.id].down + diff,
-            });
+            setUserVote(userVote === -1 ? 0 : -1);
         };
-    
+        setTotalVotes({up, down});
     }
     function votesTitle(id) {
         return totalVotes ? `Up: ${totalVotes.up} Down: ${totalVotes.down}` : "";
