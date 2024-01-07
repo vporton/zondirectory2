@@ -8,7 +8,7 @@ import ItemType from "./misc/ItemType";
 import { Button } from "react-bootstrap";
 import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { order } from "../../../declarations/order";
-import { createActor as orderActor } from "../../../declarations/order";
+import UpDown from "./misc/UpDown";
 
 export default function ShowItem() {
     return (
@@ -24,7 +24,6 @@ export default function ShowItem() {
 
 function ShowItemContent(props: {defaultAgent}) {
     const { id } = useParams();
-    const { agent } = useContext(AuthContext) as any;
     const { principal } = useContext(AuthContext) as any;
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
@@ -58,7 +57,6 @@ function ShowItemContent(props: {defaultAgent}) {
         setAntiComments(undefined);
     }, [id]);
     function updateSubCategories(x: {order: string, id: ItemRef, item: Item}[]) {
-        console.log("x", x);
         setSubcategories(x);
 
         // TODO: Extract this code for reuse:
@@ -95,8 +93,8 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.locale().then(x => setLocale(x));
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
-                data.postText().then(x => setPostText(x));
-                data.creator().then(x => setCreator(x));
+                data.postText().then(x => setPostText(x!)); // TODO: `!`
+                data.creator().then(x => setCreator(x.toString())); // TODO
                 data.subCategories().then(x => updateSubCategories(x)); // duplicate code
                 data.superCategories().then(x => {
                     setSupercategories(x);
@@ -181,21 +179,6 @@ function ShowItemContent(props: {defaultAgent}) {
     function updateStreamKind(e) {
         setStreamKind(e.currentTarget.value);
     }
-    async function vote(child: ItemRef, value: number) {
-        if (principal === undefined || principal.toString() === "2vxsx-fae") { // TODO: hack
-            alert("Login to vote!"); // TODO: a better dialog
-            return;
-        }
-        const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent})
-        await order.vote(parseItemRef(id!).canister, BigInt(parseItemRef(id!).id), child.canister, BigInt(child.id), BigInt(value), false); // TODO: no parse here
-        AppData.create(props.defaultAgent, id!, streamKind).then(data => { // duplicate code
-            data.subCategories().then(x => updateSubCategories(x));
-        });
-    }
-    function votesTitle(id) {
-        const o = totalVotesSubCategories[serializeItemRef(id)];
-        return o ? `Up: ${o.up} Down: ${o.down}` : "";
-    }
     const isCategory = type === 'ownedCategory' || type === 'communalCategory';
     return <>
         <h2><ItemType item={data}/>{isCategory ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
@@ -212,11 +195,13 @@ function ShowItemContent(props: {defaultAgent}) {
             {subcategories === undefined ? <p>Loading...</p> :
             <ul>
                 {subcategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
-                    {streamKind === 'v' &&
-                        <span title={votesTitle(x.id)}>
-                            <Button onClick={async e => await vote(x.id, (e.target as Element).classList.contains('active') ? 0 : +1)} className={userVoteSubCategories[serializeItemRef(x.id)] > 0 ? 'thumbs active' : 'thumbs'}>👍</Button>
-                            <Button onClick={async e => await vote(x.id, (e.target as Element).classList.contains('active') ? 0 : -1)} className={userVoteSubCategories[serializeItemRef(x.id)] < 0 ? 'thumbs active' : 'thumbs'}>👎</Button>
-                        </span>}
+                    <UpDown
+                        streamKind={streamKind}
+                        item={x}
+                        agent={props.defaultAgent}
+                        defaultUserVote={userVoteSubCategories[serializeItemRef(x.id)]}
+                        defaultTotalVotes={totalVotesSubCategories[serializeItemRef(x.id)]}
+                    />
                     <ItemType item={x.item}/>
                     <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
                 </li>)}
