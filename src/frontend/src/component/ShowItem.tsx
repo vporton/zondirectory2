@@ -79,7 +79,7 @@ function ShowItemContent(props: {defaultAgent}) {
             setTotalVotes(totalVotes); // TODO: Set it instead above in the loop for faster results?
         });
 
-        console.log('principal', principal);
+        console.log('principal', principal.toString());
         if (principal) { // TODO: Should re-read if logged under a different principal
             // TODO: Extract this code for reuse:
             const userVotes: {[key: string]: number} = {};
