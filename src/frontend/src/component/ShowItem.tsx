@@ -59,13 +59,13 @@ function ShowItemContent(props: {defaultAgent}) {
         setAntiComments(undefined);
     }, [idParam]);
     function updateList(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
-        const firstTime = list === undefined;
+        // const firstTime = list === undefined;
 
         setList(input);
 
-        if (!firstTime) {
-            return;
-        }
+        // if (!firstTime) {
+        //     return;
+        // }
 
         // TODO: Extract this code for reuse:
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
@@ -79,11 +79,13 @@ function ShowItemContent(props: {defaultAgent}) {
             setTotalVotes(totalVotes); // TODO: Set it instead above in the loop for faster results?
         });
 
+        console.log('principal', principal);
         if (principal) { // TODO: Should re-read if logged under a different principal
             // TODO: Extract this code for reuse:
             const userVotes: {[key: string]: number} = {};
             const userVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
                 loadUserVote(principal, id!, cat.id).then(res => { // TODO: Should not parse here.
+                    console.log('userVotes', serializeItemRef(cat.id), res);
                     userVotes[serializeItemRef(cat.id)] = res;
                 })
             );
@@ -94,9 +96,15 @@ function ShowItemContent(props: {defaultAgent}) {
         }
     }
     async function updateSubCategories() {
-        const x = await data.subCategories();
+        if (xdata === undefined) {
+            return;
+        }
+        const x = await xdata.subCategories();
         updateList(x, subcategories, setSubcategories, setTotalVotesSubCategories, setUserVoteSubCategories);
     }
+    useEffect(() => {
+        updateSubCategories().then(() => {});
+    }, [principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {
             AppData.create(props.defaultAgent, serializeItemRef(id), streamKind).then(data => {
