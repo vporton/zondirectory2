@@ -16,6 +16,7 @@ export default function UpDown(props: {
     onSetUserVote: (id: ItemRef, v: number) => void,
     totalVotes: { up: number, down: number },
     onSetTotalVotes: (id: ItemRef, v: { up: number, down: number }) => void,
+    onUpdateList: (() => void) | undefined,
 }) {
     const { principal, agent } = useContext(AuthContext) as any;
 
@@ -50,6 +51,9 @@ export default function UpDown(props: {
 
         const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent});
         await order.vote(props.parent.id.canister, BigInt(props.parent.id.id), props.item.id.canister, BigInt(props.item.id.id), BigInt(value), false);
+        if (props.onUpdateList !== undefined) {
+            props.onUpdateList();
+        }
     }
     function votesTitle() {
         return props.totalVotes ? `Up: ${props.totalVotes.up} Down: ${props.totalVotes.down}` : "";

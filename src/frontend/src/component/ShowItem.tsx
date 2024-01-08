@@ -98,7 +98,7 @@ function ShowItemContent(props: {defaultAgent}) {
     }
     useEffect(() => {
         updateSubCategories().then(() => {});
-    }, [principal, subcategories, totalVotesSubCategories, userVoteSubCategories]); // FIXME: Update on `principal` change doesn't work.
+    }, [principal, subcategories]);
     useEffect(() => { // TODO
         if (id !== undefined) {
             console.log("B");
@@ -227,6 +227,7 @@ function ShowItemContent(props: {defaultAgent}) {
                                     setUserVoteSubCategories({...userVoteSubCategories, [serializeItemRef(id)]: v})}
                                 onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
                                     setTotalVotesSubCategories({...totalVotesSubCategories, [serializeItemRef(id)]: v})}
+                                onUpdateList={() => updateSubCategories().then(() => {})}
                             />
                             <ItemType item={x.item}/>
                             <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
