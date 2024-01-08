@@ -69,6 +69,7 @@ function ShowItemContent(props: {defaultAgent}) {
         console.log("LIST update");
         setList(input);
 
+        // FIXME: It prevents list update on navigation between folders.
         if (!first) {
             return; // prevent infinite loop of updating this after changes in [totalVotesSubCategories, userVoteSubCategories]
             // TODO: Is this prevention enough to avoid duplicate queries?
