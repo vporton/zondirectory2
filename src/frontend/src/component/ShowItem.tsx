@@ -212,18 +212,19 @@ function ShowItemContent(props: {defaultAgent}) {
                 <h3>Sub-folders</h3>
                 {subcategories === undefined ? <p>Loading...</p> :
                 <ul>
-                    {subcategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
-                        <UpDown
-                            parent={{id}}
-                            item={x}
-                            agent={props.defaultAgent}
-                            onUpdateList={updateSubCategories}
-                            defaultUserVote={userVoteSubCategories[serializeItemRef(x.id)]}
-                            defaultTotalVotes={totalVotesSubCategories[serializeItemRef(x.id)]}
-                        />
-                        <ItemType item={x.item}/>
-                        <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
-                    </li>)}
+                    {subcategories.map((x: {order: string, id: ItemRef, item: Item}) =>
+                        <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
+                            <UpDown
+                                parent={{id}}
+                                item={x}
+                                agent={props.defaultAgent}
+                                onUpdateList={updateSubCategories}
+                                defaultUserVote={userVoteSubCategories[serializeItemRef(x.id)]}
+                                defaultTotalVotes={totalVotesSubCategories[serializeItemRef(x.id)]}
+                            />
+                            <ItemType item={x.item}/>
+                            <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
+                        </li>)}
                 </ul>}
                 <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
             </>}
