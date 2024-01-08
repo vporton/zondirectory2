@@ -57,7 +57,6 @@ function ShowItemContent(props: {defaultAgent}) {
         setAntiComments(undefined);
     }, [id]);
     function updateSubCategories(x: {order: string, id: ItemRef, item: Item}[]) {
-        console.log(x)
         const firstTime = subcategories === undefined;
         
         setSubcategories(x);
@@ -208,6 +207,7 @@ function ShowItemContent(props: {defaultAgent}) {
                         parent={{id: parseItemRef(id!)}}
                         item={x}
                         agent={props.defaultAgent}
+                        onUpdateList={() => xdata.subCategories().then(x => updateSubCategories(x))}
                         defaultUserVote={userVoteSubCategories[serializeItemRef(x.id)]}
                         defaultTotalVotes={totalVotesSubCategories[serializeItemRef(x.id)]}
                     />

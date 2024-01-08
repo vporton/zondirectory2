@@ -12,6 +12,7 @@ export default function UpDown(props: {
     parent: {id: ItemRef},
     item: {order: string, id: ItemRef, item: Item},
     agent: Agent,
+    onUpdateList: (() => void) | undefined,
     defaultUserVote: number, // -1, 0, or 1
     defaultTotalVotes: { up: number, down: number },
 }) {
@@ -64,6 +65,9 @@ export default function UpDown(props: {
         const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent});
         await order.vote(props.parent.id.canister, BigInt(props.parent.id.id), props.item.id.canister, BigInt(props.item.id.id), BigInt(value), false);
         // alert("VOTED!" + value);
+        if (props.onUpdateList !== undefined) {
+            props.onUpdateList();
+        }
     }
     function votesTitle(id) {
         return totalVotes ? `Up: ${totalVotes.up} Down: ${totalVotes.down}` : "";
