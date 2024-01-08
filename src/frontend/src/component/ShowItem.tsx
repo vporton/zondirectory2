@@ -9,6 +9,7 @@ import { Button } from "react-bootstrap";
 import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { order } from "../../../declarations/order";
 import UpDown from "./misc/UpDown";
+import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 
 export default function ShowItem() {
     return (
@@ -196,75 +197,84 @@ function ShowItemContent(props: {defaultAgent}) {
             <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
             <label><input type="radio" name="stream" value="p" onChange={updateStreamKind} checked={streamKind == "p"}/> amount paid</label>
         </p>
-        {!isCategory ? "" : <>
-            <h3>Sub-folders</h3>
-            {subcategories === undefined ? <p>Loading...</p> :
+        <Tabs>
+            <TabList>
+                <Tab>Main content</Tab>
+                <Tab>Comments</Tab>
+            </TabList>
+            <TabPanel>
+                {!isCategory ? "" : <>
+                <h3>Sub-folders</h3>
+                {subcategories === undefined ? <p>Loading...</p> :
+                <ul>
+                    {subcategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
+                        {/* TODO: no parse here */}
+                        <UpDown
+                            parent={{id: parseItemRef(id!)}}
+                            item={x}
+                            agent={props.defaultAgent}
+                            onUpdateList={() => xdata.subCategories().then(x => updateSubCategories(x))}
+                            defaultUserVote={userVoteSubCategories[serializeItemRef(x.id)]}
+                            defaultTotalVotes={totalVotesSubCategories[serializeItemRef(x.id)]}
+                        />
+                        <ItemType item={x.item}/>
+                        <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
+                    </li>)}
+                </ul>}
+                <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
+            </>}
+            <h3>Super-folders</h3>
+            {supercategories === undefined ? <p>Loading...</p> :
             <ul>
-                {subcategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
-                    {/* TODO: no parse here */}
-                    <UpDown
-                        parent={{id: parseItemRef(id!)}}
-                        item={x}
-                        agent={props.defaultAgent}
-                        onUpdateList={() => xdata.subCategories().then(x => updateSubCategories(x))}
-                        defaultUserVote={userVoteSubCategories[serializeItemRef(x.id)]}
-                        defaultTotalVotes={totalVotesSubCategories[serializeItemRef(x.id)]}
-                    />
+                {supercategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
                     <ItemType item={x.item}/>
                     <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
                 </li>)}
             </ul>}
-            <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
-        </>}
-        <h3>Super-folders</h3>
-        {supercategories === undefined ? <p>Loading...</p> :
-        <ul>
-            {supercategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
-                <ItemType item={x.item}/>
-                <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
-            </li>)}
-        </ul>}
-        {/* TODO: Create super-category */}
-        <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create-supercategory/for-category/${id}`}>Create</a></p>
-        {!isCategory ? "" : <>
-            <h3>Items</h3>
-            {items === undefined ? <p>Loading...</p> : items.map((item: {order: string, id: ItemRef, item: Item}) => 
-            <div key={serializeItemRef(item.id)}>
-                <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
-                    {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
-                    {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
-                    {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
-                </p>
-                <p lang={item.item.item.locale} key={serializeItemRef(item.id)} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
-            </div>
-        )}
-        <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-            <a href={`#/create/for-category/${id}`}>Create</a></p></>}
-        <h3>Comments</h3>
-        <p>TODO: Move comments to a separate tab.</p>
-        {comments === undefined ? <p>Loading...</p> : comments.map(item => 
-            <div key={serializeItemRef(item.id)}>
-                <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
-                    {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
-                    {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
-                    {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
-                </p>
-                <p lang={item.item.item.locale} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
-            </div>
-        )}
-        <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-            <a href={`#/create/comment/${id}`}>Create</a></p>
-        <h3>Comment on</h3>
-        {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: Item}) => 
-            <div key={serializeItemRef(item.id)}>
-                <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
-                    {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
-                    {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
-                    {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
-                </p>
-                <p lang={item.item.item.locale} key={serializeItemRef(item.id)} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
-            </div>
-        )}
-        <p><a href="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}</p>
+            {/* TODO: Create super-category */}
+            <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create-supercategory/for-category/${id}`}>Create</a></p>
+            {!isCategory ? "" : <>
+                <h3>Items</h3>
+                {items === undefined ? <p>Loading...</p> : items.map((item: {order: string, id: ItemRef, item: Item}) => 
+                <div key={serializeItemRef(item.id)}>
+                    <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
+                        {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
+                        {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
+                        {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
+                    </p>
+                    <p lang={item.item.item.locale} key={serializeItemRef(item.id)} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
+                </div>
+            )}
+            <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
+                <a href={`#/create/for-category/${id}`}>Create</a></p></>}
+            </TabPanel>
+            <TabPanel>
+                <h3>Comments</h3>
+                {comments === undefined ? <p>Loading...</p> : comments.map(item => 
+                    <div key={serializeItemRef(item.id)}>
+                        <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
+                            {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
+                            {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
+                            {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
+                        </p>
+                        <p lang={item.item.item.locale} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
+                    </div>
+                )}
+                <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
+                    <a href={`#/create/comment/${id}`}>Create</a></p>
+                <h3>Comment on</h3>
+                {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: Item}) => 
+                    <div key={serializeItemRef(item.id)}>
+                        <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
+                            {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
+                            {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
+                            {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
+                        </p>
+                        <p lang={item.item.item.locale} key={serializeItemRef(item.id)} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
+                    </div>
+                )}
+                <p><a href="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}</p>
+            </TabPanel>
+        </Tabs>
     </>
 }
