@@ -24,7 +24,8 @@ export default function ShowItem() {
 }
 
 function ShowItemContent(props: {defaultAgent}) {
-    const { id } = useParams();
+    const { id: idParam } = useParams();
+    const id = parseItemRef(idParam!);
     const { principal } = useContext(AuthContext) as any;
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
@@ -69,7 +70,7 @@ function ShowItemContent(props: {defaultAgent}) {
         // TODO: Extract this code for reuse:
         const votes: {[key: string]: {up: number, down: number}} = {};
         const promises = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
-            loadTotalVotes(parseItemRef(id!), cat.id).then(res => { // TODO: Should not parse here.
+            loadTotalVotes(id!, cat.id).then(res => { // TODO: Should not parse here.
                 votes[serializeItemRef(cat.id)] = res;
             })
         );
@@ -82,7 +83,7 @@ function ShowItemContent(props: {defaultAgent}) {
             // TODO: Extract this code for reuse:
             const votes2: {[key: string]: number} = {};
             const promises2 = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
-                loadUserVote(principal, parseItemRef(id!), cat.id).then(res => { // TODO: Should not parse here.
+                loadUserVote(principal, id!, cat.id).then(res => { // TODO: Should not parse here.
                     votes2[serializeItemRef(cat.id)] = res;
                 })
             );
@@ -94,7 +95,7 @@ function ShowItemContent(props: {defaultAgent}) {
     }
     useEffect(() => { // TODO
         if (id !== undefined) {
-            AppData.create(props.defaultAgent, id, streamKind).then(data => {
+            AppData.create(props.defaultAgent, serializeItemRef(id), streamKind).then(data => {
                 setXData(data);
                 setData(data.item);
                 data.locale().then(x => setLocale(x));
@@ -210,7 +211,7 @@ function ShowItemContent(props: {defaultAgent}) {
                     {subcategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
                         {/* TODO: no parse here */}
                         <UpDown
-                            parent={{id: parseItemRef(id!)}}
+                            parent={{id}}
                             item={x}
                             agent={props.defaultAgent}
                             onUpdateList={() => xdata.subCategories().then(x => updateSubCategories(x))}
