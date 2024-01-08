@@ -140,11 +140,11 @@ function ShowItemContent(props: {defaultAgent}) {
     }, [id, props.defaultAgent, streamKind]); // TODO: more tight choice
     function moreSubcategories(event: any) {
         event.preventDefault();
-        navigate(`/subfolders-of/`+id)
+        navigate(`/subfolders-of/`+serializeItemRef(id))
     }
     function moreSupercategories(event: any) {
         event.preventDefault();
-        navigate(`/superfolders-of/`+id)
+        navigate(`/superfolders-of/`+serializeItemRef(id))
     }
     function moreItems(event: any) {
         event.preventDefault();
@@ -233,7 +233,7 @@ function ShowItemContent(props: {defaultAgent}) {
                             <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
                         </li>)}
                 </ul>}
-                <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${id}`}>Create subfolder</a></p>
+                <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${serializeItemRef(id)}`}>Create subfolder</a></p>
             </>}
             <h3>Super-folders</h3>
             {supercategories === undefined ? <p>Loading...</p> :
@@ -244,7 +244,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 </li>)}
             </ul>}
             {/* TODO: Create super-category */}
-            <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create-supercategory/for-category/${id}`}>Create</a></p>
+            <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create-supercategory/for-category/${serializeItemRef(id)}`}>Create</a></p>
             {!isCategory ? "" : <>
                 <h3>Items</h3>
                 {items === undefined ? <p>Loading...</p> : items.map((item: {order: string, id: ItemRef, item: Item}) => 
@@ -258,7 +258,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 </div>
             )}
             <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                <a href={`#/create/for-category/${id}`}>Create</a></p></>}
+                <a href={`#/create/for-category/${serializeItemRef(id)}`}>Create</a></p></>}
             </TabPanel>
             <TabPanel>
                 <h3>Comments</h3>
@@ -273,7 +273,7 @@ function ShowItemContent(props: {defaultAgent}) {
                     </div>
                 )}
                 <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                    <a href={`#/create/comment/${id}`}>Create</a></p>
+                    <a href={`#/create/comment/${serializeItemRef(id)}`}>Create</a></p>
                 <h3>Comment on</h3>
                 {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: Item}) => 
                     <div key={serializeItemRef(item.id)}>
