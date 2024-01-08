@@ -318,12 +318,12 @@ shared({caller = initialOwner}) actor class Orders() = this {
       case (?order) { order };
       case null {
         let order = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer);
-        await* Reorder.add(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
-          NacDBIndex;
-          order;
-          key = oldValue2;
-          value = Nat.toText(child) # "@" # Principal.toText(childPrincipal);
-        });
+        // await* Reorder.add(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
+        //   NacDBIndex;
+        //   order;
+        //   key = oldValue2;
+        //   value = Nat.toText(child) # "@" # Principal.toText(childPrincipal);
+        // });
         order;
       };
     };
