@@ -92,10 +92,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 })
             );
             Promise.all(userVotesPromises).then(() => {
-                console.log("Z", userVotes);
                 setUserVote(userVotes); // TODO: Set it instead above in the loop for faster results?
-                // FIXME: After logging in (new `principal`), `userVoteSubCategories` isn't updated,
-                //        because it's just the `default...` argument.
             });
         }
     }
@@ -232,9 +229,12 @@ function ShowItemContent(props: {defaultAgent}) {
                                 parent={{id}}
                                 item={x}
                                 agent={props.defaultAgent}
-                                onUpdateList={updateSubCategories}
-                                defaultUserVote={userVoteSubCategories[serializeItemRef(x.id)]}
-                                defaultTotalVotes={totalVotesSubCategories[serializeItemRef(x.id)]}
+                                userVote={userVoteSubCategories[serializeItemRef(x.id)]}
+                                totalVotes={totalVotesSubCategories[serializeItemRef(x.id)]}
+                                onSetUserVote={(id: ItemRef, v: number) =>
+                                    setUserVoteSubCategories({...userVoteSubCategories, [serializeItemRef(id)]: v})}
+                                onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
+                                    setTotalVotesSubCategories({...totalVotesSubCategories, [serializeItemRef(id)]: v})}
                             />
                             <ItemType item={x.item}/>
                             <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
