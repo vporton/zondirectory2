@@ -117,7 +117,6 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.description().then(x => setDescription(x));
                 data.postText().then(x => setPostText(x!)); // TODO: `!`
                 data.creator().then(x => setCreator(x.toString())); // TODO
-                console.log("A");
                 updateSubCategories().then(() => {});
                 data.superCategories().then(x => {
                     setSupercategories(x);
