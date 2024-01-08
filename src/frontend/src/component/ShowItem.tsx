@@ -101,7 +101,7 @@ function ShowItemContent(props: {defaultAgent}) {
     }
     useEffect(() => {
         updateSubCategories().then(() => {});
-    }, [principal, totalVotesSubCategories]);
+    }, [principal, totalVotesSubCategories, userVoteSubCategories]);
     useEffect(() => { // TODO
         if (id !== undefined) {
             console.log("B");
