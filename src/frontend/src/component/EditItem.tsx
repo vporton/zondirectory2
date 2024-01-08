@@ -10,6 +10,7 @@ import EditCategoriesList from "./EditCategoriesList";
 import { serializeItemRef } from "../data/Data";
 import { addToMultipleCategories } from "../util/category";
 import { AuthContext } from "./auth/use-auth-client";
+import { BusyContext } from "./App";
 
 export default function EditItemItem(props: {comment?: boolean}) {
     const routeParams = useParams();
@@ -38,62 +39,68 @@ export default function EditItemItem(props: {comment?: boolean}) {
             }
     }
     return (
-        <AuthContext.Consumer>
-            {({agent, isAuthenticated}) => {
-                async function submit() {
-                    function itemData(): ItemWithoutOwner {
-                        // TODO: Differentiating post and message by `post === ""` is unreliable.
-                        const isPost = selectedTab == SelectedTab.selectedOther && post !== "";
-                        return {
-                            locale,
-                            title,
-                            description: shortDescription,
-                            details: selectedTab == SelectedTab.selectedLink ? {link: link} :
-                                isPost ? {post: null} : {message: null},
-                            price: 0.0, // TODO
-                        };
+            <BusyContext.Consumer>
+                {({setBusy}) =>
+                <AuthContext.Consumer>
+                    {({agent, isAuthenticated}) => {
+                    async function submit() {
+                        function itemData(): ItemWithoutOwner {
+                            // TODO: Differentiating post and message by `post === ""` is unreliable.
+                            const isPost = selectedTab == SelectedTab.selectedOther && post !== "";
+                            return {
+                                locale,
+                                title,
+                                description: shortDescription,
+                                details: selectedTab == SelectedTab.selectedLink ? {link: link} :
+                                    isPost ? {post: null} : {message: null},
+                                price: 0.0, // TODO
+                            };
+                        }
+                        async function submitItem(item: ItemWithoutOwner) {
+                            const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
+                            const [part, n] = await backend.createItemData(item);
+                            await backend.setPostText(part, n, post);
+                            console.log("post:", post);
+                            const ref = serializeItemRef({canister: part, id: Number(n)});
+                            await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)}, false);
+                            await addToMultipleCategories(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
+                            navigate("/item/"+ref);
+                        }
+                        setBusy(true);
+                        await submitItem(itemData());
+                        setBusy(false);
                     }
-                    async function submitItem(item: ItemWithoutOwner) {
-                        const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
-                        const [part, n] = await backend.createItemData(item);
-                        await backend.setPostText(part, n, post);
-                        console.log("post:", post);
-                        const ref = serializeItemRef({canister: part, id: Number(n)});
-                        await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)}, false);
-                        await addToMultipleCategories(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
-                        navigate("/item/"+ref);
-                    }
-                    await submitItem(itemData());
-                }
-                return <>
-                    <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
-                    <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
-                    <p>Short (meta) description: <textarea onChange={e => setShortDescription(e.target.value)}/></p>
-                    {/* TODO (should not because complicates ordering?):
-                    <p>Link type:
-                        <label><input type="radio" name="kind" value="0" required={true}/> Directory entry</label>
-                        <label><input type="radio" name="kind" value="1" required={true}/> Message</label></p>*/}
-                    <Tabs onSelect={onSelectTab}>
-                        <TabList>
-                            <Tab>Link</Tab>
-                            <Tab>Blog post</Tab>
-                        </TabList>
-                        <TabPanel>
-                            <p>Link: <input type="url" onChange={e => setLink(e.target.value)}/></p>
-                        </TabPanel>
-                        <TabPanel>
-                            <p>Text: <textarea style={{height: "10ex"}} onChange={e => setPost(e.target.value)}/></p>
-                        </TabPanel>
-                    </Tabs>
-                    <EditCategoriesList
-                        defaultCategories={!(props.comment === true) && mainCategory !== undefined ? [[mainCategory, {beginning: null}]] : []}
-                        defaultAntiComments={props.comment === true && mainCategory !== undefined ? [[mainCategory, {beginning: null}]] : []}
-                        onChangeCategories={setCategoriesList}
-                        onChangeAntiComments={setAntiCommentsList}
-                    />
-                    <p><Button onClick={submit} disabled={!isAuthenticated}>Submit</Button></p>
-                </>;
-            }}
-        </AuthContext.Consumer>
+                    return <>
+                        <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
+                        <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
+                        <p>Short (meta) description: <textarea onChange={e => setShortDescription(e.target.value)}/></p>
+                        {/* TODO (should not because complicates ordering?):
+                        <p>Link type:
+                            <label><input type="radio" name="kind" value="0" required={true}/> Directory entry</label>
+                            <label><input type="radio" name="kind" value="1" required={true}/> Message</label></p>*/}
+                        <Tabs onSelect={onSelectTab}>
+                            <TabList>
+                                <Tab>Link</Tab>
+                                <Tab>Blog post</Tab>
+                            </TabList>
+                            <TabPanel>
+                                <p>Link: <input type="url" onChange={e => setLink(e.target.value)}/></p>
+                            </TabPanel>
+                            <TabPanel>
+                                <p>Text: <textarea style={{height: "10ex"}} onChange={e => setPost(e.target.value)}/></p>
+                            </TabPanel>
+                        </Tabs>
+                        <EditCategoriesList
+                            defaultCategories={!(props.comment === true) && mainCategory !== undefined ? [[mainCategory, {beginning: null}]] : []}
+                            defaultAntiComments={props.comment === true && mainCategory !== undefined ? [[mainCategory, {beginning: null}]] : []}
+                            onChangeCategories={setCategoriesList}
+                            onChangeAntiComments={setAntiCommentsList}
+                        />
+                        <p><Button onClick={submit} disabled={!isAuthenticated}>Submit</Button></p>
+                    </>;
+                }}
+            </AuthContext.Consumer>
+            }
+        </BusyContext.Consumer>
     );
 }

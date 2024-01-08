@@ -1,6 +1,6 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Button, Container, Nav, Navbar } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
@@ -20,10 +20,13 @@ import { serializeItemRef } from '../data/Data'
 import { Principal } from "@dfinity/principal";
 import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
 import { main as MainCanister } from "../../../declarations/main";
- 
+
+export const BusyContext = createContext<any>(undefined);
+
 export default function App() {
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
     const identityProvider = getIsLocal() ? `http://${identityCanister}.localhost:8000` : `https://nfid.one`;
+    const [busy, setBusy] = useState(false);
     return (
         <>
             <Container>
@@ -43,7 +46,11 @@ export default function App() {
                     }
                 }}}>
                     <HashRouter>
-                        <MyRouted/>
+                        <BusyContext.Provider value={{busy, setBusy}}>
+                            {busy ? <p>Processing...</p> :
+                            <MyRouted/>
+                            }
+                        </BusyContext.Provider>
                     </HashRouter>
                 </AuthProvider>
             </Container>
@@ -74,71 +81,69 @@ function MyRouted() {
     }
     const contextValue = useAuth();
     return (
-        <>
-            <AuthContext.Consumer>
-                {({isAuthenticated, principal, authClient, defaultAgent, options, login, logout}) => {
-                    const signin = () => {
-                        login!(); // TODO: `!`
-                    };
-                    const signout = async () => {
-                        await logout!(); // TODO: `!`
-                    };
-                    return <>
-                        <p>
-                            Logged in as: {isAuthenticated ? <small>{principal?.toString()}</small> : "(none)"}{" "}
-                            {isAuthenticated ? <Button onClick={signout}>Logout</Button> : <Button onClick={signin}>Login</Button>}
-                        </p>
-                        <nav>
-                            <Navbar className="bg-body-secondary" style={{width: "auto"}}>
-                                <Nav>
-                                    <Nav.Link onClick={() => navigate("/item/"+root)}>Main folder</Nav.Link>{" "}
-                                </Nav>
-                                <Nav>
-                                    <Nav.Link target="_blank" href="https://docs.zoncircle.com">Our site</Nav.Link>
-                                </Nav>
-                            </Navbar>
-                        </nav>
-                        <Routes>
-                            <Route
-                                path=""
-                                element={<RootRedirector root={root}/>}
-                            />
-                            <Route
-                                path="/item/:id"
-                                element={<ShowItem/>}
-                            />
-                            <Route
-                                path="/subfolders-of/:id"
-                                element={<SubFolders data-dir="sub" defaultAgent={defaultAgent}/>}
-                            />
-                            <Route
-                                path="/superfolders-of/:id"
-                                element={<SubFolders data-dir="super" defaultAgent={defaultAgent}/>}
-                            />
-                            <Route
-                                path="/create/"
-                                element={<EditItem/>}
-                            />
-                            <Route
-                                path="/create/for-category/:cat"
-                                element={<EditItem/>}
-                            />
-                            <Route
-                                path="/create/comment/:cat"
-                                element={<EditItem comment={true}/>}
-                            />
-                            <Route
-                                path="/create-subcategory/for-category/:cat"
-                                element={<EditCategory/>}
-                            />
-                            <Route
-                                path="/create-supercategory/for-category/:cat"
-                                element={<EditCategory super={true}/>}
-                            />
-                        </Routes>
-                    </>
-            }}
-            </AuthContext.Consumer>
-        </>
+        <AuthContext.Consumer>
+            {({isAuthenticated, principal, authClient, defaultAgent, options, login, logout}) => {
+                const signin = () => {
+                    login!(); // TODO: `!`
+                };
+                const signout = async () => {
+                    await logout!(); // TODO: `!`
+                };
+                return <>
+                    <p>
+                        Logged in as: {isAuthenticated ? <small>{principal?.toString()}</small> : "(none)"}{" "}
+                        {isAuthenticated ? <Button onClick={signout}>Logout</Button> : <Button onClick={signin}>Login</Button>}
+                    </p>
+                    <nav>
+                        <Navbar className="bg-body-secondary" style={{width: "auto"}}>
+                            <Nav>
+                                <Nav.Link onClick={() => navigate("/item/"+root)}>Main folder</Nav.Link>{" "}
+                            </Nav>
+                            <Nav>
+                                <Nav.Link target="_blank" href="https://docs.zoncircle.com">Our site</Nav.Link>
+                            </Nav>
+                        </Navbar>
+                    </nav>
+                    <Routes>
+                        <Route
+                            path=""
+                            element={<RootRedirector root={root}/>}
+                        />
+                        <Route
+                            path="/item/:id"
+                            element={<ShowItem/>}
+                        />
+                        <Route
+                            path="/subfolders-of/:id"
+                            element={<SubFolders data-dir="sub" defaultAgent={defaultAgent}/>}
+                        />
+                        <Route
+                            path="/superfolders-of/:id"
+                            element={<SubFolders data-dir="super" defaultAgent={defaultAgent}/>}
+                        />
+                        <Route
+                            path="/create/"
+                            element={<EditItem/>}
+                        />
+                        <Route
+                            path="/create/for-category/:cat"
+                            element={<EditItem/>}
+                        />
+                        <Route
+                            path="/create/comment/:cat"
+                            element={<EditItem comment={true}/>}
+                        />
+                        <Route
+                            path="/create-subcategory/for-category/:cat"
+                            element={<EditCategory/>}
+                        />
+                        <Route
+                            path="/create-supercategory/for-category/:cat"
+                            element={<EditCategory super={true}/>}
+                        />
+                    </Routes>
+                </>
+           }}
+        </AuthContext.Consumer>
     );
 }

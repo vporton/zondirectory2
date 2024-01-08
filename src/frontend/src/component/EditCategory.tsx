@@ -9,6 +9,7 @@ import EditCategoriesList from "./EditCategoriesList";
 import { addToCategory, addToMultipleCategories } from "../util/category";
 import { parseItemRef, serializeItemRef } from "../data/Data";
 import { AuthContext } from "./auth/use-auth-client";
+import { BusyContext } from "./App";
 
 export default function EditCategory(props: {super?: boolean}) {
     const routeParams = useParams(); // TODO: a dynamic value
@@ -35,7 +36,9 @@ export default function EditCategory(props: {super?: boolean}) {
             }
     }
     return (
-        <AuthContext.Consumer>
+        <BusyContext.Consumer>
+        {({setBusy}) =>
+            <AuthContext.Consumer>
             {({agent, isAuthenticated}) => {
                 async function submit() {
                     function itemData(): ItemWithoutOwner {
@@ -62,8 +65,10 @@ export default function EditCategory(props: {super?: boolean}) {
                         }
                         navigate("/item/"+ref);
                     }
+                    setBusy(true);
                     await submitItem(itemData());
-                }
+                    setBusy(false);
+            }
                 return <>
                     <h1>{props.super === true ? `Create supercategory` : `Create subcategory`}</h1>
                     <Tabs onSelect={onSelectTab}>
@@ -95,6 +100,8 @@ export default function EditCategory(props: {super?: boolean}) {
                     <Button onClick={submit} disabled={!isAuthenticated}>Save</Button>
                 </>
             }}
-        </AuthContext.Consumer>
+            </AuthContext.Consumer>
+        }
+        </BusyContext.Consumer>
     );
 }
