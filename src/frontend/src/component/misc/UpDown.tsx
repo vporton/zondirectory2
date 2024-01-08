@@ -8,7 +8,6 @@ import { Agent } from "@dfinity/agent";
 import Button from "react-bootstrap/esm/Button";
 
 export default function UpDown(props: {
-    streamKind: 't' | 'v' | 'p',
     parent: {id: ItemRef},
     item: {order: string, id: ItemRef, item: Item},
     agent: Agent,
@@ -73,7 +72,7 @@ export default function UpDown(props: {
         return totalVotes ? `Up: ${totalVotes.up} Down: ${totalVotes.down}` : "";
     }
 
-    return props.streamKind === 'v' &&
+    return (
         <span title={votesTitle()}>
             <Button
                 onClick={async e => await vote((e.target as Element).classList.contains('active') ? 0 : +1, 'up')}
@@ -81,5 +80,6 @@ export default function UpDown(props: {
             <Button
                 onClick={async e => await vote((e.target as Element).classList.contains('active') ? 0 : -1, 'down')}
                 className={userVote < 0 ? 'thumbs active' : 'thumbs'}>👎</Button>
-        </span>;
+        </span>
+    );
 }
