@@ -66,7 +66,6 @@ function ShowItemContent(props: {defaultAgent}) {
     function updateList(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
         console.log("A");
 
-        // TODO: Extract this code for reuse:
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
         const totalVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
             loadTotalVotes(id!, cat.id).then(res => { // TODO: Should not parse here.
@@ -79,7 +78,6 @@ function ShowItemContent(props: {defaultAgent}) {
         });
 
         if (principal) {
-            // TODO: Extract this code for reuse:
             const userVotes: {[key: string]: number} = {};
             const userVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
                 loadUserVote(principal, id!, cat.id).then(res => { // TODO: Should not parse here.
