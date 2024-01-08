@@ -25,7 +25,10 @@ export default function ShowItem() {
 
 function ShowItemContent(props: {defaultAgent}) {
     const { id: idParam } = useParams();
-    const id = parseItemRef(idParam!);
+    const [id, setId] = useState(parseItemRef(idParam!));
+    useEffect(() => {
+        setId(parseItemRef(idParam!))
+    }, [idParam]);
     const { principal } = useContext(AuthContext) as any;
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
@@ -57,16 +60,16 @@ function ShowItemContent(props: {defaultAgent}) {
         setItems(undefined);
         setComments(undefined);
         setAntiComments(undefined);
-    }, [idParam]);
+    }, [id]);
     function updateList(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
         const firstTime = list === undefined;
 
         setList(input);
 
         // FIXME: This should be removed. But (why?) without this we have an infinite loop.
-        if (!firstTime) {
-            return;
-        }
+        // if (!firstTime) {
+        //     return;
+        // }
 
         // TODO: Extract this code for reuse:
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
@@ -80,13 +83,11 @@ function ShowItemContent(props: {defaultAgent}) {
             setTotalVotes(totalVotes); // TODO: Set it instead above in the loop for faster results?
         });
 
-        console.log('principal', principal.toString());
         if (principal) { // TODO: Should re-read if logged under a different principal
             // TODO: Extract this code for reuse:
             const userVotes: {[key: string]: number} = {};
             const userVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
                 loadUserVote(principal, id!, cat.id).then(res => { // TODO: Should not parse here.
-                    console.log('userVotes', serializeItemRef(cat.id), res);
                     userVotes[serializeItemRef(cat.id)] = res;
                 })
             );
@@ -108,6 +109,7 @@ function ShowItemContent(props: {defaultAgent}) {
     }, [principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {
+            console.log("B");
             AppData.create(props.defaultAgent, serializeItemRef(id), streamKind).then(data => {
                 setXData(data);
                 setData(data.item);
@@ -116,6 +118,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.description().then(x => setDescription(x));
                 data.postText().then(x => setPostText(x!)); // TODO: `!`
                 data.creator().then(x => setCreator(x.toString())); // TODO
+                console.log("A");
                 updateSubCategories().then(() => {});
                 data.superCategories().then(x => {
                     setSupercategories(x);
@@ -143,7 +146,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 });
             });
         }
-    }, [id, props.defaultAgent, streamKind]); // TODO: more tight choice
+    }, [id/*, props.defaultAgent, streamKind*/]); // TODO: more tight choice
     function moreSubcategories(event: any) {
         event.preventDefault();
         navigate(`/subfolders-of/`+id)
