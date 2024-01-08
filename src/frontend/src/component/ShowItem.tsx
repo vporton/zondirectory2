@@ -63,6 +63,7 @@ function ShowItemContent(props: {defaultAgent}) {
     }, [id]);
     function updateList(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
         // FIXME: Infinite loop: This updates `totalVotesSubCategories` and its change effects this.
+        //        Also need to ensure that after More... clicks more item voting data will load.
         console.log("LIST update");
         setList(input);
 
