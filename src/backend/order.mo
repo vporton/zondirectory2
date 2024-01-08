@@ -197,6 +197,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     await* addItemToList(stream2, catId, side);
     let itemData1 = lib.serializeStreams(Array.freeze(streamsVar1));
     let itemData2 = lib.serializeStreams(Array.freeze(streamsVar2));
+    // Debug.print("ADD STREAM: ");
     await itemId1.putAttribute({ sk = "i/" # Nat.toText(catId.1); key = key1; value = itemData1 });
     await itemId1.putAttribute({ sk = "i/" # Nat.toText(itemId.1); key = key2; value = itemData2 });
   };
@@ -308,6 +309,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let parentCanister = actor(Principal.toText(parentPrincipal)) : CanDBPartition.CanDBPartition;
     let links = await* getStreamLinks((parentPrincipal, parent), comment);
     let streamsData = await* itemsOrder((parentPrincipal, parent), "sv");
+    // Debug.print("streamsData: " # debug_show(streamsData.));
     let streamsVar: [var ?Reorder.Order] = switch (streamsData) {
       case (?streams) { Array.thaw(streams) };
       case null { [var null, null, null]};
@@ -315,14 +317,15 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let order = switch (streamsVar[links]) {
       case (?order) { order };
       case null {
-        let order = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer);
-        streamsVar[links] := ?order;
-        order;
+        await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer);
       };
     };
-
-    let data = lib.serializeStreams(Array.freeze(streamsVar));
-    await parentCanister.putAttribute({ sk = "i/" # Nat.toText(parent); key = "sv"; value = data });
+    if (streamsVar[links] == null) {
+      streamsVar[links] := ?order;
+      let data = lib.serializeStreams(Array.freeze(streamsVar));
+      await parentCanister.putAttribute({ sk = "i/" # Nat.toText(parent); key = "sv"; value = data });
+      Debug.print("ADDED: " # "i/" # Nat.toText(parent));
+    };
 
     await* Reorder.move(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
         order;
