@@ -63,8 +63,8 @@ function ShowItemContent(props: {defaultAgent}) {
     }, [id]);
     // FIXME: The list doesn't update on stream switches!
     // FIXME: Clicking up/down changes the Time order!
-    function updateList(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
-        console.log("A");
+    function updateVotes(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
+        console.log("updateVotes");
 
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
         const totalVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
@@ -89,19 +89,19 @@ function ShowItemContent(props: {defaultAgent}) {
             });
         }
     }
-    async function updateSubCategories() {
+    async function updateSubCategoriesVotes() {
         if (xdata === undefined) {
             return;
         }
         const x = await xdata.subCategories();
-        updateList(x, subcategories, setSubcategories, setTotalVotesSubCategories, setUserVoteSubCategories);
+        updateVotes(x, subcategories, setSubcategories, setTotalVotesSubCategories, setUserVoteSubCategories);
     }
     useEffect(() => {
-        updateSubCategories().then(() => {});
-    }, [principal, subcategories]);
+        updateSubCategoriesVotes().then(() => {});
+    }, [subcategories, principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {
-            console.log("B");
+            console.log("Loading from AppData");
             AppData.create(props.defaultAgent, serializeItemRef(id), streamKind).then(data => {
                 setXData(data);
                 setData(data.item);
@@ -227,7 +227,7 @@ function ShowItemContent(props: {defaultAgent}) {
                                     setUserVoteSubCategories({...userVoteSubCategories, [serializeItemRef(id)]: v})}
                                 onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
                                     setTotalVotesSubCategories({...totalVotesSubCategories, [serializeItemRef(id)]: v})}
-                                onUpdateList={() => updateSubCategories().then(() => {})}
+                                onUpdateList={() => xdata.subCategories().then(x => setSubcategories(x))}
                             />
                             <ItemType item={x.item}/>
                             <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
