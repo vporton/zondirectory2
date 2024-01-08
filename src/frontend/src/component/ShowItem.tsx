@@ -64,17 +64,6 @@ function ShowItemContent(props: {defaultAgent}) {
     // FIXME: The list doesn't update on stream switches!
     // FIXME: Clicking up/down changes the Time order!
     function updateList(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
-        const first = list === undefined;
-
-        console.log("LIST update");
-        setList(input);
-
-        // FIXME: It prevents list update on navigation between folders.
-        if (!first) {
-            return; // prevent infinite loop of updating this after changes in [totalVotesSubCategories, userVoteSubCategories]
-            // TODO: Is this prevention enough to avoid duplicate queries?
-        }
-
         // TODO: Extract this code for reuse:
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
         const totalVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
@@ -109,7 +98,7 @@ function ShowItemContent(props: {defaultAgent}) {
     }
     useEffect(() => {
         updateSubCategories().then(() => {});
-    }, [principal, totalVotesSubCategories, userVoteSubCategories]); // FIXME: Update on `principal` change doesn't work.
+    }, [principal, subcategories, totalVotesSubCategories, userVoteSubCategories]); // FIXME: Update on `principal` change doesn't work.
     useEffect(() => { // TODO
         if (id !== undefined) {
             console.log("B");
@@ -121,7 +110,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.description().then(x => setDescription(x));
                 data.postText().then(x => setPostText(x!)); // TODO: `!`
                 data.creator().then(x => setCreator(x.toString())); // TODO
-                updateSubCategories().then(() => {});
+                data.subCategories().then(x => setSubcategories(x));
                 data.superCategories().then(x => {
                     setSupercategories(x);
                 });
@@ -148,7 +137,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 });
             });
         }
-    }, [id/*, props.defaultAgent, streamKind*/]); // TODO: more tight choice
+    }, [id, props.defaultAgent, streamKind]); // TODO: more tight choice
     function moreSubcategories(event: any) {
         event.preventDefault();
         navigate(`/subfolders-of/`+id)
