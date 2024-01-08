@@ -69,12 +69,12 @@ export default function UpDown(props: {
             props.onUpdateList();
         }
     }
-    function votesTitle(id) {
+    function votesTitle() {
         return totalVotes ? `Up: ${totalVotes.up} Down: ${totalVotes.down}` : "";
     }
 
     return props.streamKind === 'v' &&
-        <span title={votesTitle(props.item.id)}>
+        <span title={votesTitle()}>
             <Button
                 onClick={async e => await vote((e.target as Element).classList.contains('active') ? 0 : +1, 'up')}
                 className={userVote > 0 ? 'thumbs active' : 'thumbs'}>👍</Button>
