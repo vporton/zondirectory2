@@ -68,28 +68,28 @@ function ShowItemContent(props: {defaultAgent}) {
         }
 
         // TODO: Extract this code for reuse:
-        const votes: {[key: string]: {up: number, down: number}} = {};
-        const promises = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
+        const totalVotes: {[key: string]: {up: number, down: number}} = {};
+        const totalVotesPromises = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
             loadTotalVotes(id!, cat.id).then(res => { // TODO: Should not parse here.
-                votes[serializeItemRef(cat.id)] = res;
+                totalVotes[serializeItemRef(cat.id)] = res;
             })
         );
-        Promise.all(promises).then(() => {
+        Promise.all(totalVotesPromises).then(() => {
             // TODO: Remove votes for excluded items?
-            setTotalVotesSubCategories(votes); // TODO: Set it instead above in the loop for faster results?
+            setTotalVotesSubCategories(totalVotes); // TODO: Set it instead above in the loop for faster results?
         });
 
         if (principal) { // TODO: Should re-read if logged under a different principal
             // TODO: Extract this code for reuse:
-            const votes2: {[key: string]: number} = {};
-            const promises2 = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
+            const userVotes: {[key: string]: number} = {};
+            const userVotesPromises = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
                 loadUserVote(principal, id!, cat.id).then(res => { // TODO: Should not parse here.
-                    votes2[serializeItemRef(cat.id)] = res;
+                    userVotes[serializeItemRef(cat.id)] = res;
                 })
             );
-            Promise.all(promises2).then(() => {
+            Promise.all(userVotesPromises).then(() => {
                 // TODO: Remove votes for excluded items?
-                setUserVoteSubCategories(votes2); // TODO: Set it instead above in the loop for faster results?
+                setUserVoteSubCategories(userVotes); // TODO: Set it instead above in the loop for faster results?
             });
         }
     }
