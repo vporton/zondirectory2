@@ -1,5 +1,3 @@
-- FIXME: In the Votes stream, a folder becomes its own subfolder after voting
-
 - Give investors 15% of the PST, using a blockchain launchpad.
   Preserve some PST in rewards fund, make rewards through a DEX.
 

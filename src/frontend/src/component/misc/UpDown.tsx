@@ -9,6 +9,7 @@ import Button from "react-bootstrap/esm/Button";
 
 export default function UpDown(props: {
     streamKind: 't' | 'v' | 'p',
+    parent: {id: ItemRef},
     item: {order: string, id: ItemRef, item: Item},
     agent: Agent,
     defaultUserVote: number, // -1, 0, or 1
@@ -32,7 +33,7 @@ export default function UpDown(props: {
         }
     }, [props.defaultTotalVotes]);
 
-    async function vote(child: ItemRef, value: number, clicked: 'up' | 'down') {
+    async function vote(value: number, clicked: 'up' | 'down') {
         if (principal === undefined || principal.toString() === "2vxsx-fae") { // TODO: hack
             alert("Login to vote!"); // TODO: a better dialog
             return;
@@ -61,8 +62,7 @@ export default function UpDown(props: {
         setTotalVotes({up, down});
 
         const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent});
-        console.log("value", value)
-        await order.vote(props.item.id.canister, BigInt(props.item.id.id), child.canister, BigInt(child.id), BigInt(value), false);
+        await order.vote(props.parent.id.canister, BigInt(props.parent.id.id), props.item.id.canister, BigInt(props.item.id.id), BigInt(value), false);
         // alert("VOTED!" + value);
     }
     function votesTitle(id) {
@@ -72,10 +72,10 @@ export default function UpDown(props: {
     return props.streamKind === 'v' &&
         <span title={votesTitle(props.item.id)}>
             <Button
-                onClick={async e => await vote(props.item.id, (e.target as Element).classList.contains('active') ? 0 : +1, 'up')}
+                onClick={async e => await vote((e.target as Element).classList.contains('active') ? 0 : +1, 'up')}
                 className={userVote > 0 ? 'thumbs active' : 'thumbs'}>👍</Button>
             <Button
-                onClick={async e => await vote(props.item.id, (e.target as Element).classList.contains('active') ? 0 : -1, 'down')}
+                onClick={async e => await vote((e.target as Element).classList.contains('active') ? 0 : -1, 'down')}
                 className={userVote < 0 ? 'thumbs active' : 'thumbs'}>👎</Button>
         </span>;
 }

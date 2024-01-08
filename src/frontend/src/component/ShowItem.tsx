@@ -202,8 +202,10 @@ function ShowItemContent(props: {defaultAgent}) {
             {subcategories === undefined ? <p>Loading...</p> :
             <ul>
                 {subcategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
+                    {/* TODO: no parse here */}
                     <UpDown
                         streamKind={streamKind}
+                        parent={{id: parseItemRef(id!)}}
                         item={x}
                         agent={props.defaultAgent}
                         defaultUserVote={userVoteSubCategories[serializeItemRef(x.id)]}
