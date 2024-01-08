@@ -61,11 +61,18 @@ function ShowItemContent(props: {defaultAgent}) {
         setComments(undefined);
         setAntiComments(undefined);
     }, [id]);
+    // FIXME: The list doesn't update on stream switches!
+    // FIXME: Clicking up/down changes the Time order!
     function updateList(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
-        // FIXME: Infinite loop: This updates `totalVotesSubCategories` and its change effects this.
-        //        Also need to ensure that after More... clicks more item voting data will load.
+        const first = list === undefined;
+
         console.log("LIST update");
         setList(input);
+
+        if (!first) {
+            return; // prevent infinite loop of updating this after changes in [totalVotesSubCategories, userVoteSubCategories]
+            // TODO: Is this prevention enough to avoid duplicate queries?
+        }
 
         // TODO: Extract this code for reuse:
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
@@ -101,7 +108,7 @@ function ShowItemContent(props: {defaultAgent}) {
     }
     useEffect(() => {
         updateSubCategories().then(() => {});
-    }, [principal, totalVotesSubCategories, userVoteSubCategories]);
+    }, [principal, totalVotesSubCategories, userVoteSubCategories]); // FIXME: Update on `principal` change doesn't work.
     useEffect(() => { // TODO
         if (id !== undefined) {
             console.log("B");
