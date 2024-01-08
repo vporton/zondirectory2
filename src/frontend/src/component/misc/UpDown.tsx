@@ -21,13 +21,11 @@ export default function UpDown(props: {
 
     // hack
     useEffect(() => {
-        console.log("QQQ", props.defaultUserVote)
         if (userVote === undefined) {
             setUserVote(props.defaultUserVote);
         }
     }, [props.defaultUserVote]);
     useEffect(() => {
-        console.log(props.defaultTotalVotes);
         if (totalVotes === undefined) {
             setTotalVotes(props.defaultTotalVotes);
         }
