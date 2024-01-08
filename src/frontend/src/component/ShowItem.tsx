@@ -58,10 +58,10 @@ function ShowItemContent(props: {defaultAgent}) {
         setComments(undefined);
         setAntiComments(undefined);
     }, [idParam]);
-    function updateSubCategories(x: {order: string, id: ItemRef, item: Item}[]) {
-        const firstTime = subcategories === undefined;
+    function updateList(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
+        const firstTime = list === undefined;
 
-        setSubcategories(x);
+        setList(input);
 
         if (!firstTime) {
             return;
@@ -69,29 +69,33 @@ function ShowItemContent(props: {defaultAgent}) {
 
         // TODO: Extract this code for reuse:
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
-        const totalVotesPromises = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
+        const totalVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
             loadTotalVotes(id!, cat.id).then(res => { // TODO: Should not parse here.
                 totalVotes[serializeItemRef(cat.id)] = res;
             })
         );
         Promise.all(totalVotesPromises).then(() => {
             // TODO: Remove votes for excluded items?
-            setTotalVotesSubCategories(totalVotes); // TODO: Set it instead above in the loop for faster results?
+            setTotalVotes(totalVotes); // TODO: Set it instead above in the loop for faster results?
         });
 
         if (principal) { // TODO: Should re-read if logged under a different principal
             // TODO: Extract this code for reuse:
             const userVotes: {[key: string]: number} = {};
-            const userVotesPromises = (x || []).map(cat => // FIXME: Ensure that `subcategories` is already set here
+            const userVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
                 loadUserVote(principal, id!, cat.id).then(res => { // TODO: Should not parse here.
                     userVotes[serializeItemRef(cat.id)] = res;
                 })
             );
             Promise.all(userVotesPromises).then(() => {
                 // TODO: Remove votes for excluded items?
-                setUserVoteSubCategories(userVotes); // TODO: Set it instead above in the loop for faster results?
+                setUserVote(userVotes); // TODO: Set it instead above in the loop for faster results?
             });
         }
+    }
+    async function updateSubCategories() {
+        const x = await data.subCategories();
+        updateList(x, subcategories, setSubcategories, setTotalVotesSubCategories, setUserVoteSubCategories);
     }
     useEffect(() => { // TODO
         if (id !== undefined) {
@@ -103,7 +107,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.description().then(x => setDescription(x));
                 data.postText().then(x => setPostText(x!)); // TODO: `!`
                 data.creator().then(x => setCreator(x.toString())); // TODO
-                data.subCategories().then(x => updateSubCategories(x)); // duplicate code
+                updateSubCategories().then(() => {});
                 data.superCategories().then(x => {
                     setSupercategories(x);
                 });
@@ -214,7 +218,7 @@ function ShowItemContent(props: {defaultAgent}) {
                             parent={{id}}
                             item={x}
                             agent={props.defaultAgent}
-                            onUpdateList={() => xdata.subCategories().then(x => updateSubCategories(x))}
+                            onUpdateList={updateSubCategories}
                             defaultUserVote={userVoteSubCategories[serializeItemRef(x.id)]}
                             defaultTotalVotes={totalVotesSubCategories[serializeItemRef(x.id)]}
                         />
