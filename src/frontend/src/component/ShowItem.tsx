@@ -66,11 +66,6 @@ function ShowItemContent(props: {defaultAgent}) {
 
         setList(input);
 
-        // FIXME: This should be removed. But (why?) without this we have an infinite loop.
-        // if (!firstTime) {
-        //     return;
-        // }
-
         // TODO: Extract this code for reuse:
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
         const totalVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
