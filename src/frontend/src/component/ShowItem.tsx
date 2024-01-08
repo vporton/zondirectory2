@@ -59,13 +59,13 @@ function ShowItemContent(props: {defaultAgent}) {
         setAntiComments(undefined);
     }, [idParam]);
     function updateList(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
-        // const firstTime = list === undefined;
+        const firstTime = list === undefined;
 
         setList(input);
 
-        // if (!firstTime) {
-        //     return;
-        // }
+        if (!firstTime) {
+            return;
+        }
 
         // TODO: Extract this code for reuse:
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
