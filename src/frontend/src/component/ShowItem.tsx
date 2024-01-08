@@ -64,6 +64,8 @@ function ShowItemContent(props: {defaultAgent}) {
     // FIXME: The list doesn't update on stream switches!
     // FIXME: Clicking up/down changes the Time order!
     function updateList(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
+        console.log("A");
+
         // TODO: Extract this code for reuse:
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
         const totalVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
