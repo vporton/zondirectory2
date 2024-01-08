@@ -57,6 +57,7 @@ function ShowItemContent(props: {defaultAgent}) {
         setAntiComments(undefined);
     }, [id]);
     function updateSubCategories(x: {order: string, id: ItemRef, item: Item}[]) {
+        console.log(x)
         const firstTime = subcategories === undefined;
         
         setSubcategories(x);

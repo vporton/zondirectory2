@@ -20,6 +20,7 @@ export default function UpDown(props: {
 
     // hack
     useEffect(() => {
+        console.log("QQQ", props.defaultUserVote)
         if (userVote === undefined) {
             setUserVote(props.defaultUserVote);
         }
@@ -59,7 +60,8 @@ export default function UpDown(props: {
         };
         setTotalVotes({up, down});
 
-        const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent})
+        const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent});
+        console.log("value", value)
         await order.vote(props.item.id.canister, BigInt(props.item.id.id), child.canister, BigInt(child.id), BigInt(value), false);
         // alert("VOTED!" + value);
     }
