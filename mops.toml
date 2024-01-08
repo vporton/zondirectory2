@@ -19,7 +19,7 @@ map = "9.0.1"
 btree = "https://github.com/canscale/StableHeapBTreeMap#v0.3.3"
 CanDBMulti = "https://github.com/vporton/CanDBMulti#v0.9.12@2785aed4a28651adf1b06f45ec3c6c48e1f4076f"
 xtended-numbers = "0.2.1"
-NacDBReorder = "https://github.com/vporton/NacDBReorder#v1.6.2@cfcad0c80b90e141eb732b9ace0ec29ea524b959"
+NacDBReorder = "https://github.com/vporton/NacDBReorder#v1.6.6@e9aaa2ffcbdae8b359bd687e85c48364f182ca25"
 
 [dev-dependencies]
 matchers = "https://github.com/kritzcreek/motoko-matchers#v1.3.0"
