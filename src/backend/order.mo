@@ -317,7 +317,14 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let order = switch (streamsVar[links]) {
       case (?order) { order };
       case null {
-        await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer);
+        let order = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer);
+        await* Reorder.add(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
+          NacDBIndex;
+          order;
+          key = oldValue2;
+          value = Nat.toText(child) # "@" # Principal.toText(childPrincipal);
+        });
+        order;
       };
     };
     if (streamsVar[links] == null) {
@@ -328,10 +335,10 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
 
     await* Reorder.move(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
-        order;
-        value = Nat.toText(child) # "@" # Principal.toText(childPrincipal);
-        relative = true;
-        newKey = -difference * 2**16;
+      order;
+      value = Nat.toText(child) # "@" # Principal.toText(childPrincipal);
+      relative = true;
+      newKey = -difference * 2**16;
     });
   };
 

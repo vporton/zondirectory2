@@ -61,6 +61,7 @@ export default function UpDown(props: {
 
         const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent})
         await order.vote(props.item.id.canister, BigInt(props.item.id.id), child.canister, BigInt(child.id), BigInt(value), false);
+        // alert("VOTED!" + value);
     }
     function votesTitle(id) {
         return totalVotes ? `Up: ${totalVotes.up} Down: ${totalVotes.down}` : "";
