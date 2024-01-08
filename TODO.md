@@ -7,6 +7,8 @@
 
 - Count votes up and down for every pair of items.
 
+- Don't reload items list when voting not in Voting stream.
+
 - When switching from item view to folders list view, preserve t/v/p radiobuttons value.
   Moreover, store this value in a cookie or local storage.
 
