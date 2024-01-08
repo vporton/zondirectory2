@@ -60,7 +60,7 @@ function ShowItemContent(props: {defaultAgent}) {
     }, [idParam]);
     function updateSubCategories(x: {order: string, id: ItemRef, item: Item}[]) {
         const firstTime = subcategories === undefined;
-        
+
         setSubcategories(x);
 
         if (!firstTime) {
