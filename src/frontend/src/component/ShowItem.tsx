@@ -63,6 +63,7 @@ function ShowItemContent(props: {defaultAgent}) {
 
         setList(input);
 
+        // FIXME: This should be removed. But (why?) without this we have an infinite loop.
         if (!firstTime) {
             return;
         }
