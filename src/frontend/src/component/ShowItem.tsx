@@ -62,6 +62,8 @@ function ShowItemContent(props: {defaultAgent}) {
         setAntiComments(undefined);
     }, [id]);
     function updateList(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
+        // FIXME: Infinite loop: This updates `totalVotesSubCategories` and its change effects this.
+        console.log("LIST update");
         setList(input);
 
         // TODO: Extract this code for reuse:
