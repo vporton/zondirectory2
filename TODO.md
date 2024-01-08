@@ -16,15 +16,6 @@
 
 - One folder having several editors, like as in Dmoz.
 
-- FIXME: Why two canisters upgraded when I didn't write much data?
-`result {"nextKey":[],"upgradeCanisterResults":[["a3shf-5eaaa-aaaaa-qaafa-cai",{"ok":null}],["asrmz-lmaaa-aaaaa-qaaeq-cai",{"ok":null}]]}`
-
-- FIXME: `is blocked` when clicking up/down thumbs. Exact workflow:
--- create two folders
--- ...
-
-- Canceling a thumb up/down by clicking it again.
-
 - Race conditions of reading an entry and saving it with a modified subkey.
   Solve by blocking by setting a special attribute.
   But how to reset it reliably?
