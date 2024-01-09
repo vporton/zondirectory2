@@ -251,7 +251,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     assert value >= -1 and value <= 1;
 
     let userVotesSK = "v/" # Principal.toText(caller) # "/" # Nat.toText(parent) # "/" # Nat.toText(child);
-    let oldVotes = await CanDBIndex.getFirstAttribute("main", { sk = userVotesSK; key = "v" }); // TODO: race condition
+    let oldVotes = await CanDBIndex.getFirstAttribute("user", { sk = userVotesSK; key = "v" }); // TODO: race condition
     let (principal, oldValue) = switch (oldVotes) {
       case (?oldVotes) { (?oldVotes.0, oldVotes.1) };
       case null { (null, null) };
@@ -270,11 +270,11 @@ shared({caller = initialOwner}) actor class Orders() = this {
       return;
     };
     // TODO: Take advantage of `principal` as a hint.
-    ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk = userVotesSK; key = "v"; value = #int value });
+    ignore await CanDBIndex.putAttributeNoDuplicates("user", { sk = userVotesSK; key = "v"; value = #int value });
 
     // Update total votes for the given parent/child:
     let totalVotesSK = "w/" # Nat.toText(parent) # "/" # Nat.toText(child);
-    let oldTotals = await CanDBIndex.getFirstAttribute("main", { sk = totalVotesSK; key = "v" }); // TODO: race condition
+    let oldTotals = await CanDBIndex.getFirstAttribute("user", { sk = totalVotesSK; key = "v" }); // TODO: race condition
     let (up, down, oldTotalsPrincipal) = switch (oldTotals) {
       case (?(oldTotalsPrincipal, ?(#tuple(a)))) {
         let (#int up, #int down) = (a[0], a[1]) else {
@@ -303,7 +303,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
         down2 += if (difference > 0) { -1 } else { 1 };
       };
       // TODO: Take advantage of `oldTotalsPrincipal` as a hint:
-      ignore await CanDBIndex.putAttributeNoDuplicates("main", { sk = totalVotesSK; key = "v"; value = #tuple([#int up2, #int down2]) }); // TODO: race condition
+      ignore await CanDBIndex.putAttributeNoDuplicates("user", { sk = totalVotesSK; key = "v"; value = #tuple([#int up2, #int down2]) }); // TODO: race condition
     };
 
     let parentCanister = actor(Principal.toText(parentPrincipal)) : CanDBPartition.CanDBPartition;

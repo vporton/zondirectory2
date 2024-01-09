@@ -172,7 +172,7 @@ shared actor class ZonBackend() = this {
     // TODO: Add Hint to CanDBMulti
     await* lib.checkSybil(caller);
     // let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-    // await CanDBIndex.putAttributeNoDuplicates("main", {
+    // await CanDBIndex.putAttributeNoDuplicates("user", {
     //     sk = key;
     //     key = "u";
     //     value = serializeUser(_user);
