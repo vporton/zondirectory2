@@ -22,7 +22,7 @@
     "@dfinity/auth-client": "^0.19.3",
     "@dfinity/identity-secp256k1": "^0.19.3",
     "@dfinity/principal": "^0.19.3",
-    "@nfid/embed": "^0.10.0-alpha.2",
+    "@nfid/embed": "^0.10.0-alpha.13",
     "base64-js": "^1.5.1",
     "bootstrap": "^5.3.2",
     "candb-client-typescript": "^0.0.0-alpha.1",
