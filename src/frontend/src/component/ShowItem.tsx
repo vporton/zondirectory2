@@ -288,6 +288,7 @@ function ShowItemContent(props: {defaultAgent}) {
                                 onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
                                     setTotalVotesComments({...totalVotesComments, [serializeItemRef(id)]: v})}
                                 onUpdateList={() => xdata.comments().then(x => setComments(x))}
+                                isComment={true}
                             />
                             {x.item.item.price ? <>({x.item.item.price} ICP) </> : ""}
                             {(x.item.item.details as any).link ? <a href={(x.item.item.details as any).link}>{x.item.item.title}</a> : x.item.item.title}

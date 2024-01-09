@@ -17,11 +17,12 @@ export default function UpDown(props: {
     totalVotes: { up: number, down: number },
     onSetTotalVotes: (id: ItemRef, v: { up: number, down: number }) => void,
     onUpdateList: (() => void) | undefined,
+    isComment?: boolean,
 }) {
     const { principal, agent } = useContext(AuthContext) as any;
 
     // hack
-    async function vote(value: number, clicked: 'up' | 'down') {
+    async function vote(value: number, clicked: 'up' | 'down', isComment) {
         if (principal === undefined || principal.toString() === "2vxsx-fae") { // TODO: hack
             alert("Login to vote!"); // TODO: a better dialog
             return;
@@ -50,7 +51,13 @@ export default function UpDown(props: {
         props.onSetTotalVotes(props.item.id, {up, down});
 
         const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent});
-        await order.vote(props.parent.id.canister, BigInt(props.parent.id.id), props.item.id.canister, BigInt(props.item.id.id), BigInt(value), false);
+        await order.vote(
+            props.parent.id.canister,
+            BigInt(props.parent.id.id),
+            props.item.id.canister,
+            BigInt(props.item.id.id),
+            BigInt(value),
+            isComment === true);
         if (props.onUpdateList !== undefined) {
             props.onUpdateList();
         }
@@ -62,10 +69,10 @@ export default function UpDown(props: {
     return (
         <span title={votesTitle()}>
             <Button
-                onClick={async e => await vote((e.target as Element).classList.contains('active') ? 0 : +1, 'up')}
+                onClick={async e => await vote((e.target as Element).classList.contains('active') ? 0 : +1, 'up', props.isComment === true)}
                 className={props.userVote > 0 ? 'thumbs active' : 'thumbs'}>👍</Button>
             <Button
-                onClick={async e => await vote((e.target as Element).classList.contains('active') ? 0 : -1, 'down')}
+                onClick={async e => await vote((e.target as Element).classList.contains('active') ? 0 : -1, 'down', props.isComment === true)}
                 className={props.userVote < 0 ? 'thumbs active' : 'thumbs'}>👎</Button>
         </span>
     );
