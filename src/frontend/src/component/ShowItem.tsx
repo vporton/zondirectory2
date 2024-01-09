@@ -218,7 +218,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${serializeItemRef(id)}`}>Create subfolder</a></p>
             </>}
             <h3>Super-folders</h3>
-            <p><small>Order not yet implemented.</small></p>
+            <p><small>Voting in this stream not yet implemented.</small></p>
             {supercategories === undefined ? <p>Loading...</p> :
             <ul>
                 {supercategories.map((x: {order: string, id: ItemRef, item: Item}) =>
@@ -300,7 +300,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
                     <a href={`#/create/comment/${serializeItemRef(id)}`}>Create</a></p>
                 <h3>Comment on</h3>
-                <p><small>Order not yet implemented.</small></p>
+                <p><small>Voting in this stream not yet implemented.</small></p>
                 {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: Item}) => 
                     <div key={serializeItemRef(item.id)}>
                         <p lang={item.item.item.locale}>
