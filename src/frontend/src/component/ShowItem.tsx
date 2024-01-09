@@ -56,6 +56,10 @@ function ShowItemContent(props: {defaultAgent}) {
     const [userVoteSuperCategories, setUserVoteSuperCategories] = useState<{[key: string]: number}>({});
     const [totalVotesItems, setTotalVotesItems] = useState<{[key: string]: {up: number, down: number}}>({});
     const [userVoteItems, setUserVoteItems] = useState<{[key: string]: number}>({});
+    const [totalVotesComments, setTotalVotesComments] = useState<{[key: string]: {up: number, down: number}}>({});
+    const [userVoteComments, setUserVoteComments] = useState<{[key: string]: number}>({});
+    const [totalVotesCommentsOn, setTotalVotesCommentsOn] = useState<{[key: string]: {up: number, down: number}}>({});
+    const [userVoteCommentsOn, setUserVoteCommentsOn] = useState<{[key: string]: number}>({});
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -73,7 +77,10 @@ function ShowItemContent(props: {defaultAgent}) {
     }, [supercategories, principal]);
     useEffect(() => {
         updateVotes(id, principal, items!, setTotalVotesItems, setUserVoteItems).then(() => {}); // FIXME: `!`
-    }, [supercategories, principal]);
+    }, [items, principal]);
+    useEffect(() => {
+        updateVotes(id, principal, comments!, setTotalVotesComments, setUserVoteComments).then(() => {}); // FIXME: `!`
+    }, [comments, principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {
             console.log("Loading from AppData");
@@ -211,6 +218,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${serializeItemRef(id)}`}>Create subfolder</a></p>
             </>}
             <h3>Super-folders</h3>
+            <p><small>Order not yet implemented.</small></p>
             {supercategories === undefined ? <p>Loading...</p> :
             <ul>
                 {supercategories.map((x: {order: string, id: ItemRef, item: Item}) =>
@@ -253,7 +261,7 @@ function ShowItemContent(props: {defaultAgent}) {
                                 onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
                                     setTotalVotesItems({...totalVotesItems, [serializeItemRef(id)]: v})}
                                 onUpdateList={() => xdata.items().then(x => setItems(x))}
-                            />
+                            />{" "}
                             {x.item.item.price ? <>({x.item.item.price} ICP) </> : ""}
                             {(x.item.item.details as any).link ? <a href={(x.item.item.details as any).link}>{x.item.item.title}</a> : x.item.item.title}
                             {" "}<a href={`#/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
@@ -266,19 +274,32 @@ function ShowItemContent(props: {defaultAgent}) {
             </TabPanel>
             <TabPanel>
                 <h3>Comments</h3>
-                {comments === undefined ? <p>Loading...</p> : comments.map(item => 
-                    <div key={serializeItemRef(item.id)}>
-                        <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
-                            {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
-                            {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
-                            {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
+                {comments === undefined ? <p>Loading...</p> : comments.map(x => 
+                    <div key={serializeItemRef(x.id)}>
+                        <p lang={x.item.item.locale} key={serializeItemRef(x.id)}>
+                            <UpDown
+                                parent={{id}}
+                                item={x}
+                                agent={props.defaultAgent}
+                                userVote={userVoteComments[serializeItemRef(x.id)]}
+                                totalVotes={totalVotesComments[serializeItemRef(x.id)]}
+                                onSetUserVote={(id: ItemRef, v: number) =>
+                                    setUserVoteComments({...userVoteComments, [serializeItemRef(id)]: v})}
+                                onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
+                                    setTotalVotesComments({...totalVotesComments, [serializeItemRef(id)]: v})}
+                                onUpdateList={() => xdata.comments().then(x => setComments(x))}
+                            />
+                            {x.item.item.price ? <>({x.item.item.price} ICP) </> : ""}
+                            {(x.item.item.details as any).link ? <a href={(x.item.item.details as any).link}>{x.item.item.title}</a> : x.item.item.title}
+                            {" "}<a href={`#/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
                         </p>
-                        <p lang={item.item.item.locale} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
+                        <p lang={x.item.item.locale} style={{marginLeft: '1em'}}>{x.item.item.description}</p>
                     </div>
                 )}
                 <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
                     <a href={`#/create/comment/${serializeItemRef(id)}`}>Create</a></p>
                 <h3>Comment on</h3>
+                <p><small>Order not yet implemented.</small></p>
                 {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: Item}) => 
                     <div key={serializeItemRef(item.id)}>
                         <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
