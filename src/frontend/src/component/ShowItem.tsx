@@ -61,14 +61,19 @@ function ShowItemContent(props: {defaultAgent}) {
         setComments(undefined);
         setAntiComments(undefined);
     }, [id]);
-    function updateVotes(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
+    async function updateVotes(setTotalVotes, setUserVote) {
         console.log("updateVotes");
 
+        if (xdata === undefined) {
+            return;
+        }
+        const input: {order: string, id: ItemRef, item: Item}[] = await xdata.subCategories(); // TODO: type not here
+
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
-        const totalVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
-            loadTotalVotes(id!, cat.id).then(res => { // TODO: Should not parse here.
+        const totalVotesPromises = (input || []).map(cat =>
+            loadTotalVotes(id!, cat.id).then(res => {
                 totalVotes[serializeItemRef(cat.id)] = res;
-            })
+            }),
         );
         Promise.all(totalVotesPromises).then(() => {
             // TODO: Remove votes for excluded items?
@@ -77,25 +82,18 @@ function ShowItemContent(props: {defaultAgent}) {
 
         if (principal) {
             const userVotes: {[key: string]: number} = {};
-            const userVotesPromises = (input || []).map(cat => // FIXME: Ensure that `list` is already set here
-                loadUserVote(principal, id!, cat.id).then(res => { // TODO: Should not parse here.
+            const userVotesPromises = (input || []).map(cat =>
+                loadUserVote(principal, id!, cat.id).then(res => {
                     userVotes[serializeItemRef(cat.id)] = res;
-                })
+                }),
             );
             Promise.all(userVotesPromises).then(() => {
                 setUserVote(userVotes); // TODO: Set it instead above in the loop for faster results?
             });
         }
     }
-    async function updateSubCategoriesVotes() {
-        if (xdata === undefined) {
-            return;
-        }
-        const x = await xdata.subCategories();
-        updateVotes(x, subcategories, setSubcategories, setTotalVotesSubCategories, setUserVoteSubCategories);
-    }
     useEffect(() => {
-        updateSubCategoriesVotes().then(() => {});
+        updateVotes(setTotalVotesSubCategories, setUserVoteSubCategories).then(() => {});
     }, [xdata, subcategories, principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {
