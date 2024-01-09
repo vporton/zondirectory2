@@ -165,52 +165,6 @@ export class ItemData {
     }
 }
 
-// TODO: This API is screwed, develop a new one.
-// export function initializeIndexClient(isLocal: boolean): IndexClient<CanDBIndex> {
-//     const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app"; // TODO
-//     return new IndexClient<CanDBIndex>({
-//       IDL: CanDBIndexIDL,
-//       canisterId: process.env.CANDBINDEX_CANISTER_ID, 
-//       agentOptions: {
-//         host,
-//       },
-//     })
-// };
-  
-// export function initializePartitionClient(isLocal: boolean, indexClient: IndexClient<CanDBIndex>): ActorClient<CanDBIndex, CanDBPartition> {
-//     const host = isLocal ? "http://127.0.0.1:8000" : "https://ic0.app";
-//     return new ActorClient<CanDBIndex, CanDBPartition>({
-//       actorOptions: {
-//         IDL: CanDBPartitionIDL,
-//         agentOptions: {
-//           host,
-//         }
-//       },
-//       indexClient, 
-//     })
-// };
-  
-// export async function loadVotes(parent: ItemRef, child: ItemRef): Promise<{up: number, down: number}> {
-//     const isLocal = process.env.REACT_APP_IS_LOCAL === "1";
-//     const indexClient = initializeIndexClient(isLocal);
-//     const partitionClient = initializePartitionClient(isLocal, indexClient);
-//     let pk = `main`;
-//     let results = await partitionClient.query<CanDBPartition["getAttribute"]>(
-//         pk,
-//         (actor) => actor.getAttribute(`w/${parent.id}/${child.id}`, "v"),
-//     );
-//     let response;
-//     for (let settledResult of results) {
-//         if (settledResult.status === "fulfilled" && settledResult.value.length > 0) {
-//             // handle candid returned optional type (string[] or string)
-//             response = Array.isArray(settledResult.value) ? settledResult.value[0] : settledResult.value
-//             break;
-//         } 
-//     }
-//     console.log("RESULTS:", response);
-//     return response === undefined ? {up: 0, down: 0} : { up: response[0], down: response[1] };
-// }
-
 export async function loadTotalVotes(parent: ItemRef, child: ItemRef): Promise<{up: number, down: number}> {
     let pk = `user`;
     let results = await CanDBIndex.getFirstAttribute(
