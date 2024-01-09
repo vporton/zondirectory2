@@ -1,3 +1,5 @@
+- FIXME: vote up/down does not work for comments.
+
 - Special stream where all the posted items are added.
 
 - Give investors 15% of the PST, using a blockchain launchpad.
