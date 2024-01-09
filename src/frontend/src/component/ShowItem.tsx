@@ -96,7 +96,7 @@ function ShowItemContent(props: {defaultAgent}) {
     }
     useEffect(() => {
         updateSubCategoriesVotes().then(() => {});
-    }, [subcategories, principal]);
+    }, [xdata, subcategories, principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {
             console.log("Loading from AppData");
