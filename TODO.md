@@ -1,4 +1,4 @@
-- FIXME: vote up/down does not work for comments.
+- Not to lose post's text if the network fails.
 
 - Special stream where all the posted items are added.
 
