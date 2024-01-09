@@ -94,9 +94,6 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
         ...defaultOptions, ...auth.options.loginOptions,
         onSuccess: () => {
           updateClient(auth.authClient);
-          if (getIsLocal()) {
-            auth.authClient.fetchRootKey();
-          }
         },
       });
     } else {
@@ -116,9 +113,6 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
         maxTimeToLive: BigInt(8) * BigInt(3_600_000_000_000) // TODO
       });
       updateClientNfid(delegationIdentity);
-      if (getIsLocal()) {
-        auth.authClient.fetchRootKey();
-      }
     }
   };
 
