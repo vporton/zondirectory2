@@ -61,8 +61,6 @@ function ShowItemContent(props: {defaultAgent}) {
         setComments(undefined);
         setAntiComments(undefined);
     }, [id]);
-    // FIXME: The list doesn't update on stream switches!
-    // FIXME: Clicking up/down changes the Time order!
     function updateVotes(input: {order: string, id: ItemRef, item: Item}[], list, setList, setTotalVotes, setUserVote) {
         console.log("updateVotes");
 
