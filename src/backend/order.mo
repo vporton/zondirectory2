@@ -307,7 +307,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
 
     let parentCanister = actor(Principal.toText(parentPrincipal)) : CanDBPartition.CanDBPartition;
-    let links = await* getStreamLinks((parentPrincipal, parent), comment);
+    let links = await* getStreamLinks((childPrincipal, child), comment);
     let streamsData = await* itemsOrder((parentPrincipal, parent), "sv");
     // Debug.print("streamsData: " # debug_show(streamsData.));
     let streamsVar: [var ?Reorder.Order] = switch (streamsData) {
