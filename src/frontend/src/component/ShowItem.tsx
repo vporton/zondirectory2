@@ -276,7 +276,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 <h3>Comments</h3>
                 {comments === undefined ? <p>Loading...</p> : comments.map(x => 
                     <div key={serializeItemRef(x.id)}>
-                        <p lang={x.item.item.locale} key={serializeItemRef(x.id)}>
+                        <p lang={x.item.item.locale}>
                             <UpDown
                                 parent={{id}}
                                 item={x}
@@ -302,12 +302,12 @@ function ShowItemContent(props: {defaultAgent}) {
                 <p><small>Order not yet implemented.</small></p>
                 {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: Item}) => 
                     <div key={serializeItemRef(item.id)}>
-                        <p lang={item.item.item.locale} key={serializeItemRef(item.id)}>
+                        <p lang={item.item.item.locale}>
                             {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
                             {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
                             {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
                         </p>
-                        <p lang={item.item.item.locale} key={serializeItemRef(item.id)} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
+                        <p lang={item.item.item.locale} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
                     </div>
                 )}
                 <p><a href="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}</p>
