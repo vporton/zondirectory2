@@ -212,7 +212,7 @@ export class ItemData {
 // }
 
 export async function loadTotalVotes(parent: ItemRef, child: ItemRef): Promise<{up: number, down: number}> {
-    let pk = `main`;
+    let pk = `user`;
     let results = await CanDBIndex.getFirstAttribute(
         pk,
         {sk: `w/${parent.id}/${child.id}`, key: "v"},
@@ -225,7 +225,7 @@ export async function loadTotalVotes(parent: ItemRef, child: ItemRef): Promise<{
 }
 
 export async function loadUserVote(principal: Principal, parent: ItemRef, child: ItemRef): Promise<number> {
-    let pk = `main`;
+    let pk = `user`;
     let results = await CanDBIndex.getFirstAttribute(
         pk,
         {sk: `v/${principal.toString()}/${parent.id}/${child.id}`, key: "v"},
