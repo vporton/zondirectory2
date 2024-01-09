@@ -61,16 +61,11 @@ function ShowItemContent(props: {defaultAgent}) {
         setComments(undefined);
         setAntiComments(undefined);
     }, [id]);
-    async function updateVotes(setTotalVotes, setUserVote) {
+    async function updateVotes(source: {order: string, id: ItemRef, item: Item}[], setTotalVotes, setUserVote) { // TODO: argument types
         console.log("updateVotes");
 
-        if (xdata === undefined) {
-            return;
-        }
-        const input: {order: string, id: ItemRef, item: Item}[] = await xdata.subCategories(); // TODO: type not here
-
         const totalVotes: {[key: string]: {up: number, down: number}} = {};
-        const totalVotesPromises = (input || []).map(cat =>
+        const totalVotesPromises = (source || []).map(cat =>
             loadTotalVotes(id!, cat.id).then(res => {
                 totalVotes[serializeItemRef(cat.id)] = res;
             }),
@@ -82,7 +77,7 @@ function ShowItemContent(props: {defaultAgent}) {
 
         if (principal) {
             const userVotes: {[key: string]: number} = {};
-            const userVotesPromises = (input || []).map(cat =>
+            const userVotesPromises = (source || []).map(cat =>
                 loadUserVote(principal, id!, cat.id).then(res => {
                     userVotes[serializeItemRef(cat.id)] = res;
                 }),
@@ -93,8 +88,8 @@ function ShowItemContent(props: {defaultAgent}) {
         }
     }
     useEffect(() => {
-        updateVotes(setTotalVotesSubCategories, setUserVoteSubCategories).then(() => {});
-    }, [xdata, subcategories, principal]);
+        updateVotes(subcategories!, setTotalVotesSubCategories, setUserVoteSubCategories).then(() => {}); // FIXME: `!`
+    }, [subcategories, principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {
             console.log("Loading from AppData");
