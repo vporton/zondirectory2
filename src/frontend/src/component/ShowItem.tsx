@@ -8,7 +8,7 @@ import ItemType from "./misc/ItemType";
 import { Button } from "react-bootstrap";
 import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { order } from "../../../declarations/order";
-import UpDown from "./misc/UpDown";
+import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 
 export default function ShowItem() {
@@ -61,34 +61,8 @@ function ShowItemContent(props: {defaultAgent}) {
         setComments(undefined);
         setAntiComments(undefined);
     }, [id]);
-    async function updateVotes(source: {order: string, id: ItemRef, item: Item}[], setTotalVotes, setUserVote) { // TODO: argument types
-        console.log("updateVotes");
-
-        const totalVotes: {[key: string]: {up: number, down: number}} = {};
-        const totalVotesPromises = (source || []).map(cat =>
-            loadTotalVotes(id!, cat.id).then(res => {
-                totalVotes[serializeItemRef(cat.id)] = res;
-            }),
-        );
-        Promise.all(totalVotesPromises).then(() => {
-            // TODO: Remove votes for excluded items?
-            setTotalVotes(totalVotes); // TODO: Set it instead above in the loop for faster results?
-        });
-
-        if (principal) {
-            const userVotes: {[key: string]: number} = {};
-            const userVotesPromises = (source || []).map(cat =>
-                loadUserVote(principal, id!, cat.id).then(res => {
-                    userVotes[serializeItemRef(cat.id)] = res;
-                }),
-            );
-            Promise.all(userVotesPromises).then(() => {
-                setUserVote(userVotes); // TODO: Set it instead above in the loop for faster results?
-            });
-        }
-    }
     useEffect(() => {
-        updateVotes(subcategories!, setTotalVotesSubCategories, setUserVoteSubCategories).then(() => {}); // FIXME: `!`
+        updateVotes(id, principal, subcategories!, setTotalVotesSubCategories, setUserVoteSubCategories).then(() => {}); // FIXME: `!`
     }, [subcategories, principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {
