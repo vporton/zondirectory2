@@ -52,6 +52,10 @@ function ShowItemContent(props: {defaultAgent}) {
     const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("v"); // time, votes, or paid
     const [totalVotesSubCategories, setTotalVotesSubCategories] = useState<{[key: string]: {up: number, down: number}}>({});
     const [userVoteSubCategories, setUserVoteSubCategories] = useState<{[key: string]: number}>({});
+    const [totalVotesSuperCategories, setTotalVotesSuperCategories] = useState<{[key: string]: {up: number, down: number}}>({});
+    const [userVoteSuperCategories, setUserVoteSuperCategories] = useState<{[key: string]: number}>({});
+    const [totalVotesItems, setTotalVotesItems] = useState<{[key: string]: {up: number, down: number}}>({});
+    const [userVoteItems, setUserVoteItems] = useState<{[key: string]: number}>({});
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -64,6 +68,12 @@ function ShowItemContent(props: {defaultAgent}) {
     useEffect(() => {
         updateVotes(id, principal, subcategories!, setTotalVotesSubCategories, setUserVoteSubCategories).then(() => {}); // FIXME: `!`
     }, [subcategories, principal]);
+    useEffect(() => {
+        updateVotes(id, principal, supercategories!, setTotalVotesSuperCategories, setUserVoteSuperCategories).then(() => {}); // FIXME: `!`
+    }, [supercategories, principal]);
+    useEffect(() => {
+        updateVotes(id, principal, items!, setTotalVotesItems, setUserVoteItems).then(() => {}); // FIXME: `!`
+    }, [supercategories, principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {
             console.log("Loading from AppData");
@@ -203,24 +213,53 @@ function ShowItemContent(props: {defaultAgent}) {
             <h3>Super-folders</h3>
             {supercategories === undefined ? <p>Loading...</p> :
             <ul>
-                {supercategories.map((x: {order: string, id: ItemRef, item: Item}) => <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
-                    <ItemType item={x.item}/>
-                    <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
-                </li>)}
+                {supercategories.map((x: {order: string, id: ItemRef, item: Item}) =>
+                    <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
+                        {/* TODO: up/down here is complicated by exchanhing parent/child. */}
+                        {/*<UpDown
+                            parent={{id}}
+                            item={x}
+                            agent={props.defaultAgent}
+                            userVote={userVoteSuperCategories[serializeItemRef(x.id)]}
+                            totalVotes={totalVotesSuperCategories[serializeItemRef(x.id)]}
+                            onSetUserVote={(id: ItemRef, v: number) =>
+                                setUserVoteSuperCategories({...userVoteSuperCategories, [serializeItemRef(id)]: v})}
+                            onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
+                                setTotalVotesSuperCategories({...totalVotesSubCategories, [serializeItemRef(id)]: v})}
+                            onUpdateList={() => xdata.superCategories().then(x => {
+                                console.log(x)
+                                setSupercategories(x);
+                            })}
+                        />*/}
+                        <ItemType item={x.item}/>
+                        <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
+                    </li>)}
             </ul>}
             {/* TODO: Create super-category */}
             <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create-supercategory/for-category/${serializeItemRef(id)}`}>Create</a></p>
             {!isCategory ? "" : <>
                 <h3>Items</h3>
-                {items === undefined ? <p>Loading...</p> : items.map((item: {order: string, id: ItemRef, item: Item}) => 
-                <div key={serializeItemRef(item.id)}>
-                    <p lang={item.item.item.locale}>
-                        {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
-                        {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
-                        {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
-                    </p>
-                    <p lang={item.item.item.locale} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
-                </div>
+                {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: Item}) => 
+                    <div key={serializeItemRef(x.id)}>
+                        <p lang={x.item.item.locale}>
+                            <UpDown
+                                parent={{id}}
+                                item={x}
+                                agent={props.defaultAgent}
+                                userVote={userVoteItems[serializeItemRef(x.id)]}
+                                totalVotes={totalVotesItems[serializeItemRef(x.id)]}
+                                onSetUserVote={(id: ItemRef, v: number) =>
+                                    setUserVoteItems({...userVoteItems, [serializeItemRef(id)]: v})}
+                                onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
+                                    setTotalVotesItems({...totalVotesItems, [serializeItemRef(id)]: v})}
+                                onUpdateList={() => xdata.items().then(x => setItems(x))}
+                            />
+                            {x.item.item.price ? <>({x.item.item.price} ICP) </> : ""}
+                            {(x.item.item.details as any).link ? <a href={(x.item.item.details as any).link}>{x.item.item.title}</a> : x.item.item.title}
+                            {" "}<a href={`#/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
+                        </p>
+                        <p lang={x.item.item.locale} style={{marginLeft: '1em'}}>{x.item.item.description}</p>
+                    </div>
             )}
             <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
                 <a href={`#/create/for-category/${serializeItemRef(id)}`}>Create</a></p></>}
