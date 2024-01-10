@@ -3,6 +3,7 @@
 - Not to lose post's text if the network fails.
 
 - Special stream where all the posted items are added.
+  FIXME: This stream requires a separate max. number of items than other streams.
 
 - Give investors 15% of the PST, using a blockchain launchpad.
   Preserve some PST in rewards fund, make rewards through a DEX.
