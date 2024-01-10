@@ -25,7 +25,7 @@ export const BusyContext = createContext<any>(undefined);
 
 export default function App() {
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
-    const identityProvider = getIsLocal() ? `http://${identityCanister}.localhost:8000` : `https://nfid.one`;
+    const identityProvider = getIsLocal() ? `http://${identityCanister}.localhost:8000` : `https://identity.ic0.app`;
     const [busy, setBusy] = useState(false);
     return (
         <>
