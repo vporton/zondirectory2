@@ -74,7 +74,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
   func addItemToList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat), side: { #beginning; #end; #zero }): async* () {
     // FIXME: Prevent duplicate entries.
     let theSubDB2: Nac.OuterCanister = theSubDB.order.0;
-    // FIXME: There are several streams.
     let timeScanSK = if (side == #zero) {
       0;
     } else {
