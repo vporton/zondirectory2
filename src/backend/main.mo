@@ -214,7 +214,6 @@ shared actor class ZonBackend() = this {
     let item2: lib.Item = { creator = caller; item; };
     let itemId = maxId;
     maxId += 1;
-    // var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(_itemId);
     let canisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
       "main", { sk = key; key = "i"; value = lib.serializeItem(item2) }
