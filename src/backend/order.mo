@@ -69,8 +69,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
     initialized := true;
   };
 
-  // Public API //
-
   func addItemToList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat), side: { #beginning; #end; #zero }): async* () {
     // FIXME: Prevent duplicate entries.
     let theSubDB2: Nac.OuterCanister = theSubDB.order.0;
@@ -106,6 +104,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
       value = scanItemInfo;
     });
   };
+
+  // Public API //
 
   public shared({caller}) func addItemToCategory(
     catId: (Principal, Nat),
