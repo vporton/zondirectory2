@@ -206,13 +206,6 @@ shared actor class ZonBackend() = this {
     };
   };
 
-  // FIXME: Uncomment.
-  // public shared func getItemData(canisterId: Principal, _itemId: Nat): async ?lib.ItemWithoutOwner {
-  //   var part: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-  //   let key = "i/" # Nat.toText(_itemId);
-  //   lib.deserializeItem(await part.get({sk = key}));
-  // };
-
   public shared({caller}) func createItemData(_item: lib.ItemWithoutOwner)
     : async (Principal, Nat)
   {
