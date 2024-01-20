@@ -11,17 +11,18 @@ import Int "mo:base/Int";
 import fractions "./fractions";
 import Debug "mo:base/Debug";
 import Nat "mo:base/Nat";
+import Array "mo:base/Array";
 
-actor class Payments() = this {
+shared({caller = initialOwner}) actor class Payments() = this {
   /// Owners ///
 
-  var initialized: Bool = false;
-  var owners = [Principal];
+  stable var initialized: Bool = false;
+  stable var owners = [initialOwner];
 
   func checkCaller(caller: Principal) {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
-      Debug.trap("payments: not allowed");
-    }
+      Debug.trap("order: not allowed");
+    };
   };
 
   public shared({caller = caller}) func setOwners(_owners: [Principal]): async () {
