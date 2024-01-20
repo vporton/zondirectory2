@@ -8,7 +8,6 @@
 - Attribute `"st"` (time), `"sv"` (votes) - `Streams` record.
 - Attribute `"srt"` (time), `"srv"` (votes) - `Streams` record, reverse order.
 - Attribute `"t"` - post's text.
-TODO: Should have separate attribute post text.
 ### "a/" - user -> <buyer affiliate>/<seller affiliate>
 ### "v/<principal>/<parent>/<child>"
 - Attribute `"v"` -  `#int +-1` - votes
