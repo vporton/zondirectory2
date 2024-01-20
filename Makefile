@@ -50,7 +50,7 @@ do-deploy-frontend:
 init:
 	dfx ledger fabricate-cycles --amount 1000000000 --canister main
 	dfx canister --network $(NETWORK) call main init '()'
-	dfx canister call --network $(NETWORK) payments init '(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\" })'
+	. .env && dfx canister call --network $(NETWORK) payments init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\" })"
 	. .env && dfx canister call --network $(NETWORK) CanDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
 	. .env && dfx canister call --network $(NETWORK) NacDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
 	. .env && dfx canister call --network $(NETWORK) order init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
