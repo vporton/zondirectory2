@@ -305,8 +305,7 @@ shared actor class ZonBackend() = this {
   //     case (?user) { Principal.toText(user) };
   //     case (null) { "" }
   //   };
-  //   // FIXME:
-  //   await db.put({sk = "a/" # Principal.toText(caller); attributes = [("v", #text (buyerAffiliateStr # "/" # sellerAffiliateStr))]});
+  //   // await db.put({sk = "a/" # Principal.toText(caller); attributes = [("v", #text (buyerAffiliateStr # "/" # sellerAffiliateStr))]});
   // };
 
   public shared func get_trusted_origins(): async [Text] {
