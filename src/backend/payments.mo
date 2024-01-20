@@ -61,7 +61,7 @@ actor class Payments() = this {
 
   stable var salesOwnersShare = fractions.fdiv(1, 10); // 10%
   stable var upvotesOwnersShare = fractions.fdiv(1, 2); // 50%
-  stable var uploadOwnersShare = fractions.fdiv(3, 20); // 15% // FIXME: Delete.
+  stable var uploadOwnersShare = fractions.fdiv(3, 20); // 15% // TODO: Delete.
   stable var buyerAffiliateShare = fractions.fdiv(1, 10); // 10%
   stable var sellerAffiliateShare = fractions.fdiv(3, 20); // 15%
 
@@ -218,11 +218,10 @@ actor class Payments() = this {
 
   // TODO: On non-existent payment it proceeds successful. Is it OK?
   func processPayment(paymentCanisterId: Principal, userId: Principal, _buyerAffiliate: ?Principal, _sellerAffiliate: ?Principal): async () {
-    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(paymentCanisterId)); // FIXME
     switch (BTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
       case (?payment) {
         let itemKey = "i/" # Nat.toText(payment.itemId);
-        switch (await db.getAttribute({sk = itemKey}, "i")) {
+        switch (await CanDBPartition.getAttribute({sk = itemKey}, "i")) {
           case (?itemRepr) {
             let item = lib.deserializeItem(itemRepr);
             let time = switch (payment.time) {

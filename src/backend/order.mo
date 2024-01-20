@@ -71,7 +71,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   func addItemToList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat), side: { #beginning; #end; #zero }): async* () {
     let scanItemInfo = Nat.toText(itemToAdd.1) # "@" # Principal.toText(itemToAdd.0);
-    if (Nac.has(theSubDB.reverse, Text.compare, scanItemInfo)) {
+    if (Nac.hasByOuter(theSubDB.reverse, Text.compare, scanItemInfo)) {
       return; // prevent duplicate
     };
     // TODO: race
@@ -101,7 +101,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     
     let guid = GUID.nextGuid(guidGen);
 
-    // FIXME: race condition
+    // TODO: race condition
     await* Reorder.add(guid, NacDBIndex, orderer, {
       order = theSubDB;
       key = timeScanSK;
@@ -122,7 +122,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
 
-    // FIXME: Race condition when adding an item.
+    // TODO: Race condition when adding an item.
     // TODO: Ensure that it is retrieved once.
     let ?categoryItemData = await catId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "i") else {
       Debug.trap("cannot get category item");
@@ -337,7 +337,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     });
   };
 
-  // FIXME: Below functions?
+  // TODO: Below functions?
 
   // func deserializeVoteAttr(attr: Entity.AttributeValue): Float {
   //   switch(attr) {
@@ -356,7 +356,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   // TODO: It has race period of duplicate (two) keys. In frontend de-duplicate.
   // TODO: Use binary keys.
-  // FIXME: Sorting CanDB by `Float` is wrong order.
+  // TODO: Sorting CanDB by `Float` is wrong order.
   // func setVotes(
   //   stream: VotesStream,
   //   oldVotesRandom: Text,
@@ -396,14 +396,14 @@ shared({caller = initialOwner}) actor class Orders() = this {
   //     };
   //   };
 
-  //   // TODO: Should use binary format. // FIXME: Decimal serialization makes order by `random` broken.
+  //   // TODO: Should use binary format. // TODO: Decimal serialization makes order by `random` broken.
   //   // newVotes -> child
   //   let newKey = stream.prefix1 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Float.toText(newVotes.weight) # "/" # oldVotesRandom;
   //   await oldVotesDB.put({sk = newKey; attributes = [("v", #text (Nat.toText(Nat64.toNat(tmp.child))))]});
   //   // child -> newVotes
   //   let parentChildCanister: CanDBPartition.CanDBPartition = actor(Principal.toText(parentChildCanisterId));
   //   let newKey2 = stream.prefix2 # Nat.toText(xNat.from64ToNat(tmp.parent)) # "/" # Nat.toText(xNat.from64ToNat(tmp.child));
-  //   // FIXME: Use NacDB:
+  //   // TODO: Use NacDB:
   //   await parentChildCanister.put({sk = newKey2; attributes = [("v", #float (newVotes.weight))]});
   //   switch (oldVotesWeight) {
   //     case (?oldVotesWeight) {
@@ -419,7 +419,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   // stable var userBusyVoting: BTree.BTree<Principal, ()> = BTree.init<Principal, ()>(null); // TODO: Delete old ones.
 
-  // TODO: Need to remember the votes // FIXME: Remembering in CanDB makes no sense because need to check canister.
+  // TODO: Need to remember the votes // TODO: Remembering in CanDB makes no sense because need to check canister.
   // public shared({caller}) func oneVotePerPersonVote(sybilCanister: Principal) {
   //   await* checkSybil(sybilCanister, caller);
   //   ignore BTree.insert(userBusyVoting, Principal.compare, caller, ());
