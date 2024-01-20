@@ -39,7 +39,7 @@ module {
       if (c <= '9') {
         Char.toNat32(c) - Char.toNat32('0');
       } else {
-        Char.toNat32(c) - Char.toNat32('a') + 10;
+        Char.toNat32(c) - (Char.toNat32('a') - 10);
       }
     );
   };
