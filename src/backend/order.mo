@@ -70,12 +70,12 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   func addItemToList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat), side: { #beginning; #end; #zero }): async* () {
     let scanItemInfo = Nat.toText(itemToAdd.1) # "@" # Principal.toText(itemToAdd.0);
-    if (Nac.hasByOuter(theSubDB.reverse, Text.compare, scanItemInfo)) {
+    let theSubDB2: Nac.OuterCanister = theSubDB.order.0;
+    if (await theSubDB2.hasByOuter({outerKey = theSubDB.reverse.1; sk = scanItemInfo})) {
       return; // prevent duplicate
     };
     // TODO: race
 
-    let theSubDB2: Nac.OuterCanister = theSubDB.order.0;
     let timeScanSK = if (side == #zero) {
       0;
     } else {
