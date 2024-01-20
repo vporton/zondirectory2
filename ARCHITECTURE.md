@@ -22,9 +22,6 @@ TODO: Should have separate attribute post text.
 * votes/votes: category -> sub-items
 * votes/votes: category -> sub-categories
 * votes/votes: item -> comments
-* paid/time: category -> sub-items
-* paid/time: category -> sub-categories
-* paid/time: item -> comments
 
 Allowed number of votes:
 - 10 per day
