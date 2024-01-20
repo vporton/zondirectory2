@@ -20,7 +20,7 @@ import Reorder "mo:NacDBReorder/Reorder"; // TODO: should be here?
 import config "../../config";
 
 module {
-  let phoneNumberVerificationCanisterId = "gzqxf-kqaaa-aaaak-qakba-cai"; // https://docs.nfid.one/developer/credentials/mobile-phone-number-credential
+  // let phoneNumberVerificationCanisterId = "gzqxf-kqaaa-aaaak-qakba-cai"; // https://docs.nfid.one/developer/credentials/mobile-phone-number-credential
 
   // We will use that "-XXX" < "XXX" for any hex number XXX.
 
@@ -361,11 +361,12 @@ module {
     if (config.skipSybil) {
       return;
     };
-    let verifyActor = actor(phoneNumberVerificationCanisterId): actor {
-      is_phone_number_approved(principal: Text) : async Bool;
-    };
-    if (not(await verifyActor.is_phone_number_approved(Principal.toText(user)))) {
-      Debug.trap("cannot verify phone number");
-    };
+    // TODO:
+    // let verifyActor = actor(phoneNumberVerificationCanisterId): actor {
+    //   is_phone_number_approved(principal: Text) : async Bool;
+    // };
+    // if (not(await verifyActor.is_phone_number_approved(Principal.toText(user)))) {
+    //   Debug.trap("cannot verify phone number");
+    // };
   };
 }
