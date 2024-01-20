@@ -51,7 +51,7 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
 
   useEffect(() => {
     // Initialize AuthClient
-    AuthClient.create(props.options!.createOptions).then(async (client) => { // FIXME: `!`?
+    AuthClient.create(props.options!.createOptions).then(async (client) => { // TODO: `!`?
       updateClient(client);
     });
   }, []);

@@ -70,16 +70,16 @@ function ShowItemContent(props: {defaultAgent}) {
         setAntiComments(undefined);
     }, [id]);
     useEffect(() => {
-        updateVotes(id, principal, subcategories!, setTotalVotesSubCategories, setUserVoteSubCategories).then(() => {}); // FIXME: `!`
+        updateVotes(id, principal, subcategories!, setTotalVotesSubCategories, setUserVoteSubCategories).then(() => {}); // TODO: `!`
     }, [subcategories, principal]);
     useEffect(() => {
-        updateVotes(id, principal, supercategories!, setTotalVotesSuperCategories, setUserVoteSuperCategories).then(() => {}); // FIXME: `!`
+        updateVotes(id, principal, supercategories!, setTotalVotesSuperCategories, setUserVoteSuperCategories).then(() => {}); // TODO: `!`
     }, [supercategories, principal]);
     useEffect(() => {
-        updateVotes(id, principal, items!, setTotalVotesItems, setUserVoteItems).then(() => {}); // FIXME: `!`
+        updateVotes(id, principal, items!, setTotalVotesItems, setUserVoteItems).then(() => {}); // TODO: `!`
     }, [items, principal]);
     useEffect(() => {
-        updateVotes(id, principal, comments!, setTotalVotesComments, setUserVoteComments).then(() => {}); // FIXME: `!`
+        updateVotes(id, principal, comments!, setTotalVotesComments, setUserVoteComments).then(() => {}); // TODO: `!`
     }, [comments, principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {

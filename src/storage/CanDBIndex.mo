@@ -44,7 +44,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
   };
 
   public shared({caller = caller}) func setOwners(_owners: [Principal]): async () {
-    checkCaller(caller); // FIXME: too weak
+    checkCaller(caller);
 
     owners := _owners;
   };

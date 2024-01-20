@@ -25,7 +25,7 @@ export default function SubFolders(props) {
                 data.title().then(x => setTitle(x));
                 if (props['data-dir'] == 'super') {
                     data.superCategories().then(x => {
-                        setCategories(x); // FIXME: SUPER-categories
+                        setCategories(x); // TODO: SUPER-categories
                         // TODO: duplicate code
                         if (x.length !== 0) {
                             setItemsLast(x[x.length - 1].order);
@@ -56,7 +56,7 @@ export default function SubFolders(props) {
             ? xdata.superCategories({lowerBound, limit: 10}) : xdata.subCategories({lowerBound, limit: 10});
         promise.then(x => {
             console.log('X', x)
-            setCategories(categories?.concat(x)); // FIXME: `?`
+            setCategories(categories?.concat(x)); // TODO: `?`?
             if (x.length !== 0) {
                 setItemsLast(x[x.length - 1].order); // duplicate code
             } else {
