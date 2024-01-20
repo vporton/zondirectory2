@@ -54,7 +54,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   // stable var rng: Prng.Seiran128 = Prng.Seiran128(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
   stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
 
-  stable let orderer = Reorder.createOrderer();
+  stable let orderer = Reorder.createOrderer({queueLengths = 20});
 
   public shared({ caller }) func init(_owners: [Principal]): async () {
     checkCaller(caller);

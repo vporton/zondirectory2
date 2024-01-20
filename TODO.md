@@ -51,8 +51,6 @@
 
 - Logout on page reload shouldn't happen.
 
-- FIXME in NacDB.
-
 - Join one communal folder to another by a community voting.
 
 - Prefix text with format specifier (like `text/plain`). Render markdown at client side.
