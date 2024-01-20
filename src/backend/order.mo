@@ -143,7 +143,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
     } else {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", #end);
     };
-    await* addToStreams(catId, itemId, comment, links, itemId1, "sp", "srp", #zero);
   };
 
   /// `key1` and `key2` are like `"s"` and `"sr"`

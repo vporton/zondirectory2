@@ -42,8 +42,8 @@ export class ItemData {
         this.agent = agent;
         this.itemRef = parseItemRef(itemId);
     }
-    /// `"t" | "v" | "p"` - time, votes, or paid.
-    static async create(agent: Agent, itemId: string, kind: "t" | "v" | "p"): Promise<ItemData> {
+    /// `"t" | "v"` - time, votes,.
+    static async create(agent: Agent, itemId: string, kind: "t" | "v"): Promise<ItemData> {
         const obj = new ItemData(agent, itemId);
         const client = canDBPartitionActor(obj.itemRef.canister);
         // TODO: Retrieve both by one call?

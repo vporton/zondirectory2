@@ -49,7 +49,7 @@ function ShowItemContent(props: {defaultAgent}) {
     const [commentsReachedEnd, setCommentsReachedEnd] = useState(false);
     const [antiCommentsLast, setAntiCommentsLast] = useState("");
     const [antiCommentsReachedEnd, setAntiCommentsReachedEnd] = useState(false);
-    const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("v"); // time, votes, or paid
+    const [streamKind, setStreamKind] = useState<"t" | "v">("v"); // time, votes
     const [totalVotesSubCategories, setTotalVotesSubCategories] = useState<{[key: string]: {up: number, down: number}}>({});
     const [userVoteSubCategories, setUserVoteSubCategories] = useState<{[key: string]: number}>({});
     const [totalVotesSuperCategories, setTotalVotesSuperCategories] = useState<{[key: string]: {up: number, down: number}}>({});
@@ -185,7 +185,6 @@ function ShowItemContent(props: {defaultAgent}) {
         <p>Sort by:{" "}
             <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
             <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
-            <label><input type="radio" name="stream" value="p" onChange={updateStreamKind} checked={streamKind == "p"}/> amount paid</label>
         </p>
         <Tabs>
             <TabList>

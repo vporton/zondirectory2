@@ -13,7 +13,7 @@ export default function SubFolders(props) {
     const [categories, setCategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>([]);
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
-    const [streamKind, setStreamKind] = useState<"t" | "v" | "p">("v"); // time, votes, or paid
+    const [streamKind, setStreamKind] = useState<"t" | "v">("v"); // time, votes
     function updateStreamKind(e) {
         setStreamKind(e.currentTarget.value);
     }
@@ -71,7 +71,6 @@ export default function SubFolders(props) {
             <p>Sort by:{" "}
                 <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
                 <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
-                <label><input type="radio" name="stream" value="p" onChange={updateStreamKind} checked={streamKind == "p"}/> amount paid</label>
             </p>
            <ul>
                 {categories !== undefined && categories.map(x =>
