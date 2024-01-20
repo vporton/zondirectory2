@@ -1,5 +1,7 @@
 - Two tokens system.
 
+- Test (not) adding duplicate entry.
+
 - https://onramper.com to buy ICP
 
 - Not to lose post's text if the network fails.

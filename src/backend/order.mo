@@ -70,7 +70,12 @@ shared({caller = initialOwner}) actor class Orders() = this {
   };
 
   func addItemToList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat), side: { #beginning; #end; #zero }): async* () {
-    // FIXME: Prevent duplicate entries.
+    let scanItemInfo = Nat.toText(itemToAdd.1) # "@" # Principal.toText(itemToAdd.0);
+    if (Nac.has(theSubDB.reverse, Text.compare, scanItemInfo)) {
+      return; // prevent duplicate
+    };
+    // TODO: race
+
     let theSubDB2: Nac.OuterCanister = theSubDB.order.0;
     let timeScanSK = if (side == #zero) {
       0;
@@ -93,7 +98,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
       };
       timeScanSK;
     };
-    let scanItemInfo = Nat.toText(itemToAdd.1) # "@" # Principal.toText(itemToAdd.0);
     
     let guid = GUID.nextGuid(guidGen);
 
