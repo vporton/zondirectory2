@@ -26,9 +26,6 @@ TODO: Should have separate attribute post text.
 * paid/time: category -> sub-categories
 * paid/time: item -> comments
 
-FIXME: The `time/time` relations need to be rewritten using `NacDBReorder` in order to
-be deleteable.
-
 Allowed number of votes:
 - 10 per day
 - additional 5 votes (not per day) for each message
