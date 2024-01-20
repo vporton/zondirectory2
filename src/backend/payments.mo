@@ -16,6 +16,7 @@ actor class Payments() = this {
   /// Owners ///
 
   var initialized: Bool = false;
+  var owners = [Principal];
 
   func checkCaller(caller: Principal) {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
