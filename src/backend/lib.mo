@@ -29,7 +29,7 @@ module {
       if (v < 10) {
         Nat32.toNat(Char.toNat32('0')) + v;
       } else {
-        Nat32.toNat(Char.toNat32('a')) + v - 10;
+        Nat32.toNat(Char.toNat32('a')) - 10 + v;
       }
     ));
   };
