@@ -13,41 +13,37 @@ import Debug "mo:base/Debug";
 import Nat "mo:base/Nat";
 
 actor class Payments() = this {
-  stable var initialized: Bool = false;
-
-  /// Incoming Payments ///
-
-  public shared({ caller }) func init(): async () {
-    if (initialized) {
-      Debug.trap("already initialized");
-    };
-
-    founder := ?caller;
-
-    initialized := true;
-  };
-
   /// Owners ///
 
-  stable var founder: ?Principal = null;
+  var initialized: Bool = false;
 
-  func onlyMainOwner(caller: Principal) {
-    if (?caller != founder) {
-      Debug.trap("not the main owner");
+  func checkCaller(caller: Principal) {
+    if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
+      Debug.trap("payments: not allowed");
     }
   };
 
-  public shared({caller}) func setMainOwner(_founder: Principal) {
-    onlyMainOwner(caller);
+  public shared({caller = caller}) func setOwners(_owners: [Principal]): async () {
+    checkCaller(caller);
 
-    founder := ?_founder;
+    owners := _owners;
   };
 
-  public shared({caller}) func removeMainOwner() {
-    onlyMainOwner(caller);
-    
-    founder := null;
+  public query func getOwners(): async [Principal] { owners };
+
+  public shared({ caller }) func init(_owners: [Principal]): async () {
+    checkCaller(caller);
+    ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles); // TODO: another number of cycles?
+    if (initialized) {
+        Debug.trap("already initialized");
+    };
+
+    owners := _owners;
+    MyCycles.addPart(Common.dbOptions.partitionCycles);
+    initialized := true;
   };
+
+  /// Tokens ///
 
   let nativeIPCToken = "ryjl3-tyaaa-aaaaa-aaaba-cai"; // native NNS ICP token.
   // let wrappedICPCanisterId = "o5d6i-5aaaa-aaaah-qbz2q-cai"; // https://github.com/C3-Protocol/wicp_docs

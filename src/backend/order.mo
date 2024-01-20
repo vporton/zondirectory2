@@ -56,7 +56,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   stable let orderer = Reorder.createOrderer();
 
-  // TODO: Remove this function?
   public shared({ caller }) func init(_owners: [Principal]): async () {
     checkCaller(caller);
     ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles); // TODO: another number of cycles?
