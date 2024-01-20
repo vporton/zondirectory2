@@ -12,6 +12,8 @@ import fractions "./fractions";
 import Debug "mo:base/Debug";
 import Nat "mo:base/Nat";
 import Array "mo:base/Array";
+import MyCycles "mo:nacdb/Cycles";
+import Common "../storage/common";
 
 shared({caller = initialOwner}) actor class Payments() = this {
   /// Owners ///
@@ -70,31 +72,31 @@ shared({caller = initialOwner}) actor class Payments() = this {
   public query func getSellerAffiliateShare(): async fractions.Fraction { sellerAffiliateShare };
 
   public shared({caller}) func setSalesOwnersShare(_share: fractions.Fraction) {
-    onlyMainOwner(caller);
+    checkCaller(caller);
     
     salesOwnersShare := _share;
   };
 
   public shared({caller}) func setUpvotesOwnersShare(_share: fractions.Fraction) {
-    onlyMainOwner(caller);
+    checkCaller(caller);
     
     upvotesOwnersShare := _share;
   };
 
   public shared({caller}) func setUploadOwnersShare(_share: fractions.Fraction) {
-    onlyMainOwner(caller);
+    checkCaller(caller);
     
     uploadOwnersShare := _share;
   };
 
   public shared({caller}) func setBuyerAffiliateShare(_share: fractions.Fraction) {
-    onlyMainOwner(caller);
+    checkCaller(caller);
     
     buyerAffiliateShare := _share;
   };
 
   public shared({caller}) func setSellerAffiliateShare(_share: fractions.Fraction) {
-    onlyMainOwner(caller);
+    checkCaller(caller);
     
     sellerAffiliateShare := _share;
   };
@@ -215,47 +217,47 @@ shared({caller = initialOwner}) actor class Payments() = this {
   };
 
   // TODO: On non-existent payment it proceeds successful. Is it OK?
-  func processPayment(paymentCanisterId: Principal, userId: Principal, _buyerAffiliate: ?Principal, _sellerAffiliate: ?Principal): async () {
-    switch (BTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
-      case (?payment) {
-        let itemKey = "i/" # Nat.toText(payment.itemId);
-        switch (await CanDBPartition.getAttribute({sk = itemKey}, "i")) {
-          case (?itemRepr) {
-            let item = lib.deserializeItem(itemRepr);
-            let time = switch (payment.time) {
-              case (?time) { time };
-              case (null) {
-                let time = Time.now();
-                payment.time := ?time;
-                ignore BTree.insert<Principal, IncomingPayment>(currentPayments, Principal.compare, userId, payment);
-                time;
-              };
-            };
-            let fee = await ledger.icrc1_fee();
-            let result = await ledger.icrc1_transfer({
-              from_subaccount = ?Principal.toBlob(userId);
-              to = {owner = Principal.fromActor(this); subaccount = null};
-              amount = payment.amount - fee;
-              fee = null;
-              memo = null;
-              created_at_time = ?Nat64.fromNat(Int.abs(time)); // idempotent
-            });
-            switch (result) {
-              case (#Ok _ or #Err (#Duplicate _)) {};
-              case _ { Debug.trap("can't pay") };
-            };
-            let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
-            recalculateShareholdersDebt(Int.abs(_shareholdersShare), _buyerAffiliate, _sellerAffiliate);
-            let toAuthor = payment.amount - _shareholdersShare;
-            indebt(item.creator, Int.abs(toAuthor));
-          };
-          case (null) {};
-        };
-        ignore BTree.delete<Principal, IncomingPayment>(currentPayments, Principal.compare, userId);
-      };
-      case (null) {};
-    };
-  };
+  // func processPayment(paymentCanisterId: Principal, userId: Principal, _buyerAffiliate: ?Principal, _sellerAffiliate: ?Principal): async () {
+  //   switch (BTree.get<Principal, IncomingPayment>(currentPayments, Principal.compare, userId)) {
+  //     case (?payment) {
+  //       let itemKey = "i/" # Nat.toText(payment.itemId);
+  //       switch (await CanDBPartition.getAttribute({sk = itemKey}, "i")) {
+  //         case (?itemRepr) {
+  //           let item = lib.deserializeItem(itemRepr);
+  //           let time = switch (payment.time) {
+  //             case (?time) { time };
+  //             case (null) {
+  //               let time = Time.now();
+  //               payment.time := ?time;
+  //               ignore BTree.insert<Principal, IncomingPayment>(currentPayments, Principal.compare, userId, payment);
+  //               time;
+  //             };
+  //           };
+  //           let fee = await ledger.icrc1_fee();
+  //           let result = await ledger.icrc1_transfer({
+  //             from_subaccount = ?Principal.toBlob(userId);
+  //             to = {owner = Principal.fromActor(this); subaccount = null};
+  //             amount = payment.amount - fee;
+  //             fee = null;
+  //             memo = null;
+  //             created_at_time = ?Nat64.fromNat(Int.abs(time)); // idempotent
+  //           });
+  //           switch (result) {
+  //             case (#Ok _ or #Err (#Duplicate _)) {};
+  //             case _ { Debug.trap("can't pay") };
+  //           };
+  //           let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
+  //           recalculateShareholdersDebt(Int.abs(_shareholdersShare), _buyerAffiliate, _sellerAffiliate);
+  //           let toAuthor = payment.amount - _shareholdersShare;
+  //           indebt(item.creator, Int.abs(toAuthor));
+  //         };
+  //         case (null) {};
+  //       };
+  //       ignore BTree.delete<Principal, IncomingPayment>(currentPayments, Principal.compare, userId);
+  //     };
+  //     case (null) {};
+  //   };
+  // };
 
   /// Dividents and Withdrawals ///
 
