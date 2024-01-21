@@ -86,7 +86,8 @@ shared actor class ZonBackend() = this {
   };
 
   func serializeUser(user: User): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(5);
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
+    buf.add(#int 0); // version
     buf.add(#text (user.locale));
     buf.add(#text (user.nick));
     buf.add(#text (user.title));
@@ -108,8 +109,8 @@ shared actor class ZonBackend() = this {
           switch (pos) {
             case (0) {
               switch (arr[pos]) {
-                case (#text v) {
-                  locale := v;
+                case (#int v) {
+                  assert v == 0; // version
                 };
                 case _ { break r false };
               };
@@ -117,7 +118,7 @@ shared actor class ZonBackend() = this {
             case (1) {
               switch (arr[pos]) {
                 case (#text v) {
-                  nick := v;
+                  locale := v;
                 };
                 case _ { break r false };
               };
@@ -125,7 +126,7 @@ shared actor class ZonBackend() = this {
             case (2) {
               switch (arr[pos]) {
                 case (#text v) {
-                  title := v;
+                  nick := v;
                 };
                 case _ { break r false };
               };
@@ -133,12 +134,20 @@ shared actor class ZonBackend() = this {
             case (3) {
               switch (arr[pos]) {
                 case (#text v) {
-                  description := v;
+                  title := v;
                 };
                 case _ { break r false };
               };
             };
             case (4) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  description := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case (5) {
               switch (arr[pos]) {
                 case (#text v) {
                   link := v;

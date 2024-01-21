@@ -151,7 +151,8 @@ module {
   // TODO: messy order of the below functions
 
   public func serializeItem(item: Item): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(7);
+    buf.add(#int 0); // version
     buf.add(#int (switch (item.item.details) {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
@@ -203,6 +204,13 @@ module {
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
         var pos = 0;
+        switch (arr[pos]) {
+          case (#int v) {
+            assert v == 0;
+          };
+          case _ { break r false };
+        };
+        pos += 1;
         switch (arr[pos]) {
           case (#int v) {
             kind := Int.abs(v);
@@ -320,6 +328,7 @@ module {
 
   public func serializeKarma(karma: Karma): Entity.AttributeValue {
     #tuple([
+      #int(0), // version
       #int(karma.earnedVotes),
       #int(karma.remainingBonusVotes),
       #int(karma.lastBonusUpdated),
@@ -331,8 +340,14 @@ module {
       switch (attr) {
         case (#tuple arr) {
           let a: [var Nat] = Array.tabulateVar<Nat>(3, func _ = 0);
+          switch (arr[0]) {
+            case (#int v) {
+              assert v == 0;
+            };
+            case _ { Debug.trap("Wrong karma version"); };
+          };
           for (i in Iter.range(0,2)) {
-            switch (arr[i]) {
+            switch (arr[i+1]) {
               case (#int elt) {
                 a[i] := Int.abs(elt);
               };
