@@ -109,8 +109,6 @@ module {
     }
   };
 
-  // TODO: Extract below to a separate module.
-
   let ITEM_TYPE_LINK = 0;
   let ITEM_TYPE_MESSAGE = 1;
   let ITEM_TYPE_POST = 2;
