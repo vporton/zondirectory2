@@ -113,20 +113,31 @@ module {
   let ITEM_TYPE_MESSAGE = 1;
   let ITEM_TYPE_POST = 2;
   let ITEM_TYPE_OWNED_CATEGORY = 3;
-  let ITEM_TYPE_COMMUNAL_CATEGORY = 4;
 
-  public type ItemWithoutOwner = {
+  public type ItemKind = {
+    #link;
+    #message;
+    #post;
+    #ownedCategory; // TODO: Rename.
+  };
+
+  public type ItemData = {
     price: Float;
     locale: Text;
     title: Text;
     description: Text;
-    details: {
-      #link : Text;
-      #message : ();
-      #post : (); // save post text separately
-      #ownedCategory : ();
-      #communalCategory : ();
-    };
+    link: ?Text;
+    // save post text separately
+  };
+
+  public type ItemOwnership = {
+    #owned: ItemData;
+    #communal;
+  };
+
+  public type ItemWithoutOwner = {
+    kind: ItemKind;
+    ownership: ItemOwnership;
   };
 
   // TODO: Add `license` field?
@@ -149,25 +160,34 @@ module {
   // TODO: messy order of the below functions
 
   public func serializeItem(item: Item): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(7);
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(7); // TODO: Check the number.
     buf.add(#int 0); // version
-    buf.add(#int (switch (item.item.details) {
-      case (#link v) { ITEM_TYPE_LINK };
+    buf.add(#int (switch (item.item.kind) {
+      case (#link) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
-      case (#post _) { ITEM_TYPE_POST };
+      case (#post) { ITEM_TYPE_POST };
       case (#ownedCategory) { ITEM_TYPE_OWNED_CATEGORY };
-      case (#communalCategory) { ITEM_TYPE_COMMUNAL_CATEGORY };
     }));
     buf.add(#text(Principal.toText(item.creator)));
-    buf.add(#float(item.item.price));
-    buf.add(#text(item.item.locale));
-    buf.add(#text(item.item.title));
-    buf.add(#text(item.item.description));
-    switch (item.item.details) {
-      case (#link v) {
-        buf.add(#text v);
+    switch (item.item.ownership) {
+      case (#owned v) {
+        buf.add(#bool false);
+        buf.add(#float(v.price));
+        buf.add(#text(v.locale));
+        buf.add(#text(v.title));
+        buf.add(#text(v.description));
+        switch (v.link) {
+          case (?t) {
+            buf.add(#text t);
+          };
+          case null {
+            buf.add(#text "");
+          }
+        };
       };
-      case _ {};
+      case (#communal) {
+        buf.add(#bool true);
+      }
     };
     #tuple(Buffer.toArray(buf));
   };
