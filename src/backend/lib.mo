@@ -122,6 +122,7 @@ module {
   };
 
   public type ItemData = {
+    kind: ItemKind;
     price: Float;
     locale: Text;
     title: Text;
@@ -130,13 +131,10 @@ module {
     // save post text separately
   };
 
-  public type ItemOwnership = {
-    #owned: ItemData;
-    #communal;
-  };
+  public type ItemOwnership = { #owned; #communal };
 
   public type ItemWithoutOwner = {
-    kind: ItemKind;
+    data: ItemData;
     ownership: ItemOwnership;
   };
 
@@ -219,6 +217,15 @@ module {
     var description = "";
     var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none;
     var link = "";
+
+    // var item: Item = {
+    //   creator = Principal.fromText("aaaaa-aa");
+    //   item = {
+    //     kind = #link; // arbitrary initial value
+    //     ownership = #communal;
+    //   };
+    // };
+
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
         var pos = 0;
