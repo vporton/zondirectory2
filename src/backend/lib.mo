@@ -112,7 +112,7 @@ module {
   let ITEM_TYPE_LINK = 0;
   let ITEM_TYPE_MESSAGE = 1;
   let ITEM_TYPE_POST = 2;
-  let ITEM_TYPE_OWNED_CATEGORY = 3;
+  let ITEM_TYPE_OWNED_CATEGORY = 3; // TODO: Rename.
 
   public type ItemKind = {
     #link;
@@ -122,7 +122,6 @@ module {
   };
 
   public type ItemData = {
-    kind: ItemKind;
     price: Float;
     locale: Text;
     title: Text;
@@ -131,10 +130,13 @@ module {
     // save post text separately
   };
 
-  public type ItemOwnership = { #owned; #communal };
+  public type ItemOwnership = {
+    #owned: ItemData;
+    #communal;
+  };
 
   public type ItemWithoutCreator = {
-    data: ItemData;
+    kind: ItemKind;
     ownership: ItemOwnership;
   };
 
@@ -144,6 +146,12 @@ module {
   public type Item = {
     creator: Principal;
     item: ItemWithoutCreator;
+  };
+
+  // TODO: Add support for it later. For now do WITHOUT communal items.
+  public type CommunalChoice = {
+    creator: Principal;
+    item: ItemData;
   };
 
   // TODO: Does it make sense to keep `Streams` in lib?
