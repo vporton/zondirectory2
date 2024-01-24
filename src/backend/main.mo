@@ -215,7 +215,7 @@ shared actor class ZonBackend() = this {
     };
   };
 
-  public shared({caller}) func createItemData(item: lib.ItemWithoutOwner)
+  public shared({caller}) func createItemData(item: lib.ItemWithoutCreator)
     : async (Principal, Nat)
   {
     await* lib.checkSybil(caller);
@@ -231,7 +231,7 @@ shared actor class ZonBackend() = this {
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
-  public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat, item: lib.ItemWithoutOwner) {
+  public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat, item: lib.ItemWithoutCreator) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(_itemId); // TODO: better encoding
     switch (await db.getAttribute({sk = key}, "i")) {

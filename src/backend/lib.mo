@@ -133,7 +133,7 @@ module {
 
   public type ItemOwnership = { #owned; #communal };
 
-  public type ItemWithoutOwner = {
+  public type ItemWithoutCreator = {
     data: ItemData;
     ownership: ItemOwnership;
   };
@@ -143,7 +143,7 @@ module {
   // TODO: Item version.
   public type Item = {
     creator: Principal;
-    item: ItemWithoutOwner;
+    item: ItemWithoutCreator;
   };
 
   // TODO: Does it make sense to keep `Streams` in lib?

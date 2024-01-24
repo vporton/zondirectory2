@@ -4,7 +4,7 @@ import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
-import { ItemWithoutOwner } from "../../../declarations/main/main.did";
+import { ItemWithoutCreator } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
 import EditCategoriesList from "./EditCategoriesList";
 import { serializeItemRef } from "../data/Data";
@@ -44,7 +44,7 @@ export default function EditItemItem(props: {comment?: boolean}) {
                 <AuthContext.Consumer>
                     {({agent, isAuthenticated}) => {
                     async function submit() {
-                        function itemData(): ItemWithoutOwner {
+                        function itemData(): ItemWithoutCreator {
                             // TODO: Differentiating post and message by `post === ""` is unreliable.
                             const isPost = selectedTab == SelectedTab.selectedOther && post !== "";
                             return {
@@ -56,7 +56,7 @@ export default function EditItemItem(props: {comment?: boolean}) {
                                 price: 0.0, // TODO
                             };
                         }
-                        async function submitItem(item: ItemWithoutOwner) {
+                        async function submitItem(item: ItemWithoutCreator) {
                             const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
                             const [part, n] = await backend.createItemData(item);
                             await backend.setPostText(part, n, post);

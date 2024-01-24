@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
-import { ItemWithoutOwner } from "../../../declarations/main/main.did";
+import { ItemWithoutCreator } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
 import EditCategoriesList from "./EditCategoriesList";
 import { addToCategory, addToMultipleCategories } from "../util/category";
@@ -41,7 +41,7 @@ export default function EditCategory(props: {super?: boolean}) {
             <AuthContext.Consumer>
             {({agent, isAuthenticated}) => {
                 async function submit() {
-                    function itemData(): ItemWithoutOwner {
+                    function itemData(): ItemWithoutCreator {
                         return {
                             locale,
                             title,
@@ -50,7 +50,7 @@ export default function EditCategory(props: {super?: boolean}) {
                             price: 0.0, // TODO
                         };
                     }
-                    async function submitItem(item: ItemWithoutOwner) {
+                    async function submitItem(item: ItemWithoutCreator) {
                         const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
                         const [part, n] = await backend.createItemData(item);
                         const ref = serializeItemRef({canister: part, id: Number(n)});
