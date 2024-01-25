@@ -82,6 +82,7 @@ shared actor class ZonBackend() = this {
     nick: Text;
     title: Text;
     description: Text;
+    // TODO: long description
     link : Text;
   };
 
