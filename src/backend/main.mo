@@ -241,11 +241,11 @@ shared actor class ZonBackend() = this {
           Debug.trap("can't change item owner");
         };
         let _item: lib.Item = { item = item; creator = caller; var streams = null; };
-        if (_item.item.details != oldItem.item.details) {
+        if (_item.item.kind != oldItem.item.kind) {
           Debug.trap("can't change item type");
         };
-        switch (oldItem.item.details) {
-          case (#communalCategory) {
+        switch (oldItem.item.ownership) {
+          case (#communal) {
             Debug.trap("can't edit communal category");
           };
           case _ {};
@@ -267,7 +267,7 @@ shared actor class ZonBackend() = this {
           Debug.trap("can't change item owner");
         };
         lib.onlyItemOwner(caller, oldItem);
-        switch(oldItem.item.details) {
+        switch(oldItem.item.kind) {
           case (#post) {};
           case _ { Debug.trap("not a post"); };
         };
@@ -284,8 +284,8 @@ shared actor class ZonBackend() = this {
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
-        switch (oldItem.item.details) {
-          case (#communalCategory) {
+        switch (oldItem.item.ownership) {
+          case (#communal) {
             Debug.trap("it's communal");
           };
           case _ {};

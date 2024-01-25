@@ -1,5 +1,7 @@
 - Two tokens system.
 
+- Testing of (de)serializing.
+
 - Test (not) adding duplicate entry.
 
 - https://onramper.com to buy ICP

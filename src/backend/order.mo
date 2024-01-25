@@ -128,11 +128,15 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
     let categoryItem = lib.deserializeItem(categoryItemData);
 
-    switch (categoryItem.item.details) {
+    switch (categoryItem.item.kind) {
       case (#ownedCategory) {
-        lib.onlyItemOwner(caller, categoryItem);
+        switch (categoryItem.item.ownership) {
+          case (#owned _) {
+            lib.onlyItemOwner(caller, categoryItem);
+          };
+          case (#communal) {};
+        };
       };
-      case (#communalCategory) {};
       case _ {
         if (not comment) {
           Debug.trap("not a category");
@@ -141,7 +145,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
     let links = await* getStreamLinks(itemId, comment);
     await* addToStreams(catId, itemId, comment, links, itemId1, "st", "srt", #beginning);
-    if (categoryItem.item.details == #ownedCategory) {
+    if (categoryItem.item.kind == #ownedCategory) {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", side);
     } else {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", #end);
@@ -218,8 +222,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
     if (comment) {
       lib.STREAM_LINK_COMMENTS;
     } else {
-      switch (childItem.item.details) {
-        case (#communalCategory or #ownedCategory) { lib.STREAM_LINK_SUBCATEGORIES };
+      switch (childItem.item.kind) {
+        case (#ownedCategory) { lib.STREAM_LINK_SUBCATEGORIES };
         case _ { lib.STREAM_LINK_SUBITEMS };
       };
     };

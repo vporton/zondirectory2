@@ -149,10 +149,11 @@ module {
   };
 
   // TODO: Add support for it later. For now do WITHOUT communal items.
-  public type CommunalChoice = {
-    creator: Principal;
-    item: ItemData;
-  };
+  // We can use either this struct or ItemData with always `#owned`.
+  // public type CommunalChoice = {
+  //   creator: Principal;
+  //   item: ItemData;
+  // };
 
   // TODO: Does it make sense to keep `Streams` in lib?
   public type StreamsLinks = Nat;
@@ -218,21 +219,14 @@ module {
 
   public func deserializeItem(attr: Entity.AttributeValue): Item {
     var kind: Nat = 0;
+    var owned: Bool = false;
     var creator: ?Principal = null;
     var price = 0.0;
     var locale = "";
     var title = "";
     var description = "";
-    var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none;
+    var details: {#link; #message; #post; #ownedCategory} = #link; // arbitrary value
     var link = "";
-
-    // var item: Item = {
-    //   creator = Principal.fromText("aaaaa-aa");
-    //   item = {
-    //     kind = #link; // arbitrary initial value
-    //     ownership = #communal;
-    //   };
-    // };
 
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
@@ -259,39 +253,46 @@ module {
         };
         pos += 1;
         switch (arr[pos]) {
-          case (#float v) {
-            price := v;
+          case (#bool v) {
+            owned := v;
           };
-          case _ { break r false; };
+          case _ { break r false };
         };
         pos += 1;
-        switch (arr[pos]) {
-          case (#text v) {
-            locale := v;
+        if (owned) {
+          switch (arr[pos]) {
+            case (#float v) {
+              price := v;
+            };
+            case _ { break r false; };
           };
-          case _ { break r false; };
-        };
-        pos += 1;
-        switch (arr[pos]) {
-          case (#text v) {
-            title := v;
+          pos += 1;
+          switch (arr[pos]) {
+            case (#text v) {
+              locale := v;
+            };
+            case _ { break r false; };
           };
-          case _ { break r false; };
-        };
-        pos += 1;
-        switch (arr[pos]) {
-          case (#text v) {
-            description := v;
+          pos += 1;
+          switch (arr[pos]) {
+            case (#text v) {
+              title := v;
+            };
+            case _ { break r false; };
           };
-          case _ { break r false; }
-        };
-        pos += 1;
-        if (kind == ITEM_TYPE_LINK) {
+          pos += 1;
+          switch (arr[pos]) {
+            case (#text v) {
+              description := v;
+            };
+            case _ { break r false; }
+          };
+          pos += 1;
           switch (arr[pos]) {
             case (#text v) {
               link := v;
             };
-            case _ { break r false; };
+            case _ { break r false; }
           };
           pos += 1;
         };
@@ -306,21 +307,28 @@ module {
       Debug.trap("wrong item format");
     };
     let ?creator2 = creator else { Debug.trap("creator2: programming error"); };
-    {
-      creator = creator2;
-      item = {
+    let ownership = if (owned) {
+      #owned {
         price = price;
         locale = locale;
         title = title;
         description = description;
-        details = switch (kind) {
-          case (0) { #link link };
+        link = if (link == "") { null } else { ?link };
+      };
+    } else {
+      #communal
+    };
+    {
+      creator = creator2;
+      item = {
+        kind = switch (kind) {
+          case (0) { #link };
           case (1) { #message };
           case (2) { #post };
           case (3) { #ownedCategory };
-          case (4) { #communalCategory };
           case _ { Debug.trap("wrong item format"); }
         };
+        ownership;
       };
     };
   };
