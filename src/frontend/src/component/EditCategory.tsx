@@ -7,7 +7,7 @@ import { ItemWithoutCreator } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
 import EditCategoriesList from "./EditCategoriesList";
 import { addToCategory, addToMultipleCategories } from "../util/category";
-import { parseItemRef, serializeItemRef } from "../data/Data";
+import { parseItemRef, serializeItemRef } from "../DataDispatcher";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 
@@ -43,11 +43,16 @@ export default function EditCategory(props: {super?: boolean}) {
                 async function submit() {
                     function itemData(): ItemWithoutCreator {
                         return {
-                            locale,
-                            title,
-                            description: shortDescription,
-                            details: categoryKind == CategoryKind.owned ? {ownedCategory: null} : {communalCategory: null},
-                            price: 0.0, // TODO
+                            kind: { ownedCategory: null },
+                            ownership: {
+                                owned: {
+                                    locale,
+                                    title,
+                                    description: shortDescription,
+                                    price: 0.0, // TODO
+                                    link: [],
+                                },
+                            }
                         };
                     }
                     async function submitItem(item: ItemWithoutCreator) {

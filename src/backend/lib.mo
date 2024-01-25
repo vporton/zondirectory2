@@ -148,12 +148,11 @@ module {
     item: ItemWithoutCreator;
   };
 
-  // TODO: Add support for it later. For now do WITHOUT communal items.
-  // We can use either this struct or ItemData with always `#owned`.
-  // public type CommunalChoice = {
-  //   creator: Principal;
-  //   item: ItemData;
-  // };
+  // used to pass information to/from backend
+  public type ItemInfo = {
+    kind: ItemKind;
+    data: ItemData;
+  };
 
   // TODO: Does it make sense to keep `Streams` in lib?
   public type StreamsLinks = Nat;

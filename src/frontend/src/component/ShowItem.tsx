@@ -3,10 +3,10 @@ import { useContext, useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "./auth/use-auth-client";
-import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../data/Data";
+import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../DataDispatcher";;
 import ItemType from "./misc/ItemType";
 import { Button } from "react-bootstrap";
-import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
+import { ItemInfo } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { order } from "../../../declarations/order";
 import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
@@ -36,11 +36,11 @@ function ShowItemContent(props: {defaultAgent}) {
     const [postText, setPostText] = useState("");
     const [type, setType] = useState<string | undefined>(undefined);
     const [creator, setCreator] = useState("");
-    const [subcategories, setSubcategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
-    const [supercategories, setSupercategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
-    const [items, setItems] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
-    const [comments, setComments] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
-    const [antiComments, setAntiComments] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
+    const [subcategories, setSubcategories] = useState<{order: string, id: ItemRef, item: ItemInfo}[] | undefined>(undefined);
+    const [supercategories, setSupercategories] = useState<{order: string, id: ItemRef, item: ItemInfo}[] | undefined>(undefined);
+    const [items, setItems] = useState<{order: string, id: ItemRef, item: ItemInfo}[] | undefined>(undefined);
+    const [comments, setComments] = useState<{order: string, id: ItemRef, item: ItemInfo}[] | undefined>(undefined);
+    const [antiComments, setAntiComments] = useState<{order: string, id: ItemRef, item: ItemInfo}[] | undefined>(undefined);
     const [data, setData] = useState<any>(undefined); // TODO: hack
     const [xdata, setXData] = useState<any>(undefined); // TODO: hack
     const [itemsLast, setItemsLast] = useState("");
@@ -86,7 +86,7 @@ function ShowItemContent(props: {defaultAgent}) {
             console.log("Loading from AppData");
             AppData.create(props.defaultAgent, serializeItemRef(id), streamKind).then(data => {
                 setXData(data);
-                setData(data.item);
+                setData(data); // TODO: superfluous
                 data.locale().then(x => setLocale(x));
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
@@ -114,7 +114,7 @@ function ShowItemContent(props: {defaultAgent}) {
                         setAntiCommentsLast(x[x.length - 1].order); // duplicate code
                     }
                 });
-                data.details().then((x) => {
+                data.kind().then((x) => {
                     setType(Object.keys(x)[0]);
                 });
             });
@@ -196,8 +196,8 @@ function ShowItemContent(props: {defaultAgent}) {
                 <h3>Sub-folders</h3>
                 {subcategories === undefined ? <p>Loading...</p> :
                 <ul>
-                    {subcategories.map((x: {order: string, id: ItemRef, item: Item}) =>
-                        <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
+                    {subcategories.map((x: {order: string, id: ItemRef, item: ItemInfo}) =>
+                        <li lang={x.item.locale} key={serializeItemRef(x.id as any)}>
                             <UpDown
                                 parent={{id}}
                                 item={x}
@@ -211,7 +211,7 @@ function ShowItemContent(props: {defaultAgent}) {
                                 onUpdateList={() => xdata.subCategories().then(x => setSubcategories(x))}
                             />
                             <ItemType item={x.item}/>
-                            <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
+                            <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.title}</a>
                         </li>)}
                 </ul>}
                 <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${serializeItemRef(id)}`}>Create subfolder</a></p>
@@ -220,8 +220,8 @@ function ShowItemContent(props: {defaultAgent}) {
             <p><small>Voting in this stream not yet implemented.</small></p>
             {supercategories === undefined ? <p>Loading...</p> :
             <ul>
-                {supercategories.map((x: {order: string, id: ItemRef, item: Item}) =>
-                    <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
+                {supercategories.map((x: {order: string, id: ItemRef, item: ItemInfo}) =>
+                    <li lang={x.item.locale} key={serializeItemRef(x.id as any)}>
                         {/* TODO: up/down here is complicated by exchanhing parent/child. */}
                         {/*<UpDown
                             parent={{id}}
@@ -239,16 +239,16 @@ function ShowItemContent(props: {defaultAgent}) {
                             })}
                         />*/}
                         <ItemType item={x.item}/>
-                        <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
+                        <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.title}</a>
                     </li>)}
             </ul>}
             {/* TODO: Create super-category */}
             <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create-supercategory/for-category/${serializeItemRef(id)}`}>Create</a></p>
             {!isCategory ? "" : <>
                 <h3>Items</h3>
-                {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: Item}) => 
+                {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemInfo}) => 
                     <div key={serializeItemRef(x.id)}>
-                        <p lang={x.item.item.locale}>
+                        <p lang={x.item.locale}>
                             <UpDown
                                 parent={{id}}
                                 item={x}
@@ -261,11 +261,11 @@ function ShowItemContent(props: {defaultAgent}) {
                                     setTotalVotesItems({...totalVotesItems, [serializeItemRef(id)]: v})}
                                 onUpdateList={() => xdata.items().then(x => setItems(x))}
                             />{" "}
-                            {x.item.item.price ? <>({x.item.item.price} ICP) </> : ""}
-                            {(x.item.item.details as any).link ? <a href={(x.item.item.details as any).link}>{x.item.item.title}</a> : x.item.item.title}
+                            {x.item.price ? <>({x.item.price} ICP) </> : ""}
+                            {x.item.link.length !== 0 ? <a href={x.item.link[0]}>{x.item.title}</a> : x.item.title}
                             {" "}<a href={`#/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
                         </p>
-                        <p lang={x.item.item.locale} style={{marginLeft: '1em'}}>{x.item.item.description}</p>
+                        <p lang={x.item.locale} style={{marginLeft: '1em'}}>{x.item.description}</p>
                     </div>
             )}
             <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
@@ -275,7 +275,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 <h3>Comments</h3>
                 {comments === undefined ? <p>Loading...</p> : comments.map(x => 
                     <div key={serializeItemRef(x.id)}>
-                        <p lang={x.item.item.locale}>
+                        <p lang={x.item.locale}>
                             <UpDown
                                 parent={{id}}
                                 item={x}
@@ -289,25 +289,25 @@ function ShowItemContent(props: {defaultAgent}) {
                                 onUpdateList={() => xdata.comments().then(x => setComments(x))}
                                 isComment={true}
                             />
-                            {x.item.item.price ? <>({x.item.item.price} ICP) </> : ""}
-                            {(x.item.item.details as any).link ? <a href={(x.item.item.details as any).link}>{x.item.item.title}</a> : x.item.item.title}
+                            {x.item.price ? <>({x.item.price} ICP) </> : ""}
+                            {x.item.link.length !== 0 ? <a href={x.item.link[0]}>{x.item.title}</a> : x.item.title}
                             {" "}<a href={`#/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
                         </p>
-                        <p lang={x.item.item.locale} style={{marginLeft: '1em'}}>{x.item.item.description}</p>
+                        <p lang={x.item.locale} style={{marginLeft: '1em'}}>{x.item.description}</p>
                     </div>
                 )}
                 <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
                     <a href={`#/create/comment/${serializeItemRef(id)}`}>Create</a></p>
                 <h3>Comment on</h3>
                 <p><small>Voting in this stream not yet implemented.</small></p>
-                {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: Item}) => 
+                {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: ItemInfo}) => 
                     <div key={serializeItemRef(item.id)}>
-                        <p lang={item.item.item.locale}>
-                            {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
-                            {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
+                        <p lang={item.item.locale}>
+                            {item.item.price ? <>({item.item.price} ICP) </> : ""}
+                            {item.item.link.length !== 0 ? <a href={item.item.link[0]}>{item.item.title}</a> : item.item.title}
                             {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
                         </p>
-                        <p lang={item.item.item.locale} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
+                        <p lang={item.item.locale} style={{marginLeft: '1em'}}>{item.item.description}</p>
                     </div>
                 )}
                 <p><a href="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}</p>

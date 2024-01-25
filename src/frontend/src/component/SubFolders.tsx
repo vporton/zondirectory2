@@ -2,15 +2,15 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
-import { ItemRef, serializeItemRef } from "../data/Data";
-import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
+import { ItemRef, serializeItemRef } from "../DataDispatcher";;
+import { ItemInfo } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import ItemType from "./misc/ItemType";
 
 export default function SubFolders(props) {
     const { id } = useParams();
     const [xdata, setXData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
-    const [categories, setCategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>([]);
+    const [categories, setCategories] = useState<{order: string, id: ItemRef, item: ItemInfo}[] | undefined>([]);
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
     const [streamKind, setStreamKind] = useState<"t" | "v">("v"); // time, votes
@@ -77,9 +77,9 @@ export default function SubFolders(props) {
                     <li key={serializeItemRef(x.id as any)}>
                         <p>
                             <ItemType item={x.item}/>
-                            <a lang={x.item.item.locale} href={`#/item/${serializeItemRef(x.id as any)}`}>{x.item.item.title}</a>
+                            <a lang={x.item.locale} href={`#/item/${serializeItemRef(x.id as any)}`}>{x.item.title}</a>
                         </p>
-                        {x.item.item.description ? <p lang={x.item.item.locale}><small>{x.item.item.description}</small></p> : ""}
+                        {x.item.description ? <p lang={x.item.locale}><small>{x.item.description}</small></p> : ""}
                     </li>)}
             </ul>
             <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Item } from "../../../../declarations/CanDBPartition/CanDBPartition.did";
+import { ItemInfo } from "../../../../declarations/CanDBPartition/CanDBPartition.did";
 import { AuthContext } from "../auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../../data/Data";
 import { createActor as orderActor } from "../../../../declarations/order";
@@ -9,7 +9,7 @@ import Button from "react-bootstrap/esm/Button";
 
 export default function UpDown(props: {
     parent: {id: ItemRef},
-    item: {order: string, id: ItemRef, item: Item},
+    item: {order: string, id: ItemRef, item: ItemInfo},
     agent: Agent,
     // onUpdateList: (() => void) | undefined,
     userVote: number, // -1, 0, or 1
@@ -78,7 +78,7 @@ export default function UpDown(props: {
     );
 }
 
-export async function updateVotes(id, principal, source: {order: string, id: ItemRef, item: Item}[], setTotalVotes, setUserVote) { // TODO: argument types
+export async function updateVotes(id, principal, source: {order: string, id: ItemRef, item: ItemInfo}[], setTotalVotes, setUserVote) { // TODO: argument types
     console.log("updateVotes");
 
     const totalVotes: {[key: string]: {up: number, down: number}} = {};

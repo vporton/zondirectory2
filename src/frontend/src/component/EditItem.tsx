@@ -7,7 +7,7 @@ import 'react-tabs/style/react-tabs.css';
 import { ItemWithoutCreator } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
 import EditCategoriesList from "./EditCategoriesList";
-import { serializeItemRef } from "../data/Data";
+import { serializeItemRef } from "../DataDispatcher";;
 import { addToMultipleCategories } from "../util/category";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
@@ -48,12 +48,16 @@ export default function EditItemItem(props: {comment?: boolean}) {
                             // TODO: Differentiating post and message by `post === ""` is unreliable.
                             const isPost = selectedTab == SelectedTab.selectedOther && post !== "";
                             return {
-                                locale,
-                                title,
-                                description: shortDescription,
-                                details: selectedTab == SelectedTab.selectedLink ? {link: link} :
-                                    isPost ? {post: null} : {message: null},
-                                price: 0.0, // TODO
+                                kind: (selectedTab == SelectedTab.selectedLink) ? {link: null} : isPost ? {post: null} : {message: null},
+                                ownership: {
+                                    owned: {
+                                        locale,
+                                        title,
+                                        description: shortDescription,
+                                        price: 0.0, // TODO
+                                        link: [link],
+                                    },
+                                },
                             };
                         }
                         async function submitItem(item: ItemWithoutCreator) {
