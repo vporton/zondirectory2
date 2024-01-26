@@ -374,6 +374,7 @@ module {
     if (config.skipSybil) {
       return;
     };
+    let voting = getVotingData(caller: Principal, partitionId)
     // TODO:
     // let verifyActor = actor(phoneNumberVerificationCanisterId): actor {
     //   is_phone_number_approved(principal: Text) : async Bool;
@@ -382,4 +383,100 @@ module {
     //   Debug.trap("cannot verify phone number");
     // };
   };
+
+  /// More user info: Voting ///
+
+  // TODO: Also store, how much votings were done.
+  public type VotingInfo = {
+    score: ?{
+      points: Float; // Gitcoin score
+      lastChecked: Time.Time;
+    };
+  };
+
+  func serializeVoting(voting: VotingInfo): Entity.AttributeValue {
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(5);
+    buf.add(#int 0); // version
+    switch (voting.score) {
+      case (?{points: Float; lastChecked: Time.Time}) {
+        buf.add(#bool true);
+        buf.add(#float points);
+        buf.add(#int lastChecked);
+      };
+      case null {
+        buf.add(#bool false);
+      };
+    };
+    #tuple (Buffer.toArray(buf));
+  };
+
+  func deserializeVoting(attr: Entity.AttributeValue): VotingInfo {
+    var isScore: Bool = false;
+    var points: Float = 0.0;
+    var lastChecked: Time.Time = 0;
+
+    let res = label r: Bool switch (attr) {
+      case (#tuple arr) {
+        var pos: Nat = 0;
+        switch (arr[pos]) {
+          case (#int v) {
+            assert v == 0;
+          };
+          case _ { break r false };
+        };
+        pos += 1;
+        switch (arr[pos]) {
+          case (#bool v) {
+            isScore := v;
+          };
+          case _ { break r false };
+        };
+        if (isScore) {
+          switch (arr[pos]) {
+            case (#float v) {
+              points := v;
+            };
+            case _ { break r false };
+          };
+          pos += 1;
+          switch (arr[pos]) {
+            case (#int v) {
+              lastChecked := v;
+            };
+            case _ { break r false };
+          };
+          pos += 1;
+        };
+        true;
+      };
+      case _ { break r false };
+    };
+    {
+      score = if (isScore) {
+        ?{points; lastChecked};
+      } else {
+        null;
+      };
+    };
+  };
+
+  func setVotingData(caller: Principal, partitionId: ?Principal, voting: VotingInfo): async* () {
+    let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
+    // TODO: Add Hint to CanDBMulti
+    ignore await CanDBIndex.putAttributeNoDuplicates("user", {
+        sk;
+        key = "v";
+        value = serializeVoting(voting);
+      },
+    );
+  };
+
+  func getVotingData(map: CanisterMap.CanisterMap, caller: Principal, partitionId: Principal): async* ?VotingInfo {
+    let part: CanDBPartition.CanDBPartition = actor(Principal.toText(partitionId));
+    let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
+    // TODO: Add Hint to CanDBMulti
+    let res = await   part.getAttributeByHint(map, pk, hint, {sk; key = "v"});
+    do ? { deserializeVoting(res!) };
+  };
+
 }

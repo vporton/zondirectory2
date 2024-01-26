@@ -15,6 +15,7 @@ import xNat "mo:xtendedNumbers/NatX";
 import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
 import Nat64 "mo:base/Nat64";
+import Time "mo:base/Time";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 import Payments "payments";
 import NacDbPartition "../storage/NacDBPartition";
@@ -71,11 +72,6 @@ shared actor class ZonBackend() = this {
   };
 
   /// Users ///
-
-  // anti-Sybil verification
-  public shared({caller}) func verifyUser(): async () {
-    await* lib.checkSybil(caller);
-  };
 
   type User = {
     locale: Text;

@@ -1,8 +1,8 @@
 ## CanDB database structure
 
 ### "u/" - Principal -> User
-- Attribute `"u"`: `"u"` - `User` record, `"v"` - Karma struct.
-- (Unused) Attribute `"s"` - set to true if anti-sybil checking passed.
+- Attribute `"u"`: `"u"` - `User` record.
+- Attribute `"v"` - `VotingInfo`.
 ### "i/" - ID -> Item
 - Attribute `"i"` - `Item` record.
 - Attribute `"st"` (time), `"sv"` (votes) - `Streams` record.

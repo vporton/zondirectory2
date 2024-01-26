@@ -230,5 +230,5 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue }
   ) : async Principal {
     await* Multi.putAttributeWithPossibleDuplicate(pkToCanisterMap, pk, options);
-  }
+  };
 }
