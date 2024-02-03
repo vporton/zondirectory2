@@ -29,6 +29,7 @@
     "crypto-js": "^4.2.0",
     "css-loader": "^6.8.1",
     "node-fetch": "^2.7.0",
+    "passport_client_dfinity": "https://github.com/vporton/passport-client-dfinity",
     "pem-file": "^1.0.1",
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.1",

@@ -370,47 +370,41 @@ module {
     };
   };
 
-  public func checkSybil(user: Principal): async* () {
+  public func checkSybil(map: CanisterMap, user: Principal): async* () {
     if (config.skipSybil) {
       return;
     };
-    let voting = getVotingData(caller: Principal, partitionId)
-    // TODO:
-    // let verifyActor = actor(phoneNumberVerificationCanisterId): actor {
-    //   is_phone_number_approved(principal: Text) : async Bool;
-    // };
-    // if (not(await verifyActor.is_phone_number_approved(Principal.toText(user)))) {
-    //   Debug.trap("cannot verify phone number");
-    // };
+    let voting = await* getVotingData(map, user, partitionId);
+    let allowed = switch (voting) {
+      case (?voting) {
+        voting.lastChecked + 7 * 24 * 3600 * 1_000_000_000 >= Time.now(); // TODO: Make configurable.
+      };
+      case null { false };
+    };
+    if (not allowed) {
+      Debug.trap("Sybil check failed");
+    };
   };
 
   /// More user info: Voting ///
 
   // TODO: Also store, how much votings were done.
-  public type VotingInfo = {
-    score: ?{
-      points: Float; // Gitcoin score
-      lastChecked: Time.Time;
-    };
+  public type VotingScore = {
+    points: Float; // Gitcoin score
+    lastChecked: Time.Time;
+    ethereumAddress: Text; // TODO: Store in binary
   };
 
-  func serializeVoting(voting: VotingInfo): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(5);
+  func serializeVoting(voting: VotingScore): Entity.AttributeValue {
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(4);
     buf.add(#int 0); // version
-    switch (voting.score) {
-      case (?{points: Float; lastChecked: Time.Time}) {
-        buf.add(#bool true);
-        buf.add(#float points);
-        buf.add(#int lastChecked);
-      };
-      case null {
-        buf.add(#bool false);
-      };
-    };
-    #tuple (Buffer.toArray(buf));
+    buf.add(#bool true);
+    buf.add(#float(voting.points));
+    buf.add(#int(voting.lastChecked));
+    #tuple(Buffer.toArray(buf));
   };
 
-  func deserializeVoting(attr: Entity.AttributeValue): VotingInfo {
+  func deserializeVoting(attr: Entity.AttributeValue): VotingScore {
     var isScore: Bool = false;
     var points: Float = 0.0;
     var lastChecked: Time.Time = 0;
@@ -451,16 +445,10 @@ module {
       };
       case _ { break r false };
     };
-    {
-      score = if (isScore) {
-        ?{points; lastChecked};
-      } else {
-        null;
-      };
-    };
+    {points; lastChecked};
   };
 
-  func setVotingData(caller: Principal, partitionId: ?Principal, voting: VotingInfo): async* () {
+  func setVotingData(caller: Principal, partitionId: ?Principal, voting: VotingScore): async* () {
     let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti
     ignore await CanDBIndex.putAttributeNoDuplicates("user", {
@@ -471,11 +459,11 @@ module {
     );
   };
 
-  func getVotingData(map: CanisterMap.CanisterMap, caller: Principal, partitionId: Principal): async* ?VotingInfo {
+  func getVotingData(map: CanisterMap.CanisterMap, caller: Principal, partitionId: ?Principal): async* ?VotingScore {
     let part: CanDBPartition.CanDBPartition = actor(Principal.toText(partitionId));
     let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti
-    let res = await   part.getAttributeByHint(map, pk, hint, {sk; key = "v"});
+    let res = await part.getAttributeByHint(map, pk, partitionId, {sk; key = "v"});
     do ? { deserializeVoting(res!) };
   };
 
