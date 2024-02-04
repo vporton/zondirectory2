@@ -1,3 +1,4 @@
+import CanDBIndex "canister:CanDBIndex";
 import Types "mo:passport-client-dfinity/lib/Types";
 import V "mo:passport-client-dfinity/lib/Verifier";
 import lib "./lib";
@@ -6,39 +7,39 @@ import Conf "../../config";
 actor Personhood {
     /// Shared ///
 
-    public shared({caller}) func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text;}): async Text {
+    public shared({caller}) func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text}): async Text {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         let body = await* V.scoreBySignedEthereumAddress({
             address;
             signature;
             nonce;
-            scorerId = Conf.scorerId;
+            config = Conf.configScorer;
             transform = removeHTTPHeaders;
         });
-        let score = extractItemScoreFromBody(body);
-        await* setVotingData(caller, null, { // TODO: Provide partition hint, not `null`.
+        let score = V.extractItemScoreFromBody(body);
+        await CanDBIndex.setVotingData(caller, null, { // TODO: Provide partition hint, not `null`.
             points = score;
             lastChecked = Time.now();
-            ethereumAddress = address;
+            ethereumAddress = address; // FIXME: Store separately.
         });
     };
 
-    public shared func submitSignedEthereumAddressForScore({address: Text; signature: Text; nonce: Text;}): async Text {
+    public shared func submitSignedEthereumAddressForScore({address: Text; signature: Text; nonce: Text}): async Text {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         let body = await* V.submitSignedEthereumAddressForScore({
             address;
             signature;
             nonce;
-            scorerId = Conf.scorerId;
+            config = Conf.configScorer;
             transform = removeHTTPHeaders;
         });
-        let score = extractItemScoreFromBody(body);
-        await* setVotingData(caller, null, { // TODO: Provide partition hint, not `null`.
+        let score = V.extractItemScoreFromBody(body);
+        await CanDBIndex.setVotingData(caller, null, { // TODO: Provide partition hint, not `null`.
             points = score;
             lastChecked = Time.now();
-            ethereumAddress = address;
+            ethereumAddress = address; // FIXME: Store separately.
         });
     };
 

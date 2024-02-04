@@ -380,7 +380,7 @@ module {
     // ethereumAddress: Text; // TODO: Store in binary
   };
 
-  func serializeVoting(voting: VotingScore): Entity.AttributeValue {
+  public func serializeVoting(voting: VotingScore): Entity.AttributeValue {
     var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(4);
     buf.add(#int 0); // version
     buf.add(#bool true);
@@ -389,7 +389,7 @@ module {
     #tuple(Buffer.toArray(buf));
   };
 
-  func deserializeVoting(attr: Entity.AttributeValue): VotingScore {
+  public func deserializeVoting(attr: Entity.AttributeValue): VotingScore {
     var isScore: Bool = false;
     var points: Float = 0.0;
     var lastChecked: Time.Time = 0;

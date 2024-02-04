@@ -15,10 +15,13 @@ import Hash "mo:base/Hash";
 import Array "mo:base/Array";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
+import Time "mo:base/Time";
 import CanDB "mo:candb/CanDB";
 import Multi "mo:CanDBMulti/Multi";
 import Entity "mo:candb/Entity";
 import Canister "mo:matchers/Canister";
+import lib "../backend/lib";
+import Conf "../../config";
 
 shared({caller = initialOwner}) actor class CanDBIndex() = this {
   stable var owners: [Principal] = [initialOwner];
@@ -232,29 +235,32 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     await* Multi.putAttributeWithPossibleDuplicate(pkToCanisterMap, pk, options);
   };
 
-  func setVotingData(caller: Principal, partitionId: ?Principal, voting: VotingScore): async* () {
+  func setVotingDataImpl(caller: Principal, partitionId: ?Principal, voting: lib.VotingScore): async* () {
     let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti
-    ignore await CanDBIndex.putAttributeNoDuplicates("user", {
+    ignore await* Multi.putAttributeNoDuplicates(pkToCanisterMap, "user", {
       sk;
       key = "v";
-      value = serializeVoting(voting);
+      value = lib.serializeVoting(voting);
     });
   };
 
-  func getVotingData(map: CM.CanisterMap, caller: Principal, partitionId: ?Principal): async* ?VotingScore {
-    let part: CanDBPartition.CanDBPartition = actor(Principal.toText(partitionId));
-    let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-    // TODO: Add Hint to CanDBMulti
-    let res = await part.getAttributeByHint(map, pk, partitionId, {sk; key = "v"});
-    do ? { deserializeVoting(res!) };
+  public shared({caller}) func setVotingData(partitionId: ?Principal, voting: lib.VotingScore): async () {
+    await* setVotingDataImpl(caller, partitionId, voting);
   };
 
-  public shared func checkSybil(user: Principal): async* () {
-    if (config.skipSybil) {
+  func getVotingData(caller: Principal, partitionId: ?Principal): async* ?lib.VotingScore {
+    let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
+    // TODO: Add Hint to CanDBMulti
+    let res = await* Multi.getAttributeByHint(pkToCanisterMap, "u", partitionId, {sk; key = "v"});
+    do ? { lib.deserializeVoting(res!.1!) };
+  };
+
+  public shared func checkSybil(user: Principal): async () {
+    if (Conf.skipSybil) {
       return;
     };
-    let voting = await* getVotingData(pkToCanisterMap, user, null); // TODO: hint `partitionId`, not null
+    let voting = await* getVotingData(user, null); // TODO: hint `partitionId`, not null
     let allowed = switch (voting) {
       case (?voting) {
         voting.lastChecked + 7 * 24 * 3600 * 1_000_000_000 >= Time.now(); // TODO: Make configurable.

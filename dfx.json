@@ -5,7 +5,6 @@
       "type": "motoko",
       "dependencies": [
         "order",
-        "personhood",
         "payments",
         "CanDBIndex",
         "NacDBIndex",
@@ -19,7 +18,7 @@
     "personhood": {
       "main": "src/backend/personhood.mo",
       "type": "motoko",
-      "dependencies": ["ic_eth"]
+      "dependencies": ["ic_eth", "main"]
     },
     "frontend": {
       "frontend": {
