@@ -5,6 +5,7 @@
       "type": "motoko",
       "dependencies": [
         "order",
+        "personhood",
         "payments",
         "CanDBIndex",
         "NacDBIndex",
@@ -14,6 +15,11 @@
     "order": {
       "main": "src/backend/order.mo",
       "type": "motoko"
+    },
+    "personhood": {
+      "main": "src/backend/personhood.mo",
+      "type": "motoko",
+      "dependencies": ["ic_eth"]
     },
     "frontend": {
       "frontend": {
@@ -41,19 +47,28 @@
     },
     "CanDBIndex": {
       "main": "src/storage/CanDBIndex.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": ["ic_eth"]
     },
     "NacDBIndex": {
       "main": "src/storage/NacDBIndex.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": ["ic_eth"]
     },
     "CanDBPartition": {
       "main": "src/storage/CanDBPartition.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": ["ic_eth"]
     },
     "NacDBPartition": {
       "main": "src/storage/NacDBPartition.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": ["ic_eth"]
+    },
+    "ic_eth": {
+      "type": "rust",
+      "candid": "src/ic_eth/ic_eth.did",
+      "package": "ic_eth"
     },
     "internet_identity": {
       "type": "custom",
@@ -67,6 +82,11 @@
         }
       }
     }
+  },
+  "ic_eth": {
+    "type": "rust",
+    "candid": "src/ic_eth/ic_eth.did",
+    "package": "ic_eth"
   },
   "defaults": {
     "build": {

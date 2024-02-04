@@ -1,8 +1,30 @@
 import Types "mo:passport-client-dfinity/lib/Types";
-import V "../lib/Verifier";
-import Conf "../../Config";
+import V "mo:passport-client-dfinity/lib/Verifier";
+import lib "./lib";
+import Conf "../../config";
 
-actor Main {
+actor Personhood {
+    func setVotingData(caller: Principal, partitionId: ?Principal, voting: VotingScore): async* () {
+        let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
+        // TODO: Add Hint to CanDBMulti
+        ignore await CanDBIndex.putAttributeNoDuplicates("user", {
+            sk;
+            key = "v";
+            value = serializeVoting(voting);
+        },
+        );
+    };
+
+    func getVotingData(map: CM.CanisterMap, caller: Principal, partitionId: ?Principal): async* ?VotingScore {
+        let part: CanDBPartition.CanDBPartition = actor(Principal.toText(partitionId));
+        let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
+        // TODO: Add Hint to CanDBMulti
+        let res = await part.getAttributeByHint(map, pk, partitionId, {sk; key = "v"});
+        do ? { deserializeVoting(res!) };
+    };
+
+    /// Shared ///
+
     public shared({caller}) func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text;}): async Text {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.

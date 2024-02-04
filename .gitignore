@@ -13,6 +13,9 @@
 .mops/
 .vessel/
 
+/target
+ic_eth.did
+
 # generated files
 src/declarations/
 

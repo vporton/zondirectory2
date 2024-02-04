@@ -31,13 +31,18 @@ deploy-main:
 .PHONY: compile-my-wasm
 compile-my-wasm: CanDBPartition.wasm NacDBPartition.wasm
 
-.PHONY: CanDBPartition.wasm
+.PHONY: CanDBPartition.wasm ic_eth
 CanDBPartition.wasm:
-	moc `mops sources` src/storage/CanDBPartition.mo
+#	. .env && moc `mops sources` --actor-idl ./src/ic_eth/ic_eth.did --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
+	. .env && moc `mops sources` --actor-idl /home/porton/Projects/zondirectory2/.dfx/local/canisters/idl/ --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
 
 .PHONY: NacDBPartition.wasm
 NacDBPartition.wasm:
 	moc `mops sources` src/storage/NacDBPartition.mo
+
+.PHONY: ic_eth
+ic_eth:
+	dfx deploy ic_eth
 
 .PHONY: deploy-frontend
 deploy-frontend: compile-my-wasm do-deploy-frontend upgrade-partitions

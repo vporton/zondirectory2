@@ -1,4 +1,5 @@
 import xNat "mo:xtendedNumbers/NatX";
+import CM "mo:candb/CanisterMap";
 import Nac "mo:nacdb/NacDB";
 import NacDBPartition "../storage/NacDBPartition";
 import RBT "mo:stable-rbtree/StableRBTree";
@@ -370,11 +371,11 @@ module {
     };
   };
 
-  public func checkSybil(map: CanisterMap, user: Principal): async* () {
+  public func checkSybil(map: CM.CanisterMap, user: Principal): async* () {
     if (config.skipSybil) {
       return;
     };
-    let voting = await* getVotingData(map, user, partitionId);
+    let voting = await* getVotingData(map, user, null); // TODO: hint `partitionId`, not null
     let allowed = switch (voting) {
       case (?voting) {
         voting.lastChecked + 7 * 24 * 3600 * 1_000_000_000 >= Time.now(); // TODO: Make configurable.
@@ -447,24 +448,4 @@ module {
     };
     {points; lastChecked};
   };
-
-  func setVotingData(caller: Principal, partitionId: ?Principal, voting: VotingScore): async* () {
-    let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-    // TODO: Add Hint to CanDBMulti
-    ignore await CanDBIndex.putAttributeNoDuplicates("user", {
-        sk;
-        key = "v";
-        value = serializeVoting(voting);
-      },
-    );
-  };
-
-  func getVotingData(map: CanisterMap.CanisterMap, caller: Principal, partitionId: ?Principal): async* ?VotingScore {
-    let part: CanDBPartition.CanDBPartition = actor(Principal.toText(partitionId));
-    let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-    // TODO: Add Hint to CanDBMulti
-    let res = await part.getAttributeByHint(map, pk, partitionId, {sk; key = "v"});
-    do ? { deserializeVoting(res!) };
-  };
-
 }

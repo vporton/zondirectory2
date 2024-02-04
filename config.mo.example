@@ -1,4 +1,12 @@
+import Verify "mo:passport-client-dfinity/lib/Verifier";
+
 module {
     // Don't verify users for sybil. It's useful for a test installation running locally.
     public let skipSybil = true | false;
+
+    public let configScorer: Verify.Config = {
+        scorerId = <NUMBER>;
+        scorerAPIKey = "<KEY>";
+        scorerUrl = "https://api.scorer.gitcoin.co";
+    };
 }
