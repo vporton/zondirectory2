@@ -371,22 +371,6 @@ module {
     };
   };
 
-  public func checkSybil(map: CM.CanisterMap, user: Principal): async* () {
-    if (config.skipSybil) {
-      return;
-    };
-    let voting = await* getVotingData(map, user, null); // TODO: hint `partitionId`, not null
-    let allowed = switch (voting) {
-      case (?voting) {
-        voting.lastChecked + 7 * 24 * 3600 * 1_000_000_000 >= Time.now(); // TODO: Make configurable.
-      };
-      case null { false };
-    };
-    if (not allowed) {
-      Debug.trap("Sybil check failed");
-    };
-  };
-
   /// More user info: Voting ///
 
   // TODO: Also store, how much votings were done.

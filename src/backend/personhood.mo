@@ -4,25 +4,6 @@ import lib "./lib";
 import Conf "../../config";
 
 actor Personhood {
-    func setVotingData(caller: Principal, partitionId: ?Principal, voting: VotingScore): async* () {
-        let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-        // TODO: Add Hint to CanDBMulti
-        ignore await CanDBIndex.putAttributeNoDuplicates("user", {
-            sk;
-            key = "v";
-            value = serializeVoting(voting);
-        },
-        );
-    };
-
-    func getVotingData(map: CM.CanisterMap, caller: Principal, partitionId: ?Principal): async* ?VotingScore {
-        let part: CanDBPartition.CanDBPartition = actor(Principal.toText(partitionId));
-        let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-        // TODO: Add Hint to CanDBMulti
-        let res = await part.getAttributeByHint(map, pk, partitionId, {sk; key = "v"});
-        do ? { deserializeVoting(res!) };
-    };
-
     /// Shared ///
 
     public shared({caller}) func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text;}): async Text {
