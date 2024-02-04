@@ -377,7 +377,7 @@ module {
   public type VotingScore = {
     points: Float; // Gitcoin score
     lastChecked: Time.Time;
-    ethereumAddress: Text; // TODO: Store in binary
+    // ethereumAddress: Text; // TODO: Store in binary
   };
 
   func serializeVoting(voting: VotingScore): Entity.AttributeValue {

@@ -175,7 +175,6 @@ shared actor class ZonBackend() = this {
   };
 
   public shared({caller}) func setUserData(partitionId: ?Principal, _user: User) {
-    await* lib.checkSybil(caller);
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti
     ignore await CanDBIndex.putAttributeNoDuplicates("user", {
@@ -215,8 +214,6 @@ shared actor class ZonBackend() = this {
   public shared({caller}) func createItemData(item: lib.ItemWithoutOwner)
     : async (Principal, Nat)
   {
-    await* lib.checkSybil(caller);
-
     let item2: lib.Item = { creator = caller; item; };
     let itemId = maxId;
     maxId += 1;
