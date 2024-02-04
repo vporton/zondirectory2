@@ -116,8 +116,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
     comment: Bool,
     side: { #beginning; #end }, // ignored unless adding to an owned folder
   ): async () {
-    await* lib.checkSybil(caller);
-
     let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
 
@@ -248,7 +246,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   /// `amount == 0` means canceling the vote.
   public shared({caller}) func vote(parentPrincipal: Principal, parent: Nat, childPrincipal: Principal, child: Nat, value: Int, comment: Bool): async () {
-    await* lib.checkSybil(caller);
+    await CanDBIndex.checkSybil(caller);
     assert value >= -1 and value <= 1;
 
     let userVotesSK = "v/" # Principal.toText(caller) # "/" # Nat.toText(parent) # "/" # Nat.toText(child);
