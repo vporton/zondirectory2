@@ -12,10 +12,6 @@ build:
 .PHONY: deploy
 deploy: deploy-frontend
 
-.PHONY: build
-build:
-	dfx build main
-
 .PHONY: deploy-backend
 deploy-backend: ic_eth compile-my-wasm deploy-main upgrade-partitions
 

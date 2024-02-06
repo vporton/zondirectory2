@@ -18,6 +18,7 @@ ic_eth.did
 
 # generated files
 src/declarations/
+our-canisters.json
 
 # frontend code
 node_modules/
