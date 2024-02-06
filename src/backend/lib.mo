@@ -377,7 +377,7 @@ module {
   public type VotingScore = {
     points: Float; // Gitcoin score
     lastChecked: Time.Time;
-    // ethereumAddress: Text; // TODO: Store in binary
+    ethereumAddress: Text; // TODO: Store in binary
   };
 
   public func serializeVoting(voting: VotingScore): Entity.AttributeValue {
@@ -393,6 +393,7 @@ module {
     var isScore: Bool = false;
     var points: Float = 0.0;
     var lastChecked: Time.Time = 0;
+    var ethereumAddress: Text = "";
 
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
@@ -425,11 +426,18 @@ module {
             case _ { break r false };
           };
           pos += 1;
+          switch (arr[pos]) {
+            case (#text v) {
+              ethereumAddress := v;
+            };
+            case _ { break r false };
+          };
+          pos += 1;
         };
         true;
       };
       case _ { break r false };
     };
-    {points; lastChecked};
+    {points; lastChecked; ethereumAddress};
   };
 }
