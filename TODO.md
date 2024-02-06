@@ -1,3 +1,5 @@
+- Optimize Makefile.
+
 - Test (not) adding duplicate entry.
 
 - https://onramper.com to buy ICP
