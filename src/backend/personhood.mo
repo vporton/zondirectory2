@@ -8,7 +8,7 @@ import Conf "../../config";
 actor Personhood {
     /// Shared ///
 
-    public shared({caller}) func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text}): async () {
+    public shared({caller}) func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text}): async Text {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         let body = await* V.scoreBySignedEthereumAddress({
@@ -25,9 +25,10 @@ actor Personhood {
             ethereumAddress = address; // FIXME: Store separately.
             config = Conf.configScorer;
         });
+        body;
     };
 
-    public shared({caller}) func submitSignedEthereumAddressForScore({address: Text; signature: Text; nonce: Text}): async () {
+    public shared({caller}) func submitSignedEthereumAddressForScore({address: Text; signature: Text; nonce: Text}): async Text {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         let body = await* V.submitSignedEthereumAddressForScore({
@@ -44,6 +45,7 @@ actor Personhood {
             ethereumAddress = address; // FIXME: Store separately.
             config = Conf.configScorer;
         });
+        body;
     };
 
     public shared func getEthereumSigningMessage(): async {message: Text; nonce: Text} {

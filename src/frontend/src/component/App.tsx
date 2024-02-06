@@ -20,6 +20,7 @@ import { serializeItemRef } from '../data/Data'
 import { Principal } from "@dfinity/principal";
 import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
 import { main as MainCanister } from "../../../declarations/main";
+import Person from "./personhood/Person";
 
 export const BusyContext = createContext<any>(undefined);
 
@@ -100,7 +101,10 @@ function MyRouted() {
                                 <Nav.Link onClick={() => navigate("/item/"+root)}>Main folder</Nav.Link>{" "}
                             </Nav>
                             <Nav>
-                                <Nav.Link target="_blank" href="https://docs.zoncircle.com">Our site</Nav.Link>
+                                <Nav.Link onClick={() => navigate("/personhood")}>Verify Your Account</Nav.Link>
+                            </Nav>
+                            <Nav>
+                                <Nav.Link href="https://docs.zoncircle.com">Our site</Nav.Link>
                             </Nav>
                         </Navbar>
                     </nav>
@@ -140,6 +144,10 @@ function MyRouted() {
                         <Route
                             path="/create-supercategory/for-category/:cat"
                             element={<EditCategory super={true}/>}
+                        />
+                        <Route
+                            path="/personhood"
+                            element={<Person/>}
                         />
                     </Routes>
                 </>

@@ -263,7 +263,9 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     let voting = await* getVotingData(user, null); // TODO: hint `partitionId`, not null
     let allowed = switch (voting) {
       case (?voting) {
-        voting.lastChecked + 7 * 24 * 3600 * 1_000_000_000 >= Time.now(); // TODO: Make configurable.
+        // TODO
+        // voting.lastChecked + 7 * 24 * 3600 * 1_000_000_000 >= Time.now() // TODO: Make configurable.
+        voting.points >= 20.0;
       };
       case null { false };
     };

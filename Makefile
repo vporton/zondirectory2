@@ -27,12 +27,14 @@ upgrade-partitions:
 .PHONY: deploy-main
 deploy-main:
 	dfx deploy --network $(NETWORK) main
+	dfx generate
+	env -i scripts/read-env.sh
 
 .PHONY: compile-my-wasm
 compile-my-wasm: CanDBPartition.wasm NacDBPartition.wasm
 
-.PHONY: CanDBPartition.wasm ic_eth
-CanDBPartition.wasm:
+.PHONY: CanDBPartition.wasm
+CanDBPartition.wasm: ic_eth
 #	. .env && moc `mops sources` --actor-idl ./src/ic_eth/ic_eth.did --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
 	. .env && moc `mops sources` --actor-idl /home/porton/Projects/zondirectory2/.dfx/local/canisters/idl/ --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
 
