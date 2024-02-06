@@ -17,7 +17,7 @@ build:
 	dfx build main
 
 .PHONY: deploy-backend
-deploy-backend: compile-my-wasm deploy-main upgrade-partitions
+deploy-backend: ic_eth compile-my-wasm deploy-main upgrade-partitions
 
 .PHONY: upgrade-partitions
 upgrade-partitions:
@@ -25,7 +25,7 @@ upgrade-partitions:
 	npx ts-node scripts/upgrade-nacdb.ts
 
 .PHONY: deploy-main
-deploy-main:
+deploy-main: ic_eth
 	dfx deploy --network $(NETWORK) main
 	dfx generate
 	env -i scripts/read-env.sh
@@ -36,7 +36,7 @@ compile-my-wasm: CanDBPartition.wasm NacDBPartition.wasm
 .PHONY: CanDBPartition.wasm
 CanDBPartition.wasm: ic_eth
 #	. .env && moc `mops sources` --actor-idl ./src/ic_eth/ic_eth.did --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
-	. .env && moc `mops sources` --actor-idl /home/porton/Projects/zondirectory2/.dfx/local/canisters/idl/ --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
+	. .env && moc `mops sources` --actor-idl .dfx/local/lsp --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
 
 .PHONY: NacDBPartition.wasm
 NacDBPartition.wasm:
