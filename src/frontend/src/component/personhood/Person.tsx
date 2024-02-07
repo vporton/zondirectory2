@@ -116,53 +116,70 @@ function PersonInner(props: {agent: Agent | undefined}) {
     }
   }, [wallet]);
 
-  async function obtainScore() {
-    try {
-      try {
-        setObtainScoreLoading(true);
-        let localMessage = message;
-        let localNonce = nonce;
-        const backend = createBackendActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
-        if (nonce === undefined) {
-          const {message, nonce} = await backend.getEthereumSigningMessage();
-          localMessage = message;
-          localNonce = nonce;
-          setMessage(localMessage);
-          setNonce(localNonce);
-        }
-        let localSignature = signature;
-        if (signature === undefined) {
-          const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
-          const signer = await ethersProvider.getSigner();
-          let signature = await signer.signMessage(localMessage!);
-          localSignature = signature;
-          setSignature(localSignature);
-        }
-        const result = await backend.scoreBySignedEthereumAddress({
-          address: address!, signature: localSignature!, nonce: localNonce!
-        });
-        const j = JSON.parse(result);
-        let score = j.score;
-        // Scorer returns 0E-9 for zero.
-        setScore(/^\d+(\.\d+)?$|^0E-9$/.test(score) ? Number(score) : 'retrieved-none');
-      }
-      catch(e) {
-        console.log(e);
-        setScore('retrieved-none');
-        alert(e);
-      }
-    }
-    finally {
-      setObtainScoreLoading(false);
-    }
-  }
+  // async function obtainScore() {
+  //   try {
+  //     try {
+  //       setObtainScoreLoading(true);
+  //       let localMessage = message;
+  //       let localNonce = nonce;
+  //       const backend = createBackendActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
+  //       if (nonce === undefined) {
+  //         const {message, nonce} = await backend.getEthereumSigningMessage();
+  //         localMessage = message;
+  //         localNonce = nonce;
+  //         setMessage(localMessage);
+  //         setNonce(localNonce);
+  //       }
+  //       let localSignature = signature;
+  //       if (signature === undefined) {
+  //         const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
+  //         const signer = await ethersProvider.getSigner();
+  //         let signature = await signer.signMessage(localMessage!);
+  //         localSignature = signature;
+  //         setSignature(localSignature);
+  //       }
+  //       const result = await backend.scoreBySignedEthereumAddress({
+  //         address: address!, signature: localSignature!, nonce: localNonce!
+  //       });
+  //       const j = JSON.parse(result);
+  //       let score = j.score;
+  //       // Scorer returns 0E-9 for zero.
+  //       setScore(/^\d+(\.\d+)?$|^0E-9$/.test(score) ? Number(score) : 'retrieved-none');
+  //     }
+  //     catch(e) {
+  //       console.log(e);
+  //       setScore('retrieved-none');
+  //       alert(e);
+  //     }
+  //   }
+  //   finally {
+  //     setObtainScoreLoading(false);
+  //   }
+  // }
 
   async function recalculateScore() {
     try {
       setRecalculateScoreLoading(true);
+      let localMessage = message;
+      let localNonce = nonce;
       const backend = createBackendActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
+      if (nonce === undefined) {
+        const {message, nonce} = await backend.getEthereumSigningMessage();
+        localMessage = message;
+        localNonce = nonce;
+        setMessage(localMessage);
+        setNonce(localNonce);
+      }
+      let localSignature = signature;
+      if (signature === undefined) {
+        const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
+        const signer = await ethersProvider.getSigner();
+        let signature = await signer.signMessage(localMessage!);
+        localSignature = signature;
+        setSignature(localSignature);
+      }
       try {
-        const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!, nonce: nonce!});
+        const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: localSignature!, nonce: localNonce!});
         const j = JSON.parse(result);
         let score = j.score;
         setScore(/^\d+(\.\d+)?/.test(score) ? Number(score) : 'retrieved-none');
@@ -203,12 +220,14 @@ function PersonInner(props: {agent: Agent | undefined}) {
               with the same wallet, as one you used for Gitcoin Password.<br/>
               Your wallet: {address ? <small>{address}</small> : 'not connected'}.
             </li>
+            {/*
             <li>Check the score<br/>
               <Button disabled={!props.agent || !wallet} onClick={obtainScore}>Get you identity score</Button>
               <ClipLoader loading={obtainScoreLoading}/>{' '}
             </li>
+            */}
             <li>If needed,<br/>
-              <Button disabled={!address || !signature || !props.agent || !wallet || !nonce} onClick={recalculateScore}>
+              <Button disabled={!props.agent || !wallet} onClick={recalculateScore}>
                 Recalculate your identity score
               </Button>
               <ClipLoader loading={recalculateScoreLoading}/>{' '}
