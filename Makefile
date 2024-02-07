@@ -22,7 +22,8 @@ upgrade-partitions:
 
 .PHONY: deploy-main
 deploy-main: ic_eth
-	dfx deploy --network $(NETWORK) main
+#	dfx deploy --network $(NETWORK) main
+	dfx deploy --network $(NETWORK) personhood
 	dfx generate
 	env -i scripts/read-env.sh
 

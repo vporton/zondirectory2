@@ -89,7 +89,7 @@
   },
   "defaults": {
     "build": {
-      "args": "-fshared-code",
+      "args": "-fshared-code --actor-idl .dfx/local/lsp",
       "packtool": "mops sources"
     }
   },

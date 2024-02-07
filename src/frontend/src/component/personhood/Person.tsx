@@ -175,29 +175,27 @@ function PersonInner(props: {agent: Agent | undefined}) {
     finally {
       setRecalculateScoreLoading(false);
     }
-}
+  }
 
   return (
     <div className="App">
       <Container>
         <Row>
-          <h1>Example Identity App</h1>
-          <p>This is an example app for DFINITY Internet Computer, that connects to{' '}
-            <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
-            to prove user's personhood and uniqueness (for example, against so called <q>Sybil attack</q>, that is when
-            a user votes more than once).</p>
+          <h1>Prove That You Are a Real Person</h1>
+          <p>Each human is allowed to vote in our social network only once (no duplicate voters or bots).</p>
+          <p>You prove your human identity by collecting several <q>stamps</q> at{' '}
+            <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport site</a>.</p>
           <p>The current version of this app requires use of an Ethereum wallet that you need
-            both in Gitcoin Passport and in this app. (So, in real Internet Computer apps
+            both in Gitcoin Passport and in this app. (So,{' '}
             you will need two wallets: DFINITY Internet Computer wallet and Ethereum wallet.){' '}
-            You don't need to have any funds on your wallet to use this app (because you will use an Ethereum wallet{' '}
-            only to sign a message for this app, not for any transactions).
-            In the future <a target='_blank' href="https://portonvictor.org" rel="noreferrer">I</a> am going to
-            add DFINITY Internet Computer support to Gitcoin Passport, to avoid the need to create an Ethereum wallet
-            to verify personhood in apps like this.</p>
+            You don't need to have any funds in your wallets to use this app (because you will use an Ethereum wallet{' '}
+            only to sign a message for this app, not for any transactions).{' '}
+            In the future we are going to add DFINITY Internet Computer support to Gitcoin Passport,{' '}
+            to avoid the need to create an Ethereum wallet to verify personhood in this app.</p>
           <h2>Steps</h2>
           <ol>
             <li>Go to <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
-              and prove your personhood.</li>
+              and prove your personhood. You need to collect several stamps with summary score 20 points or more.</li>
             <li>Return to this app and<br/>
               <Button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
                 {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
