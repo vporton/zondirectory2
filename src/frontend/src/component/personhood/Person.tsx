@@ -121,7 +121,7 @@ function PersonInner(props: {agent: Agent | undefined}) {
   useEffect(() => {
     if (props.agent !== undefined) {
       // const backend = createBackendActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
-      
+
       const CanDBIndex = Actor.createActor(personhoodIdl, {agent: props.agent, canisterId: process.env.CANDBINDEX_CANISTER_ID!});
       async function doIt() {
         const [flag, score] = await CanDBIndex.sybilScore() as [boolean, number];
