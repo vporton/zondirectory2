@@ -10,8 +10,9 @@ import walletConnectModule, {
 import injectedModule from '@web3-onboard/injected-wallets'
 import { ethers } from 'ethers'
 // import 'bootstrap/dist/css/bootstrap.min.css';
+import { createActor as mainActor } from '../../../../declarations/main';
 import { createActor as canDBIndexActor } from '../../../../declarations/CanDBIndex';
-import { createActor as createPersonhoodActor } from '../../../../declarations/personhood';
+import { createActor as createPersonhoodActor, personhood } from '../../../../declarations/personhood';
 import config from '../../config.json';
 import ourCanisters from '../../our-canisters.json';
 import { Actor, Agent, HttpAgent } from '@dfinity/agent';
@@ -87,7 +88,7 @@ function Person() {
   return <>
     <AuthContext.Consumer>
       {({agent, isAuthenticated}) =>
-        <PersonInner agent={agent}/>
+        <PersonInner agent={agent} isAuthenticated={isAuthenticated}/>
       }
     </AuthContext.Consumer>
   </>;
@@ -123,9 +124,9 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
     if (props.agent !== undefined) {
       // const backend = createBackendActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
 
-      const CanDBIndex = canDBIndexActor(process.env.CANDBINDEX_CANISTER_ID!, {agent: props.agent});
+      const actor = mainActor(process.env.MAIN_CANISTER_ID!, {agent: props.agent});
       async function doIt() {
-        const [flag, score] = await CanDBIndex.sybilScore() as [boolean, number];
+        const [flag, score] = await actor.sybilScore() as [boolean, number];
         setScore(score);
       }
       doIt().then(() => {});
@@ -137,9 +138,9 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
       setRecalculateScoreLoading(true);
       let localMessage = message;
       let localNonce = nonce;
-      const backend = createPersonhoodActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
+      const personhood = createPersonhoodActor(ourCanisters.MAIN_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
       if (nonce === undefined) {
-        const {message, nonce} = await backend.getEthereumSigningMessage();
+        const {message, nonce} = await personhood.getEthereumSigningMessage();
         localMessage = message;
         localNonce = nonce;
         setMessage(localMessage);
@@ -154,7 +155,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
         setSignature(localSignature);
       }
       try {
-        const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: localSignature!, nonce: localNonce!});
+        const result = await personhood.submitSignedEthereumAddressForScore({address: address!, signature: localSignature!, nonce: localNonce!});
         const j = JSON.parse(result);
         let score = j.score;
         setScore(/^\d+(\.\d+)?/.test(score) ? Number(score) : 'retrieved-none');
