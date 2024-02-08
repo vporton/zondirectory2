@@ -86,14 +86,14 @@ const MINUMUM_ACCEPTED_SCORE = 20.0;
 function Person() {
   return <>
     <AuthContext.Consumer>
-      {({agent}) =>
+      {({agent, isAuthenticated}) =>
         <PersonInner agent={agent}/>
       }
     </AuthContext.Consumer>
   </>;
 }  
 
-function PersonInner(props: {agent: Agent | undefined}) {
+function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}) {
   const [signature, setSignature] = useState<string>();
   const [message, setMessage] = useState<string>();
   const [nonce, setNonce] = useState<string>();
@@ -196,7 +196,7 @@ function PersonInner(props: {agent: Agent | undefined}) {
               Your wallet: {address ? <small>{address}</small> : 'not connected'}.
             </li>
             <li>If needed,<br/>
-              <Button disabled={!props.agent || !wallet || typeof score === 'number' && score >= MINUMUM_ACCEPTED_SCORE} onClick={recalculateScore}>
+              <Button disabled={props.isAuthenticated === true || !wallet || typeof score === 'number' && score >= MINUMUM_ACCEPTED_SCORE} onClick={recalculateScore}>
                 Recalculate your identity score
               </Button>
               <ClipLoader loading={recalculateScoreLoading}/>{' '}

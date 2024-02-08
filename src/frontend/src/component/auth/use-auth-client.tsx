@@ -7,7 +7,7 @@ import { getIsLocal } from "../../util/client";
 // import * as base64 from 'base64-js';
 
 export const AuthContext = createContext<{
-  isAuthenticated: boolean,
+  isAuthenticated: Boolean,
   authClient?: AuthClient,
   agent?: Agent,
   defaultAgent?: AuthClient,
