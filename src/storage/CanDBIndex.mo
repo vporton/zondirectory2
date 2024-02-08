@@ -256,19 +256,32 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     do ? { lib.deserializeVoting(res!.1!) };
   };
 
+  func sybilScoreImpl(user: Principal): async* (Bool, Float) {
+    let voting = await* getVotingData(user, null); // TODO: hint `partitionId`, not null
+    switch (voting) {
+      case (?voting) {
+        // TODO
+        if (voting.lastChecked + 150 * 24 * 3600 * 1_000_000_000 >= Time.now() and // TODO: Make configurable.
+          voting.points >= 20.0)
+        {
+          (true, voting.points);
+        } else {
+          (false, 0.0);
+        };
+      };
+      case null { (false, 0.0) };
+    };
+  };
+
+  public shared({caller}) func sybilScore(): async (Bool, Float) {
+    await* sybilScoreImpl(caller);
+  };
+
   public shared func checkSybil(user: Principal): async () {
     if (Conf.skipSybil) {
       return;
     };
-    let voting = await* getVotingData(user, null); // TODO: hint `partitionId`, not null
-    let allowed = switch (voting) {
-      case (?voting) {
-        // TODO
-        // voting.lastChecked + 7 * 24 * 3600 * 1_000_000_000 >= Time.now() // TODO: Make configurable.
-        voting.points >= 20.0;
-      };
-      case null { false };
-    };
+    let (allowed, _) = await* sybilScoreImpl(user);
     if (not allowed) {
       Debug.trap("Sybil check failed");
     };

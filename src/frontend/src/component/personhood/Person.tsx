@@ -10,10 +10,10 @@ import walletConnectModule, {
 import injectedModule from '@web3-onboard/injected-wallets'
 import { ethers } from 'ethers'
 // import 'bootstrap/dist/css/bootstrap.min.css';
-import { createActor as createBackendActor } from '../../../../declarations/personhood';
+import { createActor as createBackendActor, idlFactory as personhoodIdl } from '../../../../declarations/personhood';
 import config from '../../config.json';
 import ourCanisters from '../../our-canisters.json';
-import { Agent, HttpAgent } from '@dfinity/agent';
+import { Actor, Agent, HttpAgent } from '@dfinity/agent';
 import { ClipLoader } from 'react-spinners';
 import { AuthContext } from '../auth/use-auth-client';
 
@@ -77,6 +77,8 @@ const onboard = init({
   accountCenter,
 });
 
+const MINUMUM_ACCEPTED_SCORE = 20.0;
+
 // UI actions:
 // - connect: ask for signature, store the signature, try to retrieve, show retrieval status
 // - recalculate: recalculate, show retrieval status
@@ -116,46 +118,18 @@ function PersonInner(props: {agent: Agent | undefined}) {
     }
   }, [wallet]);
 
-  // async function obtainScore() {
-  //   try {
-  //     try {
-  //       setObtainScoreLoading(true);
-  //       let localMessage = message;
-  //       let localNonce = nonce;
-  //       const backend = createBackendActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
-  //       if (nonce === undefined) {
-  //         const {message, nonce} = await backend.getEthereumSigningMessage();
-  //         localMessage = message;
-  //         localNonce = nonce;
-  //         setMessage(localMessage);
-  //         setNonce(localNonce);
-  //       }
-  //       let localSignature = signature;
-  //       if (signature === undefined) {
-  //         const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
-  //         const signer = await ethersProvider.getSigner();
-  //         let signature = await signer.signMessage(localMessage!);
-  //         localSignature = signature;
-  //         setSignature(localSignature);
-  //       }
-  //       const result = await backend.scoreBySignedEthereumAddress({
-  //         address: address!, signature: localSignature!, nonce: localNonce!
-  //       });
-  //       const j = JSON.parse(result);
-  //       let score = j.score;
-  //       // Scorer returns 0E-9 for zero.
-  //       setScore(/^\d+(\.\d+)?$|^0E-9$/.test(score) ? Number(score) : 'retrieved-none');
-  //     }
-  //     catch(e) {
-  //       console.log(e);
-  //       setScore('retrieved-none');
-  //       alert(e);
-  //     }
-  //   }
-  //   finally {
-  //     setObtainScoreLoading(false);
-  //   }
-  // }
+  useEffect(() => {
+    if (props.agent !== undefined) {
+      // const backend = createBackendActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
+      
+      const CanDBIndex = Actor.createActor(personhoodIdl, {agent: props.agent, canisterId: process.env.CANDBINDEX_CANISTER_ID!});
+      async function doIt() {
+        const [flag, score] = await CanDBIndex.sybilScore() as [boolean, number];
+        setScore(score);
+      }
+      doIt().then(() => {});
+    };
+  }, [props.agent]);
 
   async function recalculateScore() {
     try {
@@ -220,14 +194,8 @@ function PersonInner(props: {agent: Agent | undefined}) {
               with the same wallet, as one you used for Gitcoin Password.<br/>
               Your wallet: {address ? <small>{address}</small> : 'not connected'}.
             </li>
-            {/*
-            <li>Check the score<br/>
-              <Button disabled={!props.agent || !wallet} onClick={obtainScore}>Get you identity score</Button>
-              <ClipLoader loading={obtainScoreLoading}/>{' '}
-            </li>
-            */}
             <li>If needed,<br/>
-              <Button disabled={!props.agent || !wallet} onClick={recalculateScore}>
+              <Button disabled={!props.agent || !wallet || typeof score === 'number' && score >= MINUMUM_ACCEPTED_SCORE} onClick={recalculateScore}>
                 Recalculate your identity score
               </Button>
               <ClipLoader loading={recalculateScoreLoading}/>{' '}
@@ -236,7 +204,7 @@ function PersonInner(props: {agent: Agent | undefined}) {
           <p>Your identity score:{' '}
             {score === 'didnt-read' ? 'Click the above button to check.'
               : score === 'retrieved-none' ? 'Not yet calculated'
-              : `${score} ${typeof score == 'number' && score >= 20
+              : `${score} ${typeof score == 'number' && score >= MINUMUM_ACCEPTED_SCORE
               ? '(Congratulations: You\'ve been verified.)'
               : '(Sorry: It\'s <20, you are considered a bot.)'}`}
           </p>

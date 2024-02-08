@@ -2,13 +2,38 @@ import CanDBIndex "canister:CanDBIndex";
 import Types "mo:passport-client-dfinity/lib/Types";
 import V "mo:passport-client-dfinity/lib/Verifier";
 import Time "mo:base/Time";
+import Debug "mo:base/Debug";
+import Principal "mo:base/Principal";
 import lib "./lib";
 import Conf "../../config";
 
 actor Personhood {
     /// Shared ///
 
+    // TODO: canister hint for ethereumAddress
+    func controlEthereumAddress(caller: Principal, address: Text): async* () {
+        let callerText = Principal.toText(caller);
+        // TODO: race:
+        let pa = await CanDBIndex.getFirstAttribute("user", { sk = address; key = "p" });
+        switch (pa) {
+            case (?(p, ?#text a)) {
+                if (a != callerText) {
+                    Debug.trap("attempt to use other's Ethereum address");
+                }
+            };
+            case _ {
+                // TODO: Optimize performance:
+                ignore await CanDBIndex.putAttributeNoDuplicates(
+                    "user",
+                    { sk = address; key = "p"; value = #text callerText },
+                );
+            };
+        };
+    };
+
+    // TODO: This function is unused
     public shared({caller}) func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text}): async Text {
+        await* controlEthereumAddress(caller, address);
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         let body = await* V.scoreBySignedEthereumAddress({
@@ -29,6 +54,7 @@ actor Personhood {
     };
 
     public shared({caller}) func submitSignedEthereumAddressForScore({address: Text; signature: Text; nonce: Text}): async Text {
+        await* controlEthereumAddress(caller, address);
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         let body = await* V.submitSignedEthereumAddressForScore({

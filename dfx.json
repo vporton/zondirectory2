@@ -25,7 +25,7 @@
         "entrypoint": "src/frontend/src/index.html"
       },
       "dependencies": [
-        "main"
+        "personhood"
       ],
       "source": [
         "src/frontend/assets",

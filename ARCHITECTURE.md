@@ -3,6 +3,8 @@
 ### "u/" - Principal -> User
 - Attribute `"u"`: `"u"` - `User` record.
 - Attribute `"v"` - `VotingInfo`.
+### "e/" - Ethereum address -> Principal
+- Attribute "p" - Principal
 ### "i/" - ID -> Item
 - Attribute `"i"` - `Item` record.
 - Attribute `"st"` (time), `"sv"` (votes) - `Streams` record.
