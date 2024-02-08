@@ -10,7 +10,8 @@ import walletConnectModule, {
 import injectedModule from '@web3-onboard/injected-wallets'
 import { ethers } from 'ethers'
 // import 'bootstrap/dist/css/bootstrap.min.css';
-import { createActor as createBackendActor, idlFactory as personhoodIdl } from '../../../../declarations/personhood';
+import { createActor as canDBIndexActor } from '../../../../declarations/CanDBIndex';
+import { createActor as createPersonhoodActor } from '../../../../declarations/personhood';
 import config from '../../config.json';
 import ourCanisters from '../../our-canisters.json';
 import { Actor, Agent, HttpAgent } from '@dfinity/agent';
@@ -122,7 +123,7 @@ function PersonInner(props: {agent: Agent | undefined}) {
     if (props.agent !== undefined) {
       // const backend = createBackendActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
 
-      const CanDBIndex = Actor.createActor(personhoodIdl, {agent: props.agent, canisterId: process.env.CANDBINDEX_CANISTER_ID!});
+      const CanDBIndex = canDBIndexActor(process.env.CANDBINDEX_CANISTER_ID!, {agent: props.agent});
       async function doIt() {
         const [flag, score] = await CanDBIndex.sybilScore() as [boolean, number];
         setScore(score);
@@ -136,7 +137,7 @@ function PersonInner(props: {agent: Agent | undefined}) {
       setRecalculateScoreLoading(true);
       let localMessage = message;
       let localNonce = nonce;
-      const backend = createBackendActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
+      const backend = createPersonhoodActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
       if (nonce === undefined) {
         const {message, nonce} = await backend.getEthereumSigningMessage();
         localMessage = message;
