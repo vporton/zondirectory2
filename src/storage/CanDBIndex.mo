@@ -264,7 +264,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
       case (?voting) {
         // TODO
         if (voting.lastChecked + 150 * 24 * 3600 * 1_000_000_000 >= Time.now() and // TODO: Make configurable.
-          voting.points >= 20.0)
+          voting.points >= Conf.configScorer.minimumScore)
         {
           (true, voting.points);
         } else {

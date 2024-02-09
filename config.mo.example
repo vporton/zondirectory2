@@ -8,5 +8,6 @@ module {
         scorerId = <NUMBER>;
         scorerAPIKey = "<KEY>";
         scorerUrl = "https://api.scorer.gitcoin.co";
+        minimumScore = 20.0;
     };
 }

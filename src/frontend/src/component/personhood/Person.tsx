@@ -79,8 +79,6 @@ const onboard = init({
   accountCenter,
 });
 
-const MINUMUM_ACCEPTED_SCORE = 20.0;
-
 // UI actions:
 // - connect: ask for signature, store the signature, try to retrieve, show retrieval status
 // - recalculate: recalculate, show retrieval status
@@ -138,7 +136,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
       setRecalculateScoreLoading(true);
       let localMessage = message;
       let localNonce = nonce;
-      const personhood = createPersonhoodActor(ourCanisters.MAIN_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
+      const personhood = createPersonhoodActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
       if (nonce === undefined) {
         const {message, nonce} = await personhood.getEthereumSigningMessage();
         localMessage = message;
@@ -197,7 +195,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
               Your wallet: {address ? <small>{address}</small> : 'not connected'}.
             </li>
             <li>If needed,<br/>
-              <Button disabled={props.isAuthenticated !== true || !wallet || typeof score === 'number' && score >= MINUMUM_ACCEPTED_SCORE} onClick={recalculateScore}>
+              <Button disabled={props.isAuthenticated !== true || !wallet || typeof score === 'number' && score >= config.MINUMUM_ACCEPTED_SCORE} onClick={recalculateScore}>
                 Recalculate your identity score
               </Button>
               <ClipLoader loading={recalculateScoreLoading}/>{' '}
@@ -206,7 +204,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
           <p>Your identity score:{' '}
             {score === 'didnt-read' ? 'Click the above button to check.'
               : score === 'retrieved-none' ? 'Not yet calculated'
-              : `${score} ${typeof score == 'number' && score >= MINUMUM_ACCEPTED_SCORE
+              : `${score} ${typeof score == 'number' && score >= config.MINUMUM_ACCEPTED_SCORE
               ? '(Congratulations: You\'ve been verified.)'
               : '(Sorry: It\'s <20, you are considered a bot.)'}`}
           </p>
