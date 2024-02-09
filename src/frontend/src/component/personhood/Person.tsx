@@ -197,7 +197,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
               Your wallet: {address ? <small>{address}</small> : 'not connected'}.
             </li>
             <li>If needed,<br/>
-              <Button disabled={props.isAuthenticated === true || !wallet || typeof score === 'number' && score >= MINUMUM_ACCEPTED_SCORE} onClick={recalculateScore}>
+              <Button disabled={props.isAuthenticated !== true || !wallet || typeof score === 'number' && score >= MINUMUM_ACCEPTED_SCORE} onClick={recalculateScore}>
                 Recalculate your identity score
               </Button>
               <ClipLoader loading={recalculateScoreLoading}/>{' '}
