@@ -262,9 +262,8 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     let voting = await* getVotingData(user, null); // TODO: hint `partitionId`, not null
     switch (voting) {
       case (?voting) {
-        // TODO
         if (voting.lastChecked + 150 * 24 * 3600 * 1_000_000_000 >= Time.now() and // TODO: Make configurable.
-          voting.points >= Conf.configScorer.minimumScore)
+          voting.points >= Conf.minimumScore)
         {
           (true, voting.points);
         } else {

@@ -186,7 +186,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
           <h2>Steps</h2>
           <ol>
             <li>Go to <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
-              and prove your personhood. You need to collect several stamps with summary score 20 points or more.</li>
+              and prove your personhood. You need to collect several stamps with summary score {config.MINUMUM_ACCEPTED_SCORE} points or more.</li>
             <li>Return to this app and<br/>
               <Button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
                 {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
@@ -206,7 +206,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
               : score === 'retrieved-none' ? 'Not yet calculated'
               : `${score} ${typeof score == 'number' && score >= config.MINUMUM_ACCEPTED_SCORE
               ? '(Congratulations: You\'ve been verified.)'
-              : '(Sorry: It\'s <20, you are considered a bot.)'}`}
+              : `(Sorry: It\'s <${config.MINUMUM_ACCEPTED_SCORE}, you are considered a bot.)`}
           </p>
         </Row>
       </Container>
