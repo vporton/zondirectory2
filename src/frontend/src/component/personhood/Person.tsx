@@ -206,7 +206,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
               : score === 'retrieved-none' ? 'Not yet calculated'
               : `${score} ${typeof score == 'number' && score >= config.MINUMUM_ACCEPTED_SCORE
               ? '(Congratulations: You\'ve been verified.)'
-              : `(Sorry: It\'s <${config.MINUMUM_ACCEPTED_SCORE}, you are considered a bot.)`}
+              : `(Sorry: It\'s <${config.MINUMUM_ACCEPTED_SCORE}, you are considered a bot.)`}`}
           </p>
         </Row>
       </Container>

@@ -46,8 +46,9 @@ ic_eth:
 .PHONY: deploy-frontend
 deploy-frontend: compile-my-wasm do-deploy-frontend upgrade-partitions
 
+# FIXME: VERY slow!!
 .PHONY: do-deploy-frontend
-do-deploy-frontend:
+do-deploy-frontend: deploy-main
 	dfx deploy --network $(NETWORK) frontend
 
 .PHONY: init
