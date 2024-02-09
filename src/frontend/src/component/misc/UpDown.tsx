@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Item } from "../../../../declarations/CanDBPartition/CanDBPartition.did";
 import { AuthContext } from "../auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../../data/Data";
@@ -6,6 +6,9 @@ import { createActor as orderActor } from "../../../../declarations/order";
 import { AppData } from "../../DataDispatcher";
 import { Agent } from "@dfinity/agent";
 import Button from "react-bootstrap/esm/Button";
+import Modal from 'react-bootstrap/Modal';
+import Nav from "react-bootstrap/esm/Nav";
+import { useNavigate } from "react-router-dom";
 
 export default function UpDown(props: {
     parent: {id: ItemRef},
@@ -20,6 +23,8 @@ export default function UpDown(props: {
     isComment?: boolean,
 }) {
     const { principal, agent } = useContext(AuthContext) as any;
+    // const dialogRef = useRef();
+    const [showDialog, setShowDialog] = useState(false);
 
     // hack
     async function vote(value: number, clicked: 'up' | 'down', isComment) {
@@ -42,32 +47,59 @@ export default function UpDown(props: {
             }
         }      
 
-        if (clicked === 'up') {
-            props.onSetUserVote(props.item.id, props.userVote === 1 ? 0 : 1);
-        };
-        if (clicked === 'down') {
-            props.onSetUserVote(props.item.id, props.userVote === -1 ? 0 : -1);
-        };
-        props.onSetTotalVotes(props.item.id, {up, down});
-
         const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent});
-        await order.vote(
-            props.parent.id.canister,
-            BigInt(props.parent.id.id),
-            props.item.id.canister,
-            BigInt(props.item.id.id),
-            BigInt(value),
-            isComment === true);
-        if (props.onUpdateList !== undefined) {
-            props.onUpdateList();
+        try {
+            await order.vote(
+                props.parent.id.canister,
+                BigInt(props.parent.id.id),
+                props.item.id.canister,
+                BigInt(props.item.id.id),
+                BigInt(value),
+                isComment === true
+            );
+            if (clicked === 'up') {
+                props.onSetUserVote(props.item.id, props.userVote === 1 ? 0 : 1);
+            };
+            if (clicked === 'down') {
+                props.onSetUserVote(props.item.id, props.userVote === -1 ? 0 : -1);
+            };
+            props.onSetTotalVotes(props.item.id, {up, down});
+            if (props.onUpdateList !== undefined) {
+                props.onUpdateList();
+            }
+        }
+        catch (e) { // TODO: more specific event
+            setShowDialog(true);
         }
     }
     function votesTitle() {
         return props.totalVotes ? `Up: ${props.totalVotes.up} Down: ${props.totalVotes.down}` : "";
     }
 
+    const navigate = useNavigate();
+    // TODO: Is it OK to have a separate modal for each item?
     return (
         <span title={votesTitle()}>
+            <Modal show={showDialog} onHide={() => setShowDialog(false)}>
+                <Modal.Dialog>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Need to authorize</Modal.Title>
+                    </Modal.Header>
+
+                    <Modal.Body>
+                    <p>Confirm that you are a real person:</p>
+                    <p>
+                        <Nav.Link onClick={() => navigate("/personhood")} style={{color: 'blue'}}>
+                            Verify Your Account
+                        </Nav.Link>
+                    </p>
+                    </Modal.Body>
+
+                    <Modal.Footer>
+                        <Button variant="secondary">Close</Button>
+                    </Modal.Footer>
+                </Modal.Dialog>
+            </Modal>
             <Button
                 onClick={async e => await vote((e.target as Element).classList.contains('active') ? 0 : +1, 'up', props.isComment === true)}
                 className={props.userVote > 0 ? 'thumbs active' : 'thumbs'}>👍</Button>
