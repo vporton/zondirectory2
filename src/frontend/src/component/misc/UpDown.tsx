@@ -69,6 +69,7 @@ export default function UpDown(props: {
             }
         }
         catch (e) { // TODO: more specific event
+            console.log("VOTE", e);
             setShowDialog(true);
         }
     }

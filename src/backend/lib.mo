@@ -386,6 +386,7 @@ module {
     buf.add(#bool true);
     buf.add(#float(voting.points));
     buf.add(#int(voting.lastChecked));
+    buf.add(#text(voting.ethereumAddress));
     #tuple(Buffer.toArray(buf));
   };
 
@@ -411,6 +412,7 @@ module {
           };
           case _ { break r false };
         };
+        pos += 1;
         if (isScore) {
           switch (arr[pos]) {
             case (#float v) {
@@ -437,6 +439,9 @@ module {
         true;
       };
       case _ { break r false };
+    };
+    if (not res) {
+      Debug.trap("cannot deserialize Voting");
     };
     {points; lastChecked; ethereumAddress};
   };

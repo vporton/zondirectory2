@@ -235,9 +235,8 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     await* Multi.putAttributeWithPossibleDuplicate(pkToCanisterMap, pk, options);
   };
 
-  func setVotingDataImpl(caller: Principal, partitionId: ?Principal, voting: lib.VotingScore): async* () {
-    let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-    Debug.print("setVotingDataImpl: " # debug_show(sk) # " " # debug_show(voting));
+  func setVotingDataImpl(user: Principal, partitionId: ?Principal, voting: lib.VotingScore): async* () {
+    let sk = "u/" # Principal.toText(user); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti
     ignore await* Multi.putAttributeNoDuplicates(pkToCanisterMap, "user", {
       sk;
@@ -246,16 +245,15 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     });
   };
 
-  public shared func setVotingData(caller: Principal, partitionId: ?Principal, voting: lib.VotingScore): async () {
+  public shared({caller}) func setVotingData(user: Principal, partitionId: ?Principal, voting: lib.VotingScore): async () {
     checkCaller(caller); // necessary
-    await* setVotingDataImpl(caller, partitionId, voting);
+    await* setVotingDataImpl(user, partitionId, voting);
   };
 
   func getVotingData(caller: Principal, partitionId: ?Principal): async* ?lib.VotingScore {
     let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti
     let res = await* Multi.getAttributeByHint(pkToCanisterMap, "user", partitionId, {sk; key = "v"});
-    Debug.print("getVotingDataImpl: " # debug_show(sk) # " " # debug_show(res));
     do ? { lib.deserializeVoting(res!.1!) };
   };
 
@@ -265,6 +263,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     let voting = await* getVotingData(user, null); // TODO: hint `partitionId`, not null
     switch (voting) {
       case (?voting) {
+        Debug.print("VOTING: " # debug_show(voting));
         if (voting.lastChecked + 150 * 24 * 3600 * 1_000_000_000 >= Time.now() and // TODO: Make configurable.
           voting.points >= Conf.minimumScore)
         {
@@ -286,7 +285,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     if (Conf.skipSybil) {
       return;
     };
-    let (allowed, _) = await* sybilScoreImpl(user);
+    let (allowed, score) = await* sybilScoreImpl(user);
     if (not allowed) {
       Debug.trap("Sybil check failed");
     };
