@@ -257,7 +257,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
   };
 
   func sybilScoreImpl(user: Principal): async* (Bool, Float) {
-    checkCaller(user);
+    // checkCaller(user); // TODO: enable?
 
     let voting = await* getVotingData(user, null); // TODO: hint `partitionId`, not null
     switch (voting) {
