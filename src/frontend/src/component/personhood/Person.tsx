@@ -122,9 +122,10 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
     if (props.agent !== undefined) {
       // const backend = createBackendActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
 
-      const actor = mainActor(process.env.MAIN_CANISTER_ID!, {agent: props.agent});
+      const actor = mainActor(process.env.CANDBINDEX_CANISTER_ID!, {agent: props.agent});
       async function doIt() {
         const [flag, score] = await actor.sybilScore() as [boolean, number];
+        console.log("SCORE:", score);
         setScore(score);
       }
       doIt().then(() => {});
@@ -160,7 +161,8 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
       }
       catch(e) {
         setScore('retrieved-none');
-        alert(e)
+        alert(e);
+        console.log(e);
       }
     }
     finally {

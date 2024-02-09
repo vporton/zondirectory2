@@ -237,6 +237,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
 
   func setVotingDataImpl(caller: Principal, partitionId: ?Principal, voting: lib.VotingScore): async* () {
     let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
+    Debug.print("setVotingDataImpl: " # debug_show(sk) # " " # debug_show(voting));
     // TODO: Add Hint to CanDBMulti
     ignore await* Multi.putAttributeNoDuplicates(pkToCanisterMap, "user", {
       sk;
@@ -245,14 +246,16 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     });
   };
 
-  public shared({caller}) func setVotingData(partitionId: ?Principal, voting: lib.VotingScore): async () {
+  public shared func setVotingData(caller: Principal, partitionId: ?Principal, voting: lib.VotingScore): async () {
+    checkCaller(caller); // necessary
     await* setVotingDataImpl(caller, partitionId, voting);
   };
 
   func getVotingData(caller: Principal, partitionId: ?Principal): async* ?lib.VotingScore {
     let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti
-    let res = await* Multi.getAttributeByHint(pkToCanisterMap, "u", partitionId, {sk; key = "v"});
+    let res = await* Multi.getAttributeByHint(pkToCanisterMap, "user", partitionId, {sk; key = "v"});
+    Debug.print("getVotingDataImpl: " # debug_show(sk) # " " # debug_show(res));
     do ? { lib.deserializeVoting(res!.1!) };
   };
 
@@ -279,6 +282,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
   };
 
   public shared func checkSybil(user: Principal): async () {
+    // checkCaller(user); // TODO: enable?
     if (Conf.skipSybil) {
       return;
     };

@@ -314,8 +314,4 @@ shared actor class ZonBackend() = this {
   public shared func get_trusted_origins(): async [Text] {
     return [];
   };
-
-  public shared({caller}) func sybilScore(): async (Bool, Float) {
-    await CanDBIndex.sybilScore();
-  };
 }

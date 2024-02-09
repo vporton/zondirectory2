@@ -44,10 +44,10 @@ actor Personhood {
             transform = removeHTTPHeaders;
         });
         let score = V.extractItemScoreFromBody(body);
-        await CanDBIndex.setVotingData(?caller, { // TODO: Provide partition hint.
+        await CanDBIndex.setVotingData(caller, null, { // TODO: Provide partition hint.
             points = score;
             lastChecked = Time.now();
-            ethereumAddress = address; // FIXME: Store separately.
+            ethereumAddress = address;
             config = Conf.configScorer;
         });
         body;
@@ -65,10 +65,10 @@ actor Personhood {
             transform = removeHTTPHeaders;
         });
         let score = V.extractItemScoreFromBody(body);
-        await CanDBIndex.setVotingData(?caller, { // TODO: Provide partition hint, not `null`.
+        await CanDBIndex.setVotingData(caller, null, { // TODO: Provide partition hint, not `null`.
             points = score;
             lastChecked = Time.now();
-            ethereumAddress = address; // FIXME: Store separately.
+            ethereumAddress = address;
             config = Conf.configScorer;
         });
         body;
