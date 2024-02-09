@@ -94,9 +94,8 @@ export default function UpDown(props: {
                         </Nav.Link>
                     </p>
                     </Modal.Body>
-
                     <Modal.Footer>
-                        <Button variant="secondary">Close</Button>
+                        <Button onClick={() => setShowDialog(false)} variant="secondary">Close</Button>
                     </Modal.Footer>
                 </Modal.Dialog>
             </Modal>
