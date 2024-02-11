@@ -14,8 +14,9 @@ For the frontend to work, you need `dfx generate` using https://github.com/vport
 
 If you want to test our project locally:
 
-Set `REACT_APP_IS_LOCAL=1` in `.env`. (Local version uses the usual II instead of NFID, becuase
-NFID cannot be called from localhost.)
+Copy `config.mo.example` to `config.mo` and edit it accordingly to your settings.
+
+Set `REACT_APP_IS_LOCAL=1` in `.env`.
 
 Use the following commands:
 

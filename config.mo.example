@@ -5,9 +5,9 @@ module {
     public let skipSybil = true | false;
 
     public let configScorer: Verify.Config = {
-        scorerId = <NUMBER>;
-        scorerAPIKey = "<KEY>";
+        scorerId = <NUMBER>; // get it at https://scorer.gitcoin.co/
+        scorerAPIKey = "<KEY>"; // get it at https://scorer.gitcoin.co/
         scorerUrl = "https://api.scorer.gitcoin.co";
-        minimumScore = 20.0;
     };
+    minimumScore = 20.0;
 }
