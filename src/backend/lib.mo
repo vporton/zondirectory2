@@ -110,12 +110,14 @@ module {
     }
   };
 
+  // FIXME: Communal will be a boolean flag, in order to deal with communal links and posts.
   let ITEM_TYPE_LINK = 0;
   let ITEM_TYPE_MESSAGE = 1;
   let ITEM_TYPE_POST = 2;
   let ITEM_TYPE_OWNED_CATEGORY = 3;
   let ITEM_TYPE_COMMUNAL_CATEGORY = 4;
 
+  // FIXME: Communal will be a boolean flag, in order to deal with communal links and posts.
   public type ItemWithoutOwner = {
     price: Float;
     locale: Text;
