@@ -6,6 +6,7 @@
       "dependencies": [
         "order",
         "payments",
+        "personhood",
         "CanDBIndex",
         "NacDBIndex",
         "internet_identity"
@@ -18,7 +19,7 @@
     "personhood": {
       "main": "src/backend/personhood.mo",
       "type": "motoko",
-      "dependencies": ["ic_eth", "main"]
+      "dependencies": ["ic_eth", "CanDBIndex"]
     },
     "frontend": {
       "frontend": {

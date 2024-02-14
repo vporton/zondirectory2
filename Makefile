@@ -6,8 +6,16 @@ SHELL=/bin/bash
 NETWORK=local
 FOUNDER = $(shell dfx identity get-principal)
 
+.PHONY: install-backend
+install-backend:
+	dfx install main
+
+.PHONY: install-frontend
+install-frontend:
+	dfx install frontend
+
 .PHONY: build
-build:
+build: build-frontend
 
 .PHONY: deploy
 deploy: deploy-frontend
@@ -22,8 +30,7 @@ upgrade-partitions:
 
 .PHONY: deploy-main
 deploy-main: ic_eth
-#	dfx deploy --network $(NETWORK) main
-	dfx deploy --network $(NETWORK) personhood
+	dfx deploy --network $(NETWORK) main
 	dfx generate
 	env -i scripts/read-env.sh
 
@@ -32,8 +39,8 @@ compile-my-wasm: CanDBPartition.wasm NacDBPartition.wasm
 
 .PHONY: CanDBPartition.wasm
 CanDBPartition.wasm: ic_eth
-#	. .env && moc `mops sources` --actor-idl ./src/ic_eth/ic_eth.did --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
-	. .env && moc `mops sources` --actor-idl .dfx/local/lsp --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
+	. .env && moc `mops sources` --actor-idl ./src/ic_eth --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
+#	. .env && moc `mops sources` --actor-idl .dfx/local/lsp --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
 
 .PHONY: NacDBPartition.wasm
 NacDBPartition.wasm:
