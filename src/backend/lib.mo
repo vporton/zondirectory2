@@ -321,6 +321,7 @@ module {
     Buffer.toArray(s);
   };
 
+  // TODO: Use this.
   public type Karma = {
     earnedVotes: Nat;
     remainingBonusVotes: Nat;
