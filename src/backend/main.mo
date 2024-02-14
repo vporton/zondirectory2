@@ -65,6 +65,7 @@ shared actor class ZonBackend() = this {
     founder := ?_founder;
   };
 
+  // TODO: probably, superfluous.
   public shared({caller}) func removeMainOwner() {
     onlyMainOwner(caller);
     
