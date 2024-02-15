@@ -10,6 +10,7 @@ import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { order } from "../../../declarations/order";
 import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
+import { Helmet } from 'react-helmet';
 
 export default function ShowItem() {
     return (
@@ -178,6 +179,10 @@ function ShowItemContent(props: {defaultAgent}) {
     }
     const isCategory = type === 'ownedCategory' || type === 'communalCategory';
     return <>
+        <Helmet>
+            <title>{title} - Zon</title>
+            <meta name="description" content={description}/>
+        </Helmet>
         <h2><ItemType item={data}/>{isCategory ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         <p>Creator: <small>{creator.toString()}</small></p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
