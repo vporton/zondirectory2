@@ -32,7 +32,7 @@ install-backend:
 
 .PHONY: install-frontend
 install-frontend: install-backend
-	dfx canister install --network $(NETWORK) frontend
+	dfx canister install --network $(NETWORK) --mode=upgrade frontend
 
 .PHONY: build-backend
 build-backend: do-build-backend CanDBPartition.wasm NacDBPartition.wasm
