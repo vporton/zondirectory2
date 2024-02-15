@@ -6,6 +6,8 @@ SHELL=/bin/bash
 NETWORK=local
 FOUNDER = $(shell dfx identity get-principal)
 
+INSTALLED_BACKEND_CANISTERS = main order personhood payments pst CanDBIndex NacDBIndex ic_eth internet_identity
+
 .PHONY: install-backend
 install-backend:
 	dfx install main
