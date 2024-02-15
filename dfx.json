@@ -9,7 +9,8 @@
         "personhood",
         "CanDBIndex",
         "NacDBIndex",
-        "internet_identity"
+        "internet_identity",
+        "ic_eth"
       ]
     },
     "order": {

@@ -24,6 +24,8 @@ Use the following commands:
 # Starts the replica, running in the background
 dfx start --background
 
+# Create basic files
+make configure
 # Deploys your canisters to the replica and generates your candid interface
 make deploy-frontend
 # Initializes the canisters

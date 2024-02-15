@@ -1,4 +1,5 @@
 import CanDBIndex "canister:CanDBIndex";
+import ic_eth "canister:ic_eth";
 import Types "mo:passport-client-dfinity/lib/Types";
 import V "mo:passport-client-dfinity/lib/Verifier";
 import Time "mo:base/Time";
@@ -37,6 +38,7 @@ actor Personhood {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         let body = await* V.scoreBySignedEthereumAddress({
+            ic_eth;
             address;
             signature;
             nonce;
@@ -58,6 +60,7 @@ actor Personhood {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         let body = await* V.submitSignedEthereumAddressForScore({
+            ic_eth;
             address;
             signature;
             nonce;
