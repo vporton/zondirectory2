@@ -24,15 +24,17 @@ Use the following commands:
 # Starts the replica, running in the background
 dfx start --background
 
-# Create basic files
+# Create basic files (22min on my laptop)
 make configure
-# Deploys your canisters to the replica and generates your candid interface
+# Deploys your canisters to the replica and generates your candid interface (27min on my laptop)
 make deploy-frontend
-# Initializes the canisters
+# Initializes the canisters (23sec on my laptop)
 make init
 ```
 
 Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.
+
+Note that the timings on my laptop are bigger than to be expected, because a bug forced me to run my laptop in powersave mode.
 
 If you have made changes to your backend canister, you can generate a new candid interface with
 
