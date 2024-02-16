@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import { Helmet } from 'react-helmet';
 import 'react-tabs/style/react-tabs.css';
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
@@ -71,6 +72,9 @@ export default function EditItemItem(props: {comment?: boolean}) {
                         setBusy(false);
                     }
                     return <>
+                        <Helmet>
+                            <title>Zon Social Media - create a new item</title>
+                        </Helmet>
                         <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
                         <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
                         <p>Short (meta) description: <textarea onChange={e => setShortDescription(e.target.value)}/></p>

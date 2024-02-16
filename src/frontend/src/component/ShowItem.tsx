@@ -180,7 +180,7 @@ function ShowItemContent(props: {defaultAgent}) {
     const isCategory = type === 'ownedCategory' || type === 'communalCategory';
     return <>
         <Helmet>
-            <title>{title} - Zon</title>
+            <title>{isCategory ? `${title} (folder) - Zon` : `${title} - Zon`}</title>
             <meta name="description" content={description}/>
         </Helmet>
         <h2><ItemType item={data}/>{isCategory ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>

@@ -20,6 +20,7 @@ import { serializeItemRef } from '../data/Data'
 import { Principal } from "@dfinity/principal";
 import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
 import { main as MainCanister } from "../../../declarations/main";
+import { Helmet } from 'react-helmet';
 import Person from "./personhood/Person";
 
 export const BusyContext = createContext<any>(undefined);
@@ -30,6 +31,10 @@ export default function App() {
     const [busy, setBusy] = useState(false);
     return (
         <>
+            <Helmet>
+                <title>Zon Social Media - the world as items in folders</title>
+                <meta name="description" content="A fusion of social network, marketplace, and web directory"/>
+            </Helmet>
             <Container>
                 <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
                     It is a preliminary alpha-test version. All data is likely to be deleted before the release.

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
+import { Helmet } from 'react-helmet';
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
 import EditCategoriesList from "./EditCategoriesList";
@@ -70,6 +71,9 @@ export default function EditCategory(props: {super?: boolean}) {
                     setBusy(false);
             }
                 return <>
+                    <Helmet>
+                        <title>Zon Social Media - create a new folder</title>
+                    </Helmet>
                     <h1>{props.super === true ? `Create supercategory` : `Create subcategory`}</h1>
                     <Tabs onSelect={onSelectTab}>
                         <TabList>
