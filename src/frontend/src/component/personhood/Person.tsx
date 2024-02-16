@@ -9,6 +9,7 @@ import walletConnectModule, {
 } from "@web3-onboard/walletconnect";
 import injectedModule from '@web3-onboard/injected-wallets'
 import { ethers } from 'ethers'
+import { Helmet } from 'react-helmet';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 import { createActor as mainActor } from '../../../../declarations/main';
 import { createActor as canDBIndexActor } from '../../../../declarations/CanDBIndex';
@@ -172,6 +173,9 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
 
   return (
     <div className="App">
+      <Helmet>
+        <title>Zon Social Media - verify your identity</title>
+      </Helmet>
       <Container>
         <Row>
           <h1>Prove That You Are a Real Person</h1>
