@@ -21,18 +21,19 @@ configure:
 	done
 	dfx canister create --network $(NETWORK) frontend
 	env -i scripts/read-env.sh
-	dfx deploy --network local main
+	dfx build internet_identity
+	dfx deploy --network $(NETWORK) main
 	dfx generate
 
 .PHONY: install-backend
 install-backend:
 	for i in $(BACKEND_CANISTERS); do \
-	  dfx canister install --network $(NETWORK) --mode=upgrade $$i; \
+	  dfx canister install --network $(NETWORK) --mode=auto $$i; \
 	done
 
 .PHONY: install-frontend
 install-frontend: install-backend
-	dfx canister install --network $(NETWORK) --mode=upgrade frontend
+	dfx canister install --network $(NETWORK) --mode=auto frontend
 
 .PHONY: build-backend
 build-backend: do-build-backend CanDBPartition.wasm NacDBPartition.wasm
