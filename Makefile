@@ -16,6 +16,7 @@ build: build-frontend
 
 .PHONY: configure
 configure:
+	mops i
 	for i in $(BACKEND_CANISTERS); do \
 	  dfx canister create --network $(NETWORK) $$i; \
 	done
