@@ -135,7 +135,7 @@ function MyRouted() {
                             element={<EditItem/>}
                         />
                         <Route
-                            path="/create/for-category/:cat"
+                            path="/create/for-folder/:cat"
                             element={<EditItem/>}
                         />
                         <Route
@@ -143,11 +143,11 @@ function MyRouted() {
                             element={<EditItem comment={true}/>}
                         />
                         <Route
-                            path="/create-subcategory/for-category/:cat"
+                            path="/create-subfolder/for-folder/:cat"
                             element={<EditCategory/>}
                         />
                         <Route
-                            path="/create-supercategory/for-category/:cat"
+                            path="/create-superfolder/for-folder/:cat"
                             element={<EditCategory super={true}/>}
                         />
                         <Route

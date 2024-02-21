@@ -241,7 +241,7 @@ shared actor class ZonBackend() = this {
         };
         switch (oldItem.item.details) {
           case (#communalCategory) {
-            Debug.trap("can't edit communal category");
+            Debug.trap("can't edit communal folder");
           };
           case _ {};
         };
