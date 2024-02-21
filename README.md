@@ -21,6 +21,10 @@ Set `REACT_APP_IS_LOCAL=1` in `.env`.
 Use the following commands:
 
 ```bash
+# Select Node version
+nvm install v18.19.1
+nvm use v18.19.1
+
 # Starts the replica, running in the background
 dfx start --background
 
