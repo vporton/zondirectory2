@@ -121,25 +121,25 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
     // TODO: Race condition when adding an item.
     // TODO: Ensure that it is retrieved once.
-    let ?categoryItemData = await catId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "i") else {
-      Debug.trap("cannot get category item");
+    let ?folderItemData = await catId1.getAttribute({sk = "i/" # Nat.toText(catId.1)}, "i") else {
+      Debug.trap("cannot get folder item");
     };
-    let categoryItem = lib.deserializeItem(categoryItemData);
+    let folderItem = lib.deserializeItem(folderItemData);
 
-    switch (categoryItem.item.details) {
+    switch (folderItem.item.details) {
       case (#ownedCategory) {
-        lib.onlyItemOwner(caller, categoryItem);
+        lib.onlyItemOwner(caller, folderItem);
       };
       case (#communalCategory) {};
       case _ {
         if (not comment) {
-          Debug.trap("not a category");
+          Debug.trap("not a folder");
         };
       };
     };
     let links = await* getStreamLinks(itemId, comment);
     await* addToStreams(catId, itemId, comment, links, itemId1, "st", "srt", #beginning);
-    if (categoryItem.item.details == #ownedCategory) {
+    if (folderItem.item.details == #ownedCategory) {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", side);
     } else {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", #end);
@@ -208,7 +208,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
     // TODO: Ensure that item data is readed once per `addItemToCategory` call.
     let ?childItemData = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "i") else {
-      // TODO: Keep doing for other categories after a trap?
+      // TODO: Keep doing for other folders after a trap?
       Debug.trap("cannot get child item");
     };
     let childItem = lib.deserializeItem(childItemData);

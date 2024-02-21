@@ -37,8 +37,8 @@ function ShowItemContent(props: {defaultAgent}) {
     const [postText, setPostText] = useState("");
     const [type, setType] = useState<string | undefined>(undefined);
     const [creator, setCreator] = useState("");
-    const [subcategories, setSubcategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
-    const [supercategories, setSupercategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
+    const [subfolders, setSubfolders] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
+    const [superfolders, setSuperfolders] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
     const [items, setItems] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
     const [comments, setComments] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
     const [antiComments, setAntiComments] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
@@ -51,10 +51,10 @@ function ShowItemContent(props: {defaultAgent}) {
     const [antiCommentsLast, setAntiCommentsLast] = useState("");
     const [antiCommentsReachedEnd, setAntiCommentsReachedEnd] = useState(false);
     const [streamKind, setStreamKind] = useState<"t" | "v">("v"); // time, votes
-    const [totalVotesSubCategories, setTotalVotesSubCategories] = useState<{[key: string]: {up: number, down: number}}>({});
-    const [userVoteSubCategories, setUserVoteSubCategories] = useState<{[key: string]: number}>({});
-    const [totalVotesSuperCategories, setTotalVotesSuperCategories] = useState<{[key: string]: {up: number, down: number}}>({});
-    const [userVoteSuperCategories, setUserVoteSuperCategories] = useState<{[key: string]: number}>({});
+    const [totalVotesSubFolders, setTotalVotesSubFolders] = useState<{[key: string]: {up: number, down: number}}>({});
+    const [userVoteSubFolders, setUserVoteSubFolders] = useState<{[key: string]: number}>({});
+    const [totalVotesSuperFolders, setTotalVotesSuperFolders] = useState<{[key: string]: {up: number, down: number}}>({});
+    const [userVoteSuperFolders, setUserVoteSuperFolders] = useState<{[key: string]: number}>({});
     const [totalVotesItems, setTotalVotesItems] = useState<{[key: string]: {up: number, down: number}}>({});
     const [userVoteItems, setUserVoteItems] = useState<{[key: string]: number}>({});
     const [totalVotesComments, setTotalVotesComments] = useState<{[key: string]: {up: number, down: number}}>({});
@@ -64,18 +64,18 @@ function ShowItemContent(props: {defaultAgent}) {
 
     const navigate = useNavigate();
     useEffect(() => {
-        setSubcategories(undefined);
-        setSupercategories(undefined);
+        setSubfolders(undefined);
+        setSuperfolders(undefined);
         setItems(undefined);
         setComments(undefined);
         setAntiComments(undefined);
     }, [id]);
     useEffect(() => {
-        updateVotes(id, principal, subcategories!, setTotalVotesSubCategories, setUserVoteSubCategories).then(() => {}); // TODO: `!`
-    }, [subcategories, principal]);
+        updateVotes(id, principal, subfolders!, setTotalVotesSubFolders, setUserVoteSubFolders).then(() => {}); // TODO: `!`
+    }, [subfolders, principal]);
     useEffect(() => {
-        updateVotes(id, principal, supercategories!, setTotalVotesSuperCategories, setUserVoteSuperCategories).then(() => {}); // TODO: `!`
-    }, [supercategories, principal]);
+        updateVotes(id, principal, superfolders!, setTotalVotesSuperFolders, setUserVoteSuperFolders).then(() => {}); // TODO: `!`
+    }, [superfolders, principal]);
     useEffect(() => {
         updateVotes(id, principal, items!, setTotalVotesItems, setUserVoteItems).then(() => {}); // TODO: `!`
     }, [items, principal]);
@@ -93,9 +93,9 @@ function ShowItemContent(props: {defaultAgent}) {
                 data.description().then(x => setDescription(x));
                 data.postText().then(x => setPostText(x!)); // TODO: `!`
                 data.creator().then(x => setCreator(x.toString())); // TODO
-                data.subCategories().then(x => setSubcategories(x));
-                data.superCategories().then(x => {
-                    setSupercategories(x);
+                data.subFolders().then(x => setSubfolders(x));
+                data.superFolders().then(x => {
+                    setSuperfolders(x);
                 });
                 data.items().then(x => {
                     setItems(x);
@@ -121,11 +121,11 @@ function ShowItemContent(props: {defaultAgent}) {
             });
         }
     }, [id, props.defaultAgent, streamKind]); // TODO: more tight choice
-    function moreSubcategories(event: any) {
+    function moreSubfolders(event: any) {
         event.preventDefault();
         navigate(`/subfolders-of/`+serializeItemRef(id))
     }
-    function moreSupercategories(event: any) {
+    function moreSuperfolders(event: any) {
         event.preventDefault();
         navigate(`/superfolders-of/`+serializeItemRef(id))
     }
@@ -199,56 +199,56 @@ function ShowItemContent(props: {defaultAgent}) {
             <TabPanel>
                 {!isCategory ? "" : <>
                 <h3>Sub-folders</h3>
-                {subcategories === undefined ? <p>Loading...</p> :
+                {subfolders === undefined ? <p>Loading...</p> :
                 <ul>
-                    {subcategories.map((x: {order: string, id: ItemRef, item: Item}) =>
+                    {subfolders.map((x: {order: string, id: ItemRef, item: Item}) =>
                         <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
                             <UpDown
                                 parent={{id}}
                                 item={x}
                                 agent={props.defaultAgent}
-                                userVote={userVoteSubCategories[serializeItemRef(x.id)]}
-                                totalVotes={totalVotesSubCategories[serializeItemRef(x.id)]}
+                                userVote={userVoteSubFolders[serializeItemRef(x.id)]}
+                                totalVotes={totalVotesSubFolders[serializeItemRef(x.id)]}
                                 onSetUserVote={(id: ItemRef, v: number) =>
-                                    setUserVoteSubCategories({...userVoteSubCategories, [serializeItemRef(id)]: v})}
+                                    setUserVoteSubFolders({...userVoteSubFolders, [serializeItemRef(id)]: v})}
                                 onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
-                                    setTotalVotesSubCategories({...totalVotesSubCategories, [serializeItemRef(id)]: v})}
-                                onUpdateList={() => xdata.subCategories().then(x => setSubcategories(x))}
+                                    setTotalVotesSubFolders({...totalVotesSubFolders, [serializeItemRef(id)]: v})}
+                                onUpdateList={() => xdata.subFolders().then(x => setSubfolders(x))}
                             />
                             <ItemType item={x.item}/>
                             <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
                         </li>)}
                 </ul>}
-                <p><a href="#" onClick={e => moreSubcategories(e)}>More...</a> <a href={`#/create-subcategory/for-category/${serializeItemRef(id)}`}>Create subfolder</a></p>
+                <p><a href="#" onClick={e => moreSubfolders(e)}>More...</a> <a href={`#/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</a></p>
             </>}
             <h3>Super-folders</h3>
             <p><small>Voting in this stream not yet implemented.</small></p>
-            {supercategories === undefined ? <p>Loading...</p> :
+            {superfolders === undefined ? <p>Loading...</p> :
             <ul>
-                {supercategories.map((x: {order: string, id: ItemRef, item: Item}) =>
+                {superfolders.map((x: {order: string, id: ItemRef, item: Item}) =>
                     <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
                         {/* TODO: up/down here is complicated by exchanhing parent/child. */}
                         {/*<UpDown
                             parent={{id}}
                             item={x}
                             agent={props.defaultAgent}
-                            userVote={userVoteSuperCategories[serializeItemRef(x.id)]}
-                            totalVotes={totalVotesSuperCategories[serializeItemRef(x.id)]}
+                            userVote={userVoteSuperFolders[serializeItemRef(x.id)]}
+                            totalVotes={totalVotesSuperFolders[serializeItemRef(x.id)]}
                             onSetUserVote={(id: ItemRef, v: number) =>
-                                setUserVoteSuperCategories({...userVoteSuperCategories, [serializeItemRef(id)]: v})}
+                                setUserVoteSuperFolders({...userVoteSuperFolders, [serializeItemRef(id)]: v})}
                             onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
-                                setTotalVotesSuperCategories({...totalVotesSubCategories, [serializeItemRef(id)]: v})}
-                            onUpdateList={() => xdata.superCategories().then(x => {
+                                setTotalVotesSuperFolders({...totalVotesSubFolders, [serializeItemRef(id)]: v})}
+                            onUpdateList={() => xdata.superFolders().then(x => {
                                 console.log(x)
-                                setSupercategories(x);
+                                setSuperfolders(x);
                             })}
                         />*/}
                         <ItemType item={x.item}/>
                         <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
                     </li>)}
             </ul>}
-            {/* TODO: Create super-category */}
-            <p><a href="#" onClick={e => moreSupercategories(e)}>More...</a> <a href={`#/create-supercategory/for-category/${serializeItemRef(id)}`}>Create</a></p>
+            {/* TODO: Create super-folder */}
+            <p><a href="#" onClick={e => moreSuperfolders(e)}>More...</a> <a href={`#/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</a></p>
             {!isCategory ? "" : <>
                 <h3>Items</h3>
                 {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: Item}) => 
@@ -274,7 +274,7 @@ function ShowItemContent(props: {defaultAgent}) {
                     </div>
             )}
             <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                <a href={`#/create/for-category/${serializeItemRef(id)}`}>Create</a></p></>}
+                <a href={`#/create/for-folder/${serializeItemRef(id)}`}>Create</a></p></>}
             </TabPanel>
             <TabPanel>
                 <h3>Comments</h3>

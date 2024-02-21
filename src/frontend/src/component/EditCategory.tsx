@@ -6,8 +6,8 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
-import EditCategoriesList from "./EditCategoriesList";
-import { addToCategory, addToMultipleCategories } from "../util/category";
+import EditFoldersList from "./EditFoldersList";
+import { addToCategory, addToMultipleFolders } from "../util/folder";
 import { parseItemRef, serializeItemRef } from "../data/Data";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
@@ -16,13 +16,13 @@ export default function EditCategory(props: {super?: boolean}) {
     const routeParams = useParams(); // TODO: a dynamic value
     const navigate = useNavigate();
     const [superCategory, setSuperCategory] = useState<string | undefined>();
-    const [categoriesList, setCategoriesList] = useState<[string, {beginning: null} | {end: null}][]>([]);
+    const [foldersList, setFoldersList] = useState<[string, {beginning: null} | {end: null}][]>([]);
     const [antiCommentsList, setAntiCommentsList] = useState<[string, {beginning: null} | {end: null}][]>([]);
     useEffect(() => {
         setSuperCategory(routeParams.cat);
     }, [routeParams.cat])
     enum CategoryKind { owned, communal };
-    const [categoryKind, setCategoryKind] = useState<CategoryKind>(CategoryKind.owned);
+    const [folderKind, setCategoryKind] = useState<CategoryKind>(CategoryKind.owned);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
@@ -47,7 +47,7 @@ export default function EditCategory(props: {super?: boolean}) {
                             locale,
                             title,
                             description: shortDescription,
-                            details: categoryKind == CategoryKind.owned ? {ownedCategory: null} : {communalCategory: null},
+                            details: folderKind == CategoryKind.owned ? {ownedCategory: null} : {communalCategory: null},
                             price: 0.0, // TODO
                         };
                     }
@@ -56,10 +56,10 @@ export default function EditCategory(props: {super?: boolean}) {
                         const [part, n] = await backend.createItemData(item);
                         const ref = serializeItemRef({canister: part, id: Number(n)});
                         if (!(props.super === true)) { // noComments
-                            await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)}, false);
-                            await addToMultipleCategories(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
+                            await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
+                            await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
                         } else {
-                            for (const cat of categoriesList) {
+                            for (const cat of foldersList) {
                                 // TODO: It may fail to parse.
                                 await addToCategory(agent!, {canister: part, id: Number(n)}, parseItemRef(cat[0]), false, cat[1]);
                             }
@@ -74,29 +74,29 @@ export default function EditCategory(props: {super?: boolean}) {
                     <Helmet>
                         <title>Zon Social Media - create a new folder</title>
                     </Helmet>
-                    <h1>{props.super === true ? `Create supercategory` : `Create subcategory`}</h1>
+                    <h1>{props.super === true ? `Create superfolder` : `Create subfolder`}</h1>
                     <Tabs onSelect={onSelectTab}>
                         <TabList>
                             <Tab>Owned</Tab>
                             <Tab>Communal</Tab>
                         </TabList>
                         <TabPanel>
-                            <p>Owned categories have an owner (you). Only the owner can add, delete, and reoder items in an owned category,{" "}
-                                or rename the category.</p>
+                            <p>Owned folders have an owner (you). Only the owner can add, delete, and reoder items in an owned folder,{" "}
+                                or rename the folder.</p>
                             <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
                             <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
                             <p>Short (meta) description: <textarea onChange={e => setShortDescription(e.target.value)}/></p>
                         </TabPanel>
                         <TabPanel>
-                            <p>Communal categories have no owner. Anybody can add an item to a communal category.{" "}
-                                Nobody can delete an item from a communal category or rename the category. Ordering is determined by voting.</p>
+                            <p>Communal folders have no owner. Anybody can add an item to a communal folder.{" "}
+                                Nobody can delete an item from a communal folder or rename the folder. Ordering is determined by voting.</p>
                             <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
                             <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
                         </TabPanel>
                     </Tabs>
-                    <EditCategoriesList
-                        defaultCategories={superCategory === undefined ? [] : [[superCategory, {beginning: null}]]}
-                        onChangeCategories={setCategoriesList}
+                    <EditFoldersList
+                        defaultFolders={superCategory === undefined ? [] : [[superCategory, {beginning: null}]]}
+                        onChangeFolders={setFoldersList}
                         onChangeAntiComments={setAntiCommentsList}
                         reverse={props.super === true}
                         noComments={props.super === true}

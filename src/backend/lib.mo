@@ -142,8 +142,8 @@ module {
 
   // TODO: Does it make sense to keep `Streams` in lib?
   public type StreamsLinks = Nat;
-  public let STREAM_LINK_SUBITEMS: StreamsLinks = 0; // category <-> sub-items
-  public let STREAM_LINK_SUBCATEGORIES: StreamsLinks = 1; // category <-> sub-categories
+  public let STREAM_LINK_SUBITEMS: StreamsLinks = 0; // folder <-> sub-items
+  public let STREAM_LINK_SUBCATEGORIES: StreamsLinks = 1; // folder <-> sub-folders
   public let STREAM_LINK_COMMENTS: StreamsLinks = 2; // item <-> comments
   public let STREAM_LINK_MAX: StreamsLinks = STREAM_LINK_COMMENTS;
 

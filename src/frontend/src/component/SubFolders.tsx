@@ -10,7 +10,7 @@ export default function SubFolders(props) {
     const { id } = useParams();
     const [xdata, setXData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
-    const [categories, setCategories] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>([]);
+    const [folders, setFolders] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>([]);
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
     const [streamKind, setStreamKind] = useState<"t" | "v">("v"); // time, votes
@@ -24,16 +24,16 @@ export default function SubFolders(props) {
             AppData.create(props.defaultAgent, id, streamKind).then(data => {
                 data.title().then(x => setTitle(x));
                 if (props['data-dir'] == 'super') {
-                    data.superCategories().then(x => {
-                        setCategories(x); // TODO: SUPER-categories
+                    data.superFolders().then(x => {
+                        setFolders(x); // TODO: SUPER-folders
                         // TODO: duplicate code
                         if (x.length !== 0) {
                             setItemsLast(x[x.length - 1].order);
                         }
                     });
                 } else {
-                    data.subCategories().then(x => {
-                        setCategories(x);
+                    data.subFolders().then(x => {
+                        setFolders(x);
                         // TODO: duplicate code
                         if (x.length !== 0) {
                             setItemsLast(x[x.length - 1].order);
@@ -47,16 +47,16 @@ export default function SubFolders(props) {
 
     function moreItems(event: any) {
         event.preventDefault();
-        if (categories?.length === 0) {
+        if (folders?.length === 0) {
             return;
         }
         const lowerBound = itemsLast + 'x';
         console.log('lowerBound', lowerBound)
         const promise = props['data-dir'] == 'super'
-            ? xdata.superCategories({lowerBound, limit: 10}) : xdata.subCategories({lowerBound, limit: 10});
+            ? xdata.superFolders({lowerBound, limit: 10}) : xdata.subFolders({lowerBound, limit: 10});
         promise.then(x => {
             console.log('X', x)
-            setCategories(categories?.concat(x)); // TODO: `?`?
+            setFolders(folders?.concat(x)); // TODO: `?`?
             if (x.length !== 0) {
                 setItemsLast(x[x.length - 1].order); // duplicate code
             } else {
@@ -73,7 +73,7 @@ export default function SubFolders(props) {
                 <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
             </p>
            <ul>
-                {categories !== undefined && categories.map(x =>
+                {folders !== undefined && folders.map(x =>
                     <li key={serializeItemRef(x.id as any)}>
                         <p>
                             <ItemType item={x.item}/>
@@ -83,7 +83,7 @@ export default function SubFolders(props) {
                     </li>)}
             </ul>
             <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                <a href={`#/create/for-category/${id}`}>Create</a></p>
+                <a href={`#/create/for-folder/${id}`}>Create</a></p>
         </>
     );
 }

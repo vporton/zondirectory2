@@ -7,17 +7,17 @@ import { Helmet } from 'react-helmet';
 import 'react-tabs/style/react-tabs.css';
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
-import EditCategoriesList from "./EditCategoriesList";
+import EditFoldersList from "./EditFoldersList";
 import { serializeItemRef } from "../data/Data";
-import { addToMultipleCategories } from "../util/category";
+import { addToMultipleFolders } from "../util/folder";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 
 export default function EditItemItem(props: {comment?: boolean}) {
     const routeParams = useParams();
     const navigate = useNavigate();
-    const [mainCategory, setMainCategory] = useState<string | undefined>(undefined); // TODO: For a comment, it may be not a category.
-    const [categoriesList, setCategoriesList] = useState<[string, {beginning: null} | {end: null}][]>([]);
+    const [mainCategory, setMainCategory] = useState<string | undefined>(undefined); // TODO: For a comment, it may be not a folder.
+    const [foldersList, setFoldersList] = useState<[string, {beginning: null} | {end: null}][]>([]);
     const [antiCommentsList, setAntiCommentsList] = useState<[string, {beginning: null} | {end: null}][]>([]);
     useEffect(() => {
         setMainCategory(routeParams.cat);
@@ -63,8 +63,8 @@ export default function EditItemItem(props: {comment?: boolean}) {
                             await backend.setPostText(part, n, post);
                             console.log("post:", post);
                             const ref = serializeItemRef({canister: part, id: Number(n)});
-                            await addToMultipleCategories(agent!, categoriesList, {canister: part, id: Number(n)}, false);
-                            await addToMultipleCategories(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
+                            await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
+                            await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
                             navigate("/item/"+ref);
                         }
                         setBusy(true);
@@ -94,10 +94,10 @@ export default function EditItemItem(props: {comment?: boolean}) {
                                 <p>Text: <textarea style={{height: "10ex"}} onChange={e => setPost(e.target.value)}/></p>
                             </TabPanel>
                         </Tabs>
-                        <EditCategoriesList
-                            defaultCategories={!(props.comment === true) && mainCategory !== undefined ? [[mainCategory, {beginning: null}]] : []}
+                        <EditFoldersList
+                            defaultFolders={!(props.comment === true) && mainCategory !== undefined ? [[mainCategory, {beginning: null}]] : []}
                             defaultAntiComments={props.comment === true && mainCategory !== undefined ? [[mainCategory, {beginning: null}]] : []}
-                            onChangeCategories={setCategoriesList}
+                            onChangeFolders={setFoldersList}
                             onChangeAntiComments={setAntiCommentsList}
                         />
                         <p><Button onClick={submit} disabled={!isAuthenticated}>Submit</Button></p>

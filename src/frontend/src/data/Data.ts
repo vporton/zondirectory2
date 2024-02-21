@@ -7,8 +7,8 @@ import { CanDBIndex } from "../../../declarations/CanDBIndex";
 import { useContext } from "react";
 import { AuthContext } from '../component/auth/use-auth-client';
 
-const STREAM_LINK_SUBITEMS = 0; // category <-> sub-items
-const STREAM_LINK_SUBCATEGORIES = 1; // category <-> sub-categories
+const STREAM_LINK_SUBITEMS = 0; // folder <-> sub-items
+const STREAM_LINK_SUBCATEGORIES = 1; // folder <-> sub-folders
 const STREAM_LINK_COMMENTS = 2; // item <-> comments
 // const STREAM_LINK_MAX = STREAM_LINK_COMMENTS;
 
@@ -103,7 +103,7 @@ export class ItemData {
             item: item[0],
         }));
     }
-    async subCategories(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: Item}[]> {
+    async subFolders(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: Item}[]> {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
@@ -114,7 +114,7 @@ export class ItemData {
         const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_SUBCATEGORIES]).order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
-    async superCategories(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: Item}[]> {
+    async superFolders(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: Item}[]> {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;

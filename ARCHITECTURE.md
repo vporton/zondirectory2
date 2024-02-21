@@ -17,11 +17,11 @@
 - Attribute `"v"` - `#tuple [#int <VOTES UP>, #int <VOTES DOWN>]`
 
 ## NacDB database structure
-* time/time: category -> sub-items
-* time/time: category -> sub-categories
+* time/time: folder -> sub-items
+* time/time: folder -> sub-folders
 * time/time: item -> comments
-* votes/votes: category -> sub-items
-* votes/votes: category -> sub-categories
+* votes/votes: folder -> sub-items
+* votes/votes: folder -> sub-folders
 * votes/votes: item -> comments
 
 Allowed number of votes:
