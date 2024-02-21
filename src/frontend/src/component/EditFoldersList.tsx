@@ -3,17 +3,16 @@ import { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap"; // TODO: Import by one component.
 
 export default function EditFoldersList(props: {
-    defaultFolders?: [string, {beginning: null} | {end: null}][],
-    defaultAntiComments?: [string, {beginning: null} | {end: null}][],
-    onChangeFolders?: (folders: [string, {beginning: null} | {end: null}][]) => void,
-    onChangeAntiComments?: (folders: [string, {beginning: null} | {end: null}][]) => void,
+    defaultFolders?: [string, 'beginning' | 'end'][],
+    defaultAntiComments?: [string, 'beginning' | 'end'][],
+    onChangeFolders?: (folders: [string, 'beginning' | 'end'][]) => void,
+    onChangeAntiComments?: (folders: [string, 'beginning' | 'end'][]) => void,
     noComments?: boolean,
     reverse?: boolean,
 }) {
-    const [folders, setFolders] = useState<[string, {beginning: null} | {end:null}][] | undefined>(undefined);
-    const [antiComments, setAntiComments] = useState<[string, {beginning: null} | {end: null}][] | undefined>(undefined);
-    enum SideType { beginning, end };
-    const [side, setSide] = useState<SideType>(SideType.beginning);
+    const [folders, setFolders] = useState<[string, 'beginning' | 'end'][] | undefined>(undefined);
+    const [antiComments, setAntiComments] = useState<[string, 'beginning' | 'end'][] | undefined>(undefined);
+    const [side, setSide] = useState<{ [i: number]: 'beginning' | 'end' }>({});
     useEffect(() => {
         if (folders === undefined && props.defaultFolders?.length !== 0) {
             setFolders(props.defaultFolders ?? []);
@@ -45,13 +44,13 @@ export default function EditFoldersList(props: {
                 list.push(value)
             }
         }
-        const list2: ({beginning: null} | {end: null})[] = [];
+        const list2: ('beginning' | 'end')[] = [];
         for (const e of document.querySelectorAll('#foldersList input[type=radio]:checked') as any) {
             const value = (e as HTMLInputElement).value;
-            list2.push(value === 'beginning' ? {beginning: null} : {end: null});
+            list2.push(value === 'beginning' ? 'beginning' : 'end');
         }
         const list3 = list.map(function(e, i) {
-            const v: [string, {beginning: null} | {end:null}] = [e, list2[i]];
+            const v: [string, 'beginning' | 'end'] = [e, list2[i]];
             return v;
         });
         console.log("ZZZ", list3)
@@ -66,19 +65,20 @@ export default function EditFoldersList(props: {
                 list.push(value)
             }
         }
-        const list2: ({beginning: null} | {end: null})[] = [];
+        const list2: ('beginning' | 'end')[] = [];
         for (const e of document.querySelectorAll('#antiCommentsList input[type=radio]:checked') as any) {
             const value = (e as HTMLInputElement).value;
-            list2.push(value === 'beginning' ? {beginning: null} : {end: null});
+            list2.push(value === 'beginning' ? 'beginning' : 'end');
         }
         const list3 = list.map(function(e, i) {
-            const v: [string, {beginning: null} | {end:null}] = [e, list2[i]];
+            const v: [string, 'beginning' | 'end'] = [e, list2[i]];
             return v;
         });
         setAntiComments(list3);
     }
-    function onSideChanged(e) {
-        setSide(e.currentTarget.value == 'beginning' ? SideType.beginning : SideType.end);
+    function onSideChanged(e: React.ChangeEvent<HTMLInputElement>, i: number) {
+        const newSide = {...side, [i]: ((e.currentTarget as HTMLInputElement).value === 'end' ? 'end' : 'beginning') as 'beginning' | 'end'};
+        setSide(newSide);
     }
 
     return (
@@ -95,15 +95,15 @@ export default function EditFoldersList(props: {
                                     <li key={i}>
                                         <Form.Control value={cat[0]} onChange={updateFoldersList} style={{display: 'inline', width: '15em'}}/>{" "}
                                         <Button onClick={() => setFolders(folders!.filter((item) => item !== cat))}>Delete</Button>{" "}
-                                        <label><input type="radio" name="side" checked={side === SideType.beginning}
-                                            onChange={onSideChanged}/>&#160;beginning</label>{" "}
-                                        <label><input type="radio" name="side" checked={side === SideType.end}
-                                            onChange={onSideChanged}/>&#160;end</label>
+                                        <label><input type="radio" name={`side-f${i}`} checked={side[i] === 'beginning' || side[i] === undefined}
+                                            onChange={e => onSideChanged(e, i)} value="beginning"/>&#160;beginning</label>{" "}
+                                        <label><input type="radio" name={`side-f${i}`} checked={side[i] === 'end'}
+                                            onChange={e => onSideChanged(e, i)} value="end"/>&#160;end</label>
                                     </li>
                                 );
                             })}
                         </ul>
-                        <p><Button disabled={folders === undefined} onClick={() => setFolders(folders!.concat([["", {beginning: null}]]))}>Add</Button></p>
+                        <p><Button disabled={folders === undefined} onClick={() => setFolders(folders!.concat([["", 'beginning']]))}>Add</Button></p>
                     </Col>
                     {!props.noComments &&
                     <Col>
@@ -118,7 +118,7 @@ export default function EditFoldersList(props: {
                                 );
                             })}
                         </ul>
-                        <p><Button disabled={antiComments === undefined} onClick={() => setAntiComments(antiComments!.concat([["", {beginning: null}]]))}>Add</Button></p>
+                        <p><Button disabled={antiComments === undefined} onClick={() => setAntiComments(antiComments!.concat([["", 'beginning']]))}>Add</Button></p>
                     </Col>}
                 </Row>
             </Container>

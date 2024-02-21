@@ -16,8 +16,8 @@ export default function EditFolder(props: {super?: boolean}) {
     const routeParams = useParams(); // TODO: a dynamic value
     const navigate = useNavigate();
     const [superFolder, setSuperFolder] = useState<string | undefined>();
-    const [foldersList, setFoldersList] = useState<[string, {beginning: null} | {end: null}][]>([]);
-    const [antiCommentsList, setAntiCommentsList] = useState<[string, {beginning: null} | {end: null}][]>([]);
+    const [foldersList, setFoldersList] = useState<[string, 'beginning' | 'end'][]>([]);
+    const [antiCommentsList, setAntiCommentsList] = useState<[string, 'beginning' | 'end'][]>([]);
     useEffect(() => {
         setSuperFolder(routeParams.cat);
     }, [routeParams.cat])
@@ -95,7 +95,7 @@ export default function EditFolder(props: {super?: boolean}) {
                         </TabPanel>
                     </Tabs>
                     <EditFoldersList
-                        defaultFolders={superFolder === undefined ? [] : [[superFolder, {beginning: null}]]}
+                        defaultFolders={superFolder === undefined ? [] : [[superFolder, 'beginning']]}
                         onChangeFolders={setFoldersList}
                         onChangeAntiComments={setAntiCommentsList}
                         reverse={props.super === true}

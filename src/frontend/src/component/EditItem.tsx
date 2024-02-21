@@ -17,8 +17,8 @@ export default function EditItemItem(props: {comment?: boolean}) {
     const routeParams = useParams();
     const navigate = useNavigate();
     const [mainFolder, setMainFolder] = useState<string | undefined>(undefined); // TODO: For a comment, it may be not a folder.
-    const [foldersList, setFoldersList] = useState<[string, {beginning: null} | {end: null}][]>([]);
-    const [antiCommentsList, setAntiCommentsList] = useState<[string, {beginning: null} | {end: null}][]>([]);
+    const [foldersList, setFoldersList] = useState<[string, 'beginning' | 'end'][]>([]);
+    const [antiCommentsList, setAntiCommentsList] = useState<[string, 'beginning' | 'end'][]>([]);
     useEffect(() => {
         setMainFolder(routeParams.cat);
     }, [routeParams.cat]);
@@ -95,8 +95,8 @@ export default function EditItemItem(props: {comment?: boolean}) {
                             </TabPanel>
                         </Tabs>
                         <EditFoldersList
-                            defaultFolders={!(props.comment === true) && mainFolder !== undefined ? [[mainFolder, {beginning: null}]] : []}
-                            defaultAntiComments={props.comment === true && mainFolder !== undefined ? [[mainFolder, {beginning: null}]] : []}
+                            defaultFolders={!(props.comment === true) && mainFolder !== undefined ? [[mainFolder, 'beginning']] : []}
+                            defaultAntiComments={props.comment === true && mainFolder !== undefined ? [[mainFolder, 'beginning']] : []}
                             onChangeFolders={setFoldersList}
                             onChangeAntiComments={setAntiCommentsList}
                         />
