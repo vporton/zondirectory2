@@ -5,8 +5,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ItemRef, serializeItemRef } from "../data/Data";
 import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import ItemType from "./misc/ItemType";
+import { Agent } from "@dfinity/agent";
 
-export default function SubFolders(props) {
+export default function SubFolders(props: {defaultAgent: Agent, 'data-dir': 'sub' | 'super'}) {
     const { id } = useParams();
     const [xdata, setXData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
