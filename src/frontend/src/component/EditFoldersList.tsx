@@ -39,7 +39,7 @@ export default function EditFoldersList(props: {
     function updateFoldersList() {
         const list: string[] = [];
         // TODO: validation
-        for (const e of document.querySelectorAll('#foldersList input[type=text]') as any) {
+        for (const e of document.querySelectorAll('#foldersList input[class=form-control]') as any) {
             const value = (e as HTMLInputElement).value;
             if (value !== "") {
                 list.push(value)
@@ -54,12 +54,13 @@ export default function EditFoldersList(props: {
             const v: [string, {beginning: null} | {end:null}] = [e, list2[i]];
             return v;
         });
+        console.log("ZZZ", list3)
         setFolders(list3);
     }
     function updateAntiCommentsList() {
         const list: string[] = [];
         // TODO: validation
-        for (const e of document.querySelectorAll('#antiCommentsList input[type=text]') as any) {
+        for (const e of document.querySelectorAll('#antiCommentsList input[class=form-control]') as any) {
             const value = (e as HTMLInputElement).value;
             if (value !== "") {
                 list.push(value)
