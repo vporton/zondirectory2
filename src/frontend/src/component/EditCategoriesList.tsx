@@ -102,7 +102,7 @@ export default function EditCategoriesList(props: {
                                 );
                             })}
                         </ul>
-                        <p><Button disabled={categories === undefined} onClick={() => setCategories(categories!.concat(["", {beginning: null}]))}>Add</Button></p>
+                        <p><Button disabled={categories === undefined} onClick={() => setCategories(categories!.concat([["", {beginning: null}]]))}>Add</Button></p>
                     </Col>
                     {!props.noComments &&
                     <Col>
@@ -117,7 +117,7 @@ export default function EditCategoriesList(props: {
                                 );
                             })}
                         </ul>
-                        <p><Button disabled={antiComments === undefined} onClick={() => setAntiComments(antiComments!.concat(["", {beginning: null}]))}>Add</Button></p>
+                        <p><Button disabled={antiComments === undefined} onClick={() => setAntiComments(antiComments!.concat([["", {beginning: null}]]))}>Add</Button></p>
                     </Col>}
                 </Row>
             </Container>
