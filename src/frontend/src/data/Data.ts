@@ -8,7 +8,7 @@ import { useContext } from "react";
 import { AuthContext } from '../component/auth/use-auth-client';
 
 const STREAM_LINK_SUBITEMS = 0; // folder <-> sub-items
-const STREAM_LINK_SUBCATEGORIES = 1; // folder <-> sub-folders
+const STREAM_LINK_SUBFOLDERS = 1; // folder <-> sub-folders
 const STREAM_LINK_COMMENTS = 2; // item <-> comments
 // const STREAM_LINK_MAX = STREAM_LINK_COMMENTS;
 
@@ -108,10 +108,10 @@ export class ItemData {
         if (this.agent === undefined) {
             return undefined;
         }
-        if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_SUBCATEGORIES]) === undefined) {
+        if (this.streams === undefined || _unwrap(this.streams[STREAM_LINK_SUBFOLDERS]) === undefined) {
             return [];
         }
-        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_SUBCATEGORIES]).order;
+        const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_SUBFOLDERS]).order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async superFolders(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: Item}[]> {
@@ -123,7 +123,7 @@ export class ItemData {
             return [];
         }
         const stream = (this.item.item.details as any).folder !== undefined
-            ? _unwrap(this.streamsRev[STREAM_LINK_SUBCATEGORIES]) : _unwrap(this.streamsRev[STREAM_LINK_SUBITEMS]);
+            ? _unwrap(this.streamsRev[STREAM_LINK_SUBFOLDERS]) : _unwrap(this.streamsRev[STREAM_LINK_SUBITEMS]);
         if (stream === undefined) {
             return [];
         }

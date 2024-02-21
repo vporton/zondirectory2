@@ -115,7 +115,7 @@ module {
   let ITEM_TYPE_LINK = 0;
   let ITEM_TYPE_MESSAGE = 1;
   let ITEM_TYPE_POST = 2;
-  let ITEM_TYPE_CATEGORY = 3;
+  let ITEM_TYPE_FOLDER = 3;
   
   // FIXME: Communal will be a boolean flag, in order to deal with communal links and posts.
   public type ItemWithoutOwner = {
@@ -143,7 +143,7 @@ module {
   // TODO: Does it make sense to keep `Streams` in lib?
   public type StreamsLinks = Nat;
   public let STREAM_LINK_SUBITEMS: StreamsLinks = 0; // folder <-> sub-items
-  public let STREAM_LINK_SUBCATEGORIES: StreamsLinks = 1; // folder <-> sub-folders
+  public let STREAM_LINK_SUBFOLDERS: StreamsLinks = 1; // folder <-> sub-folders
   public let STREAM_LINK_COMMENTS: StreamsLinks = 2; // item <-> comments
   public let STREAM_LINK_MAX: StreamsLinks = STREAM_LINK_COMMENTS;
 
@@ -159,7 +159,7 @@ module {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
       case (#post _) { ITEM_TYPE_POST };
-      case (#folder) { ITEM_TYPE_CATEGORY };
+      case (#folder) { ITEM_TYPE_FOLDER };
     }));
     buf.add(#text(Principal.toText(item.creator)));
     buf.add(#float(item.item.price));
