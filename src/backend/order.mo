@@ -110,7 +110,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   // Public API //
 
-  public shared({caller}) func addItemToCategory(
+  public shared({caller}) func addItemToFolder(
     catId: (Principal, Nat),
     itemId: (Principal, Nat),
     comment: Bool,
@@ -127,10 +127,10 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let folderItem = lib.deserializeItem(folderItemData);
 
     switch (folderItem.item.details) {
-      case (#ownedCategory) {
+      case (#ownedFolder) {
         lib.onlyItemOwner(caller, folderItem);
       };
-      case (#communalCategory) {};
+      case (#communalFolder) {};
       case _ {
         if (not comment) {
           Debug.trap("not a folder");
@@ -139,7 +139,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
     let links = await* getStreamLinks(itemId, comment);
     await* addToStreams(catId, itemId, comment, links, itemId1, "st", "srt", #beginning);
-    if (folderItem.item.details == #ownedCategory) {
+    if (folderItem.item.details == #ownedFolder) {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", side);
     } else {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", #end);
@@ -206,7 +206,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   {
     // let catId1: CanDBPartition.CanDBPartition = actor(Principal.toText(catId.0));
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
-    // TODO: Ensure that item data is readed once per `addItemToCategory` call.
+    // TODO: Ensure that item data is readed once per `addItemToFolder` call.
     let ?childItemData = await itemId1.getAttribute({sk = "i/" # Nat.toText(itemId.1)}, "i") else {
       // TODO: Keep doing for other folders after a trap?
       Debug.trap("cannot get child item");
@@ -217,7 +217,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
       lib.STREAM_LINK_COMMENTS;
     } else {
       switch (childItem.item.details) {
-        case (#communalCategory or #ownedCategory) { lib.STREAM_LINK_SUBCATEGORIES };
+        case (#communalFolder or #ownedFolder) { lib.STREAM_LINK_SUBCATEGORIES };
         case _ { lib.STREAM_LINK_SUBITEMS };
       };
     };

@@ -7,32 +7,32 @@ import { Helmet } from 'react-helmet';
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
 import EditFoldersList from "./EditFoldersList";
-import { addToCategory, addToMultipleFolders } from "../util/folder";
+import { addToFolder, addToMultipleFolders } from "../util/folder";
 import { parseItemRef, serializeItemRef } from "../data/Data";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 
-export default function EditCategory(props: {super?: boolean}) {
+export default function EditFolder(props: {super?: boolean}) {
     const routeParams = useParams(); // TODO: a dynamic value
     const navigate = useNavigate();
-    const [superCategory, setSuperCategory] = useState<string | undefined>();
+    const [superFolder, setSuperFolder] = useState<string | undefined>();
     const [foldersList, setFoldersList] = useState<[string, {beginning: null} | {end: null}][]>([]);
     const [antiCommentsList, setAntiCommentsList] = useState<[string, {beginning: null} | {end: null}][]>([]);
     useEffect(() => {
-        setSuperCategory(routeParams.cat);
+        setSuperFolder(routeParams.cat);
     }, [routeParams.cat])
-    enum CategoryKind { owned, communal };
-    const [folderKind, setCategoryKind] = useState<CategoryKind>(CategoryKind.owned);
+    enum FolderKind { owned, communal };
+    const [folderKind, setFolderKind] = useState<FolderKind>(FolderKind.owned);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
     function onSelectTab(index) {
         switch (index) {
             case 0:
-                setCategoryKind(CategoryKind.owned);
+                setFolderKind(FolderKind.owned);
                 break;
             case 1:
-                setCategoryKind(CategoryKind.communal);
+                setFolderKind(FolderKind.communal);
                 break;
             }
     }
@@ -47,7 +47,7 @@ export default function EditCategory(props: {super?: boolean}) {
                             locale,
                             title,
                             description: shortDescription,
-                            details: folderKind == CategoryKind.owned ? {ownedCategory: null} : {communalCategory: null},
+                            details: folderKind == FolderKind.owned ? {ownedFolder: null} : {communalFolder: null},
                             price: 0.0, // TODO
                         };
                     }
@@ -61,7 +61,7 @@ export default function EditCategory(props: {super?: boolean}) {
                         } else {
                             for (const cat of foldersList) {
                                 // TODO: It may fail to parse.
-                                await addToCategory(agent!, {canister: part, id: Number(n)}, parseItemRef(cat[0]), false, cat[1]);
+                                await addToFolder(agent!, {canister: part, id: Number(n)}, parseItemRef(cat[0]), false, cat[1]);
                             }
                         }
                         navigate("/item/"+ref);
@@ -95,7 +95,7 @@ export default function EditCategory(props: {super?: boolean}) {
                         </TabPanel>
                     </Tabs>
                     <EditFoldersList
-                        defaultFolders={superCategory === undefined ? [] : [[superCategory, {beginning: null}]]}
+                        defaultFolders={superFolder === undefined ? [] : [[superFolder, {beginning: null}]]}
                         onChangeFolders={setFoldersList}
                         onChangeAntiComments={setAntiCommentsList}
                         reverse={props.super === true}

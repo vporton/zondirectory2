@@ -122,7 +122,7 @@ export class ItemData {
         if (this.streamsRev === undefined) {
             return [];
         }
-        const stream = (this.item.item.details as any).ownedCategory !== undefined || (this.item.item.details as any).communalCategory !== undefined
+        const stream = (this.item.item.details as any).ownedFolder !== undefined || (this.item.item.details as any).communalFolder !== undefined
             ? _unwrap(this.streamsRev[STREAM_LINK_SUBCATEGORIES]) : _unwrap(this.streamsRev[STREAM_LINK_SUBITEMS]);
         if (stream === undefined) {
             return [];

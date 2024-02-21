@@ -16,11 +16,11 @@ import { BusyContext } from "./App";
 export default function EditItemItem(props: {comment?: boolean}) {
     const routeParams = useParams();
     const navigate = useNavigate();
-    const [mainCategory, setMainCategory] = useState<string | undefined>(undefined); // TODO: For a comment, it may be not a folder.
+    const [mainFolder, setMainFolder] = useState<string | undefined>(undefined); // TODO: For a comment, it may be not a folder.
     const [foldersList, setFoldersList] = useState<[string, {beginning: null} | {end: null}][]>([]);
     const [antiCommentsList, setAntiCommentsList] = useState<[string, {beginning: null} | {end: null}][]>([]);
     useEffect(() => {
-        setMainCategory(routeParams.cat);
+        setMainFolder(routeParams.cat);
     }, [routeParams.cat]);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
@@ -95,8 +95,8 @@ export default function EditItemItem(props: {comment?: boolean}) {
                             </TabPanel>
                         </Tabs>
                         <EditFoldersList
-                            defaultFolders={!(props.comment === true) && mainCategory !== undefined ? [[mainCategory, {beginning: null}]] : []}
-                            defaultAntiComments={props.comment === true && mainCategory !== undefined ? [[mainCategory, {beginning: null}]] : []}
+                            defaultFolders={!(props.comment === true) && mainFolder !== undefined ? [[mainFolder, {beginning: null}]] : []}
+                            defaultAntiComments={props.comment === true && mainFolder !== undefined ? [[mainFolder, {beginning: null}]] : []}
                             onChangeFolders={setFoldersList}
                             onChangeAntiComments={setAntiCommentsList}
                         />

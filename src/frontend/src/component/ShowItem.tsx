@@ -177,13 +177,13 @@ function ShowItemContent(props: {defaultAgent}) {
     function updateStreamKind(e) {
         setStreamKind(e.currentTarget.value);
     }
-    const isCategory = type === 'ownedCategory' || type === 'communalCategory';
+    const isFolder = type === 'ownedFolder' || type === 'communalFolder';
     return <>
         <Helmet>
-            <title>{isCategory ? `${title} (folder) - Zon` : `${title} - Zon`}</title>
+            <title>{isFolder ? `${title} (folder) - Zon` : `${title} - Zon`}</title>
             <meta name="description" content={description}/>
         </Helmet>
-        <h2><ItemType item={data}/>{isCategory ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
+        <h2><ItemType item={data}/>{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         <p>Creator: <small>{creator.toString()}</small></p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         {postText !== "" ? <p lang={locale}>{postText}</p> : ""}
@@ -197,7 +197,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 <Tab>Comments</Tab>
             </TabList>
             <TabPanel>
-                {!isCategory ? "" : <>
+                {!isFolder ? "" : <>
                 <h3>Sub-folders</h3>
                 {subfolders === undefined ? <p>Loading...</p> :
                 <ul>
@@ -249,7 +249,7 @@ function ShowItemContent(props: {defaultAgent}) {
             </ul>}
             {/* TODO: Create super-folder */}
             <p><a href="#" onClick={e => moreSuperfolders(e)}>More...</a> <a href={`#/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</a></p>
-            {!isCategory ? "" : <>
+            {!isFolder ? "" : <>
                 <h3>Items</h3>
                 {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: Item}) => 
                     <div key={serializeItemRef(x.id)}>

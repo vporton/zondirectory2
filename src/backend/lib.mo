@@ -127,8 +127,8 @@ module {
       #link : Text;
       #message : ();
       #post : (); // save post text separately
-      #ownedCategory : ();
-      #communalCategory : ();
+      #ownedFolder : ();
+      #communalFolder : ();
     };
   };
 
@@ -158,8 +158,8 @@ module {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
       case (#post _) { ITEM_TYPE_POST };
-      case (#ownedCategory) { ITEM_TYPE_OWNED_CATEGORY };
-      case (#communalCategory) { ITEM_TYPE_COMMUNAL_CATEGORY };
+      case (#ownedFolder) { ITEM_TYPE_OWNED_CATEGORY };
+      case (#communalFolder) { ITEM_TYPE_COMMUNAL_CATEGORY };
     }));
     buf.add(#text(Principal.toText(item.creator)));
     buf.add(#float(item.item.price));
@@ -200,7 +200,7 @@ module {
     var locale = "";
     var title = "";
     var description = "";
-    var details: {#none; #link; #message; #post; #ownedCategory; #communalCategory} = #none;
+    var details: {#none; #link; #message; #post; #ownedFolder; #communalFolder} = #none;
     var link = "";
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
@@ -285,8 +285,8 @@ module {
           case (0) { #link link };
           case (1) { #message };
           case (2) { #post };
-          case (3) { #ownedCategory };
-          case (4) { #communalCategory };
+          case (3) { #ownedFolder };
+          case (4) { #communalFolder };
           case _ { Debug.trap("wrong item format"); }
         };
       };

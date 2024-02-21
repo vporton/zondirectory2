@@ -14,7 +14,7 @@ import {
 import { Agent } from '@dfinity/agent';
 import SubFolders from "./SubFolders";
 import EditItem from "./EditItem";
-import EditCategory from "./EditCategory";
+import EditFolder from "./EditFolder";
 import { getIsLocal } from "../util/client";
 import { serializeItemRef } from '../data/Data'
 import { Principal } from "@dfinity/principal";
@@ -144,11 +144,11 @@ function MyRouted() {
                         />
                         <Route
                             path="/create-subfolder/for-folder/:cat"
-                            element={<EditCategory/>}
+                            element={<EditFolder/>}
                         />
                         <Route
                             path="/create-superfolder/for-folder/:cat"
-                            element={<EditCategory super={true}/>}
+                            element={<EditFolder super={true}/>}
                         />
                         <Route
                             path="/personhood"

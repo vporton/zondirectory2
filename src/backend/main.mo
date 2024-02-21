@@ -240,7 +240,7 @@ shared actor class ZonBackend() = this {
           Debug.trap("can't change item type");
         };
         switch (oldItem.item.details) {
-          case (#communalCategory) {
+          case (#communalFolder) {
             Debug.trap("can't edit communal folder");
           };
           case _ {};
@@ -280,7 +280,7 @@ shared actor class ZonBackend() = this {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
         switch (oldItem.item.details) {
-          case (#communalCategory) {
+          case (#communalFolder) {
             Debug.trap("it's communal");
           };
           case _ {};
