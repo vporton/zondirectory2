@@ -177,7 +177,7 @@ function ShowItemContent(props: {defaultAgent}) {
     function updateStreamKind(e) {
         setStreamKind(e.currentTarget.value);
     }
-    const isFolder = type === 'ownedFolder' || type === 'communalFolder';
+    const isFolder = type === 'folder';
     return <>
         <Helmet>
             <title>{isFolder ? `${title} (folder) - Zon` : `${title} - Zon`}</title>

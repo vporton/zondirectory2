@@ -126,20 +126,14 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
     let folderItem = lib.deserializeItem(folderItemData);
 
-    switch (folderItem.item.details) {
-      case (#ownedFolder) {
-        lib.onlyItemOwner(caller, folderItem);
-      };
-      case (#communalFolder) {};
-      case _ {
-        if (not comment) {
-          Debug.trap("not a folder");
-        };
-      };
+    if (folderItem.item.details == #folder) {
+      lib.onlyItemOwner(caller, folderItem);
+    } else if (not comment) {
+      Debug.trap("not a folder");
     };
     let links = await* getStreamLinks(itemId, comment);
     await* addToStreams(catId, itemId, comment, links, itemId1, "st", "srt", #beginning);
-    if (folderItem.item.details == #ownedFolder) {
+    if (folderItem.item.details == #folder) {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", side);
     } else {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", #end);
@@ -217,7 +211,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
       lib.STREAM_LINK_COMMENTS;
     } else {
       switch (childItem.item.details) {
-        case (#communalFolder or #ownedFolder) { lib.STREAM_LINK_SUBCATEGORIES };
+        case (#folder) { lib.STREAM_LINK_SUBCATEGORIES };
         case _ { lib.STREAM_LINK_SUBITEMS };
       };
     };

@@ -44,10 +44,11 @@ export default function EditFolder(props: {super?: boolean}) {
                 async function submit() {
                     function itemData(): ItemWithoutOwner {
                         return {
+                            communal: folderKind == FolderKind.communal,
                             locale,
                             title,
                             description: shortDescription,
-                            details: folderKind == FolderKind.owned ? {ownedFolder: null} : {communalFolder: null},
+                            details: {folder: null},
                             price: 0.0, // TODO
                         };
                     }

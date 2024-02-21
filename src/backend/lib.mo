@@ -17,6 +17,7 @@ import Nat64 "mo:base/Nat64";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
 import Time "mo:base/Time";
+import Bool "mo:base/Bool";
 import Reorder "mo:NacDBReorder/Reorder";
 import config "../../config";
 
@@ -114,11 +115,11 @@ module {
   let ITEM_TYPE_LINK = 0;
   let ITEM_TYPE_MESSAGE = 1;
   let ITEM_TYPE_POST = 2;
-  let ITEM_TYPE_OWNED_CATEGORY = 3;
-  let ITEM_TYPE_COMMUNAL_CATEGORY = 4;
-
+  let ITEM_TYPE_CATEGORY = 3;
+  
   // FIXME: Communal will be a boolean flag, in order to deal with communal links and posts.
   public type ItemWithoutOwner = {
+    communal: Bool;
     price: Float;
     locale: Text;
     title: Text;
@@ -127,8 +128,7 @@ module {
       #link : Text;
       #message : ();
       #post : (); // save post text separately
-      #ownedFolder : ();
-      #communalFolder : ();
+      #folder : ();
     };
   };
 
@@ -152,14 +152,14 @@ module {
   // TODO: messy order of the below functions
 
   public func serializeItem(item: Item): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(7);
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
     buf.add(#int 0); // version
+    buf.add(#bool(item.item.communal));
     buf.add(#int (switch (item.item.details) {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
       case (#post _) { ITEM_TYPE_POST };
-      case (#ownedFolder) { ITEM_TYPE_OWNED_CATEGORY };
-      case (#communalFolder) { ITEM_TYPE_COMMUNAL_CATEGORY };
+      case (#folder) { ITEM_TYPE_CATEGORY };
     }));
     buf.add(#text(Principal.toText(item.creator)));
     buf.add(#float(item.item.price));
@@ -196,11 +196,12 @@ module {
   public func deserializeItem(attr: Entity.AttributeValue): Item {
     var kind: Nat = 0;
     var creator: ?Principal = null;
+    var communal = false;
     var price = 0.0;
     var locale = "";
     var title = "";
     var description = "";
-    var details: {#none; #link; #message; #post; #ownedFolder; #communalFolder} = #none;
+    var details: {#none; #link; #message; #post; #folder} = #none;
     var link = "";
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
@@ -208,6 +209,13 @@ module {
         switch (arr[pos]) {
           case (#int v) {
             assert v == 0;
+          };
+          case _ { break r false };
+        };
+        pos += 1;
+        switch (arr[pos]) {
+          case (#bool v) {
+            communal := v;
           };
           case _ { break r false };
         };
@@ -277,6 +285,7 @@ module {
     {
       creator = creator2;
       item = {
+        communal = communal;
         price = price;
         locale = locale;
         title = title;
@@ -285,8 +294,7 @@ module {
           case (0) { #link link };
           case (1) { #message };
           case (2) { #post };
-          case (3) { #ownedFolder };
-          case (4) { #communalFolder };
+          case (3) { #folder };
           case _ { Debug.trap("wrong item format"); }
         };
       };
