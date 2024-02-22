@@ -1,11 +1,11 @@
 import * as React from "react";
 import { useContext, useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "./auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
-import { Button } from "react-bootstrap";
+import { Button, Nav } from "react-bootstrap";
 import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { order } from "../../../declarations/order";
 import UpDown, { updateVotes } from "./misc/UpDown";
@@ -217,9 +217,12 @@ function ShowItemContent(props: {defaultAgent}) {
                             />
                             <ItemType item={x.item}/>
                             <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
+                            [<Nav.Link href={`#/folder/edit/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                         </li>)}
                 </ul>}
-                <p><a href="#" onClick={e => moreSubfolders(e)}>More...</a> <a href={`#/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</a></p>
+                <p>
+                    <a href="#" onClick={e => moreSubfolders(e)}>More...</a> <a href={`#/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</a>
+                </p>
             </>}
             <h3>Super-folders</h3>
             <p><small>Voting in this stream not yet implemented.</small></p>
@@ -245,6 +248,7 @@ function ShowItemContent(props: {defaultAgent}) {
                         />*/}
                         <ItemType item={x.item}/>
                         <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
+                        [<Nav.Link href={`#/folder/edit/${serializeItemRef(id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                     </li>)}
             </ul>}
             {/* TODO: Create super-folder */}

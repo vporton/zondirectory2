@@ -10,6 +10,7 @@ import {
     NavLink,
     useNavigate,
     HashRouter,
+    useParams,
 } from "react-router-dom";
 import { Agent } from '@dfinity/agent';
 import SubFolders from "./SubFolders";
@@ -144,11 +145,31 @@ function MyRouted() {
                         />
                         <Route
                             path="/create-subfolder/for-folder/:folder"
-                            element={<EditFolder/>}
+                            element={
+                                (() => {
+                                    function Edit(props) {
+                                        const routeParams = useParams();
+                                        return <EditFolder superFolderId={routeParams.folder}/>;
+                                    }
+                                    return <Edit/>;
+                                })()
+                            }
                         />
                         <Route
                             path="/create-superfolder/for-folder/:folder"
                             element={<EditFolder super={true}/>}
+                        />
+                        <Route
+                            path="/folder/edit/:folder"
+                            element={
+                                (() => {
+                                    function Edit(props) {
+                                        const routeParams = useParams();
+                                        return <EditFolder folderId={routeParams.folder}/>;
+                                    }
+                                    return <Edit/>;
+                                })()
+                            }
                         />
                         <Route
                             path="/personhood"

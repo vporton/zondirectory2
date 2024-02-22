@@ -13,35 +13,35 @@ import { parseItemRef, serializeItemRef } from "../data/Data";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 
-export default function EditFolder(props: {super?: boolean, folderId?: string}) {
-    const routeParams = useParams(); // TODO: a dynamic value
+export default function EditFolder(props: {super?: boolean, folderId?: string, superFolderId?: string}) {
     const navigate = useNavigate();
     const [superFolder, setSuperFolder] = useState<string | undefined>();
     const [foldersList, setFoldersList] = useState<[string, 'beginning' | 'end'][]>([]);
     const [antiCommentsList, setAntiCommentsList] = useState<[string, 'beginning' | 'end'][]>([]);
     useEffect(() => {
-        setSuperFolder(routeParams.folder);
-    }, [routeParams.folder])
+        setSuperFolder(props.superFolderId);
+    }, [props.superFolderId])
     enum FolderKind { owned, communal };
     const [folderKind, setFolderKind] = useState<FolderKind>(FolderKind.owned);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
     useEffect(() => {
+        console.log(props.folderId)
         if (props.folderId !== undefined) {
             const folderId = parseItemRef(props.folderId);
             const actor = canDBPartitionActor(folderId.canister);
             actor.getItem(BigInt(folderId.id))
                 .then(item1 => {
                     const item = item1[0]!.item;
+                    console.log("item2", item);
                     setFolderKind(item.communal ? FolderKind.communal : FolderKind.owned);
                     setLocale(item.locale);
                     setTitle(item.title);
                     setShortDescription(item.description);
                 });
         }
-
-    });
+    }, [props.folderId]);
     function onSelectTab(index) {
         switch (index) {
             case 0:
@@ -59,6 +59,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string}) 
             {({agent, isAuthenticated}) => {
                 async function submit() {
                     function itemData(): ItemWithoutOwner {
+                        console.log('itemData:', shortDescription)
                         return {
                             communal: folderKind == FolderKind.communal,
                             locale,
@@ -86,12 +87,13 @@ export default function EditFolder(props: {super?: boolean, folderId?: string}) 
                     setBusy(true);
                     await submitItem(itemData());
                     setBusy(false);
-            }
+                }
                 return <>
                     <Helmet>
                         <title>Zon Social Media - create a new folder</title>
                     </Helmet>
-                    <h1>{props.super === true ? `Create superfolder` : `Create subfolder`}</h1>
+                    <h1>{props.folderId !== undefined ? `Edit folder` :
+                        props.super === true ? `Create superfolder` : `Create subfolder`}</h1>
                     <Tabs onSelect={onSelectTab}>
                         <TabList>
                             <Tab>Owned</Tab>
@@ -100,9 +102,9 @@ export default function EditFolder(props: {super?: boolean, folderId?: string}) 
                         <TabPanel>
                             <p>Owned folders have an owner (you). Only the owner can add, delete, and reoder items in an owned folder,{" "}
                                 or rename the folder.</p>
-                            <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
-                            <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
-                            <p>Short (meta) description: <textarea onChange={e => setShortDescription(e.target.value)}/></p>
+                            <p>Language: <input type="text" required={true} value="en" defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
+                            <p>Title: <input type="text" required={true} defaultValue={title} onChange={e => setTitle(e.target.value)}/></p>
+                            <p>Short (meta) description: <textarea defaultValue={shortDescription} onChange={e => setShortDescription(e.target.value)}/></p>
                         </TabPanel>
                         <TabPanel>
                             <p>Communal folders have no owner. Anybody can add an item to a communal folder.{" "}
