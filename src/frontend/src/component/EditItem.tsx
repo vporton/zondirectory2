@@ -8,7 +8,7 @@ import 'react-tabs/style/react-tabs.css';
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
 import EditFoldersList from "./EditFoldersList";
-import { serializeItemRef } from "../data/Data";
+import { parseItemRef, serializeItemRef } from "../data/Data";
 import { addToMultipleFolders } from "../util/folder";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
@@ -60,10 +60,18 @@ export default function EditItemItem(props: {comment?: boolean}) {
                         }
                         async function submitItem(item: ItemWithoutOwner) {
                             const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
-                            const [part, n] = await backend.createItemData(item);
+                            let part, n;
+                            if (routeParams.folder !== undefined) {
+                                const folder = parseItemRef(routeParams.folder); // TODO: not here
+                                await backend.setItemData(folder.canister, BigInt(folder.id), item);
+                                part = folder.canister;
+                                n = BigInt(folder.id);
+                            } else {
+                                [part, n] = await backend.createItemData(item);
+                            }
                             await backend.setPostText(part, n, post);
-                            console.log("post:", post);
                             const ref = serializeItemRef({canister: part, id: Number(n)});
+                            // TODO: What to do with this on editing the folder?
                             await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
                             await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
                             navigate("/item/"+ref);

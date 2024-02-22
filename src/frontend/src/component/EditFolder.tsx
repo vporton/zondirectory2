@@ -71,8 +71,16 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                     }
                     async function submitItem(item: ItemWithoutOwner) {
                         const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
-                        const [part, n] = await backend.createItemData(item);
-                        const ref = serializeItemRef({canister: part, id: Number(n)});
+                        let part, n;
+                        if (props.folderId !== undefined) {
+                            const folder = parseItemRef(props.folderId); // TODO: not here
+                            await backend.setItemData(folder.canister, BigInt(folder.id), item);
+                            part = folder.canister;
+                            n = BigInt(folder.id);
+                        } else {
+                            [part, n] = await backend.createItemData(item);
+                        }
+                        const ref = serializeItemRef({canister: part, id: Number(n)}); // TODO: Reduce code
                         if (!(props.super === true)) { // noComments
                             await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
                             await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
