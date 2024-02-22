@@ -27,14 +27,12 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
     useEffect(() => {
-        console.log(props.folderId)
         if (props.folderId !== undefined) {
             const folderId = parseItemRef(props.folderId);
             const actor = canDBPartitionActor(folderId.canister);
             actor.getItem(BigInt(folderId.id))
                 .then(item1 => {
                     const item = item1[0]!.item;
-                    console.log("item2", item);
                     setFolderKind(item.communal ? FolderKind.communal : FolderKind.owned);
                     setLocale(item.locale);
                     setTitle(item.title);
