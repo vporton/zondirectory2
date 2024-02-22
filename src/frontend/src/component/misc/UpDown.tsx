@@ -111,8 +111,6 @@ export default function UpDown(props: {
 }
 
 export async function updateVotes(id, principal, source: {order: string, id: ItemRef, item: Item}[], setTotalVotes, setUserVote) { // TODO: argument types
-    console.log("updateVotes");
-
     const totalVotes: {[key: string]: {up: number, down: number}} = {};
     const totalVotesPromises = (source || []).map(folder =>
         loadTotalVotes(id!, folder.id).then(res => {
