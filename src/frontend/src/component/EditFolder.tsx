@@ -6,13 +6,14 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
+import { createActor as canDBPartitionActor } from "../../../declarations/CanDBPartition";
 import EditFoldersList from "./EditFoldersList";
 import { addToFolder, addToMultipleFolders } from "../util/folder";
 import { parseItemRef, serializeItemRef } from "../data/Data";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 
-export default function EditFolder(props: {super?: boolean}) {
+export default function EditFolder(props: {super?: boolean, folderId?: string}) {
     const routeParams = useParams(); // TODO: a dynamic value
     const navigate = useNavigate();
     const [superFolder, setSuperFolder] = useState<string | undefined>();
@@ -26,6 +27,21 @@ export default function EditFolder(props: {super?: boolean}) {
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
+    useEffect(() => {
+        if (props.folderId !== undefined) {
+            const folderId = parseItemRef(props.folderId);
+            const actor = canDBPartitionActor(folderId.canister);
+            actor.getItem(BigInt(folderId.id))
+                .then(item1 => {
+                    const item = item1[0]!.item;
+                    setFolderKind(item.communal ? FolderKind.communal : FolderKind.owned);
+                    setLocale(item.locale);
+                    setTitle(item.title);
+                    setShortDescription(item.description);
+                });
+        }
+
+    });
     function onSelectTab(index) {
         switch (index) {
             case 0:

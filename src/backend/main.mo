@@ -276,7 +276,7 @@ shared actor class ZonBackend() = this {
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
-        switch (oldItem.item.communal) {
+        if (oldItem.item.communal) {
           Debug.trap("it's communal");
         };
         lib.onlyItemOwner(caller, oldItem);

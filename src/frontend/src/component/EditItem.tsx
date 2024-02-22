@@ -49,6 +49,7 @@ export default function EditItemItem(props: {comment?: boolean}) {
                             // TODO: Differentiating post and message by `post === ""` is unreliable.
                             const isPost = selectedTab == SelectedTab.selectedOther && post !== "";
                             return {
+                                communal: false, // TODO: Item can be communal.
                                 locale,
                                 title,
                                 description: shortDescription,
