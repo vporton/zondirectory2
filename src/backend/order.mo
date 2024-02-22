@@ -126,9 +126,10 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
     let folderItem = lib.deserializeItem(folderItemData);
 
-    if (folderItem.item.details == #folder and not folderItem.item.communal) { // TODO: Remove `folderItem.item.details == #folder and`?
+    if (not folderItem.item.communal) { // TODO: Remove `folderItem.item.details == #folder and`?
       lib.onlyItemOwner(caller, folderItem);
-    } else if (not comment) {
+    };
+    if (folderItem.item.details != #folder and not comment) {
       Debug.trap("not a folder");
     };
     let links = await* getStreamLinks(itemId, comment);
