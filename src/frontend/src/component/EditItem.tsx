@@ -20,8 +20,8 @@ export default function EditItemItem(props: {comment?: boolean}) {
     const [foldersList, setFoldersList] = useState<[string, 'beginning' | 'end'][]>([]);
     const [antiCommentsList, setAntiCommentsList] = useState<[string, 'beginning' | 'end'][]>([]);
     useEffect(() => {
-        setMainFolder(routeParams.cat);
-    }, [routeParams.cat]);
+        setMainFolder(routeParams.folder);
+    }, [routeParams.folder]);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");

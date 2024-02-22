@@ -18,7 +18,7 @@ export async function addToFolder(agent: Agent, catId: ItemRef, itemId: ItemRef,
 
 // TODO: Change `string[]` argument type
 export async function addToMultipleFolders(agent: Agent, cats: [string, 'beginning' | 'end'][], itemId: ItemRef, comment: boolean) {
-    for (const cat of cats) {
-        await addToFolder(agent, parseItemRef(cat[0]), itemId, comment, cat[1]); // TODO: It may fail to parse.
+    for (const folder of cats) {
+        await addToFolder(agent, parseItemRef(folder[0]), itemId, comment, folder[1]); // TODO: It may fail to parse.
     }
 }

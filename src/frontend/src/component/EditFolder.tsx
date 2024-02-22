@@ -20,8 +20,8 @@ export default function EditFolder(props: {super?: boolean, folderId?: string}) 
     const [foldersList, setFoldersList] = useState<[string, 'beginning' | 'end'][]>([]);
     const [antiCommentsList, setAntiCommentsList] = useState<[string, 'beginning' | 'end'][]>([]);
     useEffect(() => {
-        setSuperFolder(routeParams.cat);
-    }, [routeParams.cat])
+        setSuperFolder(routeParams.folder);
+    }, [routeParams.folder])
     enum FolderKind { owned, communal };
     const [folderKind, setFolderKind] = useState<FolderKind>(FolderKind.owned);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
@@ -76,9 +76,9 @@ export default function EditFolder(props: {super?: boolean, folderId?: string}) 
                             await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
                             await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
                         } else {
-                            for (const cat of foldersList) {
+                            for (const folder of foldersList) {
                                 // TODO: It may fail to parse.
-                                await addToFolder(agent!, {canister: part, id: Number(n)}, parseItemRef(cat[0]), false, cat[1]);
+                                await addToFolder(agent!, {canister: part, id: Number(n)}, parseItemRef(folder[0]), false, folder[1]);
                             }
                         }
                         navigate("/item/"+ref);

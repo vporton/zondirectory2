@@ -135,19 +135,19 @@ function MyRouted() {
                             element={<EditItem/>}
                         />
                         <Route
-                            path="/create/for-folder/:cat"
+                            path="/create/for-folder/:folder"
                             element={<EditItem/>}
                         />
                         <Route
-                            path="/create/comment/:cat"
+                            path="/create/comment/:folder"
                             element={<EditItem comment={true}/>}
                         />
                         <Route
-                            path="/create-subfolder/for-folder/:cat"
+                            path="/create-subfolder/for-folder/:folder"
                             element={<EditFolder/>}
                         />
                         <Route
-                            path="/create-superfolder/for-folder/:cat"
+                            path="/create-superfolder/for-folder/:folder"
                             element={<EditFolder super={true}/>}
                         />
                         <Route

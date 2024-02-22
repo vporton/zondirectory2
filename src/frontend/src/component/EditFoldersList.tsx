@@ -90,11 +90,11 @@ export default function EditFoldersList(props: {
                     <Col>
                         <h3>Folders</h3>
                         <ul id="foldersList">
-                            {(folders ?? []).map((cat, i) => {
+                            {(folders ?? []).map((folder, i) => {
                                 return (
                                     <li key={i}>
-                                        <Form.Control value={cat[0]} onChange={updateFoldersList} style={{display: 'inline', width: '15em'}}/>{" "}
-                                        <Button onClick={() => setFolders(folders!.filter((item) => item !== cat))}>Delete</Button>{" "}
+                                        <Form.Control value={folder[0]} onChange={updateFoldersList} style={{display: 'inline', width: '15em'}}/>{" "}
+                                        <Button onClick={() => setFolders(folders!.filter((item) => item !== folder))}>Delete</Button>{" "}
                                         <label><input type="radio" name={`side-f${i}`} checked={side[i] === 'beginning' || side[i] === undefined}
                                             onChange={e => onSideChanged(e, i)} value="beginning"/>&#160;beginning</label>{" "}
                                         <label><input type="radio" name={`side-f${i}`} checked={side[i] === 'end'}
@@ -109,11 +109,11 @@ export default function EditFoldersList(props: {
                     <Col>
                         <h3>Comment to</h3>
                         <ul id="antiCommentsList">
-                            {(antiComments ?? []).map((cat, i) => {
+                            {(antiComments ?? []).map((folder, i) => {
                                 return (
                                     <li key={i}>
-                                        <Form.Control value={cat[0]} onChange={updateAntiCommentsList} style={{display: 'inline', width: '15em'}}/>{" "}
-                                        <Button onClick={() => setAntiComments(antiComments!.filter((item) => item !== cat))}>Delete</Button>
+                                        <Form.Control value={folder[0]} onChange={updateAntiCommentsList} style={{display: 'inline', width: '15em'}}/>{" "}
+                                        <Button onClick={() => setAntiComments(antiComments!.filter((item) => item !== folder))}>Delete</Button>
                                     </li>
                                 );
                             })}

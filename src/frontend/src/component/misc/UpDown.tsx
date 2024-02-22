@@ -114,9 +114,9 @@ export async function updateVotes(id, principal, source: {order: string, id: Ite
     console.log("updateVotes");
 
     const totalVotes: {[key: string]: {up: number, down: number}} = {};
-    const totalVotesPromises = (source || []).map(cat =>
-        loadTotalVotes(id!, cat.id).then(res => {
-            totalVotes[serializeItemRef(cat.id)] = res;
+    const totalVotesPromises = (source || []).map(folder =>
+        loadTotalVotes(id!, folder.id).then(res => {
+            totalVotes[serializeItemRef(folder.id)] = res;
         }),
     );
     Promise.all(totalVotesPromises).then(() => {
@@ -126,9 +126,9 @@ export async function updateVotes(id, principal, source: {order: string, id: Ite
 
     if (principal) {
         const userVotes: {[key: string]: number} = {};
-        const userVotesPromises = (source || []).map(cat =>
-            loadUserVote(principal, id!, cat.id).then(res => {
-                userVotes[serializeItemRef(cat.id)] = res;
+        const userVotesPromises = (source || []).map(folder =>
+            loadUserVote(principal, id!, folder.id).then(res => {
+                userVotes[serializeItemRef(folder.id)] = res;
             }),
         );
         Promise.all(userVotesPromises).then(() => {
