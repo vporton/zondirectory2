@@ -126,7 +126,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
     let folderItem = lib.deserializeItem(folderItemData);
 
-    if (folderItem.item.details == #folder) {
+    if (folderItem.item.details == #folder and not folderItem.item.communal) {
       lib.onlyItemOwner(caller, folderItem);
     } else if (not comment) {
       Debug.trap("not a folder");
