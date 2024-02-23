@@ -273,17 +273,15 @@ shared actor class ZonBackend() = this {
   public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(_itemId);
-    switch (await db.getAttribute({sk = key}, "i")) {
-      case (?oldItemRepr) {
-        let oldItem = lib.deserializeItem(oldItemRepr);
-        if (oldItem.item.communal) {
-          Debug.trap("it's communal");
-        };
-        lib.onlyItemOwner(caller, oldItem);
-        await db.delete({sk = key});
-      };
-      case _ { Debug.trap("no item") };
+    let ?oldItemRepr = await db.getAttribute({sk = key}, "i") else {
+      Debug.trap("no item");
     };
+    let oldItem = lib.deserializeItem(oldItemRepr);
+    if (oldItem.item.communal) {
+      Debug.trap("it's communal");
+    };
+    lib.onlyItemOwner(caller, oldItem);
+    await db.delete({sk = key});
   };
 
   // TODO: Set maximum lengths on user nick, chirp length, etc.
