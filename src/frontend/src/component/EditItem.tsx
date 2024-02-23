@@ -48,6 +48,7 @@ export default function EditItemItem(props: {itemId?: string, comment?: boolean}
                     const text = item1[0]! as any;
                     if (text !== undefined) {
                         setPost(text.text);
+                        setSelectedTab(SelectedTab.selectedOther);
                     }
                 });
         }
@@ -116,7 +117,7 @@ export default function EditItemItem(props: {itemId?: string, comment?: boolean}
                         <p>Link type:
                             <label><input type="radio" name="kind" value="0" required={true}/> Directory entry</label>
                             <label><input type="radio" name="kind" value="1" required={true}/> Message</label></p>*/}
-                        <Tabs onSelect={onSelectTab}>
+                        <Tabs onSelect={onSelectTab} selectedIndex={selectedTab === SelectedTab.selectedLink ? 0 : 1}>
                             <TabList>
                                 <Tab>Link</Tab>
                                 <Tab>Blog post</Tab>
