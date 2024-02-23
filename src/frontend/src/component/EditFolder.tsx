@@ -57,7 +57,6 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
             {({agent, isAuthenticated}) => {
                 async function submit() {
                     function itemData(): ItemWithoutOwner {
-                        console.log('itemData:', shortDescription)
                         return {
                             communal: folderKind == FolderKind.communal,
                             locale,
