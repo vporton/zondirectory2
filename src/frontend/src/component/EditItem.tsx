@@ -7,13 +7,14 @@ import { Helmet } from 'react-helmet';
 import 'react-tabs/style/react-tabs.css';
 import { ItemWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
+import { createActor as canDBPartitionActor } from "../../../declarations/CanDBPartition";
 import EditFoldersList from "./EditFoldersList";
 import { parseItemRef, serializeItemRef } from "../data/Data";
 import { addToMultipleFolders } from "../util/folder";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 
-export default function EditItemItem(props: {comment?: boolean}) {
+export default function EditItemItem(props: {itemId?: string, comment?: boolean}) {
     const routeParams = useParams();
     const navigate = useNavigate();
     const [mainFolder, setMainFolder] = useState<string | undefined>(undefined); // TODO: For a comment, it may be not a folder.
@@ -29,6 +30,29 @@ export default function EditItemItem(props: {comment?: boolean}) {
     const [post, setPost] = useState("");
     enum SelectedTab {selectedLink, selectedOther}
     const [selectedTab, setSelectedTab] = useState(SelectedTab.selectedLink);
+    useEffect(() => {
+        if (props.itemId !== undefined) {
+            const itemId = parseItemRef(props.itemId);
+            const actor = canDBPartitionActor(itemId.canister);
+            actor.getItem(BigInt(itemId.id))
+                .then(item1 => {
+                    const item = item1[0]!.item;
+                    setLocale(item.locale);
+                    setTitle(item.title);
+                    setShortDescription(item.description);
+                    setLink((item.details as any).link);
+                });
+            // TODO: Don't call it on non-blogpost:
+            actor.getAttribute({sk: "i/" + itemId.id}, "t")
+                .then(item1 => {
+                    console.log("LOAD", item1);
+                    const text = item1[0]! as any;
+                    if (text !== undefined) {
+                        setPost(text.text);
+                    }
+                });
+        }
+    }, [props.itemId]);
     function onSelectTab(index) {
         switch (index) {
             case 0:
@@ -61,14 +85,16 @@ export default function EditItemItem(props: {comment?: boolean}) {
                         async function submitItem(item: ItemWithoutOwner) {
                             const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
                             let part, n;
-                            if (routeParams.folder !== undefined) {
-                                const folder = parseItemRef(routeParams.folder); // TODO: not here
+                            if (routeParams.item !== undefined) {
+                                console.log("routeParams.item", routeParams.item    )
+                                const folder = parseItemRef(routeParams.item); // TODO: not here
                                 await backend.setItemData(folder.canister, BigInt(folder.id), item);
                                 part = folder.canister;
                                 n = BigInt(folder.id);
                             } else {
                                 [part, n] = await backend.createItemData(item);
                             }
+                            console.log("SET", post, [part, n, post]);
                             await backend.setPostText(part, n, post);
                             const ref = serializeItemRef({canister: part, id: Number(n)});
                             // TODO: What to do with this on editing the folder?
@@ -84,9 +110,10 @@ export default function EditItemItem(props: {comment?: boolean}) {
                         <Helmet>
                             <title>Zon Social Media - create a new item</title>
                         </Helmet>
-                        <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
-                        <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
-                        <p>Short (meta) description: <textarea onChange={e => setShortDescription(e.target.value)}/></p>
+                        <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
+                        <p>Title: <input type="text" required={true} defaultValue={title} onChange={e => setTitle(e.target.value)}/></p>
+                        <p>Short (meta) description: <textarea defaultValue={shortDescription
+                        } onChange={e => setShortDescription(e.target.value)}/></p>
                         {/* TODO (should not because complicates ordering?):
                         <p>Link type:
                             <label><input type="radio" name="kind" value="0" required={true}/> Directory entry</label>
@@ -97,10 +124,10 @@ export default function EditItemItem(props: {comment?: boolean}) {
                                 <Tab>Blog post</Tab>
                             </TabList>
                             <TabPanel>
-                                <p>Link: <input type="url" onChange={e => setLink(e.target.value)}/></p>
+                                <p>Link: <input type="url" defaultValue={link} onChange={e => setLink(e.target.value)}/></p>
                             </TabPanel>
                             <TabPanel>
-                                <p>Text: <textarea style={{height: "10ex"}} onChange={e => setPost(e.target.value)}/></p>
+                                <p>Text: <textarea style={{height: "10ex"}} defaultValue={post} onChange={e => setPost(e.target.value)}/></p>
                             </TabPanel>
                         </Tabs>
                         <EditFoldersList

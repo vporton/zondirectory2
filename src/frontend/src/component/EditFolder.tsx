@@ -108,15 +108,15 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                         <TabPanel>
                             <p>Owned folders have an owner (you). Only the owner can add, delete, and reoder items in an owned folder,{" "}
                                 or rename the folder.</p>
-                            <p>Language: <input type="text" required={true} value="en" defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
+                            <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
                             <p>Title: <input type="text" required={true} defaultValue={title} onChange={e => setTitle(e.target.value)}/></p>
                             <p>Short (meta) description: <textarea defaultValue={shortDescription} onChange={e => setShortDescription(e.target.value)}/></p>
                         </TabPanel>
                         <TabPanel>
                             <p>Communal folders have no owner. Anybody can add an item to a communal folder.{" "}
                                 Nobody can delete an item from a communal folder or rename the folder. Ordering is determined by voting.</p>
-                            <p>Language: <input type="text" required={true} value="en" onChange={e => setLocale(e.target.value)}/></p>
-                            <p>Title: <input type="text" required={true} onChange={e => setTitle(e.target.value)}/></p>
+                            <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
+                            <p>Title: <input type="text" required={true} defaultValue={title} onChange={e => setTitle(e.target.value)}/></p>
                         </TabPanel>
                     </Tabs>
                     <EditFoldersList

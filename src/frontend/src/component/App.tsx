@@ -172,6 +172,18 @@ function MyRouted() {
                             }
                         />
                         <Route
+                            path="/item/edit/:item"
+                            element={
+                                (() => {
+                                    function Edit(props) {
+                                        const routeParams = useParams();
+                                        return <EditItem itemId={routeParams.item}/>;
+                                    }
+                                    return <Edit/>;
+                                })()
+                            }
+                        />
+                        <Route
                             path="/personhood"
                             element={<Person/>}
                         />

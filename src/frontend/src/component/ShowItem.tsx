@@ -248,7 +248,7 @@ function ShowItemContent(props: {defaultAgent}) {
                         />*/}
                         <ItemType item={x.item}/>
                         <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
-                        [<Nav.Link href={`#/folder/edit/${serializeItemRef(id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                        [<Nav.Link href={`#/folder/edit/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                     </li>)}
             </ul>}
             {/* TODO: Create super-folder */}
@@ -273,6 +273,7 @@ function ShowItemContent(props: {defaultAgent}) {
                             {x.item.item.price ? <>({x.item.item.price} ICP) </> : ""}
                             {(x.item.item.details as any).link ? <a href={(x.item.item.details as any).link}>{x.item.item.title}</a> : x.item.item.title}
                             {" "}<a href={`#/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
+                            {" "}[<Nav.Link href={`#/item/edit/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                         </p>
                         <p lang={x.item.item.locale} style={{marginLeft: '1em'}}>{x.item.item.description}</p>
                     </div>
