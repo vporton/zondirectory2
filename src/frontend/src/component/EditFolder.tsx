@@ -20,7 +20,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
     const [antiCommentsList, setAntiCommentsList] = useState<[string, 'beginning' | 'end'][]>([]);
     useEffect(() => {
         setSuperFolder(props.superFolderId);
-    }, [props.superFolderId])
+    }, [props.superFolderId]);
     enum FolderKind { owned, communal };
     const [folderKind, setFolderKind] = useState<FolderKind>(FolderKind.owned);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
