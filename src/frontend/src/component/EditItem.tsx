@@ -45,7 +45,6 @@ export default function EditItemItem(props: {itemId?: string, comment?: boolean}
             // TODO: Don't call it on non-blogpost:
             actor.getAttribute({sk: "i/" + itemId.id}, "t")
                 .then(item1 => {
-                    console.log("LOAD", item1);
                     const text = item1[0]! as any;
                     if (text !== undefined) {
                         setPost(text.text);
@@ -94,7 +93,6 @@ export default function EditItemItem(props: {itemId?: string, comment?: boolean}
                             } else {
                                 [part, n] = await backend.createItemData(item);
                             }
-                            console.log("SET", post, [part, n, post]);
                             await backend.setPostText(part, n, post);
                             const ref = serializeItemRef({canister: part, id: Number(n)});
                             // TODO: What to do with this on editing the folder?
