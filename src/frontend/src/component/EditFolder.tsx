@@ -40,7 +40,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                 });
         }
     }, [props.folderId]);
-    function onSelectTab(index) {
+    function onSelectTab(index: number) {
         switch (index) {
             case 0:
                 setFolderKind(FolderKind.owned);
