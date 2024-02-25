@@ -105,6 +105,12 @@ export default function EditItemItem(props: {itemId?: string, comment?: boolean}
                         await submitItem(itemData());
                         setBusy(false);
                     }
+                    async function remove() {
+                        const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
+                        const folder = parseItemRef(props.itemId!); // TODO: not here
+                        await backend.removeItem(folder.canister, BigInt(folder.id));
+                        navigate("/");
+                    }
                     return <>
                         <Helmet>
                             <title>Zon Social Media - create a new item</title>
@@ -135,7 +141,12 @@ export default function EditItemItem(props: {itemId?: string, comment?: boolean}
                             onChangeFolders={setFoldersList}
                             onChangeAntiComments={setAntiCommentsList}
                         />
-                        <p><Button onClick={submit} disabled={!isAuthenticated}>Submit</Button></p>
+                        <p>
+                            <Button onClick={submit} disabled={!isAuthenticated}>Submit</Button>
+                            {props.itemId !== undefined &&
+                                <Button onClick={remove} disabled={!isAuthenticated}>Delete</Button>
+                            }
+                        </p>
                     </>;
                 }}
             </AuthContext.Consumer>
