@@ -19,6 +19,7 @@ import Time "mo:base/Time";
 import StableBuffer "mo:StableBuffer/StableBuffer";
 import Payments "payments";
 import NacDbPartition "../storage/NacDBPartition";
+import order "canister:order";
 import lib "lib";
 import config "../../config";
 
@@ -271,6 +272,7 @@ shared actor class ZonBackend() = this {
 
   // TODO: Also remove voting data.
   public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat) {
+    await order.removeItemLinks((canisterId, _itemId));
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(_itemId);
     let ?oldItemRepr = await db.getAttribute({sk = key}, "i") else {

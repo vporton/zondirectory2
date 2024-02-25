@@ -195,6 +195,34 @@ shared({caller = initialOwner}) actor class Orders() = this {
     await itemId1.putAttribute({ sk = "i/" # Nat.toText(itemId.1); key = key2; value = itemData2 });
   };
 
+  public shared({caller}) func removeItemLinks(itemId: (Principal, Nat)): async () {
+    checkCaller(caller);
+    await* _removeItemLinks(itemId);
+  };
+
+  func _removeItemLinks(itemId: (Principal, Nat)): async* () {
+    await* _removeStream(await* itemsOrder(itemId, "s"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "sr"), itemId);
+  };
+
+  func _removeStream(stream: ?lib.Streams, itemId: (Principal, Nat)): async* () {
+    switch (stream) {
+      case (?stream) {
+        for (order in stream.vals()) {
+          switch (order) {
+            case (?order) {
+              let value = Nat.toText(itemId.1) # "@" # Principal.toText(itemId.0);
+              await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = order; value });
+            };
+            case null {};
+          }
+        };
+      };
+      case null {};
+    };
+
+  };
+
   func getStreamLinks(/*catId: (Principal, Nat),*/ itemId: (Principal, Nat), comment: Bool)
     : async* lib.StreamsLinks
   {
