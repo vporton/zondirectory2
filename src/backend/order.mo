@@ -191,7 +191,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
     await* addItemToList(stream2, catId, side);
     let itemData1 = lib.serializeStreams(Array.freeze(streamsVar1));
     let itemData2 = lib.serializeStreams(Array.freeze(streamsVar2));
-    // Debug.print("ADD STREAM: ");
     await itemId1.putAttribute({ sk = "i/" # Nat.toText(catId.1); key = key1; value = itemData1 });
     await itemId1.putAttribute({ sk = "i/" # Nat.toText(itemId.1); key = key2; value = itemData2 });
   };
