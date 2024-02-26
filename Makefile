@@ -25,6 +25,8 @@ configure:
 	dfx build internet_identity
 	dfx deploy --network $(NETWORK) main
 	dfx generate
+	dfx generate CanDBPartition
+	dfx generate NacDBPartition
 
 .PHONY: install-backend
 install-backend:
