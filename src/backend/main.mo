@@ -272,6 +272,7 @@ shared actor class ZonBackend() = this {
 
   // TODO: Also remove voting data.
   public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat) {
+    Debug.print("DEBUG: " # Nat.toText(_itemId) # "@" # Principal.toText(canisterId));
     await order.removeItemLinks((canisterId, _itemId));
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(_itemId);
