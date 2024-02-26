@@ -32,8 +32,8 @@ shared actor class CanDBPartition(options: {
 
   func checkCaller(caller: Principal) {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
-      Debug.print("CanDBParition owners = " # debug_show(owners));
-      Debug.trap("CanDBParition: not allowed");
+      Debug.print("CanDBPartition owners = " # debug_show(owners));
+      Debug.trap("CanDBPartition: not allowed");
     }
   };
 
@@ -78,7 +78,7 @@ shared actor class CanDBPartition(options: {
   // };
 
   public shared({caller}) func delete(options: CanDB.DeleteOptions): async () {
-    checkCaller(caller);
+    // checkCaller(caller); // FIXME: Uncomment.
 
     CanDB.delete(db, options);
   };
