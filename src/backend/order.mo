@@ -153,8 +153,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
     side: { #beginning; #end; #zero },
   ): async* () {
     // Put into the beginning of time order.
-    let streams1 = await* itemsOrder(catId, key1);
-    let streams2 = await* itemsOrder(itemId, key2);
+    let streams1 = await* itemsOrder(catId, if (comment) { "c" # key1 } else { key1 });
+    let streams2 = await* itemsOrder(itemId, if (comment) { "c" # key2 } else { key2 });
     let streamsVar1: [var ?Reorder.Order] = switch (streams1) {
       case (?streams) { Array.thaw(streams) };
       case null { [var null, null, null]};
@@ -201,8 +201,14 @@ shared({caller = initialOwner}) actor class Orders() = this {
   };
 
   func _removeItemLinks(itemId: (Principal, Nat)): async* () {
-    await* _removeStream(await* itemsOrder(itemId, "s"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "sr"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "st"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "sv"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "srt"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "srv"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "cst"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "csv"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "csrt"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "csrv"), itemId);
   };
 
   func _removeStream(stream: ?lib.Streams, itemId: (Principal, Nat)): async* () {
