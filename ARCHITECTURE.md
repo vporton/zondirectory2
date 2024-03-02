@@ -9,7 +9,8 @@
 - Attribute `"i"` - `Item` record.
 - Attribute `"st"` (time), `"sv"` (votes) - `Streams` record.
 - Attribute `"srt"` (time), `"srv"` (votes) - `Streams` record, reverse order.
-- Comment: prefix `c` to the attribute name - `Streams` record.
+- Attribute `"cst"` (time), `"csv"` (votes) - `Streams` record for comments.
+- Attribute `"csrt"` (time), `"csrv"` (votes) - `Streams` record, reverse order, for comments.
 - Attribute `"t"` - post's text.
 ### "a/" - user -> <buyer affiliate>/<seller affiliate>
 ### "v/<principal>/<parent>/<child>"
