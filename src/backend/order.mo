@@ -132,11 +132,11 @@ shared({caller = initialOwner}) actor class Orders() = this {
       Debug.trap("not a folder");
     };
     let links = await* getStreamLinks(itemId, comment);
-    await* addToStreams(catId, itemId, comment, links, itemId1, "st", "str", #beginning);
+    await* addToStreams(catId, itemId, comment, links, itemId1, "st", "rst", #beginning);
     if (folderItem.item.details == #folder) {
-      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "svr", side);
+      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rvt", side);
     } else {
-      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "svr", #end);
+      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rvt", #end);
     };
   };
 
@@ -152,8 +152,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
     side: { #beginning; #end; #zero },
   ): async* () {
     // Put into the beginning of time order.
-    let streams1 = await* itemsOrder(catId, if (comment) { "c" # key1 } else { key1 });
-    let streams2 = await* itemsOrder(itemId, if (comment) { "c" # key2 } else { key2 });
+    let streams1 = await* itemsOrder(catId, if (comment) { key1 # "c" } else { key1 });
+    let streams2 = await* itemsOrder(itemId, if (comment) { key2 # "c" } else { key2 });
     let streamsVar1: [var ?Reorder.Order] = switch (streams1) {
       case (?streams) { Array.thaw(streams) };
       case null { [var null, null, null]};
@@ -201,24 +201,28 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   func _removeItemLinks(itemId: (Principal, Nat)): async* () {
     // FIXME: Also delete the other end.
-    await* _removeStream(await* itemsOrder(itemId, "st"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "sv"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "str"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "svr"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "cst"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "cvs"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "cstr"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "csvr"), itemId);
+    await* _removeStream("st", itemId);
+    await* _removeStream("sv", itemId);
+    await* _removeStream("rst", itemId);
+    await* _removeStream("rvt", itemId);
+    await* _removeStream("stc", itemId);
+    await* _removeStream("vsc", itemId);
+    await* _removeStream("rstc", itemId);
+    await* _removeStream("rsvc", itemId);
   };
 
-  func _removeStream(stream: ?lib.Streams, itemId: (Principal, Nat)): async* () {
-    switch (stream) {
+  func _removeStream(kind: Text, itemId: (Principal, Nat)): async* () {
+    let directOrder = await* itemsOrder(itemId, "rsvc");
+    switch (directOrder) {
       case (?stream) {
         for (order in stream.vals()) {
           switch (order) {
             case (?order) {
               let value = Nat.toText(itemId.1) # "@" # Principal.toText(itemId.0);
+              let reverseKind = Text.su
+              let reverseOrder = ;
               await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = order; value });
+              if ()
             };
             case null {};
           }
