@@ -92,7 +92,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
       } else {
         let t = scanResult.results[0].0;
         let n = lib.decodeInt(Text.fromIter(Itertools.takeWhile(t.chars(), func (c: Char): Bool { c != '#' })));
-        Debug.print("t=" # t # "; n=" # debug_show(n));
         if (side == #end) { n + 1 } else { n - 1 };
       };
       timeScanSK;
@@ -337,7 +336,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let parentCanister = actor(Principal.toText(parentPrincipal)) : CanDBPartition.CanDBPartition;
     let links = await* getStreamLinks((childPrincipal, child), comment);
     let streamsData = await* itemsOrder((parentPrincipal, parent), "sv");
-    // Debug.print("streamsData: " # debug_show(streamsData.));
     let streamsVar: [var ?Reorder.Order] = switch (streamsData) {
       case (?streams) { Array.thaw(streams) };
       case null { [var null, null, null]};
@@ -352,7 +350,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
       streamsVar[links] := ?order;
       let data = lib.serializeStreams(Array.freeze(streamsVar));
       await parentCanister.putAttribute({ sk = "i/" # Nat.toText(parent); key = "sv"; value = data });
-      Debug.print("ADDED: " # "i/" # Nat.toText(parent));
     };
 
     await* Reorder.move(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
