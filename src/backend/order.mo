@@ -133,11 +133,11 @@ shared({caller = initialOwner}) actor class Orders() = this {
       Debug.trap("not a folder");
     };
     let links = await* getStreamLinks(itemId, comment);
-    await* addToStreams(catId, itemId, comment, links, itemId1, "st", "srt", #beginning);
+    await* addToStreams(catId, itemId, comment, links, itemId1, "st", "str", #beginning);
     if (folderItem.item.details == #folder) {
-      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", side);
+      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "svr", side);
     } else {
-      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "srv", #end);
+      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "svr", #end);
     };
   };
 
@@ -201,14 +201,15 @@ shared({caller = initialOwner}) actor class Orders() = this {
   };
 
   func _removeItemLinks(itemId: (Principal, Nat)): async* () {
+    // FIXME: Also delete the other end.
     await* _removeStream(await* itemsOrder(itemId, "st"), itemId);
     await* _removeStream(await* itemsOrder(itemId, "sv"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "srt"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "srv"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "str"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "svr"), itemId);
     await* _removeStream(await* itemsOrder(itemId, "cst"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "csv"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "csrt"), itemId);
-    await* _removeStream(await* itemsOrder(itemId, "csrv"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "cvs"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "cstr"), itemId);
+    await* _removeStream(await* itemsOrder(itemId, "csvr"), itemId);
   };
 
   func _removeStream(stream: ?lib.Streams, itemId: (Principal, Nat)): async* () {

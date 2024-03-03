@@ -8,9 +8,9 @@
 ### "i/" - ID -> Item
 - Attribute `"i"` - `Item` record.
 - Attribute `"st"` (time), `"sv"` (votes) - `Streams` record.
-- Attribute `"srt"` (time), `"srv"` (votes) - `Streams` record, reverse order.
-- Attribute `"cst"` (time), `"csv"` (votes) - `Streams` record for comments.
-- Attribute `"csrt"` (time), `"csrv"` (votes) - `Streams` record, reverse order, for comments.
+- Attribute `"str"` (time), `"svr"` (votes) - `Streams` record, reverse order.
+- Attribute `"cst"` (time), `"cvs"` (votes) - `Streams` record for comments.
+- Attribute `"cstr"` (time), `"csvr"` (votes) - `Streams` record, reverse order, for comments.
 - Attribute `"t"` - post's text.
 ### "a/" - user -> <buyer affiliate>/<seller affiliate>
 ### "v/<principal>/<parent>/<child>"
