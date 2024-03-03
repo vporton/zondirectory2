@@ -144,7 +144,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   func addToStreams(
     catId: (Principal, Nat),
     itemId: (Principal, Nat),
-    comment: Bool,
+    comment: Bool, // FIXME: Use it.
     links: lib.StreamsLinks,
     itemId1: CanDBPartition.CanDBPartition,
     key1: Text,
@@ -152,8 +152,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
     side: { #beginning; #end; #zero },
   ): async* () {
     // Put into the beginning of time order.
-    let streams1 = await* itemsOrder(catId, if (comment) { key1 # "c" } else { key1 });
-    let streams2 = await* itemsOrder(itemId, if (comment) { key2 # "c" } else { key2 });
+    let streams1 = await* itemsStream(catId, key1);
+    let streams2 = await* itemsStream(itemId, key2);
     let streamsVar1: [var ?Reorder.Order] = switch (streams1) {
       case (?streams) { Array.thaw(streams) };
       case null { [var null, null, null]};
@@ -205,24 +205,48 @@ shared({caller = initialOwner}) actor class Orders() = this {
     await* _removeStream("sv", itemId);
     await* _removeStream("rst", itemId);
     await* _removeStream("rvt", itemId);
-    await* _removeStream("stc", itemId);
-    await* _removeStream("vsc", itemId);
-    await* _removeStream("rstc", itemId);
-    await* _removeStream("rsvc", itemId);
+    // await* _removeStream("stc", itemId);
+    // await* _removeStream("vsc", itemId);
+    // await* _removeStream("rstc", itemId);
+    // await* _removeStream("rsvc", itemId);
   };
 
+  /// Removes a stream
   func _removeStream(kind: Text, itemId: (Principal, Nat)): async* () {
-    let directOrder = await* itemsOrder(itemId, "rsvc");
-    switch (directOrder) {
-      case (?stream) {
-        for (order in stream.vals()) {
-          switch (order) {
-            case (?order) {
+    let directStream = await* itemsStream(itemId, kind);
+    switch (directStream) {
+      case (?directStream) {
+        for (directOrder in directStream.vals()) {
+          switch (directOrder) {
+            case (?directOrder) {
               let value = Nat.toText(itemId.1) # "@" # Principal.toText(itemId.0);
-              let reverseKind = Text.su
-              let reverseOrder = ;
-              await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = order; value });
-              if ()
+              let reverseKind = if (kind.chars().next() == ?'r') {
+                let iter = kind.chars();
+                ignore iter.next();
+                Text.fromIter(iter);
+              } else {
+                "r" # kind;
+              };
+              // FIXME: Is the following line needed?
+              // await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = directOrder; value });
+              // FIXME !!!
+              let reversePart = Principal.fromActor(directOrder.reverse.0);
+              let otherReverseStream = await* itemsStream((reversePart, directOrder.reverse.1), reverseKind);
+              // Stream is an array of `Order`
+              switch ((otherReverseStream)) {
+                case (?otherReverseStream) {
+                  for (otherReverse in Array.vals(otherReverseStream)) { // iterate through folder, item, comment
+                    switch (otherReverse) {
+                      case (?otherReverse) {
+                        await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = otherReverse; value });
+                        // FIXME: Also remove dangling reference to the stream.
+                      };
+                      case _ {};
+                    }
+                  };
+                };
+                case _ {};
+              };
             };
             case null {};
           }
@@ -257,7 +281,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   /// `key1` and `key2` are like `"s"` and `"sr"`
   /// TODO: No need to return an option type
-  func itemsOrder(itemId: (Principal, Nat), key2: Text)
+  func itemsStream(itemId: (Principal, Nat), key2: Text)
     : async* ?lib.Streams
   {
     let itemId1: CanDBPartition.CanDBPartition = actor(Principal.toText(itemId.0));
@@ -339,7 +363,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
     let parentCanister = actor(Principal.toText(parentPrincipal)) : CanDBPartition.CanDBPartition;
     let links = await* getStreamLinks((childPrincipal, child), comment);
-    let streamsData = await* itemsOrder((parentPrincipal, parent), "sv");
+    let streamsData = await* itemsStream((parentPrincipal, parent), "sv");
     let streamsVar: [var ?Reorder.Order] = switch (streamsData) {
       case (?streams) { Array.thaw(streams) };
       case null { [var null, null, null]};
