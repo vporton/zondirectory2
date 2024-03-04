@@ -227,8 +227,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
               } else {
                 "r" # kind;
               };
-              // FIXME: Is the following line needed?
-              // await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = directOrder; value });
+              // The following line is not needed:
+              // await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = directOrder; value = ?? });
               // TODO: If more than 100_000?
               let result = await directOrder.order.0.scanLimitOuter({outerKey = directOrder.order.1; lowerBound = ""; upperBound = "x"; dir = #fwd; limit = 100_000});
               for (p in result.results.vals()) {
@@ -250,7 +250,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
                   case (?reverseStream) {
                     switch (reverseStream[index]) {
                       case (?reverseOrder) {
-                        await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = reverseOrder; value = q });
+                        Debug.print("q=" # q # ", parent=" # debug_show(w1i) # "@" # w2 # ", kind=" # reverseKind);
+                        await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = reverseOrder; value });
                       };
                       case null {};
                     };
