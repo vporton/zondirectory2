@@ -272,7 +272,6 @@ shared actor class ZonBackend() = this {
 
   // TODO: Also remove voting data.
   public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat) {
-    Debug.print("DEBUG: " # Nat.toText(_itemId) # "@" # Principal.toText(canisterId));
     // We first remove links, then the item itself, in order to avoid race conditions when displaying.
     await order.removeItemLinks((canisterId, _itemId));
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
