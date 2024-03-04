@@ -227,9 +227,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
               } else {
                 "r" # kind;
               };
-              // FIXME: Also delete detached NacDB DB sub-DBs.
-              // The following line is not needed:
-              // await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = directOrder; value = ?? });
+              // Delete links pointing to us:
               // TODO: If more than 100_000?
               let result = await directOrder.order.0.scanLimitOuter({outerKey = directOrder.order.1; lowerBound = ""; upperBound = "x"; dir = #fwd; limit = 100_000});
               for (p in result.results.vals()) {
@@ -260,6 +258,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
                   case null {};
                 };
               };
+              // Delete our own sub-DB (before deleting the item itself):
+              await directOrder.order.0.deleteSubDBOuter({outerKey = directOrder.order.1});
             };
             case null {};
           }
