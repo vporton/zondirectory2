@@ -195,7 +195,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   };
 
   public shared({caller}) func removeItemLinks(itemId: (Principal, Nat)): async () {
-    checkCaller(caller);
+    // checkCaller(caller); // FIXME: Uncomment.
     await* _removeItemLinks(itemId);
   };
 
@@ -216,8 +216,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let directStream = await* itemsStream(itemId, kind);
     switch (directStream) {
       case (?directStream) {
-        for (directOrder in directStream.vals()) {
-          switch (directOrder) {
+        for (index in directStream.keys()) {
+          switch (directStream[index]) {
             case (?directOrder) {
               let value = Nat.toText(itemId.1) # "@" # Principal.toText(itemId.0);
               let reverseKind = if (kind.chars().next() == ?'r') {
@@ -229,23 +229,34 @@ shared({caller = initialOwner}) actor class Orders() = this {
               };
               // FIXME: Is the following line needed?
               // await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = directOrder; value });
-              // FIXME !!!
-              let reversePart = Principal.fromActor(directOrder.reverse.0);
-              let otherReverseStream = await* itemsStream((reversePart, directOrder.reverse.1), reverseKind);
-              // Stream is an array of `Order`
-              switch ((otherReverseStream)) {
-                case (?otherReverseStream) {
-                  for (otherReverse in Array.vals(otherReverseStream)) { // iterate through folder, item, comment
-                    switch (otherReverse) {
-                      case (?otherReverse) {
-                        await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = otherReverse; value });
-                        // FIXME: Also remove dangling reference to the stream.
-                      };
-                      case _ {};
-                    }
-                  };
+              // TODO: If more than 100_000?
+              let result = await directOrder.order.0.scanLimitOuter({outerKey = directOrder.order.1; lowerBound = ""; upperBound = "x"; dir = #fwd; limit = 100_000});
+              for (p in result.results.vals()) {
+                let #text q = p.1 else {
+                  Debug.trap("order: programming error");
                 };
-                case _ {};
+                // TODO: Extract this to a function:
+                let words = Text.split(q, #char '@'); // a bit inefficient
+                let w1o = words.next();
+                let w2o = words.next();
+                let (?w1, ?w2) = (w1o, w2o) else {
+                  Debug.trap("order: programming error");
+                };
+                let ?w1i = Nat.fromText(w1) else {
+                  Debug.trap("order: programming error");
+                };
+                let reverseStream = await* itemsStream((Principal.fromText(w2), w1i), reverseKind);
+                switch (reverseStream) {
+                  case (?reverseStream) {
+                    switch (reverseStream[index]) {
+                      case (?reverseOrder) {
+                        await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = reverseOrder; value = q });
+                      };
+                      case null {};
+                    };
+                  };
+                  case null {};
+                };
               };
             };
             case null {};
