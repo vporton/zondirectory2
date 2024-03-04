@@ -134,13 +134,13 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let links = await* getStreamLinks(itemId, comment);
     await* addToStreams(catId, itemId, comment, links, itemId1, "st", "rst", #beginning);
     if (folderItem.item.details == #folder) {
-      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rvt", side);
+      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rsv", side);
     } else {
-      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rvt", #end);
+      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rsv", #end);
     };
   };
 
-  /// `key1` and `key2` are like `"s"` and `"sr"`
+  /// `key1` and `key2` are like `"st"` and `"rst"`
   func addToStreams(
     catId: (Principal, Nat),
     itemId: (Principal, Nat),
@@ -204,7 +204,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     await* _removeStream("st", itemId);
     await* _removeStream("sv", itemId);
     await* _removeStream("rst", itemId);
-    await* _removeStream("rvt", itemId);
+    await* _removeStream("rsv", itemId);
     // await* _removeStream("stc", itemId);
     // await* _removeStream("vsc", itemId);
     // await* _removeStream("rstc", itemId);
@@ -279,7 +279,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
   };
 
-  /// `key1` and `key2` are like `"s"` and `"sr"`
+  /// `key1` and `key2` are like `"st"` and `"rst"`
   /// TODO: No need to return an option type
   func itemsStream(itemId: (Principal, Nat), key2: Text)
     : async* ?lib.Streams
