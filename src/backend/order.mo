@@ -212,6 +212,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   };
 
   /// Removes a stream
+  /// TODO: Race condition on removing first links in only one direction. Check for more race conditions.
   func _removeStream(kind: Text, itemId: (Principal, Nat)): async* () {
     let directStream = await* itemsStream(itemId, kind);
     switch (directStream) {
