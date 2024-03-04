@@ -227,6 +227,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
               } else {
                 "r" # kind;
               };
+              // FIXME: Also delete detached NacDB DB sub-DBs.
               // The following line is not needed:
               // await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = directOrder; value = ?? });
               // TODO: If more than 100_000?
