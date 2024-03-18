@@ -26,4 +26,4 @@
 
 Allowed number of votes:
 - 10 per day
-- additional 5 votes (not per day) for each message
+- additional 10 votes (not per day) for each message
