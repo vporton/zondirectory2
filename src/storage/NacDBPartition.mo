@@ -78,7 +78,7 @@ shared({caller}) actor class Partition(
         Nac.rawInsertSubDBAndSetOuter({superDB; canister = this; map; keys; userData; hardCap});
     };
 
-    public query func isOverflowed({}) : async Bool {
+    public query func isOverflowed() : async Bool {
         Nac.isOverflowed({dbOptions = Common.dbOptions; superDB});
     };
 
@@ -132,7 +132,7 @@ shared({caller}) actor class Partition(
         Nac.scanLimitInner({innerSuperDB = superDB; innerKey; lowerBound; upperBound; dir; limit});
     };
 
-    public shared func scanLimitOuter({outerKey: Nac.OuterSubDBKey; lowerBound: Text; upperBound: Text; dir: BTree.Direction; limit: Nat})
+    public shared func scanLimitOuter({outerKey: Nac.OuterSubDBKey; lowerBound: Nac.SK; upperBound: Nac.SK; dir: BTree.Direction; limit: Nat})
         : async BTree.ScanLimitResult<Text, Nac.AttributeValue>
     {
         ignore MyCycles.topUpCycles<system>(Common.dbOptions.partitionCycles);
@@ -241,8 +241,8 @@ shared({caller}) actor class Partition(
         Nac.rawGetSubDB(superDB, innerKey);
     };
 
-    public func subDBSizeOuterImpl(options: Nac.SubDBSizeOuterOptions, dbOptions: Nac.DBOptions): async ?Nat {
-        MyCycles.addPart<system>(dbOptions.partitionCycles);
+    public func subDBSizeOuterImpl(options: Nac.SubDBSizeOuterOptions): async ?Nat {
+        MyCycles.addPart<system>(Common.dbOptions.partitionCycles);
         await options.outer.canister.subDBSizeByOuter({outerKey = options.outer.key});
     };
 
