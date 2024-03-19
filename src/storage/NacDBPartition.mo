@@ -79,7 +79,6 @@ shared({caller}) actor class Partition(
     };
 
     public query func isOverflowed({}) : async Bool {
-        ignore MyCycles.topUpCycles<system>(Common.dbOptions.partitionCycles);
         Nac.isOverflowed({dbOptions = Common.dbOptions; superDB});
     };
 
@@ -143,10 +142,10 @@ shared({caller}) actor class Partition(
     public query func scanSubDBs(): async [(Nac.OuterSubDBKey, {canister: Principal; key: Nac.InnerSubDBKey})] {
         // ignore MyCycles.topUpCycles<system>(Common.dbOptions.partitionCycles);
         type T1 = (Nac.OuterSubDBKey, Nac.InnerPair);
-        type T2 = (Nac.OuterSubDBKey, (Principal, Nac.InnerSubDBKey));
+        type T2 = (Nac.OuterSubDBKey, {canister: Principal; key: Nac.InnerSubDBKey});
         let array: [T1] = Nac.scanSubDBs({superDB});
         let iter = Iter.map(array.vals(), func ((outerKey, {canister = inner; key = innerKey}): T1): T2 {
-            (outerKey, (Principal.fromActor(inner), innerKey));
+            (outerKey, {canister = Principal.fromActor(inner); key = innerKey});
         });
         Iter.toArray(iter);
     };
@@ -221,8 +220,8 @@ shared({caller}) actor class Partition(
     // TODO: Add this function to the public interface in NacDB?
     public query func getInner(options: {outerKey: Nac.OuterSubDBKey}) : async ?{canister: Principal; key: Nac.InnerSubDBKey} {
         do ? {
-            let {canister; key} = Nac.getInner({superDB; outerKey})!;
-            (Principal.fromActor(canister), key);
+            let {canister; key} = Nac.getInner({superDB; outerKey = options.outerKey})!;
+            {canister = Principal.fromActor(canister); key};
         };
     };
 
@@ -248,7 +247,7 @@ shared({caller}) actor class Partition(
         await options.outer.canister.subDBSizeByOuter({outerKey = options.outer.key});
     };
 
-    shared query func getOuter(options: Nac.GetByOuterPartitionKeyOptions): async ?Nac.AttributeValue {
+    public shared func getOuter(options: Nac.GetByOuterPartitionKeyOptions): async ?Nac.AttributeValue {
         await* Nac.getOuter(options, Common.dbOptions);
     };
 
