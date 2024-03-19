@@ -50,6 +50,7 @@ do-build-backend:
 
 .PHONY: do-build-frontend
 do-build-frontend:
+	npm run build
 	dfx build frontend
 
 .PHONY: CanDBPartition.wasm

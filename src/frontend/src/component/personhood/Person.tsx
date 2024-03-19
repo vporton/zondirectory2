@@ -121,9 +121,9 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
 
   useEffect(() => {
     if (props.agent !== undefined) {
-      // const backend = createBackendActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
+      // const backend = createBackendActor(ourCanisters.CANISTER_ID_PERSONHOOD, {agent: props.agent}); // TODO: duplicate code
 
-      const actor = canDBIndexActor(process.env.CANDBINDEX_CANISTER_ID!, {agent: props.agent});
+      const actor = canDBIndexActor(process.env.CANISTER_ID_CANDBINDEX!, {agent: props.agent});
       async function doIt() {
         const [flag, score] = await actor.sybilScore() as [boolean, number];
         console.log("SCORE:", score);
@@ -138,7 +138,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
       setRecalculateScoreLoading(true);
       let localMessage = message;
       let localNonce = nonce;
-      const personhood = createPersonhoodActor(ourCanisters.PERSONHOOD_CANISTER_ID, {agent: props.agent}); // TODO: duplicate code
+      const personhood = createPersonhoodActor(ourCanisters.CANISTER_ID_PERSONHOOD, {agent: props.agent}); // TODO: duplicate code
       if (nonce === undefined) {
         const {message, nonce} = await personhood.getEthereumSigningMessage();
         localMessage = message;

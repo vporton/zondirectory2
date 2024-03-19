@@ -27,7 +27,7 @@ export function serializeItemRef(item: ItemRef): string {
     return item.id + "@" + item.canister;
 }
 
-function _unwrap(v) {
+function _unwrap<T>(v: T[]): T | undefined {
     // TODO: simplify for greater performance
     return v === undefined || v.length === 0 ? undefined : v[0];
 }
@@ -82,7 +82,7 @@ export class ItemData {
     {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         const client = nacDBPartitionActor(outerCanister, { agent: this.agent });
-        const [innerPart, innerKey] = (await client.getInner(outerKey) as any)[0]; // TODO: error handling
+        const {canister: innerPart, key: innerKey} = (await client.getInner({outerKey}) as any)[0]; // TODO: error handling
         const client2 = nacDBPartitionActor(innerPart, { agent: this.agent });
         const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as
             [[string, {text: string}]] | [];
