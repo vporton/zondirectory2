@@ -119,6 +119,7 @@ module {
   
   // FIXME: Communal will be a boolean flag, in order to deal with communal links and posts.
   public type ItemWithoutOwner = {
+    communal: Bool;
     // #owned : {
       price: Float;
       locale: Text;
