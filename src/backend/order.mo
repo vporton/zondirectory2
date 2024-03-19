@@ -104,6 +104,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
       order = theSubDB;
       key = timeScanSK;
       value = scanItemInfo;
+      hardCap = Common.dbOptions.hardCap;
     });
   };
 
@@ -169,7 +170,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let stream1 = switch (streams1t) {
       case (?stream) { stream };
       case null {
-        let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer);
+        let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000);
         streamsVar1[links] := ?v;
         v;
       };
@@ -181,7 +182,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let stream2 = switch (streams2t) {
       case (?stream) { stream };
       case null {
-        let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer);
+        let v = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000);
         streamsVar2[links] := ?v;
         v;
       };
@@ -385,7 +386,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let order = switch (streamsVar[links]) {
       case (?order) { order };
       case null {
-        await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer);
+        await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000);
       };
     };
     if (streamsVar[links] == null) {

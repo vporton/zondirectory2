@@ -24,7 +24,7 @@ configure:
 	env -i scripts/read-env.sh
 	dfx build internet_identity
 	dfx deploy --network $(NETWORK) main
-	dfx generate
+	dfx generate main
 #	dfx generate CanDBPartition
 #	dfx generate NacDBPartition
 
@@ -54,8 +54,7 @@ do-build-frontend:
 
 .PHONY: CanDBPartition.wasm
 CanDBPartition.wasm: do-build-backend
-	. .env && moc `mops sources` --actor-idl $$PWD/.dfx/local/lsp --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
-#	. .env && moc `mops sources` --actor-idl src/ic_eth --actor-alias ic_eth $$CANISTER_ID_ic_eth src/storage/CanDBPartition.mo
+	. .env && moc `mops sources` --actor-idl $$PWD/.dfx/local/lsp --actor-alias ic_eth $$CANISTER_ID_IC_ETH src/storage/CanDBPartition.mo
 
 .PHONY: NacDBPartition.wasm
 NacDBPartition.wasm:

@@ -75,8 +75,8 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         await* Nac.createPartitionImpl(this, dbIndex);
     };
 
-    public shared({caller}) func createSubDB(guid: [Nat8], {userData: Text})
-        : async {inner: (Principal, Nac.InnerSubDBKey); outer: (Principal, Nac.OuterSubDBKey)}
+    public shared({caller}) func createSubDB(guid: [Nat8], {userData: Text; hardCap : ?Nat})
+        : async {inner: {canister: Principal; key: Nac.InnerSubDBKey}; outer: {canister: Principal; key: Nac.OuterSubDBKey}}
     {
         checkCaller(caller);
 
@@ -84,12 +84,12 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         let r = await* Nac.createSubDB(Blob.fromArray(guid), {
             index = this;
             dbIndex;
-            hardCap = Common.dbOptions.hardCap;
+            hardCap;
             userData;
         });
         {
-            inner = (Principal.fromActor(r.inner.canister), r.inner.key);
-            outer = (Principal.fromActor(r.outer.canister), r.outer.key);
+            inner = {canister = Principal.fromActor(r.inner.canister); key = r.inner.key};
+            outer = {canister = Principal.fromActor(r.outer.canister); key = r.outer.key};
         };
     };
 
@@ -148,7 +148,8 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         outerKey: Nac.OuterSubDBKey;
         sk: Nac.SK;
         value: Nac.AttributeValue;
-    }) : async Result.Result<{inner: (Principal, Nac.InnerSubDBKey); outer: (Principal, Nac.OuterSubDBKey)}, Text> {
+        hardCap: ?Nat;
+    }) : async Result.Result<{inner: {canister: Principal; key: Nac.InnerSubDBKey}; outer: {canister: Principal; key: Nac.OuterSubDBKey}}, Text> {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles<system>(Common.dbOptions.partitionCycles);
@@ -159,13 +160,13 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
             outerKey;
             sk;
             value;
-            hardCap = Common.dbOptions.hardCap;
+            hardCap;
         });
         switch (result) {
             case (#ok { inner; outer }) {
                 let innerx: Principal = Principal.fromActor(inner.canister);
                 let outerx: Principal = Principal.fromActor(outer.canister);
-                #ok { inner = (innerx, inner.key); outer = (outerx, outer.key) };
+                #ok { inner = { canister = innerx; key = inner.key}; outer = { canister = outerx; key = outer.key} };
             };
             case (#err err) {
                 #err err;
