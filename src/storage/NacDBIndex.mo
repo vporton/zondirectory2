@@ -47,7 +47,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         };
 
         owners := _owners;
-        MyCycles.addPart(Common.dbOptions.partitionCycles);
+        MyCycles.addPart<system>(Common.dbOptions.partitionCycles);
         StableBuffer.add(dbIndex.canisters, await Partition.Partition(ownersOrSelf()));
         initialized := true;
     };
@@ -64,7 +64,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles<system>(Common.dbOptions.partitionCycles);
-        MyCycles.addPart(Common.dbOptions.partitionCycles);
+        MyCycles.addPart<system>(Common.dbOptions.partitionCycles);
         Principal.fromActor(await Partition.Partition(ownersOrSelf()));
     };
 

@@ -43,7 +43,7 @@ shared({caller = initialOwner}) actor class Payments() = this {
     };
 
     owners := _owners;
-    MyCycles.addPart(Common.dbOptions.partitionCycles);
+    MyCycles.addPart<system>(Common.dbOptions.partitionCycles);
     initialized := true;
   };
 
