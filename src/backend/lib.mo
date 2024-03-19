@@ -119,17 +119,21 @@ module {
   
   // FIXME: Communal will be a boolean flag, in order to deal with communal links and posts.
   public type ItemWithoutOwner = {
-    communal: Bool;
-    price: Float;
-    locale: Text;
-    title: Text;
-    description: Text;
-    details: {
-      #link : Text;
-      #message : ();
-      #post : (); // save post text separately
-      #folder : ();
-    };
+    // #owned : {
+      price: Float;
+      locale: Text;
+      title: Text;
+      description: Text;
+      details: {
+        #link : Text;
+        #message : ();
+        #post : (); // save post text separately
+        #folder : ();
+      };
+    // };
+    // #communal : {
+    //   votesStream: Reorder.Order;
+    // };
   };
 
   // TODO: Add `license` field?

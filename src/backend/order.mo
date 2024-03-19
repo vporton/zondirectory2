@@ -58,7 +58,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   public shared({ caller }) func init(_owners: [Principal]): async () {
     checkCaller(caller);
-    ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles); // TODO: another number of cycles?
+    ignore MyCycles.topUpCycles<system>(Common.dbOptions.partitionCycles); // TODO: another number of cycles?
     if (initialized) {
         Debug.trap("already initialized");
     };

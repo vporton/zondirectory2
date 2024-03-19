@@ -1,7 +1,7 @@
 import Nac "mo:nacdb/NacDB";
 
 module {
-    public let dbOptions: Nac.DBOptions = {
+    public let dbOptions/*: Nac.DBOptions*/ = {
         moveCap = #usedMemory 500_000_000;
         hardCap = ?10_000;
         partitionCycles = 228_000_000_000;

@@ -41,7 +41,7 @@ shared actor class ZonBackend() = this {
   stable var initialized: Bool = false;
 
   public shared({ caller }) func init(): async () {
-    ignore MyCycles.topUpCycles(Common.dbOptions.partitionCycles);
+    ignore MyCycles.topUpCycles<system>(Common.dbOptions.partitionCycles);
 
     if (initialized) {
       Debug.trap("already initialized");
