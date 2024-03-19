@@ -54,7 +54,8 @@ do-build-frontend:
 
 .PHONY: CanDBPartition.wasm
 CanDBPartition.wasm: do-build-backend
-	. .env && moc `mops sources` --actor-idl $$PWD/.dfx/local/lsp --actor-alias ic_eth $$CANISTER_ID_IC_ETH src/storage/CanDBPartition.mo
+	moc `mops sources` src/storage/CanDBPartition.mo
+#	. .env && moc `mops sources` --actor-idl $$PWD/src/declarations/ic_eth --actor-alias ic_eth ic_eth.did src/storage/CanDBPartition.mo
 
 .PHONY: NacDBPartition.wasm
 NacDBPartition.wasm:

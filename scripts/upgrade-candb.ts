@@ -19,7 +19,7 @@ async function upgradePartitions() {
     if (isLocal) {
       agent.fetchRootKey();
     }
-    const CanDBIndex = Actor.createActor(canDBIndexIdl, {agent, canisterId: process.env.CANDBINDEX_CANISTER_ID!});
+    const CanDBIndex = Actor.createActor(canDBIndexIdl, {agent, canisterId: process.env.CANISTER_ID_CANDBINDEX!});
     try {
       const upgradeResult = await CanDBIndex.upgradeAllPartitionCanisters(serviceWasm);
       console.log("result", JSON.stringify(upgradeResult));
