@@ -81,8 +81,16 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles<system>(Common.dbOptions.partitionCycles);
-        let r = await* Nac.createSubDB(Blob.fromArray(guid), {index = this; dbIndex; dbOptions = Common.dbOptions; userData});
-        { inner = (Principal.fromActor(r.inner.0), r.inner.1); outer = (Principal.fromActor(r.outer.0), r.outer.1) };
+        let r = await* Nac.createSubDB(Blob.fromArray(guid), {
+            index = this;
+            dbIndex;
+            hardCap = Common.dbOptions.hardCap;
+            userData;
+        });
+        {
+            inner = (Principal.fromActor(r.inner.canister), r.inner.key);
+            outer = (Principal.fromActor(r.outer.canister), r.outer.key);
+        };
     };
 
     // Management methods //
@@ -151,12 +159,13 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
             outerKey;
             sk;
             value;
+            hardCap = Common.dbOptions.hardCap;
         });
         switch (result) {
             case (#ok { inner; outer }) {
-                let innerx: Principal = Principal.fromActor(inner.0);
-                let outerx: Principal = Principal.fromActor(outer.0);
-                #ok { inner = (innerx, inner.1); outer = (outerx, outer.1) };
+                let innerx: Principal = Principal.fromActor(inner.canister);
+                let outerx: Principal = Principal.fromActor(outer.canister);
+                #ok { inner = (innerx, inner.key); outer = (outerx, outer.key) };
             };
             case (#err err) {
                 #err err;

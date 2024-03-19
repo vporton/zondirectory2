@@ -9,7 +9,7 @@ import NacDBIndex "canister:NacDBIndex";
 import NacDBPartition "../storage/NacDBPartition";
 import Multi "mo:CanDBMulti/Multi";
 import Entity "mo:candb/Entity";
-import Reorder "mo:NacDBReorder/Reorder";
+import Reorder "mo:nacdb-reorder/Reorder";
 import Debug "mo:base/Debug";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";

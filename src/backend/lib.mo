@@ -18,7 +18,7 @@ import Array "mo:base/Array";
 import Iter "mo:base/Iter";
 import Time "mo:base/Time";
 import Bool "mo:base/Bool";
-import Reorder "mo:NacDBReorder/Reorder";
+import Reorder "mo:nacdb-reorder/Reorder";
 import config "../../config";
 
 module {
