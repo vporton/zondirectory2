@@ -1,8 +1,4 @@
 import xNat "mo:xtendedNumbers/NatX";
-import CM "mo:candb/CanisterMap";
-import Nac "mo:nacdb/NacDB";
-import NacDBPartition "../storage/NacDBPartition";
-import RBT "mo:stable-rbtree/StableRBTree";
 import Entity "mo:candb/Entity";
 import Text "mo:base/Text";
 import Debug "mo:base/Debug";

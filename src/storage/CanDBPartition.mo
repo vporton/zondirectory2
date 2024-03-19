@@ -8,8 +8,6 @@ import Principal "mo:base/Principal";
 import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
-import Buffer "mo:base/Buffer";
-import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import lib "../backend/lib";
 

@@ -5,7 +5,6 @@ import V "mo:passport-client-dfinity/lib/Verifier";
 import Time "mo:base/Time";
 import Debug "mo:base/Debug";
 import Principal "mo:base/Principal";
-import lib "./lib";
 import Conf "../../config";
 
 actor Personhood {

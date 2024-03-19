@@ -1,4 +1,3 @@
-import I "mo:base/Iter";
 import BTree "mo:stableheapbtreemap/BTree";
 import Nac "mo:nacdb/NacDB";
 import Principal "mo:base/Principal";
@@ -8,9 +7,7 @@ import MyCycles "mo:nacdb/Cycles";
 import Text "mo:base/Text";
 import Debug "mo:base/Debug";
 import Array "mo:base/Array";
-import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
-import Buffer "mo:stable-buffer/StableBuffer"; // TODO: Here and in other places, use just `Buffer`.
 import Common "common";
 
 shared({caller}) actor class Partition(
