@@ -14,19 +14,12 @@ deploy: deploy-frontend
 .PHONY: build
 build: build-frontend
 
-.PHONY: configure
-configure:
+.PHONY: first-build
+first-build: CanDBPartition.wasm NacDBPartition.wasm
 	mops i
-	for i in $(BACKEND_CANISTERS); do \
-	  dfx canister create --network $(NETWORK) $$i; \
-	done
-	dfx canister create --network $(NETWORK) frontend
+# `frontend` is needed for ~/.dfx/local/canisters/frontend/assetstorage.did used by `dfx generate`:
+	dfx deploy frontend
 	env -i scripts/read-env.sh
-	dfx build internet_identity
-	dfx deploy --network $(NETWORK) main
-	dfx generate main
-#	dfx generate CanDBPartition
-#	dfx generate NacDBPartition
 
 .PHONY: install-backend
 install-backend:
@@ -54,9 +47,8 @@ do-build-frontend:
 	dfx build frontend
 
 .PHONY: CanDBPartition.wasm
-CanDBPartition.wasm: do-build-backend
+CanDBPartition.wasm:
 	moc `mops sources` src/storage/CanDBPartition.mo
-#	. .env && moc `mops sources` --actor-idl $$PWD/src/declarations/ic_eth --actor-alias ic_eth ic_eth.did src/storage/CanDBPartition.mo
 
 .PHONY: NacDBPartition.wasm
 NacDBPartition.wasm:
