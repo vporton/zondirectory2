@@ -19,20 +19,9 @@ first-build: CanDBPartition.wasm NacDBPartition.wasm
 	mops i
 # `frontend` is needed for ~/.dfx/local/canisters/frontend/assetstorage.did used by `dfx generate`:
 	dfx deploy frontend
-#	for i in $(BACKEND_CANISTERS) frontend; do \
-#	  dfx canister create --network $(NETWORK) $$i; \
-#	done
-#	dfx build --network $(NETWORK) frontend
-#	for i in $(BACKEND_CANISTERS) frontend; do \
-#	  dfx canister install --network $(NETWORK) $$i; \
-#	done
 	env -i scripts/read-env.sh
 	dfx build internet_identity
-#	dfx deploy --network $(NETWORK) frontend
-#	dfx deploy --network $(NETWORK) main
 	dfx generate main
-#	dfx generate CanDBPartition
-#	dfx generate NacDBPartition
 
 .PHONY: install-backend
 install-backend:
@@ -58,11 +47,6 @@ do-build-backend:
 do-build-frontend:
 	npm run build
 	dfx build frontend
-
-#.PHONY: do-deploy-frontend
-#do-deploy-frontend:
-#	npm run build
-#	dfx deploy frontend
 
 .PHONY: CanDBPartition.wasm
 CanDBPartition.wasm:
