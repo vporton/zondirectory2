@@ -1,5 +1,5 @@
 import { Principal } from "@dfinity/principal";
-import { CanDBPartition, Item, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did"
+import { CanDBPartition, ItemData, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did"
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
 import { createActor as nacDBPartitionActor } from "../../../declarations/NacDBPartition";
 import { createActor as canDBPartitionActor, idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition";
@@ -35,7 +35,7 @@ function _unwrap<T>(v: T[]): T | undefined {
 export class ItemData {
     agent?: Agent; // should be `defaultAgent`
     itemRef: ItemRef;
-    item: Item;
+    item: ItemData;
     streams: Streams | undefined;
     streamsRev: Streams | undefined;
     protected constructor(agent: Agent, itemId: string) {
@@ -51,7 +51,7 @@ export class ItemData {
             client.getItem(BigInt(obj.itemRef.id)),
             client.getStreams(BigInt(obj.itemRef.id), "s" + kind),
             client.getStreams(BigInt(obj.itemRef.id), "rs" + kind),
-        ]) as [Item[] | [], Streams[] | [], Streams[] | []];
+        ]) as [ItemData[] | [], Streams[] | [], Streams[] | []];
         obj.item = item[0]; // TODO: if no such item
         obj.streams = _unwrap(streams);
         obj.streamsRev = _unwrap(streamsRev);
@@ -78,7 +78,7 @@ export class ItemData {
         return t === undefined ? undefined : Object.values(t)[0] as string;
     }
     private async aList(outerCanister, outerKey, opts?: {lowerBound?: string, limit?: number})
-        : Promise<{order: string, id: ItemRef, item: Item}[]>
+        : Promise<{order: string, id: ItemRef, item: ItemData}[]>
     {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         const client = nacDBPartitionActor(outerCanister, { agent: this.agent });
@@ -103,7 +103,7 @@ export class ItemData {
             item: item[0],
         }));
     }
-    async subFolders(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: Item}[]> {
+    async subFolders(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemData}[]> {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
@@ -114,7 +114,7 @@ export class ItemData {
         const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_SUBFOLDERS]).order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
-    async superFolders(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: Item}[]> {
+    async superFolders(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemData}[]> {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
@@ -130,7 +130,7 @@ export class ItemData {
         const [outerCanister, outerKey] = stream.order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
-    async items(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: Item}[]> {
+    async items(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemData}[]> {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
@@ -141,7 +141,7 @@ export class ItemData {
         const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_SUBITEMS]).order;
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
-    async comments(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: Item}[]> {
+    async comments(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemData}[]> {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
@@ -152,7 +152,7 @@ export class ItemData {
         const [outerCanister, outerKey] = _unwrap(this.streams[STREAM_LINK_COMMENTS]).order
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
-    async antiComments(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: Item}[]> {
+    async antiComments(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemData}[]> {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;

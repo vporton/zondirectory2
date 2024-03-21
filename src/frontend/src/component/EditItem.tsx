@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { Helmet } from 'react-helmet';
 import 'react-tabs/style/react-tabs.css';
-import { ItemWithoutOwner } from "../../../declarations/main/main.did";
+import { ItemDataWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
 import { createActor as canDBPartitionActor } from "../../../declarations/CanDBPartition";
 import EditFoldersList from "./EditFoldersList";
@@ -69,7 +69,7 @@ export default function EditItemItem(props: {itemId?: string, comment?: boolean}
                 <AuthContext.Consumer>
                     {({agent, isAuthenticated}) => {
                     async function submit() {
-                        function itemData(): ItemWithoutOwner {
+                        function itemData(): ItemDataWithoutOwner {
                             // TODO: Differentiating post and message by `post === ""` is unreliable.
                             const isPost = selectedTab == SelectedTab.selectedOther && post !== "";
                             return {
@@ -82,7 +82,7 @@ export default function EditItemItem(props: {itemId?: string, comment?: boolean}
                                 price: 0.0, // TODO
                             };
                         }
-                        async function submitItem(item: ItemWithoutOwner) {
+                        async function submitItem(item: ItemDataWithoutOwner) {
                             const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
                             let part, n;
                             if (routeParams.item !== undefined) {

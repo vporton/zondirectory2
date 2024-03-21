@@ -107,30 +107,29 @@ module {
     }
   };
 
-  // FIXME: Communal will be a boolean flag, in order to deal with communal links and posts.
   let ITEM_TYPE_LINK = 0;
   let ITEM_TYPE_MESSAGE = 1;
   let ITEM_TYPE_POST = 2;
   let ITEM_TYPE_FOLDER = 3;
-  
-  // FIXME: Communal will be a boolean flag, in order to deal with communal links and posts.
+
+  public type ItemDataWithoutOwner = {
+    price: Float;
+    locale: Text;
+    title: Text;
+    description: Text;
+    details: {
+      #link : Text;
+      #message : ();
+      #post : (); // save post text separately
+      #folder : ();
+    };
+  };
+
   public type ItemWithoutOwner = {
-    communal: Bool;
-    // #owned : {
-      price: Float;
-      locale: Text;
-      title: Text;
-      description: Text;
-      details: {
-        #link : Text;
-        #message : ();
-        #post : (); // save post text separately
-        #folder : ();
-      };
-    // };
-    // #communal : {
-    //   votesStream: Reorder.Order;
-    // };
+    #owned : ItemDataWithoutOwner;
+    #communal : {
+      votesStream: Reorder.Order;
+    };
   };
 
   // TODO: Add `license` field?
@@ -139,6 +138,17 @@ module {
   public type Item = {
     creator: Principal;
     item: ItemWithoutOwner;
+  };
+
+  public type ItemData = {
+    creator: Principal;
+    item: ItemDataWithoutOwner;
+  };
+
+  // TODO: Use it.
+  public type ItemVariant = {
+    data: ItemDataWithoutOwner;
+    // itemRef: (Principal, Entity.SK);
   };
 
   // TODO: Does it make sense to keep `Streams` in lib?
@@ -152,10 +162,9 @@ module {
 
   // TODO: messy order of the below functions
 
-  public func serializeItem(item: Item): Entity.AttributeValue {
+  public func serializeItem(item: ItemData): Entity.AttributeValue {
     var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
     buf.add(#int 0); // version
-    buf.add(#bool(item.item.communal));
     buf.add(#int (switch (item.item.details) {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
@@ -194,10 +203,9 @@ module {
     #tuple(Buffer.toArray(buf));
   };
 
-  public func deserializeItem(attr: Entity.AttributeValue): Item {
+  public func deserializeItem(attr: Entity.AttributeValue): ItemData {
     var kind: Nat = 0;
     var creator: ?Principal = null;
-    var communal = false;
     var price = 0.0;
     var locale = "";
     var title = "";
@@ -210,13 +218,6 @@ module {
         switch (arr[pos]) {
           case (#int v) {
             assert v == 0;
-          };
-          case _ { break r false };
-        };
-        pos += 1;
-        switch (arr[pos]) {
-          case (#bool v) {
-            communal := v;
           };
           case _ { break r false };
         };
@@ -285,8 +286,7 @@ module {
     let ?creator2 = creator else { Debug.trap("creator2: programming error"); };
     {
       creator = creator2;
-      item = {
-        communal = communal;
+      data = {
         price = price;
         locale = locale;
         title = title;

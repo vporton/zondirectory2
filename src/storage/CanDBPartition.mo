@@ -118,7 +118,8 @@ shared actor class CanDBPartition(options: {
 
   // Application-specific code //
 
-  public query func getItem(itemId: Nat): async ?lib.Item {
+  // TODO: Retrieve virtual items.
+  public query func getItem(itemId: Nat): async ?lib.ItemData {
     let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "i");
     do ? { lib.deserializeItem(data!) };
   };

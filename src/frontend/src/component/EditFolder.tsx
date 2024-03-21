@@ -4,7 +4,7 @@ import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
-import { ItemWithoutOwner } from "../../../declarations/main/main.did";
+import { ItemDataWithoutOwner } from "../../../declarations/main/main.did";
 import { createActor as mainActor } from "../../../declarations/main";
 import { createActor as canDBPartitionActor } from "../../../declarations/CanDBPartition";
 import EditFoldersList from "./EditFoldersList";
@@ -56,7 +56,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
             <AuthContext.Consumer>
             {({agent, isAuthenticated}) => {
                 async function submit() {
-                    function itemData(): ItemWithoutOwner {
+                    function itemData(): ItemDataWithoutOwner {
                         return {
                             communal: folderKind == FolderKind.communal,
                             locale,
@@ -66,7 +66,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                             price: 0.0, // TODO
                         };
                     }
-                    async function submitItem(item: ItemWithoutOwner) {
+                    async function submitItem(item: ItemDataWithoutOwner) {
                         const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
                         let part, n;
                         if (props.folderId !== undefined) {

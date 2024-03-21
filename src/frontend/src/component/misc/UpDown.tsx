@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function UpDown(props: {
     parent: {id: ItemRef},
-    item: {order: string, id: ItemRef, item: Item},
+    item: {order: string, id: ItemRef, item: ItemData},
     agent: Agent,
     // onUpdateList: (() => void) | undefined,
     userVote: number, // -1, 0, or 1
@@ -110,7 +110,7 @@ export default function UpDown(props: {
     );
 }
 
-export async function updateVotes(id, principal, source: {order: string, id: ItemRef, item: Item}[], setTotalVotes, setUserVote) { // TODO: argument types
+export async function updateVotes(id, principal, source: {order: string, id: ItemRef, item: ItemData}[], setTotalVotes, setUserVote) { // TODO: argument types
     const totalVotes: {[key: string]: {up: number, down: number}} = {};
     const totalVotesPromises = (source || []).map(folder =>
         loadTotalVotes(id!, folder.id).then(res => {

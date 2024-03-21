@@ -3,14 +3,14 @@ import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
 import { ItemRef, serializeItemRef } from "../data/Data";
-import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
+import { ItemData } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import ItemType from "./misc/ItemType";
 
 export default function SubFolders(props: {defaultAgent: any, 'data-dir': 'sub' | 'super'}) { // TODO: any
     const { id } = useParams();
     const [xdata, setXData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
-    const [folders, setFolders] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>([]);
+    const [folders, setFolders] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>([]);
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
     const [streamKind, setStreamKind] = useState<"t" | "v">("v"); // time, votes

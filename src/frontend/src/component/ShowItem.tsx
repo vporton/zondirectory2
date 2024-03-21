@@ -6,7 +6,7 @@ import { AuthContext } from "./auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
 import { Button, Nav } from "react-bootstrap";
-import { Item } from "../../../declarations/CanDBPartition/CanDBPartition.did";
+import { ItemData } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { order } from "../../../declarations/order";
 import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
@@ -37,11 +37,11 @@ function ShowItemContent(props: {defaultAgent}) {
     const [postText, setPostText] = useState("");
     const [type, setType] = useState<string | undefined>(undefined);
     const [creator, setCreator] = useState("");
-    const [subfolders, setSubfolders] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
-    const [superfolders, setSuperfolders] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
-    const [items, setItems] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
-    const [comments, setComments] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
-    const [antiComments, setAntiComments] = useState<{order: string, id: ItemRef, item: Item}[] | undefined>(undefined);
+    const [subfolders, setSubfolders] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>(undefined);
+    const [superfolders, setSuperfolders] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>(undefined);
+    const [items, setItems] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>(undefined);
+    const [comments, setComments] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>(undefined);
+    const [antiComments, setAntiComments] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>(undefined);
     const [data, setData] = useState<any>(undefined); // TODO: hack
     const [xdata, setXData] = useState<any>(undefined); // TODO: hack
     const [itemsLast, setItemsLast] = useState("");
@@ -201,7 +201,7 @@ function ShowItemContent(props: {defaultAgent}) {
                 <h3>Sub-folders</h3>
                 {subfolders === undefined ? <p>Loading...</p> :
                 <ul>
-                    {subfolders.map((x: {order: string, id: ItemRef, item: Item}) =>
+                    {subfolders.map((x: {order: string, id: ItemRef, item: ItemData}) =>
                         <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
                             <UpDown
                                 parent={{id}}
@@ -228,7 +228,7 @@ function ShowItemContent(props: {defaultAgent}) {
             <p><small>Voting in this stream not yet implemented.</small></p>
             {superfolders === undefined ? <p>Loading...</p> :
             <ul>
-                {superfolders.map((x: {order: string, id: ItemRef, item: Item}) =>
+                {superfolders.map((x: {order: string, id: ItemRef, item: ItemData}) =>
                     <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
                         {/* TODO: up/down here is complicated by exchanhing parent/child. */}
                         {/*<UpDown
@@ -255,7 +255,7 @@ function ShowItemContent(props: {defaultAgent}) {
             <p><a href="#" onClick={e => moreSuperfolders(e)}>More...</a> <a href={`#/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</a></p>
             {!isFolder ? "" : <>
                 <h3>Items</h3>
-                {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: Item}) => 
+                {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemData}) => 
                     <div key={serializeItemRef(x.id)}>
                         <p lang={x.item.item.locale}>
                             <UpDown
@@ -310,7 +310,7 @@ function ShowItemContent(props: {defaultAgent}) {
                     <a href={`#/create/comment/${serializeItemRef(id)}`}>Create</a></p>
                 <h3>Comment on</h3>
                 <p><small>Voting in this stream not yet implemented.</small></p>
-                {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: Item}) => 
+                {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: ItemData}) => 
                     <div key={serializeItemRef(item.id)}>
                         <p lang={item.item.item.locale}>
                             {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
