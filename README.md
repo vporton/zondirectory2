@@ -28,12 +28,11 @@ nvm use v18.19.1
 # Starts the replica, running in the background
 dfx start --background
 
-# Create basic files (22min on my laptop)
-make configure
-# Deploys your canisters to the replica and generates your candid interface (27min on my laptop)
+# Build the first time:
+make first-build && make init
+
+# ... Build again:
 make deploy-frontend
-# Initializes the canisters (23sec on my laptop)
-make init
 ```
 
 Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.
