@@ -10,7 +10,7 @@ export default function SubFolders(props: {defaultAgent: any, 'data-dir': 'sub' 
     const { id } = useParams();
     const [xdata, setXData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
-    const [folders, setFolders] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>([]);
+    const [folders, setFolders] = useState<{order: string, id: ItemRef, item: ItemDB}[] | undefined>([]);
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
     const [streamKind, setStreamKind] = useState<"t" | "v">("v"); // time, votes

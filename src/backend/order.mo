@@ -114,9 +114,9 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
     let folderItem = lib.deserializeItem(folderItemData);
 
-    if (not folderItem.item.communal) { // TODO: Remove `folderItem.item.details == #folder and`?
-      lib.onlyItemOwner(caller, folderItem);
-    };
+    // if (not folderItem.item.communal) { // FIXME
+    //   lib.onlyItemOwner(caller, folderItem);
+    // };
     if (folderItem.item.details != #folder and not comment) {
       Debug.trap("not a folder");
     };

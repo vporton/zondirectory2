@@ -210,7 +210,7 @@ module {
     var locale = "";
     var title = "";
     var description = "";
-    var details: {#none; #link; #message; #post; #folder} = #none;
+    var details: {#none; #link; #message; #post; #folder} = #none; // FIXME
     var link = "";
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
@@ -286,7 +286,7 @@ module {
     let ?creator2 = creator else { Debug.trap("creator2: programming error"); };
     {
       creator = creator2;
-      data = {
+      item = {
         price = price;
         locale = locale;
         title = title;
@@ -377,8 +377,8 @@ module {
     Debug.trap("wrong votes format");
   };
 
-  public func onlyItemOwner(caller: Principal, _item: Item) {
-    if (caller != _item.creator) {
+  public func onlyItemOwner(caller: Principal, item: ItemData) {
+    if (caller != item.creator) {
       Debug.trap("not the item owner");
     };
   };

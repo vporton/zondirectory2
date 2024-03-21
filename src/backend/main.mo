@@ -202,10 +202,10 @@ shared actor class ZonBackend() = this {
     };
   };
 
-  public shared({caller}) func createItemData(item: lib.ItemWithoutOwner)
+  public shared({caller}) func createItemData(item: lib.ItemDataWithoutOwner)
     : async (Principal, Nat)
   {
-    let item2: lib.Item = { creator = caller; item; };
+    let item2: lib.ItemData = { creator = caller; item; };
     let itemId = maxId;
     maxId += 1;
     let key = "i/" # Nat.toText(itemId);
@@ -216,7 +216,7 @@ shared actor class ZonBackend() = this {
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
-  public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat, item: lib.ItemWithoutOwner) {
+  public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat, item: lib.ItemDataWithoutOwner) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(_itemId); // TODO: better encoding
     switch (await db.getAttribute({sk = key}, "i")) {
@@ -225,13 +225,13 @@ shared actor class ZonBackend() = this {
         if (caller != oldItem.creator) {
           Debug.trap("can't change item owner");
         };
-        let _item: lib.Item = { item = item; creator = caller; var streams = null; };
+        let _item: lib.ItemData = { item = item; creator = caller; /*var streams = null;*/ };
         if (_item.item.details != oldItem.item.details) {
           Debug.trap("can't change item type");
         };
-        if (oldItem.item.communal) {
-          Debug.trap("can't edit communal folder");
-        };
+        // if (oldItem.item.communal) { // FIXME
+        //   Debug.trap("can't edit communal folder");
+        // };
         lib.onlyItemOwner(caller, oldItem);
         await db.putAttribute({sk = key; key = "i"; value = lib.serializeItem(_item)});
       };
@@ -269,9 +269,9 @@ shared actor class ZonBackend() = this {
       Debug.trap("no item");
     };
     let oldItem = lib.deserializeItem(oldItemRepr);
-    if (oldItem.item.communal) {
-      Debug.trap("it's communal");
-    };
+    // if (oldItem.item.communal) { // FIXME
+    //   Debug.trap("it's communal");
+    // };
     lib.onlyItemOwner(caller, oldItem);
     await db.delete({sk = key});
   };

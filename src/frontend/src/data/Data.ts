@@ -32,7 +32,7 @@ function _unwrap<T>(v: T[]): T | undefined {
     return v === undefined || v.length === 0 ? undefined : v[0];
 }
 
-export class ItemData {
+export class ItemDB {
     agent?: Agent; // should be `defaultAgent`
     itemRef: ItemRef;
     item: ItemData;
@@ -43,8 +43,8 @@ export class ItemData {
         this.itemRef = parseItemRef(itemId);
     }
     /// `"t" | "v"` - time, votes,.
-    static async create(agent: Agent, itemId: string, kind: "t" | "v"): Promise<ItemData> {
-        const obj = new ItemData(agent, itemId);
+    static async create(agent: Agent, itemId: string, kind: "t" | "v"): Promise<ItemDB> {
+        const obj = new ItemDB(agent, itemId);
         const client = canDBPartitionActor(obj.itemRef.canister);
         // TODO: Retrieve both by one call?
         const [item, streams, streamsRev] = await Promise.all([
