@@ -20,8 +20,6 @@ first-build: CanDBPartition.wasm NacDBPartition.wasm
 # `frontend` is needed for ~/.dfx/local/canisters/frontend/assetstorage.did used by `dfx generate`:
 	dfx deploy frontend
 	env -i scripts/read-env.sh
-	dfx build internet_identity
-	dfx generate main
 
 .PHONY: install-backend
 install-backend:
