@@ -10,6 +10,8 @@
 - Attribute `"st"` (time), `"sv"` (votes) - `Streams` record.
 - Attribute `"rst"` (time), `"rsv"` (votes) - `Streams` record, reverse order.
 - Attribute `"t"` - post's text.
+### "r/" - ID -> Virtual item
+- Attribute `"i"` - `ItemVariant` record.
 ### "a/" - user -> <buyer affiliate>/<seller affiliate>
 ### "v/<principal>/<parent>/<child>"
 - Attribute `"v"` -  `#int +-1` - votes
