@@ -217,7 +217,6 @@ module {
     var locale = "";
     var title = "";
     var description = "";
-    var details: {#none; #link; #message; #post; #folder} = #none; // FIXME
     var link = "";
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
