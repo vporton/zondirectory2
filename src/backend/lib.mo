@@ -163,7 +163,7 @@ module {
   // TODO: messy order of the below functions
 
   public func serializeItem(item: ItemData): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
+    let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
     buf.add(#int 0); // version
     buf.add(#int (switch (item.item.details) {
       case (#link v) { ITEM_TYPE_LINK };
@@ -186,7 +186,7 @@ module {
   };
 
   public func serializeStreams(streams: Streams): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(18);
+    let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(18);
     for(item in streams.vals()) {
       switch (item) {
         case (?r) {
@@ -393,7 +393,7 @@ module {
   };
 
   public func serializeVoting(voting: VotingScore): Entity.AttributeValue {
-    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(4);
+    let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(4);
     buf.add(#int 0); // version
     buf.add(#bool true);
     buf.add(#float(voting.points));
