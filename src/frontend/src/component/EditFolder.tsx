@@ -22,7 +22,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
         setSuperFolder(props.superFolderId);
     }, [props.superFolderId]);
     enum FolderKind { owned, communal };
-    const [folderKind, setFolderKind] = useState<FolderKind>(FolderKind.owned);
+    // const [folderKind, setFolderKind] = useState<FolderKind>(FolderKind.owned);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
@@ -33,7 +33,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
             actor.getItem(BigInt(folderId.id))
                 .then(item1 => {
                     const item = item1[0]!.item;
-                    setFolderKind(item.communal ? FolderKind.communal : FolderKind.owned);
+                    // setFolderKind(item.communal ? FolderKind.communal : FolderKind.owned); // TODO
                     setLocale(item.locale);
                     setTitle(item.title);
                     setShortDescription(item.description);
@@ -43,10 +43,10 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
     function onSelectTab(index: number) {
         switch (index) {
             case 0:
-                setFolderKind(FolderKind.owned);
+                // setFolderKind(FolderKind.owned); // TODO
                 break;
             case 1:
-                setFolderKind(FolderKind.communal);
+                // setFolderKind(FolderKind.communal); // TODO
                 break;
             }
     }
@@ -58,7 +58,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                 async function submit() {
                     function itemData(): ItemDataWithoutOwner {
                         return {
-                            communal: folderKind == FolderKind.communal,
+                            // communal: folderKind == FolderKind.communal, // TODO
                             locale,
                             title,
                             description: shortDescription,

@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState } from "react";
-import { Item } from "../../../../declarations/CanDBPartition/CanDBPartition.did";
+import { ItemData } from "../../../../declarations/CanDBPartition/CanDBPartition.did";
 import { AuthContext } from "../auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../../data/Data";
 import { createActor as orderActor } from "../../../../declarations/order";
