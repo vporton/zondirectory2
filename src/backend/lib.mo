@@ -162,26 +162,33 @@ module {
 
   // TODO: messy order of the below functions
 
-  public func serializeItem(item: ItemData): Entity.AttributeValue {
-    let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
-    buf.add(#int 0); // version
-    buf.add(#int (switch (item.item.details) {
+  public func serializeItemDataWithoutOwnerToBuffer(
+    buf: Buffer.Buffer<Entity.AttributeValuePrimitive>,
+    item: ItemDataWithoutOwner,
+  ) {
+    buf.add(#int (switch (item.details) {
       case (#link v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
       case (#post _) { ITEM_TYPE_POST };
       case (#folder) { ITEM_TYPE_FOLDER };
     }));
-    buf.add(#text(Principal.toText(item.creator)));
-    buf.add(#float(item.item.price));
-    buf.add(#text(item.item.locale));
-    buf.add(#text(item.item.title));
-    buf.add(#text(item.item.description));
-    switch (item.item.details) {
+    buf.add(#float(item.price));
+    buf.add(#text(item.locale));
+    buf.add(#text(item.title));
+    buf.add(#text(item.description));
+    switch (item.details) {
       case (#link v) {
         buf.add(#text v);
       };
       case _ {};
     };
+  };
+
+  public func serializeItem(item: ItemData): Entity.AttributeValue {
+    let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
+    buf.add(#int 0); // version
+    buf.add(#text(Principal.toText(item.creator)));
+    serializeItemDataWithoutOwnerToBuffer(buf, item.item);
     #tuple(Buffer.toArray(buf));
   };
 
