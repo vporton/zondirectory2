@@ -197,57 +197,50 @@ module {
     var link = "";
 
     let res = label r: Bool {
+      switch (arr[current.pos]) {
+        case (#int v) {
+          kind := Int.abs(v);
+          current.pos += 1;
+        };
+        case _ { break r false };
+      };
+      switch (arr[current.pos]) {
+        case (#float v) {
+          price := v;
+          current.pos += 1;
+        };
+        case _ { break r false; };
+      };
+      switch (arr[current.pos]) {
+        case (#text v) {
+          locale := v;
+          current.pos += 1;
+        };
+        case _ { break r false; };
+      };
+      switch (arr[current.pos]) {
+        case (#text v) {
+          title := v;
+          current.pos += 1;
+        };
+        case _ { break r false; };
+      };
+      switch (arr[current.pos]) {
+        case (#text v) {
+          description := v;
+          current.pos += 1;
+        };
+        case _ { break r false; }
+      };
       if (kind == ITEM_TYPE_LINK) {
         switch (arr[current.pos]) {
           case (#text v) {
             link := v;
+            current.pos += 1;
           };
           case _ { break r false; };
         };
-        current.pos += 1;
       };
-      switch (arr[current.pos]) {
-        case (#int v) {
-          assert v == 0;
-        };
-        case _ { break r false };
-      };
-      current.pos += 1;
-      switch (arr[current.pos]) {
-        case (#int v) {
-          kind := Int.abs(v);
-        };
-        case _ { break r false };
-      };
-      current.pos += 1;
-      switch (arr[current.pos]) {
-        case (#float v) {
-          price := v;
-        };
-        case _ { break r false; };
-      };
-      current.pos += 1;
-      switch (arr[current.pos]) {
-        case (#text v) {
-          locale := v;
-        };
-        case _ { break r false; };
-      };
-      current.pos += 1;
-      switch (arr[current.pos]) {
-        case (#text v) {
-          title := v;
-        };
-        case _ { break r false; };
-      };
-      current.pos += 1;
-      switch (arr[current.pos]) {
-        case (#text v) {
-          description := v;
-        };
-        case _ { break r false; }
-      };
-      current.pos += 1;
 
       true;
     };
@@ -278,30 +271,19 @@ module {
     #tuple(Buffer.toArray(buf));
   };
 
-  public func serializeStreams(streams: Streams): Entity.AttributeValue {
-    let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(18);
-    for(item in streams.vals()) {
-      switch (item) {
-        case (?r) {
-          buf.add(#text(Principal.toText(Principal.fromActor(r.order.0))));
-          buf.add(#int(r.order.1));
-          buf.add(#text(Principal.toText(Principal.fromActor(r.reverse.0))));
-          buf.add(#int(r.reverse.1));
-        };
-        case null {
-          buf.add(#int(-1));
-        }
-      }
-    };
-    #tuple(Buffer.toArray(buf));
-  };
-
   public func deserializeItem(attr: Entity.AttributeValue): ItemData {
     var creator: ?Principal = null;
     var item: ?ItemDataWithoutOwner = null;
+    var pos = 0;
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
-        var pos = 0;
+        switch (arr[pos]) {
+          case (#int v) {
+            assert v == 0;
+            pos += 1;
+          };
+          case _ { break r false };
+        };
         switch (arr[pos]) {
           case (#text v) {
             creator := ?Principal.fromText(v);
@@ -325,6 +307,24 @@ module {
       creator = creator2;
       item = item2;
     };
+  };
+
+  public func serializeStreams(streams: Streams): Entity.AttributeValue {
+    let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(18);
+    for(item in streams.vals()) {
+      switch (item) {
+        case (?r) {
+          buf.add(#text(Principal.toText(Principal.fromActor(r.order.0))));
+          buf.add(#int(r.order.1));
+          buf.add(#text(Principal.toText(Principal.fromActor(r.reverse.0))));
+          buf.add(#int(r.reverse.1));
+        };
+        case null {
+          buf.add(#int(-1));
+        }
+      }
+    };
+    #tuple(Buffer.toArray(buf));
   };
 
   public func deserializeStreams(attr: Entity.AttributeValue): Streams {
