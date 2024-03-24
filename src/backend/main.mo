@@ -202,17 +202,21 @@ shared actor class ZonBackend() = this {
     };
   };
 
-  public shared({caller}) func createItemData(item: lib.ItemDataWithoutOwner)
+  public shared({caller}) func createItemData(item: lib.ItemDataWithoutOwner, communal: Bool)
     : async (Principal, Nat)
   {
-    let item2: lib.ItemData = { creator = caller; item; };
-    let itemId = maxId;
-    maxId += 1;
-    let key = "i/" # Nat.toText(itemId);
-    let canisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
-      "main", { sk = key; key = "i"; value = lib.serializeItem(item2) }
-    );
-    (canisterId, itemId);
+    // if (communal) {
+
+    // } else {
+      let item2: lib.Item = { creator = caller; item = #owned item; };
+      let itemId = maxId;
+      maxId += 1;
+      let key = "i/" # Nat.toText(itemId);
+      let canisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
+        "main", { sk = key; key = "i"; value = lib.serializeItem(item2) }
+      );
+      (canisterId, itemId);
+    // }
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
