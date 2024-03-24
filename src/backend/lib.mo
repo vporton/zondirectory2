@@ -149,7 +149,7 @@ module {
 
   // TODO: Use it.
   public type ItemVariant = {
-    data: ItemDataWithoutOwner;
+    item: ItemDataWithoutOwner;
     // itemRef: (Principal, Entity.SK);
   };
 
@@ -306,6 +306,34 @@ module {
     {
       creator = creator2;
       item = item2;
+    };
+  };
+
+  public func serializeItemVariant(item: ItemVariant): Entity.AttributeValue {
+    let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
+    buf.add(#int 0); // version
+    serializeItemDataWithoutOwnerToBuffer(buf, item.item);
+    #tuple(Buffer.toArray(buf));
+  };
+
+  public func deserializeItemVariant(attr: Entity.AttributeValue): ItemVariant {
+    var pos = 0;
+    switch (attr) {
+      case (#tuple arr) {
+        switch (arr[pos]) {
+          case (#int v) {
+            assert v == 0;
+            pos += 1;
+          };
+          case _ { Debug.trap("wrong item format"); };
+        };
+        return {
+          item = deserializeItemDataWithoutOwnerFromBuffer(arr, {var pos});
+        };
+      };
+      case _ {
+        Debug.trap("wrong item format");
+      };
     };
   };
 
