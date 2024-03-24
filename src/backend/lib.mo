@@ -232,7 +232,7 @@ module {
         };
         case _ { break r false; }
       };
-      if (kind == ITEM_TYPE_LINK) {
+      if (kind == ITEM_TYPE_LINK) { // TODO: Place it directly after `kind`?
         switch (arr[current.pos]) {
           case (#text v) {
             link := v;
@@ -263,17 +263,73 @@ module {
     };
   };
 
-  public func serializeItem(item: ItemData): Entity.AttributeValue {
+  func serializeItemWithoutOwnerToBuffer(
+    buf: Buffer.Buffer<Entity.AttributeValuePrimitive>,
+    item: ItemWithoutOwner,
+  ) {
+    switch (item) {
+      case (#owned ownedItem) {
+        buf.add(#int 0);
+        serializeItemDataWithoutOwnerToBuffer(buf, ownedItem);
+      };
+      case (#communal {votesStream: Reorder.Order}) {
+        buf.add(#int 1);
+        buf.add(#text(Principal.toText(Principal.fromActor(votesStream.order.0))));
+        buf.add(#int(votesStream.order.1));
+        buf.add(#text(Principal.toText(Principal.fromActor(votesStream.reverse.0))));
+        buf.add(#int(votesStream.reverse.1));
+      };
+    };
+  };
+
+  func deserializeItemWithoutOwnerFromBuffer(arr: [Entity.AttributeValuePrimitive], current: {var pos: Nat})
+    : ItemWithoutOwner
+  {
+    let res = label r {
+      switch (arr[current.pos]) {
+        case (#int v) {
+          current.pos += 1;
+          switch (v) {
+            case (0) {
+              return #owned(deserializeItemDataWithoutOwnerFromBuffer(arr, {var pos = current.pos}));
+            };
+            case (1) {
+              var order = ("", 0);
+              var reverse = ("", 0);
+              switch ((arr[current.pos], arr[current.pos+1], arr[current.pos+2], arr[current.pos+3])) {
+                case ((#text op1, #int on1, #text op2, #int on2)) {
+                  order := (op1, Int.abs(on1));
+                  reverse := (op2, Int.abs(on2));
+                  current.pos += 4;
+                };
+                case _ { break r };
+              };
+              return #communal {
+                votesStream = { order = (actor(order.0), order.1); reverse = (actor(reverse.0), reverse.1) };
+              };
+            };
+            case _ { break r };
+          }
+        };
+        case _ { break r };
+      };
+    };
+    Debug.trap("wrong item format");
+  };
+
+  // FIXME: Should be `Item` instead of `ItemData`.
+  public func serializeItem(item: Item): Entity.AttributeValue {
     let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
     buf.add(#int 0); // version
     buf.add(#text(Principal.toText(item.creator)));
-    serializeItemDataWithoutOwnerToBuffer(buf, item.item);
+    serializeItemWithoutOwnerToBuffer(buf, item.item);
     #tuple(Buffer.toArray(buf));
   };
 
-  public func deserializeItem(attr: Entity.AttributeValue): ItemData {
+  // FIXME: Should be `Item` instead of `ItemData`.
+  public func deserializeItem(attr: Entity.AttributeValue): Item {
     var creator: ?Principal = null;
-    var item: ?ItemDataWithoutOwner = null;
+    var item: ?ItemWithoutOwner = null;
     var pos = 0;
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
@@ -291,7 +347,7 @@ module {
           case _ { break r false; };
         };
         pos += 1;
-        item := ?deserializeItemDataWithoutOwnerFromBuffer(arr, {var pos});
+        item := ?deserializeItemWithoutOwnerFromBuffer(arr, {var pos});
 
         true;
       };
