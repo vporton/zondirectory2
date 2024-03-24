@@ -112,17 +112,19 @@ module {
   let ITEM_TYPE_POST = 2;
   let ITEM_TYPE_FOLDER = 3;
 
+  public type ItemDetails = {
+    #link : Text;
+    #message : ();
+    #post : (); // save post text separately
+    #folder : ();
+  };
+
   public type ItemDataWithoutOwner = {
     price: Float;
     locale: Text;
     title: Text;
     description: Text;
-    details: {
-      #link : Text;
-      #message : ();
-      #post : (); // save post text separately
-      #folder : ();
-    };
+    details: ItemDetails;
   };
 
   public type ItemWithoutOwner = {
@@ -162,7 +164,7 @@ module {
 
   // TODO: messy order of the below functions
 
-  public func serializeItemDataWithoutOwnerToBuffer(
+  func serializeItemDataWithoutOwnerToBuffer(
     buf: Buffer.Buffer<Entity.AttributeValuePrimitive>,
     item: ItemDataWithoutOwner,
   ) {
@@ -181,6 +183,90 @@ module {
         buf.add(#text v);
       };
       case _ {};
+    };
+  };
+
+  func deserializeItemDataWithoutOwnerFromBuffer(arr: [Entity.AttributeValuePrimitive], current: {var pos: Nat})
+    : ItemDataWithoutOwner
+  {
+    var kind: Nat = 0;
+    var price = 0.0;
+    var locale = "";
+    var title = "";
+    var description = "";
+    var link = "";
+
+    let res = label r: Bool {
+      if (kind == ITEM_TYPE_LINK) {
+        switch (arr[current.pos]) {
+          case (#text v) {
+            link := v;
+          };
+          case _ { break r false; };
+        };
+        current.pos += 1;
+      };
+      switch (arr[current.pos]) {
+        case (#int v) {
+          assert v == 0;
+        };
+        case _ { break r false };
+      };
+      current.pos += 1;
+      switch (arr[current.pos]) {
+        case (#int v) {
+          kind := Int.abs(v);
+        };
+        case _ { break r false };
+      };
+      current.pos += 1;
+      switch (arr[current.pos]) {
+        case (#float v) {
+          price := v;
+        };
+        case _ { break r false; };
+      };
+      current.pos += 1;
+      switch (arr[current.pos]) {
+        case (#text v) {
+          locale := v;
+        };
+        case _ { break r false; };
+      };
+      current.pos += 1;
+      switch (arr[current.pos]) {
+        case (#text v) {
+          title := v;
+        };
+        case _ { break r false; };
+      };
+      current.pos += 1;
+      switch (arr[current.pos]) {
+        case (#text v) {
+          description := v;
+        };
+        case _ { break r false; }
+      };
+      current.pos += 1;
+
+      true;
+    };
+
+    if (not res) {
+      Debug.trap("wrong item format");
+    };
+    {
+      price = price;
+      locale = locale;
+      title = title;
+      description = description;
+      details = switch (kind) {
+        case (0) { #link link };
+        case (1) { #message };
+        case (2) { #post };
+        case (3) { #folder };
+        case _ { Debug.trap("wrong item format"); }
+      };
     };
   };
 
@@ -211,30 +297,11 @@ module {
   };
 
   public func deserializeItem(attr: Entity.AttributeValue): ItemData {
-    var kind: Nat = 0;
     var creator: ?Principal = null;
-    var price = 0.0;
-    var locale = "";
-    var title = "";
-    var description = "";
-    var link = "";
+    var item: ?ItemDataWithoutOwner = null;
     let res = label r: Bool switch (attr) {
       case (#tuple arr) {
         var pos = 0;
-        switch (arr[pos]) {
-          case (#int v) {
-            assert v == 0;
-          };
-          case _ { break r false };
-        };
-        pos += 1;
-        switch (arr[pos]) {
-          case (#int v) {
-            kind := Int.abs(v);
-          };
-          case _ { break r false };
-        };
-        pos += 1;
         switch (arr[pos]) {
           case (#text v) {
             creator := ?Principal.fromText(v);
@@ -242,43 +309,7 @@ module {
           case _ { break r false; };
         };
         pos += 1;
-        switch (arr[pos]) {
-          case (#float v) {
-            price := v;
-          };
-          case _ { break r false; };
-        };
-        pos += 1;
-        switch (arr[pos]) {
-          case (#text v) {
-            locale := v;
-          };
-          case _ { break r false; };
-        };
-        pos += 1;
-        switch (arr[pos]) {
-          case (#text v) {
-            title := v;
-          };
-          case _ { break r false; };
-        };
-        pos += 1;
-        switch (arr[pos]) {
-          case (#text v) {
-            description := v;
-          };
-          case _ { break r false; }
-        };
-        pos += 1;
-        if (kind == ITEM_TYPE_LINK) {
-          switch (arr[pos]) {
-            case (#text v) {
-              link := v;
-            };
-            case _ { break r false; };
-          };
-          pos += 1;
-        };
+        item := ?deserializeItemDataWithoutOwnerFromBuffer(arr, {var pos});
 
         true;
       };
@@ -289,22 +320,10 @@ module {
     if (not res) {
       Debug.trap("wrong item format");
     };
-    let ?creator2 = creator else { Debug.trap("creator2: programming error"); };
+    let (?creator2, ?item2) = (creator, item) else { Debug.trap("creator2: programming error"); };
     {
       creator = creator2;
-      item = {
-        price = price;
-        locale = locale;
-        title = title;
-        description = description;
-        details = switch (kind) {
-          case (0) { #link link };
-          case (1) { #message };
-          case (2) { #post };
-          case (3) { #folder };
-          case _ { Debug.trap("wrong item format"); }
-        };
-      };
+      item = item2;
     };
   };
 
