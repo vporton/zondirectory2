@@ -119,9 +119,19 @@ shared actor class CanDBPartition(options: {
   // Application-specific code //
 
   // TODO: Retrieve virtual items.
+  // TODO: `?lib.ItemData` -> `lib.ItemData`?
   public query func getItem(itemId: Nat): async ?lib.ItemData {
     let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "i");
-    do ? { lib.deserializeItem(data!) };
+    switch (data) {
+      case (?data) {
+        let item = lib.deserializeItem(data);
+        switch (item.item) {
+          case (#owned item2) { ?{ creator = item.creator; item = item2 } };
+          case (#communal _) { Debug.trap("TODO"); }
+        };
+      };
+      case null { null };
+    };
   };
 
   public query func getStreams(itemId: Nat, kind: Text): async ?lib.Streams {
