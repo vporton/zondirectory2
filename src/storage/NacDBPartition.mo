@@ -8,7 +8,7 @@ import Text "mo:base/Text";
 import Debug "mo:base/Debug";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
-import DBConfig "../libs/configs/db.config";;
+import DBConfig "../libs/configs/db.config";
 
 shared({caller}) actor class Partition(
     initialOwners: [Principal],
