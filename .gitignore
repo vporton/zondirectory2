@@ -13,8 +13,10 @@
 .mops/
 .vessel/
 
+# compiled
 /target
 ic_eth.did
+*.wasm
 
 # generated files
 src/declarations/
@@ -24,8 +26,6 @@ our-canisters.json
 node_modules/
 dist/
 
-# environment variables
+# config
 .env
-
-/config.mo
-*.wasm
+*.config.mo

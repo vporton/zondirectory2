@@ -1,7 +1,7 @@
+import Principal "mo:base/Principal";
 import ExperimentalCycles "mo:base/ExperimentalCycles";
 import ICRC1 "mo:icrc1/ICRC1";
 // import ICRC1Types "mo:icrc1/ICRC1/Types";
-import Principal "mo:base/Principal";
 
 shared ({ caller = initialOwner }) actor class PST() : async ICRC1.FullInterface {
     stable var initialized: Bool = false;
