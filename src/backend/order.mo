@@ -1,10 +1,3 @@
-import Nac "mo:nacdb/NacDB";
-import GUID "mo:nacdb/GUID";
-import Common "../storage/common";
-import CanDBIndex "canister:CanDBIndex";
-import CanDBPartition "../storage/CanDBPartition";
-import NacDBIndex "canister:NacDBIndex";
-import Reorder "mo:nacdb-reorder/Reorder";
 import Debug "mo:base/Debug";
 import Nat "mo:base/Nat";
 import Char "mo:base/Char";
@@ -14,9 +7,17 @@ import Principal "mo:base/Principal";
 import Int "mo:base/Int";
 import Array "mo:base/Array";
 import Bool "mo:base/Bool";
+
 import Itertools "mo:itertools/Iter";
+import Nac "mo:nacdb/NacDB";
+import GUID "mo:nacdb/GUID";
+import CanDBIndex "canister:CanDBIndex";
+import CanDBPartition "../storage/CanDBPartition";
+import NacDBIndex "canister:NacDBIndex";
+import Reorder "mo:nacdb-reorder/Reorder";
 import MyCycles "mo:nacdb/Cycles";
 import lib "lib";
+import DBConfig "../libs/configs/db.config";
 
 // TODO: Delete "hanging" items (as soon, as they found)
 
@@ -46,13 +47,13 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   public shared({ caller }) func init(_owners: [Principal]): async () {
     checkCaller(caller);
-    ignore MyCycles.topUpCycles<system>(Common.dbOptions.partitionCycles); // TODO: another number of cycles?
+    ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles); // TODO: another number of cycles?
     if (initialized) {
         Debug.trap("already initialized");
     };
 
     owners := _owners;
-    MyCycles.addPart<system>(Common.dbOptions.partitionCycles);
+    MyCycles.addPart<system>(DBConfig.dbOptions.partitionCycles);
     initialized := true;
   };
 
@@ -92,7 +93,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
       order = theSubDB;
       key = timeScanSK;
       value = scanItemInfo;
-      hardCap = Common.dbOptions.hardCap;
+      hardCap = DBConfig.dbOptions.hardCap;
     });
   };
 
