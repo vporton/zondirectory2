@@ -15,7 +15,6 @@ import Iter "mo:base/Iter";
 import Time "mo:base/Time";
 import Bool "mo:base/Bool";
 import Reorder "mo:nacdb-reorder/Reorder";
-import config "../../config";
 
 module {
   // let phoneNumberVerificationCanisterId = "gzqxf-kqaaa-aaaak-qakba-cai"; // https://docs.nfid.one/developer/credentials/mobile-phone-number-credential
@@ -134,7 +133,15 @@ module {
   public type Item = {
     #owned : ItemData;
     #communal : {
+      isFolder: Bool;
       votesStream: Reorder.Order;
+    };
+  };
+
+  public func isFolder(item: Item): Bool {
+    switch (item) {
+      case (#owned data) { data.item.details == #folder };
+      case (#communal data) { data.isFolder };
     };
   };
 
@@ -269,8 +276,9 @@ module {
         buf.add(#text(Principal.toText(ownedItem.creator)));
         serializeItemDataWithoutOwnerToBuffer(buf, ownedItem.item);
       };
-      case (#communal {votesStream: Reorder.Order}) {
+      case (#communal {isFolder: Bool; votesStream: Reorder.Order}) {
         buf.add(#int 1);
+        buf.add(#int(if (isFolder) { 1 } else { 0 }));
         buf.add(#text(Principal.toText(Principal.fromActor(votesStream.order.0))));
         buf.add(#int(votesStream.order.1));
         buf.add(#text(Principal.toText(Principal.fromActor(votesStream.reverse.0))));
@@ -301,6 +309,13 @@ module {
               });
             };
             case (1) {
+              var folder = false;
+              switch (arr[current.pos]) {
+                case (#int 0) { folder := false; };
+                case (#int 1) { folder := true; };
+                case _ { break r };
+              };
+              current.pos += 1;
               var order = ("", 0);
               var reverse = ("", 0);
               switch ((arr[current.pos], arr[current.pos+1], arr[current.pos+2], arr[current.pos+3])) {
@@ -312,6 +327,7 @@ module {
                 case _ { break r };
               };
               return #communal {
+                isFolder = folder;
                 votesStream = { order = (actor(order.0), order.1); reverse = (actor(reverse.0), reverse.1) };
               };
             };

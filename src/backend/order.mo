@@ -41,7 +41,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   stable var initialized: Bool = false;
 
   // stable var rng: Prng.Seiran128 = Prng.Seiran128(); // WARNING: This is not a cryptographically secure pseudorandom number generator.
-  stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
+  stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0)); // FIXME: Gather randomness.
 
   stable let orderer = Reorder.createOrderer({queueLengths = 20});
 
@@ -118,12 +118,12 @@ shared({caller = initialOwner}) actor class Orders() = this {
     // if (not folderItem.item.communal) { // FIXME
     //   lib.onlyItemOwner(caller, folderItem);
     // };
-    if (folderItem.item.details != #folder and not comment) {
+    if (not lib.isFolder(folderItem) and not comment) {
       Debug.trap("not a folder");
     };
     let links = await* getStreamLinks(itemId, comment);
     await* addToStreams(catId, itemId, comment, links, itemId1, "st", "rst", #beginning);
-    if (folderItem.item.details == #folder) {
+    if (lib.isFolder(folderItem)) {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rsv", side);
     } else {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rsv", #end);
