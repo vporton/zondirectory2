@@ -130,6 +130,7 @@ module {
   // TODO: Add `license` field?
   // TODO: Images.
   // TODO: Item version.
+  // FIXME: Checking whether it's a folder in `order.mo` does not work.
   public type Item = {
     #owned : ItemData;
     #communal : {
@@ -327,8 +328,7 @@ module {
   public func serializeItem(item: Item): Entity.AttributeValue {
     let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
     buf.add(#int 0); // version
-    buf.add(#text(Principal.toText(item.creator)));
-    serializeItemToBuffer(buf, item.item);
+    serializeItemToBuffer(buf, item);
     #tuple(Buffer.toArray(buf));
   };
 

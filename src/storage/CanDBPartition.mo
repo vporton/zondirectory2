@@ -125,8 +125,8 @@ shared actor class CanDBPartition(options: {
     switch (data) {
       case (?data) {
         let item = lib.deserializeItem(data);
-        switch (item.item) {
-          case (#owned item2) { ?{ creator = item.creator; item = item2 } };
+        switch (item) {
+          case (#owned item2) { ?{ creator = item2.creator; item = item2.item } };
           case (#communal _) { Debug.trap("TODO"); }
         };
       };
