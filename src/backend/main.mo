@@ -9,6 +9,7 @@ import Entity "mo:candb/Entity";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Buffer "mo:base/Buffer";
+import Reorder "mo:nacdb-reorder/Reorder";
 import order "canister:order";
 import lib "lib";
 
@@ -205,9 +206,26 @@ shared actor class ZonBackend() = this {
   public shared({caller}) func createItemData(item: lib.ItemDataWithoutOwner, communal: Bool)
     : async (Principal, Nat)
   {
-    // if (communal) {
+    if (communal) {
+      let variant: lib.ItemVariant = { creator = caller; item; };
+      let variantId = maxId;
+      maxId += 1;
+      let key = "r/" # Nat.toText(variantId);
+      let canisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
+        "main", { sk = key; key = "i"; value = lib.serializeItemVariant(variant) }
+      );
+      let itemId = maxId;
+      maxId += 1;
+      let key2 = "i/" # Nat.toText(itemId);
+      let votesStream = await* Reorder.createOrder();
+      let item2 = #communal votesStream;
+      // FIXME: Put variant in stream
+      let canisterId2 = await CanDBIndex.putAttributeWithPossibleDuplicate(
+        "main", { sk = key2; key = "i"; value = lib.serializeItem(item2) }
+      );
+      (canisterId2, itemId);
 
-    // } else {
+    } else {
       let item2: lib.Item = { creator = caller; item = #owned item; };
       let itemId = maxId;
       maxId += 1;
@@ -216,7 +234,7 @@ shared actor class ZonBackend() = this {
         "main", { sk = key; key = "i"; value = lib.serializeItem(item2) }
       );
       (canisterId, itemId);
-    // }
+    }
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.

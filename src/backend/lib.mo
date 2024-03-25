@@ -127,19 +127,14 @@ module {
     details: ItemDetails;
   };
 
-  public type ItemWithoutOwner = {
-    #owned : ItemDataWithoutOwner;
-    #communal : {
-      votesStream: Reorder.Order;
-    };
-  };
-
   // TODO: Add `license` field?
   // TODO: Images.
   // TODO: Item version.
   public type Item = {
-    creator: Principal;
-    item: ItemWithoutOwner;
+    #owned : ItemData;
+    #communal : {
+      votesStream: Reorder.Order;
+    };
   };
 
   public type ItemData = {
@@ -263,14 +258,15 @@ module {
     };
   };
 
-  func serializeItemWithoutOwnerToBuffer(
+  func serializeItemToBuffer(
     buf: Buffer.Buffer<Entity.AttributeValuePrimitive>,
-    item: ItemWithoutOwner,
+    item: Item,
   ) {
     switch (item) {
       case (#owned ownedItem) {
         buf.add(#int 0);
-        serializeItemDataWithoutOwnerToBuffer(buf, ownedItem);
+        buf.add(#text(Principal.toText(ownedItem.creator)));
+        serializeItemDataWithoutOwnerToBuffer(buf, ownedItem.item);
       };
       case (#communal {votesStream: Reorder.Order}) {
         buf.add(#int 1);
@@ -282,16 +278,26 @@ module {
     };
   };
 
-  func deserializeItemWithoutOwnerFromBuffer(arr: [Entity.AttributeValuePrimitive], current: {var pos: Nat})
-    : ItemWithoutOwner
+  func deserializeItemFromBuffer(arr: [Entity.AttributeValuePrimitive], current: {var pos: Nat})
+    : Item
   {
-    let res = label r {
+    label r {
       switch (arr[current.pos]) {
         case (#int v) {
           current.pos += 1;
           switch (v) {
             case (0) {
-              return #owned(deserializeItemDataWithoutOwnerFromBuffer(arr, {var pos = current.pos}));
+              var creator = "";
+              switch (arr[current.pos]) {
+                case (#text c) {
+                  creator := c;
+                };
+                case _ { break r };
+              };
+              return #owned({
+                creator = Principal.fromText(creator);
+                item = deserializeItemDataWithoutOwnerFromBuffer(arr, {var pos = current.pos});
+              });
             };
             case (1) {
               var order = ("", 0);
@@ -322,47 +328,19 @@ module {
     let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
     buf.add(#int 0); // version
     buf.add(#text(Principal.toText(item.creator)));
-    serializeItemWithoutOwnerToBuffer(buf, item.item);
+    serializeItemToBuffer(buf, item.item);
     #tuple(Buffer.toArray(buf));
   };
 
-  // FIXME: Should be `Item` instead of `ItemData`.
   public func deserializeItem(attr: Entity.AttributeValue): Item {
-    var creator: ?Principal = null;
-    var item: ?ItemWithoutOwner = null;
     var pos = 0;
-    let res = label r: Bool switch (attr) {
+    label r switch (attr) {
       case (#tuple arr) {
-        switch (arr[pos]) {
-          case (#int v) {
-            assert v == 0;
-            pos += 1;
-          };
-          case _ { break r false };
-        };
-        switch (arr[pos]) {
-          case (#text v) {
-            creator := ?Principal.fromText(v);
-          };
-          case _ { break r false; };
-        };
-        pos += 1;
-        item := ?deserializeItemWithoutOwnerFromBuffer(arr, {var pos});
-
-        true;
+        return deserializeItemFromBuffer(arr, {var pos});
       };
-      case _ {
-        false;
-      };
+      case _ {};
     };
-    if (not res) {
-      Debug.trap("wrong item format");
-    };
-    let (?creator2, ?item2) = (creator, item) else { Debug.trap("creator2: programming error"); };
-    {
-      creator = creator2;
-      item = item2;
-    };
+    Debug.trap("wrong item format");
   };
 
   public func serializeItemVariant(item: ItemVariant): Entity.AttributeValue {
