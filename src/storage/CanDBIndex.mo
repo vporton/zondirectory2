@@ -14,7 +14,7 @@ import CanDB "mo:candb/CanDB";
 import Multi "mo:CanDBMulti/Multi";
 import Entity "mo:candb/Entity";
 import lib "../backend/lib";
-import Conf "../../config";
+import PassportConfig "../libs/configs/passport.config";
 
 shared({caller = initialOwner}) actor class CanDBIndex() = this {
   stable var owners: [Principal] = [initialOwner];
@@ -258,7 +258,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
       case (?voting) {
         Debug.print("VOTING: " # debug_show(voting));
         if (voting.lastChecked + 150 * 24 * 3600 * 1_000_000_000 >= Time.now() and // TODO: Make configurable.
-          voting.points >= Conf.minimumScore)
+          voting.points >= PassportConfig.minimumScore)
         {
           (true, voting.points);
         } else {
@@ -275,7 +275,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
 
   public shared func checkSybil(user: Principal): async () {
     // checkCaller(user); // TODO: enable?
-    if (Conf.skipSybil) {
+    if (PassportConfig.skipSybil) {
       return;
     };
     let (allowed, score) = await* sybilScoreImpl(user);

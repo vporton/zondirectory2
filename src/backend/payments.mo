@@ -1,19 +1,20 @@
-import lib "lib";
-import PST "canister:pst";
-import Token "mo:icrc1/ICRC1/Canisters/Token";
-import BTree "mo:stableheapbtreemap/BTree";
-import ICRC1Types "mo:icrc1/ICRC1/Types";
-import Time "mo:base/Time";
 import Principal "mo:base/Principal";
-import CanDBPartition "../storage/CanDBPartition";
 import Nat64 "mo:base/Nat64";
 import Int "mo:base/Int";
-import fractions "./fractions";
 import Debug "mo:base/Debug";
 import Nat "mo:base/Nat";
 import Array "mo:base/Array";
+import Time "mo:base/Time";
+
+import Token "mo:icrc1/ICRC1/Canisters/Token";
+import BTree "mo:stableheapbtreemap/BTree";
+import ICRC1Types "mo:icrc1/ICRC1/Types";
+import CanDBPartition "../storage/CanDBPartition";
 import MyCycles "mo:nacdb/Cycles";
-import Common "../storage/common";
+import lib "lib";
+import PST "canister:pst";
+import Fractions "../libs/helpers/fractions.helper";
+import DBConfig "../libs/configs/db.config";
 
 shared({caller = initialOwner}) actor class Payments() = this {
   /// Owners ///
@@ -37,13 +38,13 @@ shared({caller = initialOwner}) actor class Payments() = this {
 
   public shared({ caller }) func init(_owners: [Principal]): async () {
     checkCaller(caller);
-    ignore MyCycles.topUpCycles<system>(Common.dbOptions.partitionCycles); // TODO: another number of cycles?
+    ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles); // TODO: another number of cycles?
     if (initialized) {
         Debug.trap("already initialized");
     };
 
     owners := _owners;
-    MyCycles.addPart<system>(Common.dbOptions.partitionCycles);
+    MyCycles.addPart<system>(DBConfig.dbOptions.partitionCycles);
     initialized := true;
   };
 
@@ -59,43 +60,43 @@ shared({caller = initialOwner}) actor class Payments() = this {
 
   /// Shares ///
 
-  stable var salesOwnersShare = fractions.fdiv(1, 10); // 10%
-  stable var upvotesOwnersShare = fractions.fdiv(1, 2); // 50%
-  stable var uploadOwnersShare = fractions.fdiv(3, 20); // 15% // TODO: Delete.
-  stable var buyerAffiliateShare = fractions.fdiv(1, 10); // 10%
-  stable var sellerAffiliateShare = fractions.fdiv(3, 20); // 15%
+  stable var salesOwnersShare = Fractions.fdiv(1, 10); // 10%
+  stable var upvotesOwnersShare = Fractions.fdiv(1, 2); // 50%
+  stable var uploadOwnersShare = Fractions.fdiv(3, 20); // 15% // TODO: Delete.
+  stable var buyerAffiliateShare = Fractions.fdiv(1, 10); // 10%
+  stable var sellerAffiliateShare = Fractions.fdiv(3, 20); // 15%
 
-  public query func getSalesOwnersShare(): async fractions.Fraction { salesOwnersShare };
-  public query func getUpvotesOwnersShare(): async fractions.Fraction { upvotesOwnersShare };
-  public query func getUploadOwnersShare(): async fractions.Fraction { uploadOwnersShare };
-  public query func getBuyerAffiliateShare(): async fractions.Fraction { buyerAffiliateShare };
-  public query func getSellerAffiliateShare(): async fractions.Fraction { sellerAffiliateShare };
+  public query func getSalesOwnersShare(): async Fractions.Fraction { salesOwnersShare };
+  public query func getUpvotesOwnersShare(): async Fractions.Fraction { upvotesOwnersShare };
+  public query func getUploadOwnersShare(): async Fractions.Fraction { uploadOwnersShare };
+  public query func getBuyerAffiliateShare(): async Fractions.Fraction { buyerAffiliateShare };
+  public query func getSellerAffiliateShare(): async Fractions.Fraction { sellerAffiliateShare };
 
-  public shared({caller}) func setSalesOwnersShare(_share: fractions.Fraction) {
+  public shared({caller}) func setSalesOwnersShare(_share: Fractions.Fraction) {
     checkCaller(caller);
     
     salesOwnersShare := _share;
   };
 
-  public shared({caller}) func setUpvotesOwnersShare(_share: fractions.Fraction) {
+  public shared({caller}) func setUpvotesOwnersShare(_share: Fractions.Fraction) {
     checkCaller(caller);
     
     upvotesOwnersShare := _share;
   };
 
-  public shared({caller}) func setUploadOwnersShare(_share: fractions.Fraction) {
+  public shared({caller}) func setUploadOwnersShare(_share: Fractions.Fraction) {
     checkCaller(caller);
     
     uploadOwnersShare := _share;
   };
 
-  public shared({caller}) func setBuyerAffiliateShare(_share: fractions.Fraction) {
+  public shared({caller}) func setBuyerAffiliateShare(_share: Fractions.Fraction) {
     checkCaller(caller);
     
     buyerAffiliateShare := _share;
   };
 
-  public shared({caller}) func setSellerAffiliateShare(_share: fractions.Fraction) {
+  public shared({caller}) func setSellerAffiliateShare(_share: Fractions.Fraction) {
     checkCaller(caller);
     
     sellerAffiliateShare := _share;
@@ -246,7 +247,7 @@ shared({caller = initialOwner}) actor class Payments() = this {
   //             case (#Ok _ or #Err (#Duplicate _)) {};
   //             case _ { Debug.trap("can't pay") };
   //           };
-  //           let _shareholdersShare = fractions.mul(payment.amount, salesOwnersShare);
+  //           let _shareholdersShare = Fractions.mul(payment.amount, salesOwnersShare);
   //           recalculateShareholdersDebt(Int.abs(_shareholdersShare), _buyerAffiliate, _sellerAffiliate);
   //           let toAuthor = payment.amount - _shareholdersShare;
   //           indebt(item.creator, Int.abs(toAuthor));
@@ -285,7 +286,7 @@ shared({caller = initialOwner}) actor class Payments() = this {
     var _shareHoldersAmount = _amount;
     switch (_buyerAffiliate) {
       case (?_buyerAffiliate) {
-        let _buyerAffiliateAmount = Int.abs(fractions.mul(_amount, buyerAffiliateShare));
+        let _buyerAffiliateAmount = Int.abs(Fractions.mul(_amount, buyerAffiliateShare));
         indebt(_buyerAffiliate, _buyerAffiliateAmount);
         if (_shareHoldersAmount < _buyerAffiliateAmount) {
           Debug.trap("negative amount to pay");
@@ -296,7 +297,7 @@ shared({caller = initialOwner}) actor class Payments() = this {
     };
     switch (_sellerAffiliate) {
       case (?_sellerAffiliate) {
-        let _sellerAffiliateAmount = Int.abs(fractions.mul(_amount, sellerAffiliateShare));
+        let _sellerAffiliateAmount = Int.abs(Fractions.mul(_amount, sellerAffiliateShare));
         indebt(_sellerAffiliate, _sellerAffiliateAmount);
         if (_shareHoldersAmount < _sellerAffiliateAmount) {
           Debug.trap("negative amount to pay");

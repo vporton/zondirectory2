@@ -1,16 +1,18 @@
-// import ICRC1Types "mo:icrc1/ICRC1/Types";
-import CanDBIndex "canister:CanDBIndex";
-import CanDBPartition "../storage/CanDBPartition";
-import MyCycles "mo:nacdb/Cycles";
-import Common "../storage/common";
 import Principal "mo:base/Principal";
 import Debug "mo:base/Debug";
-import Entity "mo:candb/Entity";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Buffer "mo:base/Buffer";
 import order "canister:order";
+
+import Entity "mo:candb/Entity";
+
+import CanDBIndex "canister:CanDBIndex";
+import CanDBPartition "../storage/CanDBPartition";
+import MyCycles "mo:nacdb/Cycles";
+import DBConfig "../libs/configs/db.config";
 import lib "lib";
+// import ICRC1Types "mo:icrc1/ICRC1/Types";
 
 shared actor class ZonBackend() = this {
   /// External Canisters ///
@@ -30,7 +32,7 @@ shared actor class ZonBackend() = this {
   stable var initialized: Bool = false;
 
   public shared({ caller }) func init(): async () {
-    ignore MyCycles.topUpCycles<system>(Common.dbOptions.partitionCycles);
+    ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
 
     if (initialized) {
       Debug.trap("already initialized");

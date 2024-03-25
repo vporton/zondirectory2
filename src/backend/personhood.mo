@@ -1,11 +1,12 @@
+import Time "mo:base/Time";
+import Debug "mo:base/Debug";
+import Principal "mo:base/Principal";
+
 import CanDBIndex "canister:CanDBIndex";
 import ic_eth "canister:ic_eth";
 import Types "mo:passport-client-dfinity/lib/Types";
 import V "mo:passport-client-dfinity/lib/Verifier";
-import Time "mo:base/Time";
-import Debug "mo:base/Debug";
-import Principal "mo:base/Principal";
-import Conf "../../config";
+import PassportConfig "../libs/configs/passport.config";
 
 actor Personhood {
     /// Shared ///
@@ -41,7 +42,7 @@ actor Personhood {
             address;
             signature;
             nonce;
-            config = Conf.configScorer;
+            config = PassportConfig.configScorer;
             transform = removeHTTPHeaders;
         });
         let score = V.extractItemScoreFromBody(body);
@@ -49,7 +50,7 @@ actor Personhood {
             points = score;
             lastChecked = Time.now();
             ethereumAddress = address;
-            config = Conf.configScorer;
+            config = PassportConfig.configScorer;
         });
         body;
     };
@@ -63,7 +64,7 @@ actor Personhood {
             address;
             signature;
             nonce;
-            config = Conf.configScorer;
+            config = PassportConfig.configScorer;
             transform = removeHTTPHeaders;
         });
         let score = V.extractItemScoreFromBody(body);
@@ -71,13 +72,13 @@ actor Personhood {
             points = score;
             lastChecked = Time.now();
             ethereumAddress = address;
-            config = Conf.configScorer;
+            config = PassportConfig.configScorer;
         });
         body;
     };
 
     public shared func getEthereumSigningMessage(): async {message: Text; nonce: Text} {
-        await* V.getEthereumSigningMessage({transform = removeHTTPHeaders; config = Conf.configScorer});
+        await* V.getEthereumSigningMessage({transform = removeHTTPHeaders; config = PassportConfig.configScorer});
     };
 
     public shared query func removeHTTPHeaders(args: Types.TransformArgs): async Types.HttpResponsePayload {
