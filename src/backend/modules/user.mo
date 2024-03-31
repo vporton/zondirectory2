@@ -8,7 +8,7 @@ import Entity "mo:candb/Entity";
 import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../../storage/CanDBPartition";
 
-module {
+module UserModule{
     /// Users ///
 
   type User = {

@@ -4,7 +4,6 @@
       "main": "src/backend/main.mo",
       "type": "motoko",
       "dependencies": [
-        "order",
         "payments",
         "personhood",
         "CanDBIndex",
@@ -12,10 +11,6 @@
         "internet_identity",
         "ic_eth"
       ]
-    },
-    "order": {
-      "main": "src/backend/order.mo",
-      "type": "motoko"
     },
     "personhood": {
       "main": "src/backend/personhood.mo",

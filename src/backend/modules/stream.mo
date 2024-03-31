@@ -6,6 +6,7 @@ import Principal "mo:base/Principal";
 import Int "mo:base/Int";
 import Array "mo:base/Array";
 import Bool "mo:base/Bool";
+
 import Nac "mo:nacdb/NacDB";
 import GUID "mo:nacdb/GUID";
 import NacDBIndex "canister:NacDBIndex";
@@ -16,7 +17,7 @@ import CanDBPartition "../../storage/CanDBPartition";
 import { deserializeItem; addItemToList } = "item";
 import Modifers "../libs/helpers/modifiers.helper"
 
-module {
+module StreamModule{
  // TODO: Does it make sense to keep `Streams` in lib?
   public type StreamsLinks = Nat;
   public let STREAM_LINK_SUBITEMS: StreamsLinks = 0; // folder <-> sub-items

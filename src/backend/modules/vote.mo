@@ -9,7 +9,7 @@ import Time "mo:base/Time";
 import Bool "mo:base/Bool";
 import Modifers "../libs/helpers/modifiers.helper"
 
-module{
+module VoteModule{
 
     
  

@@ -8,7 +8,7 @@ import Types "mo:passport-client-dfinity/lib/Types";
 import V "mo:passport-client-dfinity/lib/Verifier";
 import PassportConfig "../libs/configs/passport.config";
 
-actor Personhood {
+module AuthModule {
     /// Shared ///
 
     // TODO: canister hint for ethereumAddress

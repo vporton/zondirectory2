@@ -7,7 +7,7 @@ import Buffer "mo:base/Buffer";
 import Int "mo:base/Int";
 import Bool "mo:base/Bool";
 
-import order "canister:order";
+// import order "canister:order";
 import Itertools "mo:itertools/Iter";
 import xNat "mo:xtendedNumbers/NatX";
 import Entity "mo:candb/Entity";
@@ -22,7 +22,7 @@ import StreamModule "stream";
 
 
 
-module{
+module ItemModule{
 
  // FIXME: Communal will be a boolean flag, in order to deal with communal links and posts.
   let ITEM_TYPE_LINK = 0;
