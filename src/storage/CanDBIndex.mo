@@ -1,19 +1,18 @@
 import Cycles "mo:base/ExperimentalCycles";
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
-import CA "mo:candb/CanisterActions";
-import Utils "mo:candb/Utils";
-import CanisterMap "mo:candb/CanisterMap";
-import Buffer "mo:stable-buffer/StableBuffer";
-import CanDBPartition "CanDBPartition";
-import Admin "mo:candb/CanDBAdmin";
 import Principal "mo:base/Principal";
 import Array "mo:base/Array";
 import Time "mo:base/Time";
+import Buffer "mo:stable-buffer/StableBuffer";
+import CA "mo:candb/CanisterActions";
+import Utils "mo:candb/Utils";
+import CanisterMap "mo:candb/CanisterMap";
+import CanDBPartition "CanDBPartition";
+import Admin "mo:candb/CanDBAdmin";
+import Entity "mo:candb/Entity";
 import CanDB "mo:candb/CanDB";
 import Multi "mo:CanDBMulti/Multi";
-import Entity "mo:candb/Entity";
-import lib "../backend/lib";
 import PassportConfig "../libs/configs/passport.config";
 
 shared({caller = initialOwner}) actor class CanDBIndex() = this {
@@ -228,59 +227,4 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     await* Multi.putAttributeWithPossibleDuplicate(pkToCanisterMap, pk, options);
   };
 
-  func setVotingDataImpl(user: Principal, partitionId: ?Principal, voting: lib.VotingScore): async* () {
-    let sk = "u/" # Principal.toText(user); // TODO: Should use binary encoding.
-    // TODO: Add Hint to CanDBMulti
-    ignore await* Multi.putAttributeNoDuplicates(pkToCanisterMap, "user", {
-      sk;
-      key = "v";
-      value = lib.serializeVoting(voting);
-    });
-  };
-
-  public shared({caller}) func setVotingData(user: Principal, partitionId: ?Principal, voting: lib.VotingScore): async () {
-    checkCaller(caller); // necessary
-    await* setVotingDataImpl(user, partitionId, voting);
-  };
-
-  func getVotingData(caller: Principal, partitionId: ?Principal): async* ?lib.VotingScore {
-    let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
-    // TODO: Add Hint to CanDBMulti
-    let res = await* Multi.getAttributeByHint(pkToCanisterMap, "user", partitionId, {sk; key = "v"});
-    do ? { lib.deserializeVoting(res!.1!) };
-  };
-
-  func sybilScoreImpl(user: Principal): async* (Bool, Float) {
-    // checkCaller(user); // TODO: enable?
-
-    let voting = await* getVotingData(user, null); // TODO: hint `partitionId`, not null
-    switch (voting) {
-      case (?voting) {
-        Debug.print("VOTING: " # debug_show(voting));
-        if (voting.lastChecked + 150 * 24 * 3600 * 1_000_000_000 >= Time.now() and // TODO: Make configurable.
-          voting.points >= PassportConfig.minimumScore)
-        {
-          (true, voting.points);
-        } else {
-          (false, 0.0);
-        };
-      };
-      case null { (false, 0.0) };
-    };
-  };
-
-  public shared({caller}) func sybilScore(): async (Bool, Float) {
-    await* sybilScoreImpl(caller);
-  };
-
-  public shared func checkSybil(user: Principal): async () {
-    // checkCaller(user); // TODO: enable?
-    if (PassportConfig.skipSybil) {
-      return;
-    };
-    let (allowed, score) = await* sybilScoreImpl(user);
-    if (not allowed) {
-      Debug.trap("Sybil check failed");
-    };
-  };
 }
