@@ -1,15 +1,14 @@
 import Array "mo:base/Array";
-import CA "mo:candb/CanisterActions";
-import Entity "mo:candb/Entity";
-import CanDB "mo:candb/CanDB";
-import Multi "mo:CanDBMulti/Multi";
-import RBT "mo:stable-rbtree/StableRBTree";
 import Principal "mo:base/Principal";
 import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
-import lib "../backend/lib";
+import CA "mo:candb/CanisterActions";
+import Entity "mo:candb/Entity";
+import CanDB "mo:candb/CanDB";
+import Multi "mo:CanDBMulti/Multi";
+import RBT "mo:stable-rbtree/StableRBTree";
 
 shared actor class CanDBPartition(options: {
   partitionKey: Text;
@@ -116,21 +115,7 @@ shared actor class CanDBPartition(options: {
     _getAttribute(options, subkey);
   };
 
-  // Application-specific code //
 
-  public query func getItem(itemId: Nat): async ?lib.Item {
-    let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "i");
-    do ? { lib.deserializeItem(data!) };
-  };
-
-  public query func getStreams(itemId: Nat, kind: Text): async ?lib.Streams {
-    // TODO: Duplicate code
-    if (kind != "st" and kind != "rst" and kind != "sv" and kind != "rsv") {
-      Debug.trap("wrong streams");
-    };
-    let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, kind);
-    do ? { lib.deserializeStreams(data!) };
-  };
 
   // CanDBMulti //
 
