@@ -1,69 +1,48 @@
 #!/usr/bin/make -f
 
-# For `. .env` to work, even if /bin/sh is Dash:
-SHELL=/bin/bash
+ICPRULESDIR = icp-make-rules
+include $(ICPRULESDIR)/icp.rules
 
-NETWORK=local
 FOUNDER = $(shell dfx identity get-principal)
 
-BACKEND_CANISTERS = main order personhood payments pst CanDBIndex NacDBIndex ic_eth internet_identity
+MOFILES = $(shell find src/backend src/libs src/storage)
+CANISTERS = \
+	src/storage/CanDBIndex src/storage/NacDBIndex \
+	src/backend/order src/backend/personhood src/backend/payments src/backend/pst src/backend/main
 
-.PHONY: deploy
-deploy: deploy-frontend
+out/src/backend/main.wasm: out/src/backend/order.deploy out/src/storage/CanDBIndex.deploy
+out/src/backend/personhood.wasm: out/src/storage/CanDBIndex.deploy deploy-ic_eth
+out/src/backend/order.wasm: out/src/storage/CanDBIndex.deploy out/src/storage/NacDBIndex.deploy
+out/src/backend/payments.wasm: out/src/backend/pst.deploy
 
-.PHONY: build
-build: build-frontend
+,PHONY: deploy-ic_eth
+deploy-ic_eth:
+	dfx deploy ic_eth
+	touch out/ic_eth.deploy
 
-.PHONY: first-build
-first-build: CanDBPartition.wasm NacDBPartition.wasm
-	mops i
-# `frontend` is needed for ~/.dfx/local/canisters/frontend/assetstorage.did used by `dfx generate`:
-	dfx deploy frontend
-	env -i scripts/read-env.sh
-
-.PHONY: install-backend
-install-backend:
-	for i in $(BACKEND_CANISTERS); do \
-	  dfx canister install --network $(NETWORK) --mode=auto $$i; \
-	done
-
-.PHONY: install-frontend
-install-frontend: install-backend
-	dfx canister install --network $(NETWORK) --mode=auto frontend
-
-.PHONY: build-backend
-build-backend: do-build-backend CanDBPartition.wasm NacDBPartition.wasm
-
-.PHONY: build-frontend
-build-frontend: do-build-frontend CanDBPartition.wasm NacDBPartition.wasm
-
-.PHONY: do-build-backend
-do-build-backend:
-	dfx build main
-
-.PHONY: do-build-frontend
-do-build-frontend:
-	npm run build
-	dfx build frontend
-
-.PHONY: CanDBPartition.wasm
-CanDBPartition.wasm:
-	moc `mops sources` src/storage/CanDBPartition.mo
-
-.PHONY: NacDBPartition.wasm
-NacDBPartition.wasm:
-	moc `mops sources` src/storage/NacDBPartition.mo
-
-.PHONY: deploy-backend
-deploy-backend: build-backend install-backend upgrade-partitions
+,PHONY: deploy-internet_identity
+deploy-internet_identity:
+	dfx deploy internet_identity
+	touch out/internet_identity.deploy
 
 .PHONY: deploy-frontend
-deploy-frontend: build-frontend install-frontend upgrade-partitions
+deploy-frontend: deploy-backend
+	dfx deploy frontend
+	touch out/frontend.deploy
 
-.PHONY: upgrade-partitions
-upgrade-partitions:
-	npx ts-node scripts/upgrade-candb.ts
-	npx ts-node scripts/upgrade-nacdb.ts
+.PHONY: deploy-backend
+deploy-backend: deploy-main upgrade-candb upgrade-nacdb
+
+.PHONY: deploy-main
+deploy-main: $(addprefix $(DESTDIR)/,$(addsuffix .deploy,$(CANISTERS)))
+
+.PHONY: upgrade-candb
+upgrade-candb: $(DESTDIR)/src/storage/CanDBPartition.wasm
+	npx ts-node scripts/upgrade-candb.ts $<
+
+.PHONY: upgrade-nacdb
+upgrade-nacdb: $(DESTDIR)/src/storage/NacDBPartition.wasm
+	npx ts-node scripts/upgrade-nacdb.ts $<
 
 .PHONY: init
 init:

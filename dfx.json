@@ -26,9 +26,7 @@
       "frontend": {
         "entrypoint": "src/frontend/src/index.html"
       },
-      "dependencies": [
-        "main"
-      ],
+      "dependencies": [],
       "source": [
         "src/frontend/assets",
         "dist/frontend/"

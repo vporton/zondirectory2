@@ -13,7 +13,7 @@ const isLocal = process.env.DFX_NETWORK !== "ic";
 const MANAGEMENT_CANISTER_ID = Principal.fromText('aaaaa-aa');
 
 async function upgradePartitions() {
-    const serviceWasmModulePath = `NacDBPartition.wasm`
+    const serviceWasmModulePath = process.argv[2];
     const serviceWasm = loadWasm(serviceWasmModulePath);
 
     const identity = decodeFile(process.env.HOME+"/.config/dfx/identity/default/identity.pem");

@@ -10,7 +10,7 @@ import { decodeFile } from './lib/key';
 const isLocal = process.env.DFX_NETWORK !== "ic";
 
 async function upgradePartitions() {
-    const serviceWasmModulePath = `CanDBPartition.wasm`
+    const serviceWasmModulePath = process.argv[2];
     const serviceWasm = loadWasm(serviceWasmModulePath);
 
     const identity = decodeFile(process.env.HOME+"/.config/dfx/identity/default/identity.pem");
