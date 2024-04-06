@@ -16,7 +16,7 @@
 # compiled
 /target
 ic_eth.did
-*.wasm
+/out
 
 # generated files
 src/declarations/

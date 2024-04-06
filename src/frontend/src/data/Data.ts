@@ -1,9 +1,9 @@
 import { Principal } from "@dfinity/principal";
-import { CanDBPartition, ItemData, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did"
+import { idlFactory as canDBPartitionIdl, Item, Streams } from "../../out/src/storage/CanDBPartition";
+import { _SERVICE as NacDBPartition } from "../../out/src/storage/NacDBPartition";
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
-import { createActor as nacDBPartitionActor } from "../../../declarations/NacDBPartition";
-import { createActor as canDBPartitionActor, idlFactory as CanDBPartitionIDL } from "../../../declarations/CanDBPartition";
-import { CanDBIndex } from "../../../declarations/CanDBIndex";
+import { idlFactory as nacDBPartitionIdl } from "../../out/src/storage/NacDBPartition";
+import { CanDBIndex, idlFactory as canDBIndexIdl } from "../../out/src/storage/CanDBIndex";
 import { useContext } from "react";
 import { AuthContext } from '../component/auth/use-auth-client';
 
@@ -43,9 +43,15 @@ export class ItemDB {
         this.itemRef = parseItemRef(itemId);
     }
     /// `"t" | "v"` - time, votes,.
+<<<<<<< HEAD
     static async create(agent: Agent, itemId: string, kind: "t" | "v"): Promise<ItemDB> {
         const obj = new ItemDB(agent, itemId);
         const client = canDBPartitionActor(obj.itemRef.canister);
+=======
+    static async create(agent: Agent, itemId: string, kind: "t" | "v"): Promise<ItemData> {
+        const obj = new ItemData(agent, itemId);
+        const client = Actor.createActor(canDBPartitionIdl, {canisterId: obj.itemRef.canister, agent});
+>>>>>>> main
         // TODO: Retrieve both by one call?
         const [item, streams, streamsRev] = await Promise.all([
             client.getItem(BigInt(obj.itemRef.id)),
@@ -73,7 +79,7 @@ export class ItemDB {
         return this.item.creator;
     }
     async postText(): Promise<string | undefined> {
-        const client = canDBPartitionActor(this.itemRef.canister);
+        const client = Actor.createActor(canDBPartitionIdl, {canisterId: this.itemRef.canister, agent: this.agent});
         const t = (await client.getAttribute({sk: "i/" + this.itemRef.id}, "t") as any)[0]; // TODO: error handling
         return t === undefined ? undefined : Object.values(t)[0] as string;
     }
@@ -81,9 +87,9 @@ export class ItemDB {
         : Promise<{order: string, id: ItemRef, item: ItemData}[]>
     {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
-        const client = nacDBPartitionActor(outerCanister, { agent: this.agent });
+        const client: NacDBPartition = Actor.createActor(nacDBPartitionIdl, {canisterId: outerCanister, agent: this.agent });
         const {canister: innerPart, key: innerKey} = (await client.getInner({outerKey}) as any)[0]; // TODO: error handling
-        const client2 = nacDBPartitionActor(innerPart, { agent: this.agent });
+        const client2 = Actor.createActor(nacDBPartitionIdl, {canisterId: innerPart, agent: this.agent });
         const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as
             [[string, {text: string}]] | [];
         const items1aa = items.length === 0 ? [] : items.map(x => ({key: x[0], text: x[1].text}));
@@ -93,7 +99,7 @@ export class ItemDB {
         });
         const items2 = items1a.map(({order, principal, id}) => { return {canister: Principal.from(principal), id, order} });
         const items3 = items2.map(id => (async () => {
-            const part = canDBPartitionActor(id.canister, { agent: this.agent });
+            const part = Actor.createActor(canDBPartitionIdl, {canisterId: id.canister, agent: this.agent });
             return {order: id.order, id, item: await part.getItem(BigInt(id.id))};
         })());
         const items4 = await Promise.all(items3);
@@ -165,9 +171,10 @@ export class ItemDB {
     }
 }
 
-export async function loadTotalVotes(parent: ItemRef, child: ItemRef): Promise<{up: number, down: number}> {
+export async function loadTotalVotes(agent: Agent, parent: ItemRef, child: ItemRef): Promise<{up: number, down: number}> {
     let pk = `user`;
-    let results = await CanDBIndex.getFirstAttribute(
+    const canDBIndex: CanDBIndex = Actor.createActor(canDBIndexIdl, {canisterId: process.env.CANISTER_ID_CANDBINDEX!, agent})
+    let results = await canDBIndex.getFirstAttribute(
         pk,
         {sk: `w/${parent.id}/${child.id}`, key: "v"},
     );
@@ -178,9 +185,10 @@ export async function loadTotalVotes(parent: ItemRef, child: ItemRef): Promise<{
     return { up: tuple[0].int, down: tuple[1].int };
 }
 
-export async function loadUserVote(principal: Principal, parent: ItemRef, child: ItemRef): Promise<number> {
+export async function loadUserVote(agent: Agent, principal: Principal, parent: ItemRef, child: ItemRef): Promise<number> {
     let pk = `user`;
-    let results = await CanDBIndex.getFirstAttribute(
+    const canDBIndex: CanDBIndex = Actor.createActor(canDBIndexIdl, {canisterId: process.env.CANISTER_ID_CANDBINDEX!})
+    let results = await canDBIndex.getFirstAttribute(
         pk,
         {sk: `v/${principal.toString()}/${parent.id}/${child.id}`, key: "v"},
     );

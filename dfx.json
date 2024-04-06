@@ -22,13 +22,11 @@
       "type": "motoko",
       "dependencies": ["ic_eth", "CanDBIndex"]
     },
-    "frontend": {
+    "assetstorage": {
       "frontend": {
         "entrypoint": "src/frontend/src/index.html"
       },
-      "dependencies": [
-        "main"
-      ],
+      "dependencies": [],
       "source": [
         "src/frontend/assets",
         "dist/frontend/"
@@ -83,11 +81,6 @@
         }
       }
     }
-  },
-  "ic_eth": {
-    "type": "rust",
-    "candid": "src/ic_eth/ic_eth.did",
-    "package": "ic_eth"
   },
   "defaults": {
     "build": {

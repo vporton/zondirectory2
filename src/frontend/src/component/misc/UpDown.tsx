@@ -1,10 +1,10 @@
 import React, { useContext, useRef, useState } from "react";
-import { ItemData } from "../../../../declarations/CanDBPartition/CanDBPartition.did";
+import { Item } from "../../../out/src/storage/CanDBPartition";
 import { AuthContext } from "../auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../../data/Data";
-import { createActor as orderActor } from "../../../../declarations/order";
+import { idlFactory as orderIdlFactory } from "../../../out/src/backend/main";
 import { AppData } from "../../DataDispatcher";
-import { Agent } from "@dfinity/agent";
+import { Actor, Agent } from "@dfinity/agent";
 import Button from "react-bootstrap/esm/Button";
 import Modal from 'react-bootstrap/Modal';
 import Nav from "react-bootstrap/esm/Nav";
@@ -47,7 +47,7 @@ export default function UpDown(props: {
             }
         }      
 
-        const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent});
+        const order = Actor.createActor(orderIdlFactory, {canisterId: process.env.CANISTER_ID_ORDER!, agent});
         try {
             await order.vote(
                 props.parent.id.canister,
@@ -110,10 +110,14 @@ export default function UpDown(props: {
     );
 }
 
+<<<<<<< HEAD
 export async function updateVotes(id, principal, source: {order: string, id: ItemRef, item: ItemData}[], setTotalVotes, setUserVote) { // TODO: argument types
+=======
+export async function updateVotes(agent: Agent, id, principal, source: {order: string, id: ItemRef, item: Item}[], setTotalVotes, setUserVote) { // TODO: argument types
+>>>>>>> main
     const totalVotes: {[key: string]: {up: number, down: number}} = {};
     const totalVotesPromises = (source || []).map(folder =>
-        loadTotalVotes(id!, folder.id).then(res => {
+        loadTotalVotes(agent, id!, folder.id).then(res => {
             totalVotes[serializeItemRef(folder.id)] = res;
         }),
     );
@@ -125,7 +129,7 @@ export async function updateVotes(id, principal, source: {order: string, id: Ite
     if (principal) {
         const userVotes: {[key: string]: number} = {};
         const userVotesPromises = (source || []).map(folder =>
-            loadUserVote(principal, id!, folder.id).then(res => {
+            loadUserVote(agent, principal, id!, folder.id).then(res => {
                 userVotes[serializeItemRef(folder.id)] = res;
             }),
         );

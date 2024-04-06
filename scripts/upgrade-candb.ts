@@ -3,14 +3,14 @@ global.fetch = fetch;
 
 require("dotenv").config();
 import { loadWasm } from "candb-client-typescript/dist/ClientUtil";
-import { idlFactory as canDBIndexIdl } from "../src/declarations/CanDBIndex";
+import { idlFactory as canDBIndexIdl } from "../out/src/storage/CanDBIndex";
 import { Actor, HttpAgent } from '@dfinity/agent';
 import { decodeFile } from './lib/key';
 
 const isLocal = process.env.DFX_NETWORK !== "ic";
 
 async function upgradePartitions() {
-    const serviceWasmModulePath = `CanDBPartition.wasm`
+    const serviceWasmModulePath = process.argv[2];
     const serviceWasm = loadWasm(serviceWasmModulePath);
 
     const identity = decodeFile(process.env.HOME+"/.config/dfx/identity/default/identity.pem");

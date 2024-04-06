@@ -6,8 +6,7 @@ import { AuthContext } from "./auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
 import { Button, Nav } from "react-bootstrap";
-import { ItemData } from "../../../declarations/CanDBPartition/CanDBPartition.did";
-import { order } from "../../../declarations/order";
+import { Item } from "../../out/src/storage/CanDBPartition";
 import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
@@ -71,16 +70,16 @@ function ShowItemContent(props: {defaultAgent}) {
         setAntiComments(undefined);
     }, [id]);
     useEffect(() => {
-        updateVotes(id, principal, subfolders!, setTotalVotesSubFolders, setUserVoteSubFolders).then(() => {}); // TODO: `!`
+        updateVotes(props.defaultAgent, id, principal, subfolders!, setTotalVotesSubFolders, setUserVoteSubFolders).then(() => {}); // TODO: `!`
     }, [subfolders, principal]);
     useEffect(() => {
-        updateVotes(id, principal, superfolders!, setTotalVotesSuperFolders, setUserVoteSuperFolders).then(() => {}); // TODO: `!`
+        updateVotes(props.defaultAgent, id, principal, superfolders!, setTotalVotesSuperFolders, setUserVoteSuperFolders).then(() => {}); // TODO: `!`
     }, [superfolders, principal]);
     useEffect(() => {
-        updateVotes(id, principal, items!, setTotalVotesItems, setUserVoteItems).then(() => {}); // TODO: `!`
+        updateVotes(props.defaultAgent, id, principal, items!, setTotalVotesItems, setUserVoteItems).then(() => {}); // TODO: `!`
     }, [items, principal]);
     useEffect(() => {
-        updateVotes(id, principal, comments!, setTotalVotesComments, setUserVoteComments).then(() => {}); // TODO: `!`
+        updateVotes(props.defaultAgent, id, principal, comments!, setTotalVotesComments, setUserVoteComments).then(() => {}); // TODO: `!`
     }, [comments, principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {
