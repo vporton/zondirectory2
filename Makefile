@@ -20,7 +20,7 @@ out/src/backend/payments.wasm: out/src/backend/pst.deploy
 deploy-backend: deploy-main upgrade-candb upgrade-nacdb $(DESTDIR)/internet_identity.deploy
 
 .PHONY: deploy-frontend
-deploy-frontend: deploy-interface out/frontend.deploy
+deploy-frontend: deploy-interface out/assetstorage.deploy
 
 # hack
 .PHONY: deploy-main
@@ -43,6 +43,7 @@ upgrade-nacdb: $(DESTDIR)/src/storage/NacDBPartition.wasm
 
 $(DESTDIR)/ic_eth.wasm: ./target/wasm32-unknown-unknown/release/ic_eth.wasm
 	cp -f $< $@
+	cp src/ic_eth/ic_eth.did $(DESTDIR)/
 
 ./target/wasm32-unknown-unknown/release/ic_eth.wasm:
 	cd src/ic_eth && cargo build --target wasm32-unknown-unknown --release
