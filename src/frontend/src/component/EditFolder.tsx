@@ -4,14 +4,14 @@ import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
-import { ItemWithoutOwner } from "../../../declarations/main/main.did";
-import { createActor as mainActor } from "../../../declarations/main";
-import { createActor as canDBPartitionActor } from "../../../declarations/CanDBPartition";
+import { ItemWithoutOwner, ZonBackend, idlFactory as mainIdlFactory } from "../../../../out/src/backend/main";
+import { CanDBPartition, idlFactory as canDBPartitionIdlFactory } from "../../../../out/src/storage/CanDBPartition";
 import EditFoldersList from "./EditFoldersList";
 import { addToFolder, addToMultipleFolders } from "../util/folder";
 import { parseItemRef, serializeItemRef } from "../data/Data";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
+import { Actor } from "@dfinity/agent";
 
 export default function EditFolder(props: {super?: boolean, folderId?: string, superFolderId?: string}) {
     const navigate = useNavigate();
@@ -29,7 +29,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
     useEffect(() => {
         if (props.folderId !== undefined) {
             const folderId = parseItemRef(props.folderId);
-            const actor = canDBPartitionActor(folderId.canister);
+            const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: folderId.canister});
             actor.getItem(BigInt(folderId.id))
                 .then(item1 => {
                     const item = item1[0]!.item;
@@ -67,7 +67,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                         };
                     }
                     async function submitItem(item: ItemWithoutOwner) {
-                        const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
+                        const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
                         let part, n;
                         if (props.folderId !== undefined) {
                             const folder = parseItemRef(props.folderId); // TODO: not here
@@ -94,7 +94,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                     setBusy(false);
                 }
                 async function remove() {
-                    const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
+                    const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
                     const folder = parseItemRef(props.folderId!); // TODO: not here
                     await backend.removeItem(folder.canister, BigInt(folder.id));
                     navigate("/");

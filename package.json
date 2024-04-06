@@ -11,11 +11,10 @@
   ],
   "scripts": {
     "build": "webpack",
-    "prebuild": "dfx generate",
+    "prebuild": "",
     "start": "webpack serve --mode development --env development",
     "deploy:local": "dfx deploy --network=local",
-    "deploy:ic": "dfx deploy --network=ic",
-    "generate": "dfx generate backend"
+    "deploy:ic": "dfx deploy --network=ic"
   },
   "dependencies": {
     "@dfinity/agent": "^0.19.3",

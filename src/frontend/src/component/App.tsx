@@ -12,7 +12,7 @@ import {
     HashRouter,
     useParams,
 } from "react-router-dom";
-import { Agent } from '@dfinity/agent';
+import { Actor, Agent } from '@dfinity/agent';
 import SubFolders from "./SubFolders";
 import EditItem from "./EditItem";
 import EditFolder from "./EditFolder";
@@ -20,7 +20,7 @@ import { getIsLocal } from "../util/client";
 import { serializeItemRef } from '../data/Data'
 import { Principal } from "@dfinity/principal";
 import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
-import { main as MainCanister } from "../../../declarations/main";
+import { idlFactory as mainIdlFactory, ZonBackend } from "../../../../out/src/backend/main";
 import { Helmet } from 'react-helmet';
 import Person from "./personhood/Person";
 
@@ -69,6 +69,7 @@ function MyRouted() {
     const navigate = useNavigate();
     const [root, setRoot] = useState("");
     async function fetchRootItem() {
+        const MainCanister: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!})
         const data0 = await MainCanister.getRootItem();
         const [data] = data0; // TODO: We assume that it's initialized.
         let [part, id] = data! as [Principal, bigint];

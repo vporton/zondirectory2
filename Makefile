@@ -8,7 +8,8 @@ FOUNDER = $(shell dfx identity get-principal)
 MOFILES = $(shell find src/backend src/libs src/storage)
 CANISTERS = \
 	src/storage/CanDBIndex src/storage/NacDBIndex \
-	src/backend/order src/backend/personhood src/backend/payments src/backend/pst src/backend/main
+	src/backend/order src/backend/personhood src/backend/main
+CANISTER_INTERFACES = $(CANISTERS) src/storage/CanDBPartition src/storage/NacDBPartition
 
 out/src/backend/main.wasm: out/src/backend/order.deploy out/src/storage/CanDBIndex.deploy
 out/src/backend/personhood.wasm: out/src/storage/CanDBIndex.deploy deploy-ic_eth
@@ -25,16 +26,17 @@ deploy-internet_identity:
 	dfx deploy internet_identity
 	touch out/internet_identity.deploy
 
-.PHONY: deploy-frontend
-deploy-frontend: deploy-backend
-	dfx deploy frontend
-	touch out/frontend.deploy
-
 .PHONY: deploy-backend
-deploy-backend: deploy-main upgrade-candb upgrade-nacdb
+deploy-backend: deploy-main upgrade-candb upgrade-nacdb deploy-internet_identity
+
+.PHONY: deploy-frontend
+deploy-frontend: deploy-interface out/frontend.deploy
 
 .PHONY: deploy-main
 deploy-main: $(addprefix $(DESTDIR)/,$(addsuffix .deploy,$(CANISTERS)))
+
+.PHONY: deploy-interface
+deploy-interface: $(addprefix $(DESTDIR)/,$(addsuffix .ts,$(CANISTER_INTERFACES)))
 
 .PHONY: upgrade-candb
 upgrade-candb: $(DESTDIR)/src/storage/CanDBPartition.wasm
@@ -49,10 +51,10 @@ init:
 	dfx ledger fabricate-cycles --amount 1000000000 --canister main
 	dfx canister --network $(NETWORK) call main init '()'
 # FIXME: Which canisters to allow calls?
-	. .env && dfx canister call --network $(NETWORK) payments init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\" })"
-	. .env && dfx canister call --network $(NETWORK) CanDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\"; principal \"$$CANISTER_ID_PERSONHOOD\" })"
-	. .env && dfx canister call --network $(NETWORK) NacDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
-	. .env && dfx canister call --network $(NETWORK) order init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
+#	. ./.env && dfx canister call --network $(NETWORK) payments init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\" })"
+	. ./.env && dfx canister call --network $(NETWORK) CanDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\"; principal \"$$CANISTER_ID_PERSONHOOD\" })"
+	. ./.env && dfx canister call --network $(NETWORK) NacDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
+	. ./.env && dfx canister call --network $(NETWORK) order init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
 	mainItem=`dfx canister call --network $(NETWORK) main createItemData \
 	  '(record { communal = true; price = 0.0; locale = "en"; title = "The homepage"; description = ""; details = variant { folder = null } })'`; \
 	  dfx canister call --network $(NETWORK) main setRootItem "$$mainItem"

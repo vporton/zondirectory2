@@ -1,10 +1,10 @@
 import React, { useContext, useRef, useState } from "react";
-import { Item } from "../../../../declarations/CanDBPartition/CanDBPartition.did";
+import { Item } from "../../../../../out/src/storage/CanDBPartition";
 import { AuthContext } from "../auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../../data/Data";
-import { createActor as orderActor } from "../../../../declarations/order";
+import { idlFactory as orderIdlFactory } from "../../../../../out/src/backend/main";
 import { AppData } from "../../DataDispatcher";
-import { Agent } from "@dfinity/agent";
+import { Actor, Agent } from "@dfinity/agent";
 import Button from "react-bootstrap/esm/Button";
 import Modal from 'react-bootstrap/Modal';
 import Nav from "react-bootstrap/esm/Nav";
@@ -47,7 +47,7 @@ export default function UpDown(props: {
             }
         }      
 
-        const order = orderActor(process.env.CANISTER_ID_ORDER!, {agent});
+        const order = Actor.createActor(orderIdlFactory, {canisterId: process.env.CANISTER_ID_ORDER!, agent});
         try {
             await order.vote(
                 props.parent.id.canister,
