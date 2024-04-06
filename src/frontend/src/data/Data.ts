@@ -1,7 +1,8 @@
 import { Principal } from "@dfinity/principal";
 import { idlFactory as canDBPartitionIdl, Item, Streams } from "../../out/src/storage/CanDBPartition";
+import { _SERVICE as NacDBPartition } from "../../out/src/storage/NacDBPartition";
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
-import { idlFactory as nacDBPartitionIdl } from "../../out/src/storage/CanDBPartition";
+import { idlFactory as nacDBPartitionIdl } from "../../out/src/storage/NacDBPartition";
 import { CanDBIndex, idlFactory as canDBIndexIdl } from "../../out/src/storage/CanDBIndex";
 import { useContext } from "react";
 import { AuthContext } from '../component/auth/use-auth-client';
@@ -80,7 +81,7 @@ export class ItemData {
         : Promise<{order: string, id: ItemRef, item: Item}[]>
     {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
-        const client = Actor.createActor(nacDBPartitionIdl, {canisterId: outerCanister, agent: this.agent });
+        const client: NacDBPartition = Actor.createActor(nacDBPartitionIdl, {canisterId: outerCanister, agent: this.agent });
         const {canister: innerPart, key: innerKey} = (await client.getInner({outerKey}) as any)[0]; // TODO: error handling
         const client2 = Actor.createActor(nacDBPartitionIdl, {canisterId: innerPart, agent: this.agent });
         const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as
