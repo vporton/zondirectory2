@@ -26,7 +26,6 @@ deploy-frontend: deploy-interface build-frontend $(DESTDIR)/assetstorage.deploy
 build-frontend:
 	npm run build
 
-# hack
 .PHONY: deploy-main
 deploy-main: $(addprefix $(DESTDIR)/,$(addsuffix .deploy,$(CANISTERS))) \
 	$(DESTDIR)/ic_eth.deploy \
