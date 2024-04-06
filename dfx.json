@@ -22,7 +22,7 @@
       "type": "motoko",
       "dependencies": ["ic_eth", "CanDBIndex"]
     },
-    "frontend": {
+    "assetstorage": {
       "frontend": {
         "entrypoint": "src/frontend/src/index.html"
       },

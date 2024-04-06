@@ -12,7 +12,7 @@ CANISTERS = \
 CANISTER_INTERFACES = $(CANISTERS) src/storage/CanDBPartition src/storage/NacDBPartition
 
 out/src/backend/main.wasm: out/src/backend/order.deploy out/src/storage/CanDBIndex.deploy
-out/src/backend/personhood.wasm: out/src/storage/CanDBIndex.deploy $(DESTDIR)/target/wasm32-unknown-unknown/release/ic_eth.wasm
+out/src/backend/personhood.wasm: out/src/storage/CanDBIndex.deploy out/src/storage/NacDBIndex.deploy $(DESTDIR)/ic_eth.deploy
 out/src/backend/order.wasm: out/src/storage/CanDBIndex.deploy out/src/storage/NacDBIndex.deploy
 out/src/backend/payments.wasm: out/src/backend/pst.deploy
 
@@ -20,12 +20,12 @@ out/src/backend/payments.wasm: out/src/backend/pst.deploy
 deploy-backend: deploy-main upgrade-candb upgrade-nacdb $(DESTDIR)/internet_identity.deploy
 
 .PHONY: deploy-frontend
-deploy-frontend: deploy-interface out/assetstorage.deploy
+deploy-frontend: out/assetstorage.deploy
 
 # hack
 .PHONY: deploy-main
 deploy-main: $(addprefix $(DESTDIR)/,$(addsuffix .deploy,$(CANISTERS))) \
-	$(DESTDIR)/target/wasm32-unknown-unknown/release/ic_eth.deploy \
+	$(DESTDIR)/ic_eth.deploy \
 	$(DESTDIR)/internet_identity.deploy
 
 .PHONY: deploy-interface
@@ -34,20 +34,21 @@ deploy-interface: \
   $(addprefix $(DESTDIR)/,$(addsuffix .d.ts,$(CANISTER_INTERFACES)))
 
 .PHONY: upgrade-candb
-upgrade-candb: $(DESTDIR)/src/storage/CanDBPartition.wasm
+upgrade-candb: $(DESTDIR)/src/storage/CanDBPartition.wasm deploy-interface
 	npx ts-node scripts/upgrade-candb.ts $<
 
 .PHONY: upgrade-nacdb
-upgrade-nacdb: $(DESTDIR)/src/storage/NacDBPartition.wasm
+upgrade-nacdb: $(DESTDIR)/src/storage/NacDBPartition.wasm deploy-interface
 	npx ts-node scripts/upgrade-nacdb.ts $<
 
-$(DESTDIR)/target/wasm32-unknown-unknown/release/ic_eth.wasm: ./target/wasm32-unknown-unknown/release/ic_eth.wasm
-	mkdir -p $(DESTDIR)/target/wasm32-unknown-unknown/release
-	cp -f $< $@
-	cp src/ic_eth/ic_eth.did $(DESTDIR)/target/wasm32-unknown-unknown/release/
+.PHONY: 
+ic_eth: ic_eth
+	dfx build ic_eth
 
-target/wasm32-unknown-unknown/release/ic_eth.wasm:
-	cd src/ic_eth && cargo build --target wasm32-unknown-unknown --release
+.PHONY: $(DESTDIR)/ic_eth.deploy
+$(DESTDIR)/ic_eth.deploy:
+	dfx deploy ic_eth
+	touch $(DESTDIR)/ic_eth.deploy
 
 .PHONY: init
 init:
