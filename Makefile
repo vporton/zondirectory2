@@ -12,14 +12,9 @@ CANISTERS = \
 CANISTER_INTERFACES = $(CANISTERS) src/storage/CanDBPartition src/storage/NacDBPartition
 
 out/src/backend/main.wasm: out/src/backend/order.deploy out/src/storage/CanDBIndex.deploy
-out/src/backend/personhood.wasm: out/src/storage/CanDBIndex.deploy deploy-ic_eth
+out/src/backend/personhood.wasm: out/src/storage/CanDBIndex.deploy ./target/wasm32-unknown-unknown/release/ic_eth.deploy
 out/src/backend/order.wasm: out/src/storage/CanDBIndex.deploy out/src/storage/NacDBIndex.deploy
 out/src/backend/payments.wasm: out/src/backend/pst.deploy
-
-,PHONY: deploy-ic_eth
-deploy-ic_eth:
-	dfx deploy ic_eth
-	touch out/ic_eth.deploy
 
 ,PHONY: deploy-internet_identity
 deploy-internet_identity:
@@ -32,8 +27,10 @@ deploy-backend: deploy-main upgrade-candb upgrade-nacdb deploy-internet_identity
 .PHONY: deploy-frontend
 deploy-frontend: deploy-interface out/frontend.deploy
 
+# hack
 .PHONY: deploy-main
-deploy-main: $(addprefix $(DESTDIR)/,$(addsuffix .deploy,$(CANISTERS)))
+deploy-main: $(addprefix $(DESTDIR)/,$(addsuffix .deploy,$(CANISTERS))) \
+	./target/wasm32-unknown-unknown/release/ic_eth.deploy
 
 .PHONY: deploy-interface
 deploy-interface: $(addprefix $(DESTDIR)/,$(addsuffix .ts,$(CANISTER_INTERFACES)))
@@ -45,6 +42,9 @@ upgrade-candb: $(DESTDIR)/src/storage/CanDBPartition.wasm
 .PHONY: upgrade-nacdb
 upgrade-nacdb: $(DESTDIR)/src/storage/NacDBPartition.wasm
 	npx ts-node scripts/upgrade-nacdb.ts $<
+
+./target/wasm32-unknown-unknown/release/ic_eth.wasm:
+	cd src/ic_eth && cargo build --target wasm32-unknown-unknown --release
 
 .PHONY: init
 init:
