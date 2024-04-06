@@ -16,13 +16,8 @@ out/src/backend/personhood.wasm: out/src/storage/CanDBIndex.deploy $(DESTDIR)/ic
 out/src/backend/order.wasm: out/src/storage/CanDBIndex.deploy out/src/storage/NacDBIndex.deploy
 out/src/backend/payments.wasm: out/src/backend/pst.deploy
 
-,PHONY: deploy-internet_identity
-deploy-internet_identity:
-	dfx deploy internet_identity
-	touch out/internet_identity.deploy
-
 .PHONY: deploy-backend
-deploy-backend: deploy-main upgrade-candb upgrade-nacdb deploy-internet_identity
+deploy-backend: deploy-main upgrade-candb upgrade-nacdb $(DESTDIR)/internet_identity.deploy
 
 .PHONY: deploy-frontend
 deploy-frontend: deploy-interface out/frontend.deploy
@@ -30,7 +25,8 @@ deploy-frontend: deploy-interface out/frontend.deploy
 # hack
 .PHONY: deploy-main
 deploy-main: $(addprefix $(DESTDIR)/,$(addsuffix .deploy,$(CANISTERS))) \
-	$(DESTDIR)/ic_eth.deploy
+	$(DESTDIR)/ic_eth.deploy \
+	$(DESTDIR)/internet_identity.deploy
 
 .PHONY: deploy-interface
 deploy-interface: \
