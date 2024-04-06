@@ -5,7 +5,7 @@ include $(ICPRULESDIR)/icp.rules
 
 FOUNDER = $(shell dfx identity get-principal)
 
-MOFILES = $(shell find src/backend src/libs src/storage)
+MOFILES = $(shell find src/backend src/libs src/storage -name "*.mo")
 CANISTERS = \
 	src/storage/CanDBIndex src/storage/NacDBIndex \
 	src/backend/order src/backend/personhood src/backend/main
@@ -20,7 +20,11 @@ out/src/backend/payments.wasm: out/src/backend/pst.deploy
 deploy-backend: deploy-main upgrade-candb upgrade-nacdb $(DESTDIR)/internet_identity.deploy
 
 .PHONY: deploy-frontend
-deploy-frontend: out/assetstorage.deploy
+deploy-frontend: deploy-interface build-frontend $(DESTDIR)/assetstorage.deploy
+
+.PHONY: build-frontend
+build-frontend:
+	npm run build
 
 # hack
 .PHONY: deploy-main
@@ -41,14 +45,16 @@ upgrade-candb: $(DESTDIR)/src/storage/CanDBPartition.wasm $(DESTDIR)/src/storage
 upgrade-nacdb: $(DESTDIR)/src/storage/NacDBPartition.wasm $(DESTDIR)/src/storage/NacDBIndex.js $(DESTDIR)/src/storage/NacDBIndex.d.ts
 	npx ts-node scripts/upgrade-nacdb.ts $<
 
-.PHONY: 
-ic_eth: ic_eth
+.PHONY: ic_eth
+ic_eth: target/wasm32-unknown-unknown/release/ic_eth.wasm
+
+target/wasm32-unknown-unknown/release/ic_eth.wasm:
 	dfx build ic_eth
 
-.PHONY: $(DESTDIR)/ic_eth.deploy
+#.PHONY: $(DESTDIR)/ic_eth.deploy
 $(DESTDIR)/ic_eth.deploy:
 	dfx deploy ic_eth
-	touch $(DESTDIR)/ic_eth.deploy
+	touch $@
 
 .PHONY: init
 init:
