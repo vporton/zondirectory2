@@ -14,7 +14,7 @@ import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 import { Actor } from "@dfinity/agent";
 
-export default function EditItemItem(props: {itemId?: string, comment?: boolean}) {
+export default function EditItem(props: {itemId?: string, comment?: boolean}) {
     const routeParams = useParams();
     const navigate = useNavigate();
     const [mainFolder, setMainFolder] = useState<string | undefined>(undefined); // TODO: For a comment, it may be not a folder.
@@ -30,29 +30,6 @@ export default function EditItemItem(props: {itemId?: string, comment?: boolean}
     const [post, setPost] = useState("");
     enum SelectedTab {selectedLink, selectedOther}
     const [selectedTab, setSelectedTab] = useState(SelectedTab.selectedLink);
-    useEffect(() => {
-        if (props.itemId !== undefined) {
-            const itemId = parseItemRef(props.itemId);
-            const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: itemId.canister});
-            actor.getItem(BigInt(itemId.id))
-                .then(item1 => {
-                    const item = item1[0]!.item;
-                    setLocale(item.locale);
-                    setTitle(item.title);
-                    setShortDescription(item.description);
-                    setLink((item.details as any).link);
-                });
-            // TODO: Don't call it on non-blogpost:
-            actor.getAttribute({sk: "i/" + itemId.id}, "t")
-                .then(item1 => {
-                    const text = item1[0]! as any;
-                    if (text !== undefined) {
-                        setPost(text.text);
-                        setSelectedTab(SelectedTab.selectedOther);
-                    }
-                });
-        }
-    }, [props.itemId]);
     function onSelectTab(index) {
         switch (index) {
             case 0:
@@ -67,9 +44,32 @@ export default function EditItemItem(props: {itemId?: string, comment?: boolean}
             <BusyContext.Consumer>
                 {({setBusy}) =>
                 <AuthContext.Consumer>
-                    {({agent, isAuthenticated}) => {
+                    {({agent, defaultAgent, isAuthenticated}) => {
                     async function submit() {
-                        function itemData(): ItemWithoutOwner {
+                        useEffect(() => {
+                            if (props.itemId !== undefined) {
+                                const itemId = parseItemRef(props.itemId);
+                                const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: itemId.canister, agent: defaultAgent});
+                                actor.getItem(BigInt(itemId.id))
+                                    .then(item1 => {
+                                        const item = item1[0]!.item;
+                                        setLocale(item.locale);
+                                        setTitle(item.title);
+                                        setShortDescription(item.description);
+                                        setLink((item.details as any).link);
+                                    });
+                                // TODO: Don't call it on non-blogpost:
+                                actor.getAttribute({sk: "i/" + itemId.id}, "t")
+                                    .then(item1 => {
+                                        const text = item1[0]! as any;
+                                        if (text !== undefined) {
+                                            setPost(text.text);
+                                            setSelectedTab(SelectedTab.selectedOther);
+                                        }
+                                    });
+                            }
+                        }, [props.itemId]);
+                                            function itemData(): ItemWithoutOwner {
                             // TODO: Differentiating post and message by `post === ""` is unreliable.
                             const isPost = selectedTab == SelectedTab.selectedOther && post !== "";
                             return {

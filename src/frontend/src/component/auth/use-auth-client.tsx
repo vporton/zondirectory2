@@ -10,7 +10,7 @@ export const AuthContext = createContext<{
   isAuthenticated: Boolean,
   authClient?: AuthClient,
   agent?: Agent,
-  defaultAgent?: AuthClient,
+  defaultAgent?: Agent,
   identity?: Identity,
   principal?: Principal,
   options?: UseAuthClientOptions,

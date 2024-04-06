@@ -110,10 +110,10 @@ export default function UpDown(props: {
     );
 }
 
-export async function updateVotes(id, principal, source: {order: string, id: ItemRef, item: Item}[], setTotalVotes, setUserVote) { // TODO: argument types
+export async function updateVotes(agent: Agent, id, principal, source: {order: string, id: ItemRef, item: Item}[], setTotalVotes, setUserVote) { // TODO: argument types
     const totalVotes: {[key: string]: {up: number, down: number}} = {};
     const totalVotesPromises = (source || []).map(folder =>
-        loadTotalVotes(id!, folder.id).then(res => {
+        loadTotalVotes(agent, id!, folder.id).then(res => {
             totalVotes[serializeItemRef(folder.id)] = res;
         }),
     );
@@ -125,7 +125,7 @@ export async function updateVotes(id, principal, source: {order: string, id: Ite
     if (principal) {
         const userVotes: {[key: string]: number} = {};
         const userVotesPromises = (source || []).map(folder =>
-            loadUserVote(principal, id!, folder.id).then(res => {
+            loadUserVote(agent, principal, id!, folder.id).then(res => {
                 userVotes[serializeItemRef(folder.id)] = res;
             }),
         );

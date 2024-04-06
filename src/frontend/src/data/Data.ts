@@ -44,7 +44,7 @@ export class ItemData {
     /// `"t" | "v"` - time, votes,.
     static async create(agent: Agent, itemId: string, kind: "t" | "v"): Promise<ItemData> {
         const obj = new ItemData(agent, itemId);
-        const client = Actor.createActor(canDBPartitionIdl, {canisterId: obj.itemRef.canister});
+        const client = Actor.createActor(canDBPartitionIdl, {canisterId: obj.itemRef.canister, agent});
         // TODO: Retrieve both by one call?
         const [item, streams, streamsRev] = await Promise.all([
             client.getItem(BigInt(obj.itemRef.id)),
@@ -72,7 +72,7 @@ export class ItemData {
         return this.item.creator;
     }
     async postText(): Promise<string | undefined> {
-        const client = Actor.createActor(canDBPartitionIdl, {canisterId: this.itemRef.canister});
+        const client = Actor.createActor(canDBPartitionIdl, {canisterId: this.itemRef.canister, agent: this.agent});
         const t = (await client.getAttribute({sk: "i/" + this.itemRef.id}, "t") as any)[0]; // TODO: error handling
         return t === undefined ? undefined : Object.values(t)[0] as string;
     }
@@ -164,9 +164,9 @@ export class ItemData {
     }
 }
 
-export async function loadTotalVotes(parent: ItemRef, child: ItemRef): Promise<{up: number, down: number}> {
+export async function loadTotalVotes(agent: Agent, parent: ItemRef, child: ItemRef): Promise<{up: number, down: number}> {
     let pk = `user`;
-    const canDBIndex: CanDBIndex = Actor.createActor(canDBIndexIdl, {canisterId: process.env.CANISTER_ID_CANDBINDEX!})
+    const canDBIndex: CanDBIndex = Actor.createActor(canDBIndexIdl, {canisterId: process.env.CANISTER_ID_CANDBINDEX!, agent})
     let results = await canDBIndex.getFirstAttribute(
         pk,
         {sk: `w/${parent.id}/${child.id}`, key: "v"},
@@ -178,7 +178,7 @@ export async function loadTotalVotes(parent: ItemRef, child: ItemRef): Promise<{
     return { up: tuple[0].int, down: tuple[1].int };
 }
 
-export async function loadUserVote(principal: Principal, parent: ItemRef, child: ItemRef): Promise<number> {
+export async function loadUserVote(agent: Agent, principal: Principal, parent: ItemRef, child: ItemRef): Promise<number> {
     let pk = `user`;
     const canDBIndex: CanDBIndex = Actor.createActor(canDBIndexIdl, {canisterId: process.env.CANISTER_ID_CANDBINDEX!})
     let results = await canDBIndex.getFirstAttribute(

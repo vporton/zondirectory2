@@ -11,9 +11,9 @@ import { addToFolder, addToMultipleFolders } from "../util/folder";
 import { parseItemRef, serializeItemRef } from "../data/Data";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
-import { Actor } from "@dfinity/agent";
+import { Actor, Agent } from "@dfinity/agent";
 
-export default function EditFolder(props: {super?: boolean, folderId?: string, superFolderId?: string}) {
+export default function EditFolder(props: {super?: boolean, folderId?: string, superFolderId?: string, defaultAgent: Agent | undefined}) {
     const navigate = useNavigate();
     const [superFolder, setSuperFolder] = useState<string | undefined>();
     const [foldersList, setFoldersList] = useState<[string, 'beginning' | 'end'][]>([]);
@@ -29,7 +29,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
     useEffect(() => {
         if (props.folderId !== undefined) {
             const folderId = parseItemRef(props.folderId);
-            const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: folderId.canister});
+            const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: folderId.canister, agent: props.defaultAgent});
             actor.getItem(BigInt(folderId.id))
                 .then(item1 => {
                     const item = item1[0]!.item;

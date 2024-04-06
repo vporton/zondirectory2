@@ -12,7 +12,7 @@ import {
     HashRouter,
     useParams,
 } from "react-router-dom";
-import { Actor, Agent } from '@dfinity/agent';
+import { Actor, Agent, getDefaultAgent } from '@dfinity/agent';
 import SubFolders from "./SubFolders";
 import EditItem from "./EditItem";
 import EditFolder from "./EditFolder";
@@ -50,12 +50,14 @@ export default function App() {
                     },
                     onError: (error) => {
                         console.error('Login Failed: ', error);
-                    }
+                    },
                 }}}>
                     <HashRouter>
                         <BusyContext.Provider value={{busy, setBusy}}>
                             {busy ? <p>Processing...</p> :
-                            <MyRouted/>
+                            <AuthContext.Consumer>
+                                {({defaultAgent}) => <MyRouted defaultAgent={defaultAgent}/>}
+                            </AuthContext.Consumer>
                             }
                         </BusyContext.Provider>
                     </HashRouter>
@@ -65,11 +67,11 @@ export default function App() {
     );
 }
 
-function MyRouted() {
+function MyRouted(props: {defaultAgent: Agent | undefined}) {
     const navigate = useNavigate();
     const [root, setRoot] = useState("");
     async function fetchRootItem() {
-        const MainCanister: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!})
+        const MainCanister: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent: props.defaultAgent})
         const data0 = await MainCanister.getRootItem();
         const [data] = data0; // TODO: We assume that it's initialized.
         let [part, id] = data! as [Principal, bigint];
@@ -150,7 +152,7 @@ function MyRouted() {
                                 (() => {
                                     function Edit(props) {
                                         const routeParams = useParams();
-                                        return <EditFolder superFolderId={routeParams.folder}/>;
+                                        return <EditFolder superFolderId={routeParams.folder} defaultAgent={defaultAgent}/>;
                                     }
                                     return <Edit/>;
                                 })()
@@ -158,7 +160,7 @@ function MyRouted() {
                         />
                         <Route
                             path="/create-superfolder/for-folder/:folder"
-                            element={<EditFolder super={true}/>}
+                            element={<EditFolder super={true} defaultAgent={defaultAgent}/>}
                         />
                         <Route
                             path="/folder/edit/:folder"
@@ -166,7 +168,7 @@ function MyRouted() {
                                 (() => {
                                     function Edit(props) {
                                         const routeParams = useParams();
-                                        return <EditFolder folderId={routeParams.folder}/>;
+                                        return <EditFolder folderId={routeParams.folder} defaultAgent={defaultAgent}/>;
                                     }
                                     return <Edit/>;
                                 })()

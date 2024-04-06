@@ -33,7 +33,9 @@ deploy-main: $(addprefix $(DESTDIR)/,$(addsuffix .deploy,$(CANISTERS))) \
 	$(DESTDIR)/ic_eth.deploy
 
 .PHONY: deploy-interface
-deploy-interface: $(addprefix $(DESTDIR)/,$(addsuffix .ts,$(CANISTER_INTERFACES)))
+deploy-interface: \
+  $(addprefix $(DESTDIR)/,$(addsuffix .js,$(CANISTER_INTERFACES))) \
+  $(addprefix $(DESTDIR)/,$(addsuffix .d.ts,$(CANISTER_INTERFACES)))
 
 .PHONY: upgrade-candb
 upgrade-candb: $(DESTDIR)/src/storage/CanDBPartition.wasm
