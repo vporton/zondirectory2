@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
 import { ItemRef, serializeItemRef } from "../data/Data";
-import { Item } from "../../../../out/src/storage/CanDBPartition";
+import { Item } from "../../out/src/storage/CanDBPartition";
 import ItemType from "./misc/ItemType";
 
 export default function SubFolders(props: {defaultAgent: any, 'data-dir': 'sub' | 'super'}) { // TODO: any

@@ -20,7 +20,7 @@ import { getIsLocal } from "../util/client";
 import { serializeItemRef } from '../data/Data'
 import { Principal } from "@dfinity/principal";
 import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
-import { idlFactory as mainIdlFactory, ZonBackend } from "../../../../out/src/backend/main";
+import { idlFactory as mainIdlFactory, ZonBackend } from "../../out/src/backend/main";
 import { Helmet } from 'react-helmet';
 import Person from "./personhood/Person";
 

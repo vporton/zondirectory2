@@ -1,8 +1,8 @@
 import { Principal } from "@dfinity/principal";
-import { idlFactory as canDBPartitionIdl, Item, Streams } from "../../../../out/src/storage/CanDBPartition";
+import { idlFactory as canDBPartitionIdl, Item, Streams } from "../../out/src/storage/CanDBPartition";
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
-import { idlFactory as nacDBPartitionIdl } from "../../../../out/src/storage/CanDBPartition";
-import { CanDBIndex, idlFactory as canDBIndexIdl } from "../../../../out/src/storage/CanDBIndex";
+import { idlFactory as nacDBPartitionIdl } from "../../out/src/storage/CanDBPartition";
+import { CanDBIndex, idlFactory as canDBIndexIdl } from "../../out/src/storage/CanDBIndex";
 import { useContext } from "react";
 import { AuthContext } from '../component/auth/use-auth-client';
 

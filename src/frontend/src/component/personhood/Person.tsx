@@ -11,9 +11,9 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import { ethers } from 'ethers'
 import { Helmet } from 'react-helmet';
 // import 'bootstrap/dist/css/bootstrap.min.css';
-import { createActor as mainActor } from '../../../../declarations/main';
-import { createActor as canDBIndexActor } from '../../../../declarations/CanDBIndex';
-import { createActor as createPersonhoodActor, personhood } from '../../../../declarations/personhood';
+import { idlFactory as mainIdlFactory } from '../../../out/src/backend/main';
+import { idlFactory as canDBIndexIdl } from '../../../out/src/storage/CanDBIndex';
+import { idlFactory as personhoodIdl, _SERVICE as Personhood } from '../../../out/src/backend/personhood';
 import config from '../../config.json';
 import ourCanisters from '../../our-canisters.json';
 import { Actor, Agent, HttpAgent } from '@dfinity/agent';
@@ -123,7 +123,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
     if (props.agent !== undefined) {
       // const backend = createBackendActor(ourCanisters.CANISTER_ID_PERSONHOOD, {agent: props.agent}); // TODO: duplicate code
 
-      const actor = canDBIndexActor(process.env.CANISTER_ID_CANDBINDEX!, {agent: props.agent});
+      const actor = Actor.createActor(canDBIndexIdl, {canisterId: process.env.CANISTER_ID_CANDBINDEX!, agent: props.agent});
       async function doIt() {
         const [flag, score] = await actor.sybilScore() as [boolean, number];
         console.log("SCORE:", score);
@@ -138,7 +138,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
       setRecalculateScoreLoading(true);
       let localMessage = message;
       let localNonce = nonce;
-      const personhood = createPersonhoodActor(ourCanisters.CANISTER_ID_PERSONHOOD, {agent: props.agent}); // TODO: duplicate code
+      const personhood: Personhood = Actor.createActor(personhoodIdl, {canisterId: ourCanisters.CANISTER_ID_PERSONHOOD!, agent: props.agent}); // TODO: duplicate code
       if (nonce === undefined) {
         const {message, nonce} = await personhood.getEthereumSigningMessage();
         localMessage = message;

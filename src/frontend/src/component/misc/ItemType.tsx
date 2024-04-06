@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Item } from "../../../../../out/src/storage/CanDBPartition";
+import { Item } from "../../../out/src/storage/CanDBPartition";
 
 export default function ItemType(props: {item: Item | undefined}) { // TODO: Is it the right type of argument?
     return <>
