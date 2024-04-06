@@ -34,11 +34,11 @@ deploy-interface: \
   $(addprefix $(DESTDIR)/,$(addsuffix .d.ts,$(CANISTER_INTERFACES)))
 
 .PHONY: upgrade-candb
-upgrade-candb: $(DESTDIR)/src/storage/CanDBPartition.wasm deploy-interface
+upgrade-candb: $(DESTDIR)/src/storage/CanDBPartition.wasm $(DESTDIR)/src/storage/CanDBIndex.js $(DESTDIR)/src/storage/CanDBIndex.d.ts
 	npx ts-node scripts/upgrade-candb.ts $<
 
 .PHONY: upgrade-nacdb
-upgrade-nacdb: $(DESTDIR)/src/storage/NacDBPartition.wasm deploy-interface
+upgrade-nacdb: $(DESTDIR)/src/storage/NacDBPartition.wasm $(DESTDIR)/src/storage/NacDBIndex.js $(DESTDIR)/src/storage/NacDBIndex.d.ts
 	npx ts-node scripts/upgrade-nacdb.ts $<
 
 .PHONY: 
