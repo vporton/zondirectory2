@@ -12,7 +12,7 @@ CANISTERS = \
 CANISTER_INTERFACES = $(CANISTERS) src/storage/CanDBPartition src/storage/NacDBPartition
 
 out/src/backend/main.wasm: out/src/backend/order.deploy out/src/storage/CanDBIndex.deploy
-out/src/backend/personhood.wasm: out/src/storage/CanDBIndex.deploy ./target/wasm32-unknown-unknown/release/ic_eth.deploy
+out/src/backend/personhood.wasm: out/src/storage/CanDBIndex.deploy $(DESTDIR)/ic_eth.deploy
 out/src/backend/order.wasm: out/src/storage/CanDBIndex.deploy out/src/storage/NacDBIndex.deploy
 out/src/backend/payments.wasm: out/src/backend/pst.deploy
 
@@ -30,7 +30,7 @@ deploy-frontend: deploy-interface out/frontend.deploy
 # hack
 .PHONY: deploy-main
 deploy-main: $(addprefix $(DESTDIR)/,$(addsuffix .deploy,$(CANISTERS))) \
-	./target/wasm32-unknown-unknown/release/ic_eth.deploy
+	$(DESTDIR)/ic_eth.deploy
 
 .PHONY: deploy-interface
 deploy-interface: $(addprefix $(DESTDIR)/,$(addsuffix .ts,$(CANISTER_INTERFACES)))
@@ -42,6 +42,9 @@ upgrade-candb: $(DESTDIR)/src/storage/CanDBPartition.wasm
 .PHONY: upgrade-nacdb
 upgrade-nacdb: $(DESTDIR)/src/storage/NacDBPartition.wasm
 	npx ts-node scripts/upgrade-nacdb.ts $<
+
+$(DESTDIR)/ic_eth.wasm: ./target/wasm32-unknown-unknown/release/ic_eth.wasm
+	cp -f $< $@
 
 ./target/wasm32-unknown-unknown/release/ic_eth.wasm:
 	cd src/ic_eth && cargo build --target wasm32-unknown-unknown --release
