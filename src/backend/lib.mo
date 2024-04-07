@@ -150,7 +150,9 @@ module {
     item: ItemDataWithoutOwner;
   };
 
-  // TODO: Use it.
+  /// One of voted-for variants of a communal item.
+  ///
+  /// TODO: Use it.
   public type ItemVariant = {
     item: ItemDataWithoutOwner;
     // itemRef: (Principal, Entity.SK);
