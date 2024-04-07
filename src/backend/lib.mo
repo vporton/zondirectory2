@@ -130,6 +130,9 @@ module {
   // TODO: Images.
   // TODO: Item version.
   // FIXME: Checking whether it's a folder in `order.mo` does not work.
+  /// The main type for the item. 
+  ///
+  /// Stored at `"i/" # ID` attribute `"i"`.
   public type Item = {
     #owned : ItemData;
     #communal : {
@@ -151,6 +154,8 @@ module {
   };
 
   /// One of voted-for variants of a communal item.
+  ///
+  /// Stored at `"r/" # ID` attribute `"i"`.
   ///
   /// TODO: Use it.
   public type ItemVariant = {
