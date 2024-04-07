@@ -246,16 +246,7 @@ shared actor class ZonBackend() = this {
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
-        if (caller != oldItem.creator) {
-          Debug.trap("can't change item owner");
-        };
         let _item: lib.ItemData = { item = item; creator = caller; /*var streams = null;*/ };
-        if (_item.item.details != oldItem.item.details) {
-          Debug.trap("can't change item type");
-        };
-        // if (oldItem.item.communal) { // FIXME
-        //   Debug.trap("can't edit communal folder");
-        // };
         lib.onlyItemOwner(caller, oldItem);
         await db.putAttribute({sk = key; key = "i"; value = lib.serializeItem(_item)});
       };

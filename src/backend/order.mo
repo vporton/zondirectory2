@@ -276,9 +276,10 @@ shared({caller = initialOwner}) actor class Orders() = this {
     if (comment) {
       lib.STREAM_LINK_COMMENTS;
     } else {
-      switch (childItem.item.details) {
-        case (#folder) { lib.STREAM_LINK_SUBFOLDERS };
-        case _ { lib.STREAM_LINK_SUBITEMS };
+      if (lib.isFolder(childItem)) {
+        lib.STREAM_LINK_SUBFOLDERS;
+      } else {
+        lib.STREAM_LINK_SUBITEMS;
       };
     };
   };

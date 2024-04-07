@@ -487,10 +487,17 @@ module {
     Debug.trap("wrong votes format");
   };
 
-  public func onlyItemOwner(caller: Principal, item: ItemData) {
-    if (caller != item.creator) {
-      Debug.trap("not the item owner");
-    };
+  public func onlyItemOwner(caller: Principal, item: Item) {
+      switch (item) {
+        case (#owned data) {
+          if (caller != data.creator) {
+            Debug.trap("can't change item owner");
+          };
+        };
+        case (#communal _) {
+          Debug.trap("can't directly edit a communal item");
+        };
+      };
   };
 
   /// More user info: Voting ///
