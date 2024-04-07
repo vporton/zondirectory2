@@ -246,11 +246,11 @@ shared actor class ZonBackend() = this {
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
-        let _item: lib.ItemData = { item = item; creator = caller; /*var streams = null;*/ };
+        let item2: lib.ItemData = { item = item; creator = caller };
         lib.onlyItemOwner(caller, oldItem);
-        await db.putAttribute({sk = key; key = "i"; value = lib.serializeItem(_item)});
+        await db.putAttribute({sk = key; key = "i"; value = lib.serializeItem(#owned item2)});
       };
-      case _ { Debug.trap("no item") };
+      case null { Debug.trap("no item") };
     };
   };
 
