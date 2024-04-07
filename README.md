@@ -28,24 +28,16 @@ nvm use v18.19.1
 # Starts the replica, running in the background
 dfx start --background
 
-# Build the first time:
-make first-build && make init
+# Build the first time: (6 min)
+make deploy-backend && make deploy-frontend && make init
 
 # ... Build again:
-make deploy-frontend
+make deploy-backend && make deploy-frontend
 ```
 
 Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.
 
 Note that the timings on my laptop are bigger than to be expected, because a bug forced me to run my laptop in powersave mode.
-
-If you have made changes to your backend canister, you can generate a new candid interface with
-
-```bash
-npm run generate
-```
-
-at any time. This is recommended before starting the frontend development server, and will be run automatically any time you run `dfx deploy`.
 
 If you are making frontend changes, you can start a development server with
 
