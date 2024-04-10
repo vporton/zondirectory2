@@ -303,6 +303,10 @@ module {
     : Item
   {
     label r {
+      if (arr[current.pos] != #int 0) { // version marker
+        break r;
+      };
+      current.pos += 1;
       switch (arr[current.pos]) {
         case (#int v) {
           current.pos += 1;
