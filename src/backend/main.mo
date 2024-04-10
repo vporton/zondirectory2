@@ -3,12 +3,14 @@ import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Buffer "mo:base/Buffer";
+import Array "mo:base/Array";
 import Reorder "mo:nacdb-reorder/Reorder";
 import order "canister:order";
-
+import GUID "mo:nacdb/GUID";
 import Entity "mo:candb/Entity";
 
 import CanDBIndex "canister:CanDBIndex";
+import NacDBIndex "canister:NacDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
 import MyCycles "mo:nacdb/Cycles";
 import DBConfig "../libs/configs/db.config";
@@ -19,6 +21,9 @@ shared actor class ZonBackend() = this {
   /// External Canisters ///
 
   /// Some Global Variables ///
+  stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0)); // FIXME: Gather randomness.
+
+  stable let orderer = Reorder.createOrderer({queueLengths = 20}); // TODO: What's the number?
 
   // See ARCHITECTURE.md for database structure
 
@@ -219,16 +224,15 @@ shared actor class ZonBackend() = this {
       let itemId = maxId;
       maxId += 1;
       let key2 = "i/" # Nat.toText(itemId);
-      let votesStream = await* Reorder.createOrder();
-      let item2 = #communal votesStream;
+      let votesStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
+      let item2 = #communal { votesStream; isFolder = item.details == #folder };
       // FIXME: Put variant in stream
       let canisterId2 = await CanDBIndex.putAttributeWithPossibleDuplicate(
         "main", { sk = key2; key = "i"; value = lib.serializeItem(item2) }
       );
       (canisterId2, itemId);
-
     } else {
-      let item2: lib.Item = { creator = caller; item = #owned item; };
+      let item2: lib.Item = #owned { creator = caller; item };
       let itemId = maxId;
       maxId += 1;
       let key = "i/" # Nat.toText(itemId);
