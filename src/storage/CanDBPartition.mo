@@ -127,7 +127,18 @@ shared actor class CanDBPartition(options: {
         let item = lib.deserializeItem(data);
         switch (item) {
           case (#owned item2) { ?{ creator = item2.creator; item = item2.item } };
-          case (#communal _) { Debug.trap("TODO"); }
+          case (#communal c) {
+            let scanResult = await c.votesStream.order.0.scanLimitOuter({
+              dir = #fwd;
+              outerKey = c.votesStream.order.1;
+              lowerBound = "";
+              upperBound = "x";
+              limit = 1;
+              ascending = ?true;
+            });
+            let v = scanResult.results[0].1;
+            // FIXME
+          };
         };
       };
       case null { null };
