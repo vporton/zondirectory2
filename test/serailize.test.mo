@@ -5,11 +5,11 @@ import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
 import lib "../src/backend/lib";
 
-class testableItem(data: lib.ItemData): T.TestableItem<lib.ItemData> = {
+class testableItem(data: lib.Item): T.TestableItem<lib.Item> = {
     public let item = data;
-    public func display(person: lib.ItemData) : Text =
-       debug_show(person.item);
-    public func equals(data1: lib.ItemData, data2: lib.ItemData) : Bool =
+    public func display(_item: lib.Item) : Text =
+       "<ITEM>"; // TODO
+    public func equals(data1: lib.Item, data2: lib.Item) : Bool =
        data1 == data2;
 };
 
@@ -25,7 +25,8 @@ let suite = Suite.suite("Serialize/deserialize", [
     Suite.suite("Item serialize/deserialize item",
         Iter.toArray(
             Iter.map([#link "https://example.com", #message, #post, #folder].vals(), func (d: lib.ItemDetails): Suite.Suite {
-                let item: lib.ItemData = {
+                // TODO: Test also communal item.
+                let item: lib.Item = #owned {
                     creator = Principal.fromText("2vxsx-fae");
                     item = {
                         price = 0.25;
@@ -33,7 +34,7 @@ let suite = Suite.suite("Serialize/deserialize", [
                         title = "Title";
                         description = "Description";
                         details = d;
-                    };
+                    } : lib.ItemDataWithoutOwner;
                 };
                 Suite.test(
                     "serialization of deserialization",
