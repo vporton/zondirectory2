@@ -137,6 +137,7 @@ module {
     #owned : ItemData;
     #communal : {
       isFolder: Bool;
+      timeStream: Reorder.Order;
       votesStream: Reorder.Order;
     };
   };
@@ -283,9 +284,13 @@ module {
         buf.add(#text(Principal.toText(ownedItem.creator)));
         serializeItemDataWithoutOwnerToBuffer(buf, ownedItem.item);
       };
-      case (#communal {isFolder: Bool; votesStream: Reorder.Order}) {
+      case (#communal {isFolder: Bool; timeStream: Reorder.Order; votesStream: Reorder.Order}) {
         buf.add(#int 1);
         buf.add(#int(if (isFolder) { 1 } else { 0 }));
+        buf.add(#text(Principal.toText(Principal.fromActor(timeStream.order.0))));
+        buf.add(#int(timeStream.order.1));
+        buf.add(#text(Principal.toText(Principal.fromActor(timeStream.reverse.0))));
+        buf.add(#int(votesStreatimeStream.reverse.1));
         buf.add(#text(Principal.toText(Principal.fromActor(votesStream.order.0))));
         buf.add(#int(votesStream.order.1));
         buf.add(#text(Principal.toText(Principal.fromActor(votesStream.reverse.0))));
@@ -325,6 +330,8 @@ module {
               current.pos += 1;
               var order = ("", 0);
               var reverse = ("", 0);
+              var order2 = ("", 0);
+              var reverse2 = ("", 0);
               switch ((arr[current.pos], arr[current.pos+1], arr[current.pos+2], arr[current.pos+3])) {
                 case ((#text op1, #int on1, #text op2, #int on2)) {
                   order := (op1, Int.abs(on1));
@@ -333,9 +340,18 @@ module {
                 };
                 case _ { break r };
               };
+              switch ((arr[current.pos], arr[current.pos+1], arr[current.pos+2], arr[current.pos+3])) {
+                case ((#text op1, #int on1, #text op2, #int on2)) {
+                  order2 := (op1, Int.abs(on1));
+                  reverse2 := (op2, Int.abs(on2));
+                  current.pos += 4;
+                };
+                case _ { break r };
+              };
               return #communal {
                 isFolder = folder;
-                votesStream = { order = (actor(order.0), order.1); reverse = (actor(reverse.0), reverse.1) };
+                timeStream = { order = (actor(order.0), order.1); reverse = (actor(reverse.0), reverse.1) };
+                votesStream = { order = (actor(order2.0), order.1); reverse = (actor(reverse2.0), reverse2.1) };
               };
             };
             case _ { break r };
