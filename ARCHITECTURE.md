@@ -18,6 +18,19 @@
 ### "w/<parent>/<child>"
 - Attribute `"v"` - `#tuple [#int <VOTES UP>, #int <VOTES DOWN>]`
 
+### Variant votes:
+
+TODO:
+
+For streams of variants re-voting up should remove the previous vote up.
+We also should remove old up votes (after 15 new votes).
+However, we should not remove old down votes.
+
+### "b/<item>/<user>"
+- attribute `"v"` - `ItemVariant` that was voted up
+### "d/<item>/<user>/<item-variant>"
+- attribute `"v"` - `()` (votes down)
+
 ## NacDB database structure
 * time/time: folder -> sub-items
 * time/time: folder -> sub-folders

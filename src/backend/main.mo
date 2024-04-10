@@ -217,21 +217,19 @@ shared actor class ZonBackend() = this {
       let variant: lib.ItemVariant = { creator = caller; item; };
       let variantId = maxId;
       maxId += 1;
-      let key = "r/" # Nat.toText(variantId);
-      let canisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
-        "main", { sk = key; key = "i"; value = lib.serializeItemVariant(variant) }
+      let variantKey = "r/" # Nat.toText(variantId);
+      let variantCanisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
+        "main", { sk = variantKey; key = "i"; value = lib.serializeItemVariant(variant) }
       );
       let itemId = maxId;
       maxId += 1;
-      let key2 = "i/" # Nat.toText(itemId);
-      // FIXME: For streams of variants re-voting up should remove the previous vote. We also should remove old votes.
-      //        However, we probably should not remove old **negative** votes.
+      let itemKey = "i/" # Nat.toText(itemId);
       let timeStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
       let votesStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
       let item2 = #communal { timeStream; votesStream; isFolder = item.details == #folder };
       // FIXME: Put variant in stream
       let canisterId2 = await CanDBIndex.putAttributeWithPossibleDuplicate(
-        "main", { sk = key2; key = "i"; value = lib.serializeItem(item2) }
+        "main", { sk = itemKey; key = "i"; value = lib.serializeItem(item2) }
       );
       (canisterId2, itemId);
     } else {
