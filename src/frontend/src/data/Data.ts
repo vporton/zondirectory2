@@ -1,5 +1,5 @@
 import { Principal } from "@dfinity/principal";
-import { idlFactory as canDBPartitionIdl, Item, Streams } from "../../out/src/storage/CanDBPartition";
+import { idlFactory as canDBPartitionIdl, ItemData, Streams } from "../../out/src/storage/CanDBPartition";
 import { _SERVICE as NacDBPartition } from "../../out/src/storage/NacDBPartition";
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
 import { idlFactory as nacDBPartitionIdl } from "../../out/src/storage/NacDBPartition";
@@ -43,15 +43,9 @@ export class ItemDB {
         this.itemRef = parseItemRef(itemId);
     }
     /// `"t" | "v"` - time, votes,.
-<<<<<<< HEAD
     static async create(agent: Agent, itemId: string, kind: "t" | "v"): Promise<ItemDB> {
         const obj = new ItemDB(agent, itemId);
-        const client = canDBPartitionActor(obj.itemRef.canister);
-=======
-    static async create(agent: Agent, itemId: string, kind: "t" | "v"): Promise<ItemData> {
-        const obj = new ItemData(agent, itemId);
         const client = Actor.createActor(canDBPartitionIdl, {canisterId: obj.itemRef.canister, agent});
->>>>>>> main
         // TODO: Retrieve both by one call?
         const [item, streams, streamsRev] = await Promise.all([
             client.getItem(BigInt(obj.itemRef.id)),

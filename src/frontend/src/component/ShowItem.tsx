@@ -6,7 +6,7 @@ import { AuthContext } from "./auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
 import { Button, Nav } from "react-bootstrap";
-import { Item } from "../../out/src/storage/CanDBPartition";
+import { ItemData } from "../../out/src/storage/CanDBPartition";
 import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
