@@ -65,6 +65,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
     // TODO: race
 
+    // TODO: duplicate code
+
     let timeScanSK = if (side == #zero) {
       0;
     } else {
