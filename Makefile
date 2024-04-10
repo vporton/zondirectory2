@@ -16,6 +16,9 @@ out/src/backend/personhood.wasm: out/src/storage/CanDBIndex.deploy out/src/stora
 out/src/backend/order.wasm: out/src/storage/CanDBIndex.deploy out/src/storage/NacDBIndex.deploy
 out/src/backend/payments.wasm: out/src/backend/pst.deploy
 
+# TODO: hack
+out/src/storage/CanDBPartition.wasm: out/src/storage/NacDBPartition.deploy
+
 .PHONY: deploy-backend
 deploy-backend: deploy-main upgrade-candb upgrade-nacdb $(DESTDIR)/internet_identity.deploy
 

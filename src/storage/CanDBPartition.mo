@@ -120,7 +120,7 @@ shared actor class CanDBPartition(options: {
 
   // TODO: Retrieve virtual items.
   // TODO: `?lib.ItemData` -> `lib.ItemData`?
-  public query func getItem(itemId: Nat): async ?lib.ItemData {
+  public shared func getItem(itemId: Nat): async ?lib.ItemData {
     let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "i");
     switch (data) {
       case (?data) {

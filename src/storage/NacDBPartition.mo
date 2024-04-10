@@ -132,7 +132,7 @@ shared({caller}) actor class Partition(
     public query func scanLimitOuter({outerKey: Nac.OuterSubDBKey; lowerBound: Nac.SK; upperBound: Nac.SK; dir: BTree.Direction; limit: Nat})
         : async BTree.ScanLimitResult<Text, Nac.AttributeValue>
     {
-        ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
+        // ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
         await* Nac.scanLimitOuter({outerSuperDB = superDB; outerKey; lowerBound; upperBound; dir; limit});
     };
 
