@@ -312,6 +312,7 @@ module {
               switch (arr[current.pos]) {
                 case (#text c) {
                   creator := c;
+                  current.pos += 1;
                 };
                 case _ { break r };
               };
