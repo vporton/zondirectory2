@@ -8,6 +8,7 @@ import Reorder "mo:nacdb-reorder/Reorder";
 import order "canister:order";
 import GUID "mo:nacdb/GUID";
 import Entity "mo:candb/Entity";
+import Itertools "mo:itertools/Iter";
 
 import CanDBIndex "canister:CanDBIndex";
 import NacDBIndex "canister:NacDBIndex";
@@ -227,11 +228,40 @@ shared actor class ZonBackend() = this {
       let timeStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
       let votesStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
       let item2 = #communal { timeStream; votesStream; isFolder = item.details == #folder };
-      // FIXME: Put variant in stream
-      let canisterId2 = await CanDBIndex.putAttributeWithPossibleDuplicate(
+      let variantValue = Principal.toText(variantCanisterId) # "/" # Nat.toText(variantId);
+      await* Reorder.add(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
+        hardCap = ?100; key = -2; order = votesStream; value = variantValue; // TODO: Take position `key` configurable.
+      });
+
+      // Put variant in time stream // TODO: duplicate code
+      let scanResult = await timeStream.order.0.scanLimitOuter({
+        dir = #fwd;
+        outerKey = timeStream.order.1;
+        lowerBound = "";
+        upperBound = "x";
+        limit = 1;
+        ascending = ?true;
+      });
+      let timeScanSK = if (scanResult.results.size() == 0) { // empty list
+        0;
+      } else {
+        let t = scanResult.results[0].0;
+        let n = lib.decodeInt(Text.fromIter(Itertools.takeWhile(t.chars(), func (c: Char): Bool { c != '#' })));
+        n - 1;
+      };
+      let guid = GUID.nextGuid(guidGen);
+      // TODO: race condition
+      await* Reorder.add(guid, NacDBIndex, orderer, {
+        order = timeStream;
+        key = timeScanSK;
+        value = variantValue;
+        hardCap = DBConfig.dbOptions.hardCap;
+      });
+
+      let itemCanisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
         "main", { sk = itemKey; key = "i"; value = lib.serializeItem(item2) }
       );
-      (canisterId2, itemId);
+      (itemCanisterId, itemId);
     } else {
       let item2: lib.Item = #owned { creator = caller; item };
       let itemId = maxId;

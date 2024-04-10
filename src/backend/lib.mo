@@ -290,7 +290,7 @@ module {
         buf.add(#text(Principal.toText(Principal.fromActor(timeStream.order.0))));
         buf.add(#int(timeStream.order.1));
         buf.add(#text(Principal.toText(Principal.fromActor(timeStream.reverse.0))));
-        buf.add(#int(votesStreatimeStream.reverse.1));
+        buf.add(#int(timeStream.reverse.1));
         buf.add(#text(Principal.toText(Principal.fromActor(votesStream.order.0))));
         buf.add(#int(votesStream.order.1));
         buf.add(#text(Principal.toText(Principal.fromActor(votesStream.reverse.0))));
