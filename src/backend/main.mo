@@ -225,6 +225,7 @@ shared actor class ZonBackend() = this {
       maxId += 1;
       let key2 = "i/" # Nat.toText(itemId);
       // FIXME: For streams of variants re-voting should remove old vote. Voting should be only up.
+      //        However, we probably should not remove old **negative** votes.
       let timeStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
       let votesStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
       let item2 = #communal { timeStream; votesStream; isFolder = item.details == #folder };
