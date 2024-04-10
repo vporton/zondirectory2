@@ -282,7 +282,7 @@ shared actor class ZonBackend() = this {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
         let item2: lib.ItemData = { item = item; creator = caller };
-        lib.onlyItemOwner(caller, oldItem);
+        lib.onlyItemOwner(caller, oldItem); // also rejects changing communal items.
         await db.putAttribute({sk = key; key = "i"; value = lib.serializeItem(#owned item2)});
       };
       case null { Debug.trap("no item") };
