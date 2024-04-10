@@ -66,13 +66,8 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                             price: 0.0, // TODO
                         };
                     }
-<<<<<<< HEAD
                     async function submitItem(item: ItemDataWithoutOwner) {
-                        const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
-=======
-                    async function submitItem(item: ItemWithoutOwner) {
                         const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
->>>>>>> main
                         let part, n;
                         if (props.folderId !== undefined) {
                             const folder = parseItemRef(props.folderId); // TODO: not here

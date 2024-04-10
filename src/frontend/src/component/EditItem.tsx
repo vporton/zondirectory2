@@ -46,9 +46,6 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                 <AuthContext.Consumer>
                     {({agent, defaultAgent, isAuthenticated}) => {
                     async function submit() {
-<<<<<<< HEAD
-                        function itemData(): ItemDataWithoutOwner {
-=======
                         useEffect(() => {
                             if (props.itemId !== undefined) {
                                 const itemId = parseItemRef(props.itemId);
@@ -72,8 +69,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                                     });
                             }
                         }, [props.itemId]);
-                                            function itemData(): ItemWithoutOwner {
->>>>>>> main
+                        function itemData(): ItemDataWithoutOwner {
                             // TODO: Differentiating post and message by `post === ""` is unreliable.
                             const isPost = selectedTab == SelectedTab.selectedOther && post !== "";
                             return {
@@ -86,13 +82,8 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                                 price: 0.0, // TODO
                             };
                         }
-<<<<<<< HEAD
                         async function submitItem(item: ItemDataWithoutOwner) {
-                            const backend = mainActor(process.env.CANISTER_ID_MAIN!, {agent});
-=======
-                        async function submitItem(item: ItemWithoutOwner) {
                             const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
->>>>>>> main
                             let part, n;
                             if (routeParams.item !== undefined) {
                                 console.log("routeParams.item", routeParams.item    )

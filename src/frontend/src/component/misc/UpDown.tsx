@@ -110,11 +110,7 @@ export default function UpDown(props: {
     );
 }
 
-<<<<<<< HEAD
-export async function updateVotes(id, principal, source: {order: string, id: ItemRef, item: ItemData}[], setTotalVotes, setUserVote) { // TODO: argument types
-=======
-export async function updateVotes(agent: Agent, id, principal, source: {order: string, id: ItemRef, item: Item}[], setTotalVotes, setUserVote) { // TODO: argument types
->>>>>>> main
+export async function updateVotes(agent: Agent, id, principal, source: {order: string, id: ItemRef, item: ItemData}[], setTotalVotes, setUserVote) { // TODO: argument types
     const totalVotes: {[key: string]: {up: number, down: number}} = {};
     const totalVotesPromises = (source || []).map(folder =>
         loadTotalVotes(agent, id!, folder.id).then(res => {
