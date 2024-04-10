@@ -4,7 +4,7 @@ import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
-import { ItemWithoutOwner, ZonBackend, idlFactory as mainIdlFactory } from "../../out/src/backend/main";
+import { ItemDataWithoutOwner, ZonBackend, idlFactory as mainIdlFactory } from "../../out/src/backend/main";
 import { CanDBPartition, idlFactory as canDBPartitionIdlFactory } from "../../out/src/storage/CanDBPartition";
 import EditFoldersList from "./EditFoldersList";
 import { addToFolder, addToMultipleFolders } from "../util/folder";
@@ -75,7 +75,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                             part = folder.canister;
                             n = BigInt(folder.id);
                         } else {
-                            [part, n] = await backend.createItemData(item);
+                            [part, n] = await backend.createItemData(item, false); // FIXME: Folder can be communal (true).
                         }
                         const ref = serializeItemRef({canister: part, id: Number(n)}); // TODO: Reduce code
                         if (!(props.super === true)) { // noComments

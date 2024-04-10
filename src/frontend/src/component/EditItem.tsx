@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { Helmet } from 'react-helmet';
 import 'react-tabs/style/react-tabs.css';
-import { ItemWithoutOwner, ZonBackend, idlFactory as mainIdlFactory } from "../../out/src/backend/main";
+import { ItemDataWithoutOwner, ZonBackend, idlFactory as mainIdlFactory } from "../../out/src/backend/main";
 import { CanDBPartition, idlFactory as canDBPartitionIdlFactory } from "../../out/src/storage/CanDBPartition";
 import EditFoldersList from "./EditFoldersList";
 import { parseItemRef, serializeItemRef } from "../data/Data";
@@ -92,7 +92,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                                 part = folder.canister;
                                 n = BigInt(folder.id);
                             } else {
-                                [part, n] = await backend.createItemData(item);
+                                [part, n] = await backend.createItemData(item, false); // FIXME: true for communal
                             }
                             await backend.setPostText(part, n, post);
                             const ref = serializeItemRef({canister: part, id: Number(n)});
