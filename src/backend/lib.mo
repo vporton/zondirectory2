@@ -351,7 +351,7 @@ module {
               return #communal {
                 isFolder = folder;
                 timeStream = { order = (actor(order.0), order.1); reverse = (actor(reverse.0), reverse.1) };
-                votesStream = { order = (actor(order2.0), order.1); reverse = (actor(reverse2.0), reverse2.1) };
+                votesStream = { order = (actor(order2.0), order2.1); reverse = (actor(reverse2.0), reverse2.1) };
               };
             };
             case _ { break r };
