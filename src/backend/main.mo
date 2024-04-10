@@ -228,7 +228,7 @@ shared actor class ZonBackend() = this {
       let timeStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
       let votesStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
       let item2 = #communal { timeStream; votesStream; isFolder = item.details == #folder };
-      let variantValue = Principal.toText(variantCanisterId) # "/" # Nat.toText(variantId);
+      let variantValue = Nat.toText(variantId) # "@" # Principal.toText(variantCanisterId);
       await* Reorder.add(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
         hardCap = ?100; key = -2; order = votesStream; value = variantValue; // TODO: Take position `key` configurable.
       });

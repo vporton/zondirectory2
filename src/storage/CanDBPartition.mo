@@ -136,8 +136,24 @@ shared actor class CanDBPartition(options: {
               limit = 1;
               ascending = ?true;
             });
-            let v = scanResult.results[0].1;
-            // FIXME
+            let ref = scanResult.results[0].1;
+            let words = Text.split(ref, #char '@');
+            let w1o = words.next();
+            let w2o = words.next();
+            let (?itemId, ?itemCanisterId) = (w1o, w2o) else {
+              Debug.trap("order: programming error");
+            };
+            // let ?itemId = Nat.fromText(w1) else {
+            //   Debug.trap("order: programming error");
+            // };
+            let itemCanister: CanDBPartition = actor(itemCanisterId);
+            switch (await itemCanister.getAttribute({sk = itemId}, "v")) {
+              case (?data) {
+                let variant = lib.deserializeItemVariant(data);
+                ?{ creator = Principal.fromText("aaaaa-aa"); item = variant.item }; // FIXME: principal
+              };
+              case null { return null };
+            };
           };
         };
       };
