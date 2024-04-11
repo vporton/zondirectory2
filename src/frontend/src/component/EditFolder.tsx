@@ -32,8 +32,8 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
             const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: folderId.canister, agent: props.defaultAgent});
             actor.getItem(BigInt(folderId.id))
                 .then((itemx) => {
-                    const item = itemx[0] ? itemx[0][0]!.item : undefined;
-                    const communal = itemx[0] ? itemx[0][1]! : undefined; // TODO: Simplify.
+                    const item = itemx[0] ? itemx[0][0]!.data : undefined;
+                    const communal = itemx[0]?.communal; // TODO: Simplify.
                     setFolderKind(communal ? FolderKind.communal : FolderKind.owned);
                     setLocale(item!.locale);
                     setTitle(item!.title);
@@ -75,8 +75,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                             part = folder.canister;
                             n = BigInt(folder.id);
                         } else {
-                            console.log('folderKind == FolderKind.communal', folderKind == FolderKind.communal);
-                            [part, n] = await backend.createItemData(item, folderKind == FolderKind.communal);
+                            [part, n] = await backend.createItemData({data: item, communal: folderKind == FolderKind.communal});
                         }
                         const ref = serializeItemRef({canister: part, id: Number(n)}); // TODO: Reduce code
                         if (!(props.super === true)) { // noComments

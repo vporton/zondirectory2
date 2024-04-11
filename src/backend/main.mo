@@ -215,7 +215,7 @@ shared actor class ZonBackend() = this {
     : async (Principal, Nat)
   {
     if (item.communal) {
-      let variant: lib.ItemVariant = { creator = caller; item; };
+      let variant: lib.ItemVariant = { creator = caller; item = item.data; };
       let variantId = maxId;
       maxId += 1;
       let variantKey = "r/" # Nat.toText(variantId);
@@ -227,7 +227,7 @@ shared actor class ZonBackend() = this {
       let itemKey = "i/" # Nat.toText(itemId);
       let timeStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
       let votesStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
-      let item2 = #communal { timeStream; votesStream; isFolder = item.details == #folder };
+      let item2 = #communal { timeStream; votesStream; isFolder = item.data.details == #folder };
       let variantValue = Nat.toText(variantId) # "@" # Principal.toText(variantCanisterId);
       await* Reorder.add(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
         hardCap = ?100; key = -2; order = votesStream; value = variantValue; // TODO: Take position `key` configurable.
@@ -263,7 +263,7 @@ shared actor class ZonBackend() = this {
       );
       (itemCanisterId, itemId);
     } else {
-      let item2: lib.Item = #owned { creator = caller; item };
+      let item2: lib.Item = #owned { creator = caller; item = item.data };
       let itemId = maxId;
       maxId += 1;
       let key = "i/" # Nat.toText(itemId);

@@ -6,7 +6,7 @@ import { AuthContext } from "./auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
 import { Button, Nav } from "react-bootstrap";
-import { ItemData } from "../../../../out/src/storage/CanDBPartition";
+import { ItemData, ItemTransfer } from "../../../../out/src/storage/CanDBPartition";
 import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
@@ -37,11 +37,11 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     const [postText, setPostText] = useState("");
     const [type, setType] = useState<string | undefined>(undefined);
     const [creator, setCreator] = useState("");
-    const [subfolders, setSubfolders] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>(undefined);
-    const [superfolders, setSuperfolders] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>(undefined);
-    const [items, setItems] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>(undefined);
-    const [comments, setComments] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>(undefined);
-    const [antiComments, setAntiComments] = useState<{order: string, id: ItemRef, item: ItemData}[] | undefined>(undefined);
+    const [subfolders, setSubfolders] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
+    const [superfolders, setSuperfolders] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
+    const [items, setItems] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
+    const [comments, setComments] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
+    const [antiComments, setAntiComments] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
     const [data, setData] = useState<any>(undefined); // TODO: hack
     const [xdata, setXData] = useState<any>(undefined); // TODO: hack
     const [itemsLast, setItemsLast] = useState("");
@@ -202,12 +202,13 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 <h3>Sub-folders</h3>
                 {subfolders === undefined ? <p>Loading...</p> :
                 <ul>
-                    {subfolders.map((x: {order: string, id: ItemRef, item: ItemData}) =>
+                    {subfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
                         <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
+                             {/* FIXME: `defaultAgent` `!` */}
                             <UpDown
-                                parent={{id}}
+                                parent={xdata}
                                 item={x}
-                                agent={props.defaultAgent!} {/* FIXME: `!` */}
+                                agent={props.defaultAgent!}
                                 userVote={userVoteSubFolders[serializeItemRef(x.id)]}
                                 totalVotes={totalVotesSubFolders[serializeItemRef(x.id)]}
                                 onSetUserVote={(id: ItemRef, v: number) =>
