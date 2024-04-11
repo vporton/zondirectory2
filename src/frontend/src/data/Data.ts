@@ -35,7 +35,7 @@ function _unwrap<T>(v: T[]): T | undefined {
 export class ItemDB {
     agent?: Agent; // should be `defaultAgent`
     itemRef: ItemRef;
-    item: ItemData;
+    item: ItemTransfer;
     streams: Streams | undefined;
     streamsRev: Streams | undefined;
     communal: boolean;
@@ -52,27 +52,26 @@ export class ItemDB {
             client.getItem(BigInt(obj.itemRef.id)),
             client.getStreams(BigInt(obj.itemRef.id), "s" + kind),
             client.getStreams(BigInt(obj.itemRef.id), "rs" + kind),
-        ]) as [ItemData[] | [], Streams[] | [], Streams[] | []];
-        obj.item = item[0][0]; // TODO: if no such item
-        obj.communal = item[0][1]; // TODO: if no such item
+        ]) as [ItemTransfer[] | [], Streams[] | [], Streams[] | []];
+        obj.item = item[0]; // TODO: if no such item
         obj.streams = _unwrap(streams);
         obj.streamsRev = _unwrap(streamsRev);
         return obj;
     }
     async locale(): Promise<string> {
-        return this.item.item.locale;
+        return this.item.data.item.locale;
     }
     async title(): Promise<string> {
-        return this.item.item.title;
+        return this.item.data.item.title;
     }
     async description(): Promise<string> {
-        return this.item.item.description;
+        return this.item.data.item.description;
     }
     async details() {
-        return this.item.item.details;
+        return this.item.data.item.details;
     }
     async creator(): Promise<Principal> {
-        return this.item.creator;
+        return this.item.data.creator;
     }
     async postText(): Promise<string | undefined> {
         const client = Actor.createActor(canDBPartitionIdl, {canisterId: this.itemRef.canister, agent: this.agent});
@@ -124,7 +123,7 @@ export class ItemDB {
         if (this.streamsRev === undefined) {
             return [];
         }
-        const stream = (this.item.item.details as any).folder !== undefined
+        const stream = (this.item.data.item.details as any).folder !== undefined
             ? _unwrap(this.streamsRev[STREAM_LINK_SUBFOLDERS]) : _unwrap(this.streamsRev[STREAM_LINK_SUBITEMS]);
         if (stream === undefined) {
             return [];
