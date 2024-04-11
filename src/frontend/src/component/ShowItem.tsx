@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "./auth/use-auth-client";
-import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../data/Data";
+import { ItemDB, ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
 import { Button, Nav } from "react-bootstrap";
 import { ItemData, ItemTransfer } from "../../../../out/src/storage/CanDBPartition";
@@ -42,8 +42,8 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     const [items, setItems] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
     const [comments, setComments] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
     const [antiComments, setAntiComments] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
-    const [data, setData] = useState<any>(undefined); // TODO: hack
-    const [xdata, setXData] = useState<any>(undefined); // TODO: hack
+    const [data, setData] = useState<ItemTransfer | undefined>(undefined); // TODO: hack
+    const [xdata, setXData] = useState<ItemDB | undefined>(undefined); // TODO: hack
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
     const [commentsLast, setCommentsLast] = useState("");
@@ -184,7 +184,8 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             <title>{isFolder ? `${title} (folder) - Zon` : `${title} - Zon`}</title>
             <meta name="description" content={description}/>
         </Helmet>
-        <h2><ItemType item={xdata}/>{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
+        {/* FIXME: `!` on the next line */}
+        <h2><ItemType item={data!}/>{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         <p>Creator: <small>{creator.toString()}</small></p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         {postText !== "" ? <p lang={locale}>{postText}</p> : ""}
@@ -204,9 +205,9 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 <ul>
                     {subfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
                         <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
-                             {/* FIXME: `defaultAgent` `!` */}
+                             {/* FIXME: `!` below */}
                             <UpDown
-                                parent={xdata}
+                                parent={{id}}
                                 item={x}
                                 agent={props.defaultAgent!}
                                 userVote={userVoteSubFolders[serializeItemRef(x.id)]}
@@ -215,7 +216,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                     setUserVoteSubFolders({...userVoteSubFolders, [serializeItemRef(id)]: v})}
                                 onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
                                     setTotalVotesSubFolders({...totalVotesSubFolders, [serializeItemRef(id)]: v})}
-                                onUpdateList={() => xdata.subFolders().then(x => setSubfolders(x))}
+                                onUpdateList={() => xdata!.subFolders().then(x => setSubfolders(x))}
                             />
                             <ItemType item={x.item}/>
                             <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>

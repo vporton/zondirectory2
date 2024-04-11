@@ -68,5 +68,5 @@ init:
 	. ./.env && dfx canister call --network $(NETWORK) NacDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
 	. ./.env && dfx canister call --network $(NETWORK) order init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ORDER\" })"
 	mainItem=`dfx canister call --network $(NETWORK) main createItemData \
-	  '(record { price = 0.0; locale = "en"; title = "The homepage"; description = ""; details = variant { folder = null } }, true)'`; \
+	  'record { data = record{price = 0.0; locale = "en"; title = "The homepage"; description = ""; details = variant { folder = null }}; communal = true }'`; \
 	  dfx canister call --network $(NETWORK) main setRootItem "$$mainItem"
