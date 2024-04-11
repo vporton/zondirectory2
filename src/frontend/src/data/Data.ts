@@ -182,7 +182,7 @@ export async function loadTotalVotes(agent: Agent, parent: ItemRef, child: ItemR
 
 export async function loadUserVote(agent: Agent, principal: Principal, parent: ItemRef, child: ItemRef): Promise<number> {
     let pk = `user`;
-    const canDBIndex: CanDBIndex = Actor.createActor(canDBIndexIdl, {canisterId: process.env.CANISTER_ID_CANDBINDEX!})
+    const canDBIndex: CanDBIndex = Actor.createActor(canDBIndexIdl, {canisterId: process.env.CANISTER_ID_CANDBINDEX!, agent})
     let results = await canDBIndex.getFirstAttribute(
         pk,
         {sk: `v/${principal.toString()}/${parent.id}/${child.id}`, key: "v"},

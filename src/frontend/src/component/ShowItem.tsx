@@ -10,6 +10,7 @@ import { ItemData } from "../../out/src/storage/CanDBPartition";
 import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
+import { Agent } from "@dfinity/agent";
 
 export default function ShowItem() {
     return (
@@ -23,7 +24,7 @@ export default function ShowItem() {
     );
 }
 
-function ShowItemContent(props: {defaultAgent}) {
+function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     const { id: idParam } = useParams();
     const [id, setId] = useState(parseItemRef(idParam!));
     useEffect(() => {
