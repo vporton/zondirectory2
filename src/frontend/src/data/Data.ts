@@ -55,6 +55,7 @@ export class ItemDB {
         obj.item = item[0]; // TODO: if no such item
         obj.streams = _unwrap(streams);
         obj.streamsRev = _unwrap(streamsRev);
+        console.log('obj:', obj);
         return obj;
     }
     async locale(): Promise<string> {

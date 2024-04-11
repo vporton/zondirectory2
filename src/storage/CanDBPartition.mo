@@ -150,7 +150,7 @@ shared actor class CanDBPartition(options: {
             //   Debug.trap("order: programming error");
             // };
             let itemCanister: CanDBPartition = actor(itemCanisterId);
-            switch (await itemCanister.getAttribute({sk = itemId}, "v")) {
+            switch (await itemCanister.getAttribute({sk = "r/" # itemId}, "i")) {
               case (?data) {
                 let variant = lib.deserializeItemVariant(data);
                 ?{ creator = Principal.fromText("aaaaa-aa"); item = variant.item }; // FIXME: principal
