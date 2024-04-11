@@ -130,7 +130,7 @@ module {
   // TODO: Images.
   // TODO: Item version.
   // FIXME: Checking whether it's a folder in `order.mo` does not work.
-  /// The main type for the item. 
+  /// The type of stored item in DB.
   ///
   /// Stored at `"i/" # ID` attribute `"i"`.
   public type Item = {
