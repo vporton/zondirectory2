@@ -137,7 +137,10 @@ shared actor class CanDBPartition(options: {
               ascending = ?true;
             });
             let ref = scanResult.results[0].1;
-            let words = Text.split(ref, #char '@');
+            let #text ref2 = ref else {
+              Debug.trap("programming error");
+            };
+            let words = Text.split(ref2, #char '@');
             let w1o = words.next();
             let w2o = words.next();
             let (?itemId, ?itemCanisterId) = (w1o, w2o) else {
