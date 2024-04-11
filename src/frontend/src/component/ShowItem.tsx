@@ -203,7 +203,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 {subfolders === undefined ? <p>Loading...</p> :
                 <ul>
                     {subfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
-                        <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
+                        <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
                              {/* FIXME: `defaultAgent` `!` */}
                             <UpDown
                                 parent={xdata}
@@ -218,7 +218,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                 onUpdateList={() => xdata.subFolders().then(x => setSubfolders(x))}
                             />
                             <ItemType item={x.item}/>
-                            <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
+                            <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
                             [<Nav.Link href={`#/folder/edit/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                         </li>)}
                 </ul>}
@@ -230,8 +230,8 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             <p><small>Voting in this stream not yet implemented.</small></p>
             {superfolders === undefined ? <p>Loading...</p> :
             <ul>
-                {superfolders.map((x: {order: string, id: ItemRef, item: ItemData}) =>
-                    <li lang={x.item.item.locale} key={serializeItemRef(x.id as any)}>
+                {superfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
+                    <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
                         {/* TODO: up/down here is complicated by exchanhing parent/child. */}
                         {/*<UpDown
                             parent={{id}}
@@ -249,7 +249,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             })}
                         />*/}
                         <ItemType item={x.item}/>
-                        <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.item.title}</a>
+                        <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
                         [<Nav.Link href={`#/folder/edit/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                     </li>)}
             </ul>}
@@ -257,13 +257,14 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             <p><a href="#" onClick={e => moreSuperfolders(e)}>More...</a> <a href={`#/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</a></p>
             {!isFolder ? "" : <>
                 <h3>Items</h3>
-                {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemData}) => 
+                {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) => 
                     <div key={serializeItemRef(x.id)}>
-                        <p lang={x.item.item.locale}>
+                        {/* FIXME: `!` in `props.defaultAgent!` */}
+                        <p lang={x.item.data.item.locale}>
                             <UpDown
                                 parent={{id}}
                                 item={x}
-                                agent={props.defaultAgent}
+                                agent={props.defaultAgent!}
                                 userVote={userVoteItems[serializeItemRef(x.id)]}
                                 totalVotes={totalVotesItems[serializeItemRef(x.id)]}
                                 onSetUserVote={(id: ItemRef, v: number) =>
@@ -272,12 +273,12 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                     setTotalVotesItems({...totalVotesItems, [serializeItemRef(id)]: v})}
                                 onUpdateList={() => xdata.items().then(x => setItems(x))}
                             />{" "}
-                            {x.item.item.price ? <>({x.item.item.price} ICP) </> : ""}
-                            {(x.item.item.details as any).link ? <a href={(x.item.item.details as any).link}>{x.item.item.title}</a> : x.item.item.title}
+                            {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
+                            {(x.item.data.item.details as any).link ? <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a> : x.item.data.item.title}
                             {" "}<a href={`#/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
                             {" "}[<Nav.Link href={`#/item/edit/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                         </p>
-                        <p lang={x.item.item.locale} style={{marginLeft: '1em'}}>{x.item.item.description}</p>
+                        <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                     </div>
             )}
             <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
@@ -287,11 +288,12 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 <h3>Comments</h3>
                 {comments === undefined ? <p>Loading...</p> : comments.map(x => 
                     <div key={serializeItemRef(x.id)}>
-                        <p lang={x.item.item.locale}>
+                        {/* FIXME: `!` in `props.defaultAgent!` */}
+                        <p lang={x.item.data.item.locale}>
                             <UpDown
                                 parent={{id}}
                                 item={x}
-                                agent={props.defaultAgent}
+                                agent={props.defaultAgent!}
                                 userVote={userVoteComments[serializeItemRef(x.id)]}
                                 totalVotes={totalVotesComments[serializeItemRef(x.id)]}
                                 onSetUserVote={(id: ItemRef, v: number) =>
@@ -301,25 +303,25 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                 onUpdateList={() => xdata.comments().then(x => setComments(x))}
                                 isComment={true}
                             />
-                            {x.item.item.price ? <>({x.item.item.price} ICP) </> : ""}
-                            {(x.item.item.details as any).link ? <a href={(x.item.item.details as any).link}>{x.item.item.title}</a> : x.item.item.title}
+                            {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
+                            {(x.item.data.item.details as any).link ? <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a> : x.item.data.item.title}
                             {" "}<a href={`#/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
                         </p>
-                        <p lang={x.item.item.locale} style={{marginLeft: '1em'}}>{x.item.item.description}</p>
+                        <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                     </div>
                 )}
                 <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
                     <a href={`#/create/comment/${serializeItemRef(id)}`}>Create</a></p>
                 <h3>Comment on</h3>
                 <p><small>Voting in this stream not yet implemented.</small></p>
-                {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: ItemData}) => 
+                {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: ItemTransfer}) => 
                     <div key={serializeItemRef(item.id)}>
-                        <p lang={item.item.item.locale}>
-                            {item.item.item.price ? <>({item.item.item.price} ICP) </> : ""}
-                            {(item.item.item.details as any).link ? <a href={(item.item.item.details as any).link}>{item.item.item.title}</a> : item.item.item.title}
+                        <p lang={item.item.data.item.locale}>
+                            {item.item.data.item.price ? <>({item.item.data.item.price} ICP) </> : ""}
+                            {(item.item.data.item.details as any).link ? <a href={(item.item.data.item.details as any).link}>{item.item.data.item.title}</a> : item.item.data.item.title}
                             {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
                         </p>
-                        <p lang={item.item.item.locale} style={{marginLeft: '1em'}}>{item.item.item.description}</p>
+                        <p lang={item.item.data.item.locale} style={{marginLeft: '1em'}}>{item.item.data.item.description}</p>
                     </div>
                 )}
                 <p><a href="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}</p>

@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState } from "react";
-import { ItemData } from "../../../../../out/src/storage/CanDBPartition";
+import { ItemData, ItemTransfer } from "../../../../../out/src/storage/CanDBPartition";
 import { AuthContext } from "../auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../../data/Data";
 import { idlFactory as orderIdlFactory } from "../../../../../out/src/backend/main";
@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function UpDown(props: {
     parent: {id: ItemRef},
-    item: {order: string, id: ItemRef, item: ItemData},
+    item: {order: string, id: ItemRef, item: ItemTransfer},
     agent: Agent,
     // onUpdateList: (() => void) | undefined,
     userVote: number, // -1, 0, or 1
@@ -109,7 +109,7 @@ export default function UpDown(props: {
     );
 }
 
-export async function updateVotes(agent: Agent, id, principal, source: {order: string, id: ItemRef, item: ItemData}[], setTotalVotes, setUserVote) { // TODO: argument types
+export async function updateVotes(agent: Agent, id, principal, source: {order: string, id: ItemRef, item: ItemTransfer}[], setTotalVotes, setUserVote) { // TODO: argument types
     const totalVotes: {[key: string]: {up: number, down: number}} = {};
     const totalVotesPromises = (source || []).map(folder =>
         loadTotalVotes(agent, id!, folder.id).then(res => {

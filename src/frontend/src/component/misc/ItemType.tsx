@@ -1,8 +1,7 @@
 import * as React from "react";
-// import { ItemData } from "../../../../../out/src/storage/CanDBPartition";
-import { ItemDB } from "../../data/Data";
+import { ItemTransfer } from "../../../../../out/src/storage/CanDBPartition";
 
-export default function ItemType(props: {item: ItemDB}) { // TODO: Is it the right type of argument?
+export default function ItemType(props: {item: ItemTransfer}) { // TODO: Is it the right type of argument?
     // FIXME
     return <>
         {props.item && (props.item.communal ?
