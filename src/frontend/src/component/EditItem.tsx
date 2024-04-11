@@ -55,9 +55,8 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                                 actor.getItem(BigInt(itemId.id))
                                     .then((item0) => {
                                         const item1 = item0[0]!; // FIXME: `!`
-                                        const [itemx, communal] = item1;
-                                        const item = itemx.item;
-                                        setFolderKind(communal ? FolderKind.communal : FolderKind.owned);
+                                        const item = item1.data.item;
+                                        setFolderKind(item1.communal ? FolderKind.communal : FolderKind.owned);
                                         setLocale(item.locale);
                                         setTitle(item.title);
                                         setShortDescription(item.description);
@@ -97,7 +96,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                                 part = folder.canister;
                                 n = BigInt(folder.id);
                             } else {
-                                [part, n] = await backend.createItemData(item, false); // FIXME: true for communal
+                                [part, n] = await backend.createItemData({data: item, communal: folderKind == FolderKind.communal});
                             }
                             await backend.setPostText(part, n, post);
                             const ref = serializeItemRef({canister: part, id: Number(n)});
