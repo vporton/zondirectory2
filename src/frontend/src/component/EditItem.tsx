@@ -110,6 +110,9 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                         setBusy(false);
                     }
                     async function remove() {
+                        if (!window.confirm("Really delete?")) {
+                            return;
+                        }
                         const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
                         const folder = parseItemRef(props.itemId!); // TODO: not here
                         await backend.removeItem(folder.canister, BigInt(folder.id));
