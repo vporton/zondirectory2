@@ -6,7 +6,7 @@ import { AuthContext } from "./auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
 import { Button, Nav } from "react-bootstrap";
-import { ItemData } from "../../out/src/storage/CanDBPartition";
+import { ItemData } from "../../../../out/src/storage/CanDBPartition";
 import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
@@ -70,17 +70,18 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
         setComments(undefined);
         setAntiComments(undefined);
     }, [id]);
+    // TODO: Are `!`s suitable here?
     useEffect(() => {
-        updateVotes(props.defaultAgent, id, principal, subfolders!, setTotalVotesSubFolders, setUserVoteSubFolders).then(() => {}); // TODO: `!`
+        updateVotes(props.defaultAgent!, id, principal, subfolders!, setTotalVotesSubFolders, setUserVoteSubFolders).then(() => {}); // TODO: `!`
     }, [subfolders, principal]);
     useEffect(() => {
-        updateVotes(props.defaultAgent, id, principal, superfolders!, setTotalVotesSuperFolders, setUserVoteSuperFolders).then(() => {}); // TODO: `!`
+        updateVotes(props.defaultAgent!, id, principal, superfolders!, setTotalVotesSuperFolders, setUserVoteSuperFolders).then(() => {}); // TODO: `!`
     }, [superfolders, principal]);
     useEffect(() => {
-        updateVotes(props.defaultAgent, id, principal, items!, setTotalVotesItems, setUserVoteItems).then(() => {}); // TODO: `!`
+        updateVotes(props.defaultAgent!, id, principal, items!, setTotalVotesItems, setUserVoteItems).then(() => {}); // TODO: `!`
     }, [items, principal]);
     useEffect(() => {
-        updateVotes(props.defaultAgent, id, principal, comments!, setTotalVotesComments, setUserVoteComments).then(() => {}); // TODO: `!`
+        updateVotes(props.defaultAgent!, id, principal, comments!, setTotalVotesComments, setUserVoteComments).then(() => {}); // TODO: `!`
     }, [comments, principal]);
     useEffect(() => { // TODO
         if (id !== undefined) {

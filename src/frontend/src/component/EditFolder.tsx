@@ -4,8 +4,8 @@ import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
-import { ItemDataWithoutOwner, ZonBackend, idlFactory as mainIdlFactory } from "../../out/src/backend/main";
-import { CanDBPartition, idlFactory as canDBPartitionIdlFactory } from "../../out/src/storage/CanDBPartition";
+import { ItemDataWithoutOwner, ZonBackend, idlFactory as mainIdlFactory } from "../../../../out/src/backend/main";
+import { CanDBPartition, idlFactory as canDBPartitionIdlFactory } from "../../../../out/src/storage/CanDBPartition";
 import EditFoldersList from "./EditFoldersList";
 import { addToFolder, addToMultipleFolders } from "../util/folder";
 import { parseItemRef, serializeItemRef } from "../data/Data";
@@ -22,7 +22,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
         setSuperFolder(props.superFolderId);
     }, [props.superFolderId]);
     enum FolderKind { owned, communal };
-    // const [folderKind, setFolderKind] = useState<FolderKind>(FolderKind.owned);
+    const [folderKind, setFolderKind] = useState<FolderKind>(FolderKind.owned);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
@@ -31,22 +31,23 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
             const folderId = parseItemRef(props.folderId);
             const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: folderId.canister, agent: props.defaultAgent});
             actor.getItem(BigInt(folderId.id))
-                .then(item1 => {
-                    const item = item1[0]!.item;
-                    // setFolderKind(item.communal ? FolderKind.communal : FolderKind.owned); // TODO
-                    setLocale(item.locale);
-                    setTitle(item.title);
-                    setShortDescription(item.description);
+                .then((itemx) => {
+                    const item = itemx[0] ? itemx[0][0]!.item : undefined;
+                    const communal = itemx[0] ? itemx[0][1]! : undefined; // TODO: Simplify.
+                    setFolderKind(communal ? FolderKind.communal : FolderKind.owned);
+                    setLocale(item!.locale);
+                    setTitle(item!.title);
+                    setShortDescription(item!.description);
                 });
         }
     }, [props.folderId]);
     function onSelectTab(index: number) {
         switch (index) {
             case 0:
-                // setFolderKind(FolderKind.owned); // TODO
+                setFolderKind(FolderKind.owned);
                 break;
             case 1:
-                // setFolderKind(FolderKind.communal); // TODO
+                setFolderKind(FolderKind.communal);
                 break;
             }
     }
@@ -58,7 +59,6 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                 async function submit() {
                     function itemData(): ItemDataWithoutOwner {
                         return {
-                            // communal: folderKind == FolderKind.communal, // TODO
                             locale,
                             title,
                             description: shortDescription,
@@ -75,7 +75,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                             part = folder.canister;
                             n = BigInt(folder.id);
                         } else {
-                            [part, n] = await backend.createItemData(item, false); // FIXME: Folder can be communal (true).
+                            [part, n] = await backend.createItemData(item, folderKind == FolderKind.communal);
                         }
                         const ref = serializeItemRef({canister: part, id: Number(n)}); // TODO: Reduce code
                         if (!(props.super === true)) { // noComments
@@ -113,17 +113,15 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                         <TabPanel>
                             <p>Owned folders have an owner (you). Only the owner can add, delete, and reoder items in an owned folder,{" "}
                                 or rename the folder.</p>
-                            <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
-                            <p>Title: <input type="text" required={true} defaultValue={title} onChange={e => setTitle(e.target.value)}/></p>
-                            <p>Short (meta) description: <textarea defaultValue={shortDescription} onChange={e => setShortDescription(e.target.value)}/></p>
                         </TabPanel>
                         <TabPanel>
                             <p>Communal folders have no owner. Anybody can add an item to a communal folder.{" "}
                                 Nobody can delete an item from a communal folder or rename the folder. Ordering is determined by voting.</p>
-                            <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
-                            <p>Title: <input type="text" required={true} defaultValue={title} onChange={e => setTitle(e.target.value)}/></p>
                         </TabPanel>
                     </Tabs>
+                    <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
+                    <p>Title: <input type="text" required={true} defaultValue={title} onChange={e => setTitle(e.target.value)}/></p>
+                    <p>Short (meta) description: <textarea defaultValue={shortDescription} onChange={e => setShortDescription(e.target.value)}/></p>
                     <EditFoldersList
                         defaultFolders={superFolder === undefined ? [] : [[superFolder, 'beginning']]}
                         onChangeFolders={setFoldersList}

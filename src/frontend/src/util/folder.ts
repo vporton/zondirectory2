@@ -1,4 +1,4 @@
-import { idlFactory as orderIdlFactory, Orders } from "../../out/src/backend/order";
+import { idlFactory as orderIdlFactory, Orders } from "../../../../out/src/backend/order";
 import { Actor, Agent } from "@dfinity/agent";
 import { getIsLocal } from "./client";
 import { ItemId } from './types';

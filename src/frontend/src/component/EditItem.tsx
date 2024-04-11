@@ -5,8 +5,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { Helmet } from 'react-helmet';
 import 'react-tabs/style/react-tabs.css';
-import { ItemDataWithoutOwner, ZonBackend, idlFactory as mainIdlFactory } from "../../out/src/backend/main";
-import { CanDBPartition, idlFactory as canDBPartitionIdlFactory } from "../../out/src/storage/CanDBPartition";
+import { ItemDataWithoutOwner, ZonBackend, idlFactory as mainIdlFactory } from "../../../../out/src/backend/main";
+import { CanDBPartition, idlFactory as canDBPartitionIdlFactory } from "../../../../out/src/storage/CanDBPartition";
 import EditFoldersList from "./EditFoldersList";
 import { parseItemRef, serializeItemRef } from "../data/Data";
 import { addToMultipleFolders } from "../util/folder";
@@ -23,6 +23,8 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
     useEffect(() => {
         setMainFolder(routeParams.folder);
     }, [routeParams.folder]);
+    enum FolderKind { owned, communal };
+    const [folderKind, setFolderKind] = useState<FolderKind>(FolderKind.owned);
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
@@ -51,8 +53,11 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                                 const itemId = parseItemRef(props.itemId);
                                 const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: itemId.canister, agent: defaultAgent});
                                 actor.getItem(BigInt(itemId.id))
-                                    .then(item1 => {
-                                        const item = item1[0]!.item;
+                                    .then((item0) => {
+                                        const item1 = item0[0]!; // FIXME: `!`
+                                        const [itemx, communal] = item1;
+                                        const item = itemx.item;
+                                        setFolderKind(communal ? FolderKind.communal : FolderKind.owned);
                                         setLocale(item.locale);
                                         setTitle(item.title);
                                         setShortDescription(item.description);

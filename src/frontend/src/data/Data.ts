@@ -1,9 +1,9 @@
 import { Principal } from "@dfinity/principal";
-import { idlFactory as canDBPartitionIdl, ItemData, Streams } from "../../out/src/storage/CanDBPartition";
-import { _SERVICE as NacDBPartition } from "../../out/src/storage/NacDBPartition";
+import { idlFactory as canDBPartitionIdl, ItemData, Streams } from "../../../../out/src/storage/CanDBPartition";
+import { _SERVICE as NacDBPartition } from "../../../../out/src/storage/NacDBPartition";
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
-import { idlFactory as nacDBPartitionIdl } from "../../out/src/storage/NacDBPartition";
-import { CanDBIndex, idlFactory as canDBIndexIdl } from "../../out/src/storage/CanDBIndex";
+import { idlFactory as nacDBPartitionIdl } from "../../../../out/src/storage/NacDBPartition";
+import { CanDBIndex, idlFactory as canDBIndexIdl } from "../../../../out/src/storage/CanDBIndex";
 import { useContext } from "react";
 import { AuthContext } from '../component/auth/use-auth-client';
 
@@ -38,6 +38,7 @@ export class ItemDB {
     item: ItemData;
     streams: Streams | undefined;
     streamsRev: Streams | undefined;
+    communal: boolean;
     protected constructor(agent: Agent, itemId: string) {
         this.agent = agent;
         this.itemRef = parseItemRef(itemId);
@@ -47,15 +48,15 @@ export class ItemDB {
         const obj = new ItemDB(agent, itemId);
         const client = Actor.createActor(canDBPartitionIdl, {canisterId: obj.itemRef.canister, agent});
         // TODO: Retrieve both by one call?
-        const [item, streams, streamsRev] = await Promise.all([
+        const [[item, communal], streams, streamsRev] = await Promise.all([
             client.getItem(BigInt(obj.itemRef.id)),
             client.getStreams(BigInt(obj.itemRef.id), "s" + kind),
             client.getStreams(BigInt(obj.itemRef.id), "rs" + kind),
         ]) as [ItemData[] | [], Streams[] | [], Streams[] | []];
         obj.item = item[0]; // TODO: if no such item
+        obj.communal = item[1]; // TODO: if no such item
         obj.streams = _unwrap(streams);
         obj.streamsRev = _unwrap(streamsRev);
-        console.log('obj:', obj);
         return obj;
     }
     async locale(): Promise<string> {
@@ -79,7 +80,7 @@ export class ItemDB {
         return t === undefined ? undefined : Object.values(t)[0] as string;
     }
     private async aList(outerCanister, outerKey, opts?: {lowerBound?: string, limit?: number})
-        : Promise<{order: string, id: ItemRef, item: ItemData}[]>
+        : Promise<{order: string, id: ItemRef, item: ItemData, communal: boolean}[]>
     {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         const client: NacDBPartition = Actor.createActor(nacDBPartitionIdl, {canisterId: outerCanister, agent: this.agent });
@@ -101,7 +102,8 @@ export class ItemDB {
         return items4.map(({order, id, item}) => ({
             order,
             id,
-            item: item[0],
+            item: item[0][0],
+            communal: item[0][1],
         }));
     }
     async subFolders(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemData}[]> {

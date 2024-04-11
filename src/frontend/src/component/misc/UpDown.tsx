@@ -1,9 +1,8 @@
 import React, { useContext, useRef, useState } from "react";
-import { ItemData } from "../../../out/src/storage/CanDBPartition";
+import { ItemData } from "../../../../../out/src/storage/CanDBPartition";
 import { AuthContext } from "../auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../../data/Data";
-import { idlFactory as orderIdlFactory } from "../../../out/src/backend/main";
-import { AppData } from "../../DataDispatcher";
+import { idlFactory as orderIdlFactory } from "../../../../../out/src/backend/main";
 import { Actor, Agent } from "@dfinity/agent";
 import Button from "react-bootstrap/esm/Button";
 import Modal from 'react-bootstrap/Modal';
