@@ -120,13 +120,13 @@ shared actor class CanDBPartition(options: {
 
   // TODO: Retrieve virtual items.
   // TODO: `?lib.ItemData` -> `lib.ItemData`?
-  public shared func getItem(itemId: Nat): async ?(lib.ItemData, Bool) { // `Bool` is "communal"
+  public shared func getItem(itemId: Nat): async ?lib.ItemTransfer {
     let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "i");
     switch (data) {
       case (?data) {
         let item = lib.deserializeItem(data);
         switch (item) {
-          case (#owned item2) { ?({ creator = item2.creator; item = item2.item }, false) };
+          case (#owned item2) { ?{ data = { creator = item2.creator; item = item2.item }; communal = false } };
           case (#communal c) {
             let scanResult = await c.votesStream.order.0.scanLimitOuter({
               dir = #fwd;
@@ -153,7 +153,7 @@ shared actor class CanDBPartition(options: {
             switch (await itemCanister.getAttribute({sk = "r/" # itemId}, "i")) {
               case (?data) {
                 let variant = lib.deserializeItemVariant(data);
-                ?({ creator = Principal.fromText("aaaaa-aa"); item = variant.item }, true); // FIXME: principal
+                ?{ data = { creator = Principal.fromText("aaaaa-aa"); item = variant.item }; communal = true }; // FIXME: principal
               };
               case null { return null };
             };

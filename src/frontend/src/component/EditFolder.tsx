@@ -75,6 +75,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                             part = folder.canister;
                             n = BigInt(folder.id);
                         } else {
+                            console.log('folderKind == FolderKind.communal', folderKind == FolderKind.communal);
                             [part, n] = await backend.createItemData(item, folderKind == FolderKind.communal);
                         }
                         const ref = serializeItemRef({canister: part, id: Number(n)}); // TODO: Reduce code

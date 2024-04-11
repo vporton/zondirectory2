@@ -149,6 +149,18 @@ module {
     };
   };
 
+  /// Used when requesting item data.
+  public type ItemTransfer = {
+    data: ItemData;
+    communal: Bool;
+  };
+
+  /// Used when creating new items.
+  public type ItemTransferWithoutOwner = {
+    data: ItemDataWithoutOwner;
+    communal: Bool;
+  };
+
   public type ItemData = {
     creator: Principal;
     item: ItemDataWithoutOwner;

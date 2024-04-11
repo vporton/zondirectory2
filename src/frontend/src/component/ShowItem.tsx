@@ -86,7 +86,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     useEffect(() => { // TODO
         if (id !== undefined) {
             console.log("Loading from AppData");
-            AppData.create(props.defaultAgent, serializeItemRef(id), streamKind).then(data => {
+            AppData.create(props.defaultAgent!, serializeItemRef(id), streamKind).then(data => { // TODO: `!`
                 setXData(data);
                 setData(data.item);
                 data.locale().then(x => setLocale(x));
@@ -184,7 +184,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             <title>{isFolder ? `${title} (folder) - Zon` : `${title} - Zon`}</title>
             <meta name="description" content={description}/>
         </Helmet>
-        <h2><ItemType item={data}/>{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
+        <h2><ItemType item={xdata}/>{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         <p>Creator: <small>{creator.toString()}</small></p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         {postText !== "" ? <p lang={locale}>{postText}</p> : ""}
@@ -207,7 +207,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             <UpDown
                                 parent={{id}}
                                 item={x}
-                                agent={props.defaultAgent}
+                                agent={props.defaultAgent!} {/* FIXME: `!` */}
                                 userVote={userVoteSubFolders[serializeItemRef(x.id)]}
                                 totalVotes={totalVotesSubFolders[serializeItemRef(x.id)]}
                                 onSetUserVote={(id: ItemRef, v: number) =>

@@ -22,7 +22,7 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
     const navigate = useNavigate();
     useEffect(() => {
         if (id !== undefined) {
-            AppData.create(props.defaultAgent, id, streamKind).then(data => {
+            AppData.create(props.defaultAgent!, id, streamKind).then(data => { // TODO: `!`
                 data.title().then(x => setTitle(x));
                 if (props['data-dir'] == 'super') {
                     data.superFolders().then(x => {

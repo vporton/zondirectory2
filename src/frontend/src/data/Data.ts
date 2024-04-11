@@ -48,13 +48,13 @@ export class ItemDB {
         const obj = new ItemDB(agent, itemId);
         const client = Actor.createActor(canDBPartitionIdl, {canisterId: obj.itemRef.canister, agent});
         // TODO: Retrieve both by one call?
-        const [[item, communal], streams, streamsRev] = await Promise.all([
+        const [item, streams, streamsRev] = await Promise.all([
             client.getItem(BigInt(obj.itemRef.id)),
             client.getStreams(BigInt(obj.itemRef.id), "s" + kind),
             client.getStreams(BigInt(obj.itemRef.id), "rs" + kind),
         ]) as [ItemData[] | [], Streams[] | [], Streams[] | []];
-        obj.item = item[0]; // TODO: if no such item
-        obj.communal = item[1]; // TODO: if no such item
+        obj.item = item[0][0]; // TODO: if no such item
+        obj.communal = item[0][1]; // TODO: if no such item
         obj.streams = _unwrap(streams);
         obj.streamsRev = _unwrap(streamsRev);
         return obj;

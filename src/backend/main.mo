@@ -211,10 +211,10 @@ shared actor class ZonBackend() = this {
     };
   };
 
-  public shared({caller}) func createItemData(item: lib.ItemDataWithoutOwner, communal: Bool)
+  public shared({caller}) func createItemData(item: lib.ItemTransferWithoutOwner)
     : async (Principal, Nat)
   {
-    if (communal) {
+    if (item.communal) {
       let variant: lib.ItemVariant = { creator = caller; item; };
       let variantId = maxId;
       maxId += 1;
