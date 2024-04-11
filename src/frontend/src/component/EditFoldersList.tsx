@@ -53,7 +53,6 @@ export default function EditFoldersList(props: {
             const v: [string, 'beginning' | 'end'] = [e, list2[i]];
             return v;
         });
-        console.log("ZZZ", list3)
         setFolders(list3);
     }
     function updateAntiCommentsList() {
