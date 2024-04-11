@@ -164,6 +164,7 @@ module {
   public type ItemData = {
     creator: Principal;
     item: ItemDataWithoutOwner;
+    edited: Bool;
   };
 
   /// One of voted-for variants of a communal item.
@@ -294,6 +295,7 @@ module {
       case (#owned ownedItem) {
         buf.add(#int 0);
         buf.add(#text(Principal.toText(ownedItem.creator)));
+        buf.add(#bool(ownedItem.edited));
         serializeItemDataWithoutOwnerToBuffer(buf, ownedItem.item);
       };
       case (#communal {isFolder: Bool; timeStream: Reorder.Order; votesStream: Reorder.Order}) {
@@ -325,6 +327,7 @@ module {
           switch (v) {
             case (0) {
               var creator = "";
+              var edited = false;
               switch (arr[current.pos]) {
                 case (#text c) {
                   creator := c;
@@ -332,9 +335,17 @@ module {
                 };
                 case _ { break r };
               };
+              switch (arr[current.pos]) {
+                case (#bool f) {
+                  edited := f;
+                  current.pos += 1;
+                };
+                case _ { break r };
+              };
               return #owned({
                 creator = Principal.fromText(creator);
                 item = deserializeItemDataWithoutOwnerFromBuffer(arr, {var pos = current.pos});
+                edited;
               });
             };
             case (1) {

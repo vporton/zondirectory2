@@ -126,7 +126,7 @@ shared actor class CanDBPartition(options: {
       case (?data) {
         let item = lib.deserializeItem(data);
         switch (item) {
-          case (#owned item2) { ?{ data = { creator = item2.creator; item = item2.item }; communal = false } };
+          case (#owned item2) { ?{ data = { creator = item2.creator; item = item2.item; edited = item2.edited }; communal = false } };
           case (#communal c) {
             let scanResult = await c.votesStream.order.0.scanLimitOuter({
               dir = #fwd;
@@ -153,7 +153,7 @@ shared actor class CanDBPartition(options: {
             switch (await itemCanister.getAttribute({sk = "r/" # itemId}, "i")) {
               case (?data) {
                 let variant = lib.deserializeItemVariant(data);
-                ?{ data = { creator = Principal.fromText("aaaaa-aa"); item = variant.item }; communal = true }; // FIXME: principal
+                ?{ data = { creator = Principal.fromText("aaaaa-aa"); item = variant.item; edited = true }; communal = true }; // FIXME: principal
               };
               case null { return null };
             };

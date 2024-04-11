@@ -263,7 +263,7 @@ shared actor class ZonBackend() = this {
       );
       (itemCanisterId, itemId);
     } else {
-      let item2: lib.Item = #owned { creator = caller; item = item.data };
+      let item2: lib.Item = #owned { creator = caller; item = item.data; edited = false };
       let itemId = maxId;
       maxId += 1;
       let key = "i/" # Nat.toText(itemId);
@@ -281,7 +281,7 @@ shared actor class ZonBackend() = this {
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
-        let item2: lib.ItemData = { item = item; creator = caller };
+        let item2: lib.ItemData = { item = item; creator = caller; edited = true }; // TODO: edited only if actually changed
         lib.onlyItemOwner(caller, oldItem); // also rejects changing communal items.
         await db.putAttribute({sk = key; key = "i"; value = lib.serializeItem(#owned item2)});
       };
