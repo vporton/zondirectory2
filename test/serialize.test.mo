@@ -28,6 +28,7 @@ let suite = Suite.suite("Serialize/deserialize", [
                 // TODO: Test also communal item.
                 let item: lib.Item = #owned {
                     creator = Principal.fromText("2vxsx-fae");
+                    edited = true;
                     item = {
                         price = 0.25;
                         locale = "en_US";
