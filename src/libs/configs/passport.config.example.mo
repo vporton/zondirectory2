@@ -1,4 +1,4 @@
-import Verify "mo:passport-client-dfinity/lib/Verifier";
+import Verify "mo:passport-client/lib/Verifier";
 
 module {
     // Don't verify users for sybil. It's useful for a test installation running locally.

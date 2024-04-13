@@ -243,6 +243,14 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     await* setVotingDataImpl(user, partitionId, voting);
   };
 
+  // public shared({caller}) func getUser(userId: Principal, partitionId: ?Principal): async ?lib.User {
+  //   let sk = "u/" # Principal.toText(userId); // TODO: Should use binary encoding.
+  //   // TODO: Add Hint to CanDBMulti
+  //   let res = await* Multi.getAttributeByHint(pkToCanisterMap, "user", partitionId, {sk; key = "u"});
+  //   do ? { lib.deserializeUser(res!.1!) };
+  // };
+
+  // TODO: Here should be a shared function:
   func getVotingData(caller: Principal, partitionId: ?Principal): async* ?lib.VotingScore {
     let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti

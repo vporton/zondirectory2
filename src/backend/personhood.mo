@@ -4,8 +4,8 @@ import Principal "mo:base/Principal";
 
 import CanDBIndex "canister:CanDBIndex";
 import ic_eth "canister:ic_eth";
-import Types "mo:passport-client-dfinity/lib/Types";
-import V "mo:passport-client-dfinity/lib/Verifier";
+import Types "mo:passport-client/lib/Types";
+import V "mo:passport-client/lib/Verifier";
 import PassportConfig "../libs/configs/passport.config";
 
 actor Personhood {

@@ -19,9 +19,9 @@ map = "9.0.1"
 btree = "https://github.com/canscale/StableHeapBTreeMap#v0.3.3"
 CanDBMulti = "https://github.com/vporton/CanDBMulti#v0.10.0@86d00711216349ba4879370d6313d44a26d16f61"
 xtended-numbers = "0.2.1"
-passport-client-dfinity = "https://github.com/vporton/passport-client-dfinity#v0.3.0@894c1f08386d4351834fab3413127f777a2c5955"
-"json.mo" = "https://github.com/vporton/json.mo#main@49612cf3865dc24bca7bb0e8b6fcf275d11a8cb2"
+"json.mo" = "https://github.com/aviate-labs/json.mo#master@afd30ed75095cb339c1ec187d61030bbd2e59ae6"
 nacdb-reorder = "2.0.8"
+passport-client = "0.4.6"
 
 [dev-dependencies]
 matchers = "https://github.com/kritzcreek/motoko-matchers#v1.3.0"

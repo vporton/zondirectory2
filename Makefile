@@ -11,6 +11,7 @@ CANISTERS = \
 	src/backend/order src/backend/personhood src/backend/main
 CANISTER_INTERFACES = $(CANISTERS) src/storage/CanDBPartition src/storage/NacDBPartition
 
+# TODO: Remove this section:
 out/src/backend/main.wasm: out/src/backend/order.deploy out/src/storage/CanDBIndex.deploy
 out/src/backend/personhood.wasm: out/src/storage/CanDBIndex.deploy out/src/storage/NacDBIndex.deploy $(DESTDIR)/ic_eth.deploy
 out/src/backend/order.wasm: out/src/storage/CanDBIndex.deploy out/src/storage/NacDBIndex.deploy

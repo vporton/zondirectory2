@@ -7,6 +7,9 @@ import Principal "mo:base/Principal";
 import Int "mo:base/Int";
 import Array "mo:base/Array";
 import Bool "mo:base/Bool";
+import Float "mo:base/Float";
+import V "mo:passport-client/lib/Verifier";
+import PCB "mo:passport-client/backend";
 
 import Itertools "mo:itertools/Iter";
 import Nac "mo:nacdb/NacDB";
@@ -54,6 +57,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
     owners := _owners;
     MyCycles.addPart<system>(DBConfig.dbOptions.partitionCycles);
+
     initialized := true;
   };
 
@@ -201,6 +205,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     // await* _removeStream("vsc", itemId);
     // await* _removeStream("rstc", itemId);
     // await* _removeStream("rsvc", itemId);
+    
   };
 
   /// Removes a stream
@@ -260,7 +265,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
       };
       case null {};
     };
-
   };
 
   func getStreamLinks(/*catId: (Principal, Nat),*/ itemId: (Principal, Nat), comment: Bool)
@@ -312,6 +316,10 @@ shared({caller = initialOwner}) actor class Orders() = this {
     await CanDBIndex.checkSybil(caller);
     assert value >= -1 and value <= 1;
 
+    let votingPower = value;
+    // TODO: Use this:
+    // let votingPower = Float.toInt(Float.fromInt(value) * PCB.adjustVotingPower(user)); // TODO: `Float.toInt` is a hack.
+
     let userVotesSK = "v/" # Principal.toText(caller) # "/" # Nat.toText(parent) # "/" # Nat.toText(child);
     let oldVotes = await CanDBIndex.getFirstAttribute("user", { sk = userVotesSK; key = "v" }); // TODO: race condition
     let (principal, oldValue) = switch (oldVotes) {
@@ -327,12 +335,12 @@ shared({caller = initialOwner}) actor class Orders() = this {
       };
       case null { 0 };
     };
-    let difference = value - oldValue2;
+    let difference = votingPower - oldValue2;
     if (difference == 0) {
       return;
     };
     // TODO: Take advantage of `principal` as a hint.
-    ignore await CanDBIndex.putAttributeNoDuplicates("user", { sk = userVotesSK; key = "v"; value = #int value });
+    ignore await CanDBIndex.putAttributeNoDuplicates("user", { sk = userVotesSK; key = "v"; value = #int votingPower });
 
     // Update total votes for the given parent/child:
     let totalVotesSK = "w/" # Nat.toText(parent) # "/" # Nat.toText(child);
@@ -353,8 +361,8 @@ shared({caller = initialOwner}) actor class Orders() = this {
     };
 
     // TODO: Check this block of code for errors.
-    let changeUp = (value == 1 and oldValue2 != 1) or (oldValue2 == 1 and value != 1);
-    let changeDown = (value == -1 and oldValue2 != -1) or (oldValue2 == -1 and value != -1);
+    let changeUp = (votingPower == 1 and oldValue2 != 1) or (oldValue2 == 1 and votingPower != 1);
+    let changeDown = (votingPower == -1 and oldValue2 != -1) or (oldValue2 == -1 and votingPower != -1);
     var up2 = up;
     var down2 = down;
     if (changeUp or changeDown) {
@@ -393,6 +401,23 @@ shared({caller = initialOwner}) actor class Orders() = this {
       relative = true;
       newKey = -difference * 2**16;
     });
+  };
+
+  /// Insert item into the beginning of the global list.
+  public shared({caller}) func insertIntoAllTimeStream(itemId: (Principal, Nat)): async () {
+    checkCaller(caller);
+
+    let globalTimeStream = await NacDBIndex.getAllItemsStream();
+    await* addItemToList(globalTimeStream, itemId, #beginning); // TODO: Implement #beginning special case.
+  };
+
+  /// Insert item into the beginning of the global list.
+  public shared({caller}) func removeFromAllTimeStream(itemId: (Principal, Nat)): async () {
+    checkCaller(caller);
+
+    let globalTimeStream = await NacDBIndex.getAllItemsStream();
+    let value = Nat.toText(itemId.1) # "@" # Principal.toText(itemId.0);
+    await* Reorder.delete(GUID.nextGuid(guidGen), NacDBIndex, orderer, { order = globalTimeStream; value });
   };
 
   // TODO: Below functions?

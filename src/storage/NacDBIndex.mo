@@ -1,4 +1,6 @@
 import Nac "mo:nacdb/NacDB";
+import Reorder "mo:nacdb-reorder/Reorder";
+import GUID "mo:nacdb/GUID";
 import StableBuffer "mo:stable-buffer/StableBuffer";
 import Principal "mo:base/Principal";
 import Debug "mo:base/Debug";
@@ -34,7 +36,13 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         Buffer.toArray(buf);
     };
     
+    stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0)); // FIXME: Gather randomness.
+
     stable var dbIndex: Nac.DBIndex = Nac.createDBIndex(DBConfig.dbOptions);
+
+    stable let orderer = Reorder.createOrderer({queueLengths = 20}); // TODO: What's the number?
+
+    stable var allItemsStream: ?Reorder.Order = null;
 
     stable var initialized = false;
 
@@ -48,7 +56,18 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         owners := _owners;
         MyCycles.addPart<system>(DBConfig.dbOptions.partitionCycles);
         StableBuffer.add(dbIndex.canisters, await Partition.Partition(ownersOrSelf()));
+
+        allItemsStream := ?(await* Reorder.createOrder(GUID.nextGuid(guidGen), this, orderer, ?5_000)); // TODO: configurable hardCap
+
         initialized := true;
+    };
+
+    // TODO: Move this function below.
+    public query func getAllItemsStream(): async Reorder.Order {
+        let ?v = allItemsStream else {
+            Debug.trap("programming error");
+        };
+        v;
     };
 
     public query func getCanisters(): async [Principal] {

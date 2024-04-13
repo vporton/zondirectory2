@@ -618,4 +618,107 @@ module {
     };
     {points; lastChecked; ethereumAddress};
   };
+
+  /// Users ///
+
+  public type User = {
+    locale: Text;
+    nick: Text;
+    title: Text;
+    description: Text;
+    // TODO: long description
+    link : Text;
+  };
+
+  public func serializeUser(user: User): Entity.AttributeValue {
+    var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(6);
+    buf.add(#int 0); // version
+    buf.add(#text (user.locale));
+    buf.add(#text (user.nick));
+    buf.add(#text (user.title));
+    buf.add(#text (user.description));
+    buf.add(#text (user.link));
+    #tuple (Buffer.toArray(buf));
+  };
+
+  public func deserializeUser(attr: Entity.AttributeValue): User {
+    var locale = "";
+    var nick = "";
+    var title = "";
+    var description = "";
+    var link = "";
+    let res = label r: Bool switch (attr) {
+      case (#tuple arr) {
+        var pos = 0;
+        while (pos < arr.size()) {
+          switch (pos) {
+            case (0) {
+              switch (arr[pos]) {
+                case (#int v) {
+                  assert v == 0; // version
+                };
+                case _ { break r false };
+              };
+            };
+            case (1) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  locale := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case (2) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  nick := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case (3) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  title := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case (4) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  description := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case (5) {
+              switch (arr[pos]) {
+                case (#text v) {
+                  link := v;
+                };
+                case _ { break r false };
+              };
+            };
+            case _ { break r false; };
+          };
+          pos += 1;
+        };
+        true;
+      };
+      case _ {
+        false;
+      };
+    };
+    if (not res) {
+      Debug.trap("wrong user format");
+    };
+    {
+      locale = locale;
+      nick = nick;
+      title = title;
+      description = description;
+      link = link;
+    };    
+  };
 }
