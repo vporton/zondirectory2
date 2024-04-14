@@ -1,8 +1,7 @@
 import { Principal } from "@dfinity/principal";
 import { CanDBPartition, idlFactory as canDBPartitionIdl, ItemData, ItemTransfer, Streams } from "../../../../out/src/storage/CanDBPartition";
-import { _SERVICE as NacDBPartition } from "../../../../out/src/storage/NacDBPartition";
+import { _SERVICE as NacDBPartition, idlFactory as nacDBPartitionIdl } from "../../../../out/src/storage/NacDBPartition";
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
-import { idlFactory as nacDBPartitionIdl } from "../../../../out/src/storage/NacDBPartition";
 import { CanDBIndex, idlFactory as canDBIndexIdl } from "../../../../out/src/storage/CanDBIndex";
 import { useContext } from "react";
 import { AuthContext } from '../component/auth/use-auth-client';
@@ -78,6 +77,7 @@ export class ItemDB {
         const t = (await client.getAttribute({sk: "i/" + this.itemRef.id}, "t") as any)[0]; // TODO: error handling
         return t === undefined ? undefined : Object.values(t)[0] as string;
     }
+    // TODO: duplicate code with AllItems
     private async aList(outerCanister, outerKey, opts?: {lowerBound?: string, limit?: number})
         : Promise<{order: string, id: ItemRef, item: ItemTransfer}[]>
     {

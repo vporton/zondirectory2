@@ -151,7 +151,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             return;
         }
         const lowerBound = commentsLast + 'x';
-        xdata.items({lowerBound, limit: 10}).then(x => {
+        xdata!.items({lowerBound, limit: 10}).then(x => { // TODO: `!`
             setItems(comments?.concat(x));
             if (x.length !== 0) {
                 setCommentsLast(x[x.length - 1].order); // duplicate code
@@ -166,7 +166,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             return;
         }
         const lowerBound = antiCommentsLast + 'x';
-        xdata.items({lowerBound, limit: 10}).then(x => {
+        xdata!.items({lowerBound, limit: 10}).then(x => { // TODO: `!`
             setItems(antiComments?.concat(x));
             if (x.length !== 0) {
                 setAntiCommentsLast(x[x.length - 1].order); // duplicate code

@@ -23,6 +23,7 @@ import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
 import { idlFactory as mainIdlFactory, ZonBackend } from "../../../../out/src/backend/main";
 import { Helmet } from 'react-helmet';
 import Person from "./personhood/Person";
+import { AllItems } from "./AllItems";
 
 export const BusyContext = createContext<any>(undefined);
 
@@ -106,8 +107,11 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                     </p>
                     <nav>
                         <Navbar className="bg-body-secondary" style={{width: "auto"}}>
-                            <Nav>
+                        <Nav>
                                 <Nav.Link onClick={() => navigate("/item/"+root)}>Main folder</Nav.Link>{" "}
+                            </Nav>
+                            <Nav>
+                                <Nav.Link onClick={() => navigate("/latest")}>Latest posts</Nav.Link>{" "}
                             </Nav>
                             <Nav>
                                 <Nav.Link onClick={() => navigate("/personhood")}>Verify Your Account</Nav.Link>
@@ -121,6 +125,10 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                         <Route
                             path=""
                             element={<RootRedirector root={root}/>}
+                        />
+                        <Route
+                            path="/latest"
+                            element={<AllItems defaultAgent={defaultAgent}/>}
                         />
                         <Route
                             path="/item/:id"

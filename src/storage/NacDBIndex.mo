@@ -47,7 +47,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     stable var initialized = false;
 
     public shared({caller}) func init(_owners: [Principal]) : async () {
-        checkCaller(caller);
+        // checkCaller(caller); // FIXME
         ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
         if (initialized) {
             Debug.trap("already initialized");

@@ -3,24 +3,17 @@
     "main": {
       "main": "src/backend/main.mo",
       "type": "motoko",
-      "dependencies": [
-        "order",
-        "payments",
-        "personhood",
-        "CanDBIndex",
-        "NacDBIndex",
-        "internet_identity",
-        "ic_eth"
-      ]
+      "dependencies": []
     },
     "order": {
       "main": "src/backend/order.mo",
-      "type": "motoko"
+      "type": "motoko",
+      "dependencies": ["CanDBIndex"]
     },
     "personhood": {
       "main": "src/backend/personhood.mo",
       "type": "motoko",
-      "dependencies": ["ic_eth", "CanDBIndex"]
+      "dependencies": []
     },
     "assetstorage": {
       "frontend": {
@@ -36,9 +29,7 @@
     "payments": {
       "main": "src/backend/payments.mo",
       "type": "motoko",
-      "dependencies": [
-        "pst"
-      ]
+      "dependencies": []
     },
     "pst": {
       "main": "src/backend/pst.mo",
@@ -47,22 +38,22 @@
     "CanDBIndex": {
       "main": "src/storage/CanDBIndex.mo",
       "type": "motoko",
-      "dependencies": ["ic_eth"]
+      "dependencies": []
     },
     "NacDBIndex": {
       "main": "src/storage/NacDBIndex.mo",
       "type": "motoko",
-      "dependencies": ["ic_eth"]
+      "dependencies": []
     },
     "CanDBPartition": {
       "main": "src/storage/CanDBPartition.mo",
       "type": "motoko",
-      "dependencies": ["ic_eth"]
+      "dependencies": []
     },
     "NacDBPartition": {
       "main": "src/storage/NacDBPartition.mo",
       "type": "motoko",
-      "dependencies": ["ic_eth"]
+      "dependencies": []
     },
     "ic_eth": {
       "type": "rust",
