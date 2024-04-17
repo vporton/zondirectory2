@@ -8,7 +8,7 @@
     "order": {
       "main": "src/backend/order.mo",
       "type": "motoko",
-      "dependencies": ["CanDBIndex"]
+      "dependencies": []
     },
     "personhood": {
       "main": "src/backend/personhood.mo",
@@ -48,11 +48,13 @@
     "CanDBPartition": {
       "main": "src/storage/CanDBPartition.mo",
       "type": "motoko",
+      "deploy": false,
       "dependencies": []
     },
     "NacDBPartition": {
       "main": "src/storage/NacDBPartition.mo",
       "type": "motoko",
+      "deploy": false,
       "dependencies": []
     },
     "ic_eth": {
