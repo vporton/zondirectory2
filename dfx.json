@@ -1,7 +1,15 @@
 {
   "canisters": {
     "frontend": {
-      "entrypoint": "src/frontend/src/index.html"
+      "frontend": {
+        "entrypoint": "src/frontend/src/index.html"
+      },
+      "source": [
+        "src/frontend/assets",
+        "dist/frontend/"
+      ],
+      "type": "assets",
+      "dependencies": ["ic_eth", "CanDBIndex", "order", "main"]
     },
     "main": {
       "main": "src/backend/main.mo",
