@@ -1,35 +1,27 @@
 {
   "canisters": {
+    "frontend": {
+      "entrypoint": "src/frontend/src/index.html"
+    },
     "main": {
       "main": "src/backend/main.mo",
       "type": "motoko",
-      "dependencies": []
+      "dependencies": ["order", "CanDBIndex", "NacDBIndex"]
     },
     "order": {
       "main": "src/backend/order.mo",
       "type": "motoko",
-      "dependencies": []
+      "dependencies": ["CanDBIndex", "NacDBIndex"]
     },
     "personhood": {
       "main": "src/backend/personhood.mo",
       "type": "motoko",
-      "dependencies": []
-    },
-    "assetstorage": {
-      "frontend": {
-        "entrypoint": "src/frontend/src/index.html"
-      },
-      "dependencies": [],
-      "source": [
-        "src/frontend/assets",
-        "dist/frontend/"
-      ],
-      "type": "assets"
+      "dependencies": ["ic_eth", "CanDBIndex", "order"]
     },
     "payments": {
       "main": "src/backend/payments.mo",
       "type": "motoko",
-      "dependencies": []
+      "dependencies": ["pst"]
     },
     "pst": {
       "main": "src/backend/pst.mo",
