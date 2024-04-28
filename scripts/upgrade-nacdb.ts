@@ -3,7 +3,7 @@ global.fetch = fetch;
 
 require("dotenv").config();
 import { loadWasm } from "candb-client-typescript/dist/ClientUtil";
-import { _SERVICE as NacDBIndex, idlFactory as nacDBIndexIdl } from "../out/src/storage/NacDBIndex";
+import { NacDBIndex, idlFactory as nacDBIndexIdl } from "../out/src/storage/NacDBIndex";
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { decodeFile } from "./lib/key";

@@ -1,6 +1,6 @@
 import { Principal } from "@dfinity/principal";
 import { CanDBPartition, idlFactory as canDBPartitionIdl, ItemData, ItemTransfer, Streams } from "../../../../out/src/storage/CanDBPartition";
-import { _SERVICE as NacDBPartition, idlFactory as nacDBPartitionIdl } from "../../../../out/src/storage/NacDBPartition";
+import { NacDBPartition, idlFactory as nacDBPartitionIdl } from "../../../../out/src/storage/NacDBPartition";
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
 import { CanDBIndex, idlFactory as canDBIndexIdl } from "../../../../out/src/storage/CanDBIndex";
 import { useContext } from "react";

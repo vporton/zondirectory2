@@ -13,7 +13,7 @@ import { Helmet } from 'react-helmet';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 import { idlFactory as mainIdlFactory } from '../../../../../out/src/backend/main';
 import { idlFactory as canDBIndexIdl } from '../../../../../out/src/storage/CanDBIndex';
-import { idlFactory as personhoodIdl, _SERVICE as Personhood } from '../../../../..//out/src/backend/personhood';
+import { idlFactory as personhoodIdl, Personhood } from '../../../../..//out/src/backend/personhood';
 import config from '../../config.json';
 import ourCanisters from '../../our-canisters.json';
 import { Actor, Agent, HttpAgent } from '@dfinity/agent';

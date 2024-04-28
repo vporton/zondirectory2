@@ -1,10 +1,12 @@
 import * as React from "react";
-import { _SERVICE as CanDBPartition, idlFactory as canDBPartitionIdl } from "../../../../out/src/storage/CanDBPartition";
-import { _SERVICE as NacDBPartition, idlFactory as nacDBPartitionIdl } from "../../../../out/src/storage/NacDBPartition";
-import { _SERVICE as NacDBIndex, idlFactory as nacDBIndexIdl } from "../../../../out/src/storage/NacDBIndex";
+import { idlFactory as canDBPartitionIdl } from "../../../declarations/CanDBPartition";
+import { _SERVICE as CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
+import { idlFactory as nacDBPartitionIdl } from "../../../declarations/NacDBPartition";
+// import { NacDBPartition } from "../../../declarations/NacDBPartition/NacDBPartition.did";
+import { NacDBIndex, idlFactory as nacDBIndexIdl } from "../../../declarations/NacDBIndex";
 import { Actor, Agent } from "@dfinity/agent";
 import { ItemRef, serializeItemRef } from "../data/Data";
-import { ItemTransfer } from "../../../../out/src/storage/CanDBPartition";
+import { ItemTransfer } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { Principal } from "@dfinity/principal";
 import { useState } from "react";
 import { Helmet } from "react-helmet";
