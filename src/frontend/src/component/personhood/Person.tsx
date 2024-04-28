@@ -11,9 +11,10 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import { ethers } from 'ethers'
 import { Helmet } from 'react-helmet';
 // import 'bootstrap/dist/css/bootstrap.min.css';
-import { idlFactory as mainIdlFactory } from '../../../../../out/src/backend/main';
-import { idlFactory as canDBIndexIdl } from '../../../../../out/src/storage/CanDBIndex';
-import { idlFactory as personhoodIdl, Personhood } from '../../../../..//out/src/backend/personhood';
+import { idlFactory as mainIdlFactory } from '../../../../declarations/main';
+import { idlFactory as canDBIndexIdl } from '../../../../declarations/CanDBIndex';
+import { idlFactory as personhoodIdl } from '../../../../declarations/personhood';
+// import { Personhood } from '../../../../declarations/personhood/personhood.did'; // FIXME
 import config from '../../config.json';
 import ourCanisters from '../../our-canisters.json';
 import { Actor, Agent, HttpAgent } from '@dfinity/agent';

@@ -3,7 +3,8 @@ import { idlFactory as canDBPartitionIdl } from "../../../declarations/CanDBPart
 import { _SERVICE as CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { idlFactory as nacDBPartitionIdl } from "../../../declarations/NacDBPartition";
 // import { NacDBPartition } from "../../../declarations/NacDBPartition/NacDBPartition.did";
-import { NacDBIndex, idlFactory as nacDBIndexIdl } from "../../../declarations/NacDBIndex";
+import { idlFactory as nacDBIndexIdl } from "../../../declarations/NacDBIndex";
+import { _SERVICE as NacDBIndex } from "../../../declarations/NacDBIndex/NacDBIndex.did";
 import { Actor, Agent } from "@dfinity/agent";
 import { ItemRef, serializeItemRef } from "../data/Data";
 import { ItemTransfer } from "../../../declarations/CanDBPartition/CanDBPartition.did";

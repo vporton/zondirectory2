@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ItemTransfer } from "../../../../../out/src/storage/CanDBPartition";
+import { ItemTransfer } from "../../../../declarations/CanDBPartition/CanDBPartition.did";
 
 export default function ItemType(props: {item: ItemTransfer}) { // TODO: Is it the right type of argument?
     // FIXME

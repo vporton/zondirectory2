@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
 import { useNavigate, useParams } from "react-router-dom";
 import { ItemRef, serializeItemRef } from "../data/Data";
-import { ItemData, ItemTransfer } from "../../../../out/src/storage/CanDBPartition";
+import { ItemData, ItemTransfer } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import ItemType from "./misc/ItemType";
 import { Agent } from "@dfinity/agent";
 

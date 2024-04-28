@@ -1,8 +1,11 @@
 import { Principal } from "@dfinity/principal";
-import { CanDBPartition, idlFactory as canDBPartitionIdl, ItemData, ItemTransfer, Streams } from "../../../../out/src/storage/CanDBPartition";
-import { NacDBPartition, idlFactory as nacDBPartitionIdl } from "../../../../out/src/storage/NacDBPartition";
+import {idlFactory as canDBPartitionIdl } from "../../../declarations/CanDBPartition";
+import { CanDBPartition, ItemData, ItemTransfer, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did";
+import { idlFactory as nacDBPartitionIdl } from "../../../declarations/NacDBPartition";
+import { NacDBPartition } from "../../../declarations/NacDBPartition/NacDBPartition.did"; // FIXME
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
-import { CanDBIndex, idlFactory as canDBIndexIdl } from "../../../../out/src/storage/CanDBIndex";
+import { idlFactory as canDBIndexIdl } from "../../../declarations/CanDBIndex";
+import { CanDBIndex } from "../../../declarations/CanDBIndex/CanDBIndex.did";
 import { useContext } from "react";
 import { AuthContext } from '../component/auth/use-auth-client';
 
