@@ -88,5 +88,10 @@
       "bind": "localhost:8000",
       "type": "ephemeral"
     }
-  }
+  },
+  "metadata": [
+    {
+      "name": "candid:service"
+    }
+  ] 
 }

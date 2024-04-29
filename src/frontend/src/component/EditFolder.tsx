@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
 import { idlFactory as mainIdlFactory } from "../../../declarations/main";
-import { ItemDataWithoutOwner, ItemTransferWithoutOwner, ZonBackend } from "../../../declarations/main/main.did";
+import { ItemDataWithoutOwner, ItemTransferWithoutOwner, _SERVICE as ZonBackend } from "../../../declarations/main/main.did";
 import { idlFactory as canDBPartitionIdlFactory } from "../../../declarations/CanDBPartition";
 import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import EditFoldersList from "./EditFoldersList";

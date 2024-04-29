@@ -2,7 +2,7 @@ import * as React from "react";
 import { idlFactory as canDBPartitionIdl } from "../../../declarations/CanDBPartition";
 import { _SERVICE as CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { idlFactory as nacDBPartitionIdl } from "../../../declarations/NacDBPartition";
-// import { NacDBPartition } from "../../../declarations/NacDBPartition/NacDBPartition.did";
+// import { SERVICE as NacDBPartition } from "../../../declarations/NacDBPartition/NacDBPartition.did";
 import { idlFactory as nacDBIndexIdl } from "../../../declarations/NacDBIndex";
 import { _SERVICE as NacDBIndex } from "../../../declarations/NacDBIndex/NacDBIndex.did";
 import { Actor, Agent } from "@dfinity/agent";

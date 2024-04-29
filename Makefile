@@ -1,5 +1,14 @@
 #!/usr/bin/make -f
 
+NETWORK = local
+
+.PHONY: all
+all: deploy init
+
+.PHONY: deploy
+deploy:
+	dfx deploy
+
 .PHONY: init
 init:
 	dfx ledger fabricate-cycles --amount 1000000000 --canister main

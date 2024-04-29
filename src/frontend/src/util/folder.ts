@@ -1,5 +1,5 @@
 import { idlFactory as orderIdlFactory } from "../../../declarations/order";
-import { Orders } from "../../../declarations/order/order.did";
+import { _SERVICE as Orders } from "../../../declarations/order/order.did";
 import { Actor, Agent } from "@dfinity/agent";
 import { getIsLocal } from "./client";
 import { ItemId } from './types';

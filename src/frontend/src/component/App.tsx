@@ -21,7 +21,7 @@ import { serializeItemRef } from '../data/Data'
 import { Principal } from "@dfinity/principal";
 import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
 import { idlFactory as mainIdlFactory } from "../../../declarations/main";
-import { ZonBackend } from "../../../declarations/main/main.did";
+import { _SERVICE as ZonBackend } from "../../../declarations/main/main.did";
 import { Helmet } from 'react-helmet';
 import Person from "./personhood/Person";
 import { AllItems } from "./AllItems";

@@ -14,7 +14,7 @@ import { Helmet } from 'react-helmet';
 import { idlFactory as mainIdlFactory } from '../../../../declarations/main';
 import { idlFactory as canDBIndexIdl } from '../../../../declarations/CanDBIndex';
 import { idlFactory as personhoodIdl } from '../../../../declarations/personhood';
-// import { Personhood } from '../../../../declarations/personhood/personhood.did'; // FIXME
+import { _SERVICE as Personhood } from '../../../../declarations/personhood/personhood.did';
 import config from '../../config.json';
 import ourCanisters from '../../our-canisters.json';
 import { Actor, Agent, HttpAgent } from '@dfinity/agent';
