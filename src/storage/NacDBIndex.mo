@@ -17,7 +17,8 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     stable var owners = [initialOwner];
 
     func checkCaller(caller: Principal) {
-        if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
+        // TODO: It isn't really necessary to call itself.
+        if (caller != Principal.fromActor(this) and Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
             Debug.trap("NacDBIndex: not allowed");
         }
     };
@@ -47,7 +48,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     stable var initialized = false;
 
     public shared({caller}) func init(_owners: [Principal]) : async () {
-        // checkCaller(caller); // FIXME
+        // // checkCaller(caller); // FIXME
         ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
         if (initialized) {
             Debug.trap("already initialized");
