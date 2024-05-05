@@ -409,7 +409,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     await* addItemToList(globalTimeStream, itemId, #beginning); // TODO: Implement #beginning special case.
   };
 
-  /// Insert item into the beginning of the global list.
+  /// Remove item from the beginning of the global list.
   public shared({caller}) func removeFromAllTimeStream(itemId: (Principal, Nat)): async () {
     checkCaller(caller);
 
