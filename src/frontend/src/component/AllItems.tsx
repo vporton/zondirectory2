@@ -59,6 +59,7 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
     
     return <>
         <Helmet>
+            <meta name="canonical" content="https://zoncircle.com/latest"/>
             <title>Latest Added Items - Zon</title>
             <meta name="description" content="Latest added items - Zon Social Media: a fusion of social network, web directory, and marketplace"/>
             <meta name="robots" content="noindex"/>
@@ -69,8 +70,8 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
             {items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
                 <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
                     <ItemType item={x.item}/>
-                    <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                    [<Nav.Link href={`#/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                    <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                    [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                 </li>)}
         </ul>}
         {/* TODO: Load More button */}

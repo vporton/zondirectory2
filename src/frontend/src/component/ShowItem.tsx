@@ -219,12 +219,12 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                 onUpdateList={() => xdata!.subFolders().then(x => setSubfolders(x))}
                             />
                             <ItemType item={x.item}/>
-                            <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                            [<Nav.Link href={`#/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                            <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                            [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                         </li>)}
                 </ul>}
                 <p>
-                    <a href="#" onClick={e => moreSubfolders(e)}>More...</a> <a href={`#/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</a>
+                    <a href="#" onClick={e => moreSubfolders(e)}>More...</a> <a href={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</a>
                 </p>
             </>}
             <h3>Super-folders</h3>
@@ -250,12 +250,12 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             })}
                         />*/}
                         <ItemType item={x.item}/>
-                        <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                        [<Nav.Link href={`#/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                        <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                        [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                     </li>)}
             </ul>}
             {/* TODO: Create super-folder */}
-            <p><a href="#" onClick={e => moreSuperfolders(e)}>More...</a> <a href={`#/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</a></p>
+            <p><a href="#" onClick={e => moreSuperfolders(e)}>More...</a> <a href={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</a></p>
             {!isFolder ? "" : <>
                 <h3>Items</h3>
                 {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) => 
@@ -276,14 +276,14 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             />{" "}
                             {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
                             {(x.item.data.item.details as any).link ? <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a> : x.item.data.item.title}
-                            {" "}<a href={`#/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
-                            {" "}[<Nav.Link href={`#/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                            {" "}<a href={`/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
+                            {" "}[<Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                         </p>
                         <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                     </div>
             )}
             <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                <a href={`#/create/for-folder/${serializeItemRef(id)}`}>Create</a></p></>}
+                <a href={`/create/for-folder/${serializeItemRef(id)}`}>Create</a></p></>}
             </TabPanel>
             <TabPanel>
                 <h3>Comments</h3>
@@ -306,13 +306,13 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             />
                             {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
                             {(x.item.data.item.details as any).link ? <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a> : x.item.data.item.title}
-                            {" "}<a href={`#/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
+                            {" "}<a href={`/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
                         </p>
                         <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                     </div>
                 )}
                 <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                    <a href={`#/create/comment/${serializeItemRef(id)}`}>Create</a></p>
+                    <a href={`/create/comment/${serializeItemRef(id)}`}>Create</a></p>
                 <h3>Comment on</h3>
                 <p><small>Voting in this stream not yet implemented.</small></p>
                 {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: ItemTransfer}) => 
@@ -320,7 +320,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                         <p lang={item.item.data.item.locale}>
                             {item.item.data.item.price ? <>({item.item.data.item.price} ICP) </> : ""}
                             {(item.item.data.item.details as any).link ? <a href={(item.item.data.item.details as any).link}>{item.item.data.item.title}</a> : item.item.data.item.title}
-                            {" "}<a href={`#/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
+                            {" "}<a href={`/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
                         </p>
                         <p lang={item.item.data.item.locale} style={{marginLeft: '1em'}}>{item.item.data.item.description}</p>
                     </div>

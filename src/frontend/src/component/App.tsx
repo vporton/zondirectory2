@@ -12,6 +12,7 @@ import {
     HashRouter,
     useParams,
     Link,
+    BrowserRouter,
 } from "react-router-dom";
 import { Actor, Agent, getDefaultAgent } from '@dfinity/agent';
 import SubFolders from "./SubFolders";
@@ -86,7 +87,7 @@ export default function App() {
                         console.error('Login Failed: ', error);
                     },
                 }}}>
-                    <HashRouter>
+                    <BrowserRouter>
                         <BusyContext.Provider value={{busy, setBusy}}>
                             {busy ? <p>Processing...</p> :
                             <AuthContext.Consumer>
@@ -94,7 +95,7 @@ export default function App() {
                             </AuthContext.Consumer>
                             }
                         </BusyContext.Provider>
-                    </HashRouter>
+                    </BrowserRouter>
                 </AuthProvider>
             </Container>
         </>
