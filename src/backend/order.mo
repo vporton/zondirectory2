@@ -189,7 +189,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   };
 
   public shared({caller}) func removeItemLinks(itemId: (Principal, Nat)): async () {
-    // checkCaller(caller); // FIXME: Uncomment.
+    checkCaller(caller);
     await* _removeItemLinks(itemId);
   };
 
@@ -203,7 +203,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     // await* _removeStream("vsc", itemId);
     // await* _removeStream("rstc", itemId);
     // await* _removeStream("rsvc", itemId);
-    
+    await* _removeItemLinks(itemId);
   };
 
   /// Removes a stream
