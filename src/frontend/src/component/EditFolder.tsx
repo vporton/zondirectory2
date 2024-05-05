@@ -122,7 +122,8 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                         </TabPanel>
                         <TabPanel>
                             <p>Communal folders have no owner. Anybody can add an item to a communal folder.{" "}
-                                Nobody can delete an item from a communal folder or rename the folder. Ordering is determined by voting.</p>
+                                Nobody can delete an item from a communal folder. Ordering is determined by voting.{" "}
+                                Renaming communal folders (not yet implemented) is by voting, too.</p>
                         </TabPanel>
                     </Tabs>
                     <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
