@@ -6,6 +6,7 @@ import { ItemRef, serializeItemRef } from "../data/Data";
 import { ItemData, ItemTransfer } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import ItemType from "./misc/ItemType";
 import { Agent } from "@dfinity/agent";
+import { Helmet } from "react-helmet";
 
 export default function SubFolders(props: {defaultAgent: Agent | undefined, 'data-dir': 'sub' | 'super'}) { // TODO: any
     const { id } = useParams();
@@ -68,6 +69,10 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
 
     return (
         <>
+            <Helmet>
+                <title>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: {title}</title>
+                <meta name="robots" content="noindex"/>
+            </Helmet>
             <h2>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: <a href='#' onClick={() => navigate(`/item/`+id)}>{title}</a></h2>
             <p>Sort by:{" "}
                 <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
