@@ -1,7 +1,6 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { ErrorBoundary, useErrorBoundary } from "react-error-boundary";
-import { createContext, useEffect, useState } from "react";
+import { Component, ErrorInfo, ReactNode, createContext, useEffect, useState } from "react";
 import { Button, Container, Nav, Navbar } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
@@ -30,21 +29,37 @@ import { AllItems } from "./AllItems";
 
 export const BusyContext = createContext<any>(undefined);
 
-function ErrorHandler({ error, resetErrorBoundary }) {
-    // TODO: The following does not work:
-    // const { resetBoundary } = useErrorBoundary();
-    // useEffect(() => {
-    //     window.addEventListener('click', resetErrorBoundary);
-    // }, []);                
+function ErrorHandler({ error }) {
     return (
       <div role="alert">
         <h2>Error</h2>
-        <p><Link to="/" onClick={resetErrorBoundary}>Reset error and go to homepage</Link></p>
+        <p><Link to="/" onClick={() => error.hasError = false}>Reset error and go to homepage</Link></p>
         <p style={{color: 'red'}}>{error.message}</p>
       </div>
     );
 }
 
+class ErrorBoundary extends Component<{children?: ReactNode}, {hasError: boolean, message: string | undefined}> {
+    public state: {hasError: boolean, message: string | undefined} = {
+        hasError: false,
+        message: undefined,
+    };
+    public static getDerivedStateFromError(error: {hasError: boolean, message: string | undefined})
+        : {hasError: boolean, message: string | undefined}
+    {
+        return error;
+    }
+    public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+        console.error("Uncaught error:", error, errorInfo);
+    }
+    public render() {
+        if (this.state.hasError) {
+            return <ErrorHandler error={this.state.message}/>;
+        }
+        return this.props.children;
+    }
+}
+  
 export default function App() {
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
     const identityProvider = getIsLocal() ? `http://${identityCanister}.localhost:8000` : `https://identity.ic0.app`;
@@ -125,7 +140,7 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                     </p>
                     <nav>
                         <Navbar className="bg-body-secondary" style={{width: "auto"}}>
-                        <Nav>
+                            <Nav>
                                 <Nav.Link onClick={() => navigate("/item/"+root)}>Main folder</Nav.Link>{" "}
                             </Nav>
                             <Nav>
@@ -139,7 +154,7 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             </Nav>
                         </Navbar>
                     </nav>
-                    <ErrorBoundary fallbackRender={ErrorHandler}>
+                    <ErrorBoundary>
                     <Routes>
                         <Route
                             path=""
@@ -217,7 +232,7 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             path="/personhood"
                             element={<Person/>}
                         />
-                        <Route path="*" element={<ErrorHandler error={hasError: true, message: "No such page"}/>}/>
+                        <Route path="*" element={<ErrorHandler error={{hasError: true, message: "No such page"}}/>}/>
                     </Routes>
                     </ErrorBoundary>
                 </>
