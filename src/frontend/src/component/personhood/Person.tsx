@@ -175,6 +175,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
   return (
     <div className="App">
       <Helmet>
+        <meta name="canonical" content="https://zoncircle.com/personhood"/>
         <title>Zon Social Media - verify your identity</title>
       </Helmet>
       <Container>

@@ -181,6 +181,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     const isFolder = type === 'folder';
     return <>
         <Helmet>
+            <meta name="canonical" content={`https://zoncircle.com/item/${idParam!}`}/>
             <title>{isFolder ? `${title} (folder) - Zon` : `${title} - Zon`}</title>
             <meta name="description" content={description}/>
         </Helmet>

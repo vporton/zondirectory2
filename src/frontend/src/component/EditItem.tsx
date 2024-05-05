@@ -122,6 +122,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                     }
                     return <>
                         <Helmet>
+                            <meta name="canonical" content="https://zoncircle.com/create"/>
                             <title>Zon Social Media - create a new item</title>
                         </Helmet>
                         <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>

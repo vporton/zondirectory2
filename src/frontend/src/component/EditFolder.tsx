@@ -107,6 +107,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                 }
                 return <>
                     <Helmet>
+                        <meta name="canonical" content="https://zoncircle.com/create"/>
                         <title>Zon Social Media - create a new folder</title>
                     </Helmet>
                     <h1>{props.folderId !== undefined ? `Edit folder` :
