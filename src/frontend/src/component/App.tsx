@@ -1,6 +1,7 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { createContext, useContext, useEffect, useState } from "react";
+import { ErrorBoundary, useErrorBoundary } from "react-error-boundary";
+import { createContext, useEffect, useState } from "react";
 import { Button, Container, Nav, Navbar } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
@@ -11,6 +12,7 @@ import {
     useNavigate,
     HashRouter,
     useParams,
+    Link,
 } from "react-router-dom";
 import { Actor, Agent, getDefaultAgent } from '@dfinity/agent';
 import SubFolders from "./SubFolders";
@@ -27,6 +29,21 @@ import Person from "./personhood/Person";
 import { AllItems } from "./AllItems";
 
 export const BusyContext = createContext<any>(undefined);
+
+function ErrorHandler({ error, resetErrorBoundary }) {
+    // TODO: The following does not work:
+    // const { resetBoundary } = useErrorBoundary();
+    // useEffect(() => {
+    //     window.addEventListener('click', resetErrorBoundary);
+    // }, []);                
+    return (
+      <div role="alert">
+        <h2>Error</h2>
+        <p><Link to="/" onClick={resetErrorBoundary}>Reset error and go to homepage</Link></p>
+        <p style={{color: 'red'}}>{error.message}</p>
+      </div>
+    );
+}
 
 export default function App() {
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
@@ -122,6 +139,7 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             </Nav>
                         </Navbar>
                     </nav>
+                    <ErrorBoundary fallbackRender={ErrorHandler}>
                     <Routes>
                         <Route
                             path=""
@@ -199,7 +217,9 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             path="/personhood"
                             element={<Person/>}
                         />
+                        <Route path="*" element={<ErrorHandler error={hasError: true, message: "No such page"}/>}/>
                     </Routes>
+                    </ErrorBoundary>
                 </>
            }}
         </AuthContext.Consumer>
