@@ -144,7 +144,7 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             element={<SubFolders data-dir="super" defaultAgent={defaultAgent}/>}
                         />
                         <Route
-                            path="/create/"
+                            path="/create"
                             element={<EditItem/>}
                         />
                         <Route
@@ -172,7 +172,7 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             element={<EditFolder super={true} defaultAgent={defaultAgent}/>}
                         />
                         <Route
-                            path="/folder/edit/:folder"
+                            path="/edit/folder/:folder"
                             element={
                                 (() => {
                                     function Edit(props) {
@@ -184,7 +184,7 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             }
                         />
                         <Route
-                            path="/item/edit/:item"
+                            path="/edit/item/:item"
                             element={
                                 (() => {
                                     function Edit(props) {

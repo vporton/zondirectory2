@@ -61,6 +61,7 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
         <Helmet>
             <title>Latest Added Items - Zon</title>
             <meta name="description" content="Latest added items - Zon Social Media: a fusion of social network, web directory, and marketplace"/>
+            <meta name="robots" content="noindex"/>
         </Helmet>
         <h1>Latest Added Items - Zon</h1>
         {items === undefined ? <p>Loading...</p> :
@@ -69,7 +70,7 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
                 <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
                     <ItemType item={x.item}/>
                     <a href={`#/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                    [<Nav.Link href={`#/folder/edit/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                    [<Nav.Link href={`#/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                 </li>)}
         </ul>}
         {/* TODO: Load More button */}
