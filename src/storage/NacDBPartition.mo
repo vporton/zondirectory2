@@ -55,7 +55,7 @@ shared({caller}) actor class Partition(
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
-        Nac.rawInsertSubDB({superDB; map; innerKey; userData; hardCap = DBConfig.dbOptions.hardCap});
+        Nac.rawInsertSubDB({superDB; map; innerKey; userData; hardCap});
     };
 
     public shared({caller}) func rawInsertSubDBAndSetOuter({
@@ -93,12 +93,12 @@ shared({caller}) actor class Partition(
         await* Nac.deleteSubDBInner({superDB; innerKey});
     };
 
-    public shared func putLocation({outerKey: Nac.OuterSubDBKey; innerCanister: Principal; newInnerSubDBKey: Nac.InnerSubDBKey}) : async () {
+    public shared func putLocation({outerKey: Nac.OuterSubDBKey; innerCanister: Principal; innerKey: Nac.InnerSubDBKey}) : async () {
         checkCaller(caller);
 
         ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
         let inner2: Nac.InnerCanister = actor(Principal.toText(innerCanister));
-        Nac.putLocation({outerSuperDB = superDB; outerKey; innerCanister = inner2; innerKey = newInnerSubDBKey});
+        Nac.putLocation({outerSuperDB = superDB; outerKey; innerCanister = inner2; innerKey});
     };
 
     public shared func createOuter({part: Principal; outerKey: Nac.OuterSubDBKey; innerKey: Nac.InnerSubDBKey})
@@ -204,8 +204,8 @@ shared({caller}) actor class Partition(
     };
 
     // TODO: These...
-    public shared func getSubDBUserDataOuter(options: Nac.GetUserDataOuterOptions) : async ?Text {
-        await* Nac.getSubDBUserDataOuter(options, DBConfig.dbOptions);
+    public shared func getSubDBUserDataOuter(options: {outerKey: Nac.OuterSubDBKey}) : async ?Text {
+        await* Nac.getSubDBUserDataOuter({outerSuperDB = superDB; outerKey = options.outerKey});
     };
 
     // TODO: .., two functions should have similar arguments
@@ -238,13 +238,8 @@ shared({caller}) actor class Partition(
         Nac.rawGetSubDB(superDB, innerKey);
     };
 
-    public func subDBSizeOuterImpl(options: Nac.SubDBSizeOuterOptions): async ?Nat {
-        MyCycles.addPart<system>(DBConfig.dbOptions.partitionCycles);
-        await options.outer.canister.subDBSizeByOuter({outerKey = options.outer.key});
-    };
-
-    public shared func getOuter(options: Nac.GetByOuterPartitionKeyOptions): async ?Nac.AttributeValue {
-        await* Nac.getOuter(options, DBConfig.dbOptions);
+    public shared func subDBSizeOuterImpl(options: {outerKey: Nac.OuterSubDBKey}): async ?Nat {
+        await* Nac.subDBSizeOuterImpl({outerSuperDB = superDB; outerKey = options.outerKey}, DBConfig.dbOptions);
     };
 
     // TODO: Remove superfluous functions from above.

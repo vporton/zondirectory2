@@ -55,7 +55,7 @@
       "main": "src/storage/NacDBPartition.mo",
       "type": "motoko",
       "deploy": false,
-      "dependencies": []
+      "dependencies": ["NacDBIndex"]
     },
     "ic_eth": {
       "type": "rust",

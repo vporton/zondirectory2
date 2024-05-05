@@ -58,7 +58,12 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         MyCycles.addPart<system>(DBConfig.dbOptions.partitionCycles);
         StableBuffer.add(dbIndex.canisters, await Partition.Partition(ownersOrSelf()));
 
-        allItemsStream := ?(await* Reorder.createOrder(GUID.nextGuid(guidGen), this, orderer, ?5_000)); // TODO: configurable hardCap
+        allItemsStream := ?(await* Reorder.createOrder(GUID.nextGuid(guidGen), {
+            index = this;
+            dbIndex;
+            orderer;
+            hardCap = ?5_000; // TODO: configurable hardCap
+        }));
 
         initialized := true;
     };
@@ -191,5 +196,70 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
                 #err err;
             }
         };
+    };
+
+    /// reorder methods ///
+
+    public shared({caller}) func reorderCreateOrder(guid: GUID.GUID): async Reorder.Order {
+        checkCaller(caller);
+
+        await* Reorder.createOrder(guid, {
+            index = this;
+            dbIndex;
+            orderer;
+            hardCap = DBConfig.dbOptions.hardCap;
+        });
+    };
+
+    public shared({caller}) func reorderAdd(guid: GUID.GUID, options: {
+        order: Reorder.Order;
+        key: Int;
+        value: Text;
+    }): async () {
+        checkCaller(caller);
+
+        await* Reorder.add(guid, {
+            index = this;
+            dbIndex;
+            orderer;
+            order = options.order;
+            key = options.key;
+            value = options.value;
+            hardCap = DBConfig.dbOptions.hardCap;
+        });
+    };
+
+    public shared({caller}) func reorderMove(guid: GUID.GUID, options: {
+        order: Reorder.Order;
+        value: Text;
+        relative: Bool;
+        newKey: Int;
+    }): async () {
+        checkCaller(caller);
+
+        await* Reorder.move(guid, {
+            index = this;
+            dbIndex;
+            orderer;
+            order = options.order;
+            value = options.value;
+            relative = options.relative;
+            newKey = options.newKey;
+       });
+    };
+
+    public shared({caller}) func reorderDelete(guid: GUID.GUID, options: {
+        order: Reorder.Order;
+        value: Text;
+    }): async () {
+        checkCaller(caller);
+
+        await* Reorder.delete(guid, {
+            index = this;
+            dbIndex;
+            orderer;
+            order = options.order;
+            value = options.value;
+       });
     };
 }

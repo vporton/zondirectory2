@@ -1,14 +1,13 @@
 import Nac "mo:nacdb/NacDB";
 import Principal "mo:base/Principal";
+import Blob "mo:base/Blob";
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
-import Buffer "mo:base/Buffer";
 import Array "mo:base/Array";
 import Reorder "mo:nacdb-reorder/Reorder";
 import order "canister:order";
 import GUID "mo:nacdb/GUID";
-import Entity "mo:candb/Entity";
 import Itertools "mo:itertools/Iter";
 
 import CanDBIndex "canister:CanDBIndex";
@@ -123,11 +122,11 @@ shared actor class ZonBackend() = this {
       let itemId = maxId;
       maxId += 1;
       let itemKey = "i/" # Nat.toText(itemId);
-      let timeStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
-      let votesStream = await* Reorder.createOrder(GUID.nextGuid(guidGen), NacDBIndex, orderer, ?10000); // FIXME: max length
+      let timeStream = await NacDBIndex.reorderCreateOrder(Blob.toArray(GUID.nextGuid(guidGen)));
+      let votesStream = await NacDBIndex.reorderCreateOrder(Blob.toArray(GUID.nextGuid(guidGen)));
       let item2 = #communal { timeStream; votesStream; isFolder = item.data.details == #folder };
       let variantValue = Nat.toText(variantId) # "@" # Principal.toText(variantCanisterId);
-      await* Reorder.add(GUID.nextGuid(guidGen), NacDBIndex, orderer, {
+      await NacDBIndex.reorderAdd(Blob.toArray(GUID.nextGuid(guidGen)), {
         hardCap = ?100; key = -2; order = votesStream; value = variantValue; // TODO: Take position `key` configurable.
       });
 
@@ -149,7 +148,7 @@ shared actor class ZonBackend() = this {
       };
       let guid = GUID.nextGuid(guidGen);
       // TODO: race condition
-      await* Reorder.add(guid, NacDBIndex, orderer, {
+      await NacDBIndex.reorderAdd(Blob.toArray(guid), {
         order = timeStream;
         key = timeScanSK;
         value = variantValue;
