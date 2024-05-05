@@ -92,7 +92,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 data.locale().then(x => setLocale(x));
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
-                data.postText().then(x => setPostText(x!)); // TODO: `!`
+                data.postText().then(x => setPostText(x !== undefined ? x.substring(1) : "")); // strip `t` denoting that it's a text // TODO: `!`
                 data.creator().then(x => setCreator(x.toString())); // TODO
                 data.subFolders().then(x => setSubfolders(x));
                 data.superFolders().then(x => {

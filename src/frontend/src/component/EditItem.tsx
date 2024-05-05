@@ -50,31 +50,29 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                 <AuthContext.Consumer>
                     {({agent, defaultAgent, isAuthenticated}) => {
                     async function submit() {
-                        useEffect(() => {
-                            if (props.itemId !== undefined) {
-                                const itemId = parseItemRef(props.itemId);
-                                const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: itemId.canister, agent: defaultAgent});
-                                actor.getItem(BigInt(itemId.id))
-                                    .then((item0) => {
-                                        const item1 = item0[0]!; // FIXME: `!`
-                                        const item = item1.data.item;
-                                        setFolderKind(item1.communal ? FolderKind.communal : FolderKind.owned);
-                                        setLocale(item.locale);
-                                        setTitle(item.title);
-                                        setShortDescription(item.description);
-                                        setLink((item.details as any).link);
-                                    });
-                                // TODO: Don't call it on non-blogpost:
-                                actor.getAttribute({sk: "i/" + itemId.id}, "t")
-                                    .then(item1 => {
-                                        const text = item1[0]! as any;
-                                        if (text !== undefined) {
-                                            setPost(text.text);
-                                            setSelectedTab(SelectedTab.selectedOther);
-                                        }
-                                    });
-                            }
-                        }, [props.itemId]);
+                        if (props.itemId !== undefined) {
+                            const itemId = parseItemRef(props.itemId);
+                            const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: itemId.canister, agent: defaultAgent});
+                            actor.getItem(BigInt(itemId.id))
+                                .then((item0) => {
+                                    const item1 = item0[0]!; // FIXME: `!`
+                                    const item = item1.data.item;
+                                    setFolderKind(item1.communal ? FolderKind.communal : FolderKind.owned);
+                                    setLocale(item.locale);
+                                    setTitle(item.title);
+                                    setShortDescription(item.description);
+                                    setLink((item.details as any).link);
+                                });
+                            // TODO: Don't call it on non-blogpost:
+                            actor.getAttribute({sk: "i/" + itemId.id}, "t")
+                                .then(item1 => {
+                                    const text = item1[0]! as any;
+                                    if (text !== undefined) {
+                                        setPost(text.text);
+                                        setSelectedTab(SelectedTab.selectedOther);
+                                    }
+                                });
+                        }
                         function itemData(): ItemDataWithoutOwner {
                             // TODO: Differentiating post and message by `post === ""` is unreliable.
                             const isPost = selectedTab == SelectedTab.selectedOther && post !== "";
@@ -100,7 +98,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                             } else {
                                 [part, n] = await backend.createItemData({data: item, communal: folderKind == FolderKind.communal});
                             }
-                            await backend.setPostText(part, n, post);
+                            await backend.setPostText(part, n, 't'+post);
                             const ref = serializeItemRef({canister: part, id: Number(n)});
                             // TODO: What to do with this on editing the folder?
                             await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
