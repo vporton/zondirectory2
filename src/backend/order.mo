@@ -203,7 +203,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     // await* _removeStream("vsc", itemId);
     // await* _removeStream("rstc", itemId);
     // await* _removeStream("rsvc", itemId);
-    await* _removeItemLinks(itemId);
+    await* removeFromAllTimeStream(itemId);
   };
 
   /// Removes a stream
@@ -410,7 +410,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   };
 
   /// Remove item from the beginning of the global list.
-  public shared({caller}) func removeFromAllTimeStream(itemId: (Principal, Nat)): async () {
+  func removeFromAllTimeStream(itemId: (Principal, Nat)): async* () {
     checkCaller(caller);
 
     let globalTimeStream = await NacDBIndex.getAllItemsStream();
