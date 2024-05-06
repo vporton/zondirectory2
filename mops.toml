@@ -19,7 +19,7 @@ map = "9.0.1"
 btree = "https://github.com/canscale/StableHeapBTreeMap#v0.3.3"
 CanDBMulti = "https://github.com/vporton/CanDBMulti#v0.10.0@86d00711216349ba4879370d6313d44a26d16f61"
 xtended-numbers = "0.2.1"
-"json.mo" = "https://github.com/aviate-labs/json.mo#master@afd30ed75095cb339c1ec187d61030bbd2e59ae6"
+"json.mo" = "0.1.2"
 nacdb-reorder = "3.0.0"
 passport-client = "0.4.6"
 
