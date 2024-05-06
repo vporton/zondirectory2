@@ -41,7 +41,7 @@ module {
     );
   };
 
-  func encodeBlob(g: Blob): Text {
+  public func encodeBlob(g: Blob): Text {
     var result = "";
     for (b in g.vals()) {
       let b2 = Nat8.toNat(b);
@@ -50,7 +50,7 @@ module {
     result;
   };
 
-  func decodeBlob(t: Text): Blob {
+  public func decodeBlob(t: Text): Blob {
     let buf = Buffer.Buffer<Nat8>(t.size() / 2);
     let c = t.chars();
     label r loop {

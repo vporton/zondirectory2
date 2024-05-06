@@ -34,7 +34,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
             const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: folderId.canister, agent: props.defaultAgent});
             actor.getItem(BigInt(folderId.id))
                 .then((itemx) => {
-                    const item = itemx[0] ? itemx[0][0]!.data : undefined;
+                    const item = itemx[0] ? itemx[0]!.data.item : undefined;
                     const communal = itemx[0]?.communal; // TODO: Simplify.
                     setFolderKind(communal ? FolderKind.communal : FolderKind.owned);
                     setLocale(item!.locale);

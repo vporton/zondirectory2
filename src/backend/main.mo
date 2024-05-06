@@ -16,6 +16,8 @@ import CanDBPartition "../storage/CanDBPartition";
 import MyCycles "mo:nacdb/Cycles";
 import DBConfig "../libs/configs/db.config";
 import lib "lib";
+import AI "ai";
+import AITypes "HttpTypes";
 // import ICRC1Types "mo:icrc1/ICRC1/Types";
 
 shared actor class ZonBackend() = this {
@@ -108,9 +110,20 @@ shared actor class ZonBackend() = this {
     };
   };
 
+  public query func checkSpamTransform(args: AITypes.TransformArgs): async AITypes.HttpResponsePayload {
+    AI.removeHTTPHeaders(args);
+  };
+
+  private func itemCheckSpam(item: lib.ItemDataWithoutOwner): async* () {
+    if (not (await* AI.checkSpam(item.title # "\n" # item.description, checkSpamTransform))) {
+      Debug.trap("spam");
+    };
+  };
+
   public shared({caller}) func createItemData(item: lib.ItemTransferWithoutOwner)
     : async (Principal, Nat)
   {
+    await* itemCheckSpam(item.data);
     let (canisterId, itemId) = if (item.communal) {
       let variant: lib.ItemVariant = { creator = caller; item = item.data; };
       let variantId = maxId;
@@ -175,9 +188,10 @@ shared actor class ZonBackend() = this {
   };
 
   // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
-  public shared({caller}) func setItemData(canisterId: Principal, _itemId: Nat, item: lib.ItemDataWithoutOwner) {
+  public shared({caller}) func setItemData(canisterId: Principal, itemId: Nat, item: lib.ItemDataWithoutOwner) {
+    await* itemCheckSpam(item);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # Nat.toText(_itemId); // TODO: better encoding
+    let key = "i/" # Nat.toText(itemId); // TODO: better encoding
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
@@ -189,7 +203,12 @@ shared actor class ZonBackend() = this {
     };
   };
 
+  // TODO: If item set is successful and setPostText is unsuccessful, this is counter-intuitive.
   public shared({caller}) func setPostText(canisterId: Principal, _itemId: Nat, text: Text) {
+    if (not (await* AI.checkSpam(text, checkSpamTransform))) {
+      Debug.trap("spam");
+    };
+
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(_itemId); // TODO: better encoding
     switch (await db.getAttribute({sk = key}, "i")) {
