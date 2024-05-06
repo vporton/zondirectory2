@@ -411,8 +411,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
 
   /// Remove item from the beginning of the global list.
   func removeFromAllTimeStream(itemId: (Principal, Nat)): async* () {
-    checkCaller(caller);
-
     let globalTimeStream = await NacDBIndex.getAllItemsStream();
     let value = Nat.toText(itemId.1) # "@" # Principal.toText(itemId.0);
     await NacDBIndex.reorderDelete(Blob.toArray(GUID.nextGuid(guidGen)), { order = globalTimeStream; value });
