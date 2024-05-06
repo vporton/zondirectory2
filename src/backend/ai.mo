@@ -101,11 +101,13 @@ module {
         textToCheck: Text,
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload,
     ): async* JSON.JSON {
-        Debug.print("PROMPT: " # fullPrompt(textToCheck)); // FIXME: Remove.
-        let body = Blob.toArray(Text.encodeUtf8(fullPrompt(textToCheck)));
+        let bodyText = fullPrompt(textToCheck);
+        Debug.print("PROMPT: " # bodyText); // FIXME: Remove.
+        let body = Blob.toArray(Text.encodeUtf8(bodyText));
         let request : Types.HttpRequestArgs = {
             body = ?body;
             headers = [
+                {name = "Content-Type"; value = "application/json"},
                 {name = "Authorization"; value = "Bearer " # Config.openaiApiKey},
                 {name = "X-My-Security"; value = Config.cloudfrontSecurityKey},
             ];
@@ -132,14 +134,13 @@ module {
         Debug.trap("No JSON subobject: " # name);
     };
 
-    /// `completion.choices[0].message.content`
+    /// `choices[0].message.content`
     private func obtainAICompletion(
         textToCheck: Text,
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload,
     ): async* Text {
         let json = await* requestAI(textToCheck, transform);
-        let completion = getJSONSubObject(json, "completion");
-        let choices = getJSONSubObject(completion, "choices");
+        let choices = getJSONSubObject(json, "choices");
         let #Array(choicesArr) = choices else {
             Debug.trap("Not JSON array.");
         };
