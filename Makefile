@@ -9,7 +9,7 @@ all: deploy init
 
 .PHONY: deploy
 deploy:
-	dfx deploy
+	dfx deploy -vv
 
 .PHONY: init
 init:

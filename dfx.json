@@ -9,7 +9,7 @@
         "dist/frontend/"
       ],
       "type": "assets",
-      "dependencies": ["ic_eth", "CanDBIndex", "order", "main"]
+      "dependencies": ["main"]
     },
     "main": {
       "main": "src/backend/main.mo",
@@ -24,7 +24,7 @@
     "personhood": {
       "main": "src/backend/personhood.mo",
       "type": "motoko",
-      "dependencies": ["ic_eth", "CanDBIndex", "order"]
+      "dependencies": ["ic_eth", "CanDBIndex"]
     },
     "payments": {
       "main": "src/backend/payments.mo",
