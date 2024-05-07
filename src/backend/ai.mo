@@ -102,7 +102,6 @@ module {
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload,
     ): async* JSON.JSON {
         let bodyText = fullPrompt(textToCheck);
-        Debug.print("PROMPT: " # bodyText); // FIXME: Remove.
         let body = Blob.toArray(Text.encodeUtf8(bodyText));
         let request : Types.HttpRequestArgs = {
             body = ?body;
