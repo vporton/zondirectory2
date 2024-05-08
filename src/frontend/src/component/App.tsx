@@ -125,89 +125,87 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             </Nav>
                         </Navbar>
                     </nav>
-                    <ErrorContext.Provider value={new ErrorContextType()}>
-                        <ErrorBoundary>
-                            <Routes>
-                                <Route
-                                    path=""
-                                    element={<RootRedirector root={root}/>}
-                                />
-                                <Route
-                                    path="/latest"
-                                    element={<AllItems defaultAgent={defaultAgent}/>}
-                                />
-                                <Route
-                                    path="/item/:id"
-                                    element={<ShowItem/>}
-                                />
-                                <Route
-                                    path="/subfolders-of/:id"
-                                    element={<SubFolders data-dir="sub" defaultAgent={defaultAgent}/>}
-                                />
-                                <Route
-                                    path="/superfolders-of/:id"
-                                    element={<SubFolders data-dir="super" defaultAgent={defaultAgent}/>}
-                                />
-                                <Route
-                                    path="/create"
-                                    element={<EditItem/>}
-                                />
-                                <Route
-                                    path="/create/for-folder/:folder"
-                                    element={<EditItem/>}
-                                />
-                                <Route
-                                    path="/create/comment/:folder"
-                                    element={<EditItem comment={true}/>}
-                                />
-                                <Route
-                                    path="/create-subfolder/for-folder/:folder"
-                                    element={
-                                        (() => {
-                                            function Edit(props) {
-                                                const routeParams = useParams();
-                                                return <EditFolder superFolderId={routeParams.folder} defaultAgent={defaultAgent}/>;
-                                            }
-                                            return <Edit/>;
-                                        })()
-                                    }
-                                />
-                                <Route
-                                    path="/create-superfolder/for-folder/:folder"
-                                    element={<EditFolder super={true} defaultAgent={defaultAgent}/>}
-                                />
-                                <Route
-                                    path="/edit/folder/:folder"
-                                    element={
-                                        (() => {
-                                            function Edit(props) {
-                                                const routeParams = useParams();
-                                                return <EditFolder folderId={routeParams.folder} defaultAgent={defaultAgent}/>;
-                                            }
-                                            return <Edit/>;
-                                        })()
-                                    }
-                                />
-                                <Route
-                                    path="/edit/item/:item"
-                                    element={
-                                        (() => {
-                                            function Edit(props) {
-                                                const routeParams = useParams();
-                                                return <EditItem itemId={routeParams.item}/>;
-                                            }
-                                            return <Edit/>;
-                                        })()
-                                    }
-                                />
-                                <Route
-                                    path="/personhood"
-                                    element={<Person/>}
-                                />
-                                <Route path="*" element={<ErrorHandler error={{hasError: true, message: "No such page"}}/>}/>
-                            </Routes>
-                        </ErrorBoundary>
-                    </ErrorContext.Provider>
+                    <ErrorBoundary>
+                        <Routes>
+                            <Route
+                                path=""
+                                element={<RootRedirector root={root}/>}
+                            />
+                            <Route
+                                path="/latest"
+                                element={<AllItems defaultAgent={defaultAgent}/>}
+                            />
+                            <Route
+                                path="/item/:id"
+                                element={<ShowItem/>}
+                            />
+                            <Route
+                                path="/subfolders-of/:id"
+                                element={<SubFolders data-dir="sub" defaultAgent={defaultAgent}/>}
+                            />
+                            <Route
+                                path="/superfolders-of/:id"
+                                element={<SubFolders data-dir="super" defaultAgent={defaultAgent}/>}
+                            />
+                            <Route
+                                path="/create"
+                                element={<EditItem/>}
+                            />
+                            <Route
+                                path="/create/for-folder/:folder"
+                                element={<EditItem/>}
+                            />
+                            <Route
+                                path="/create/comment/:folder"
+                                element={<EditItem comment={true}/>}
+                            />
+                            <Route
+                                path="/create-subfolder/for-folder/:folder"
+                                element={
+                                    (() => {
+                                        function Edit(props) {
+                                            const routeParams = useParams();
+                                            return <EditFolder superFolderId={routeParams.folder} defaultAgent={defaultAgent}/>;
+                                        }
+                                        return <Edit/>;
+                                    })()
+                                }
+                            />
+                            <Route
+                                path="/create-superfolder/for-folder/:folder"
+                                element={<EditFolder super={true} defaultAgent={defaultAgent}/>}
+                            />
+                            <Route
+                                path="/edit/folder/:folder"
+                                element={
+                                    (() => {
+                                        function Edit(props) {
+                                            const routeParams = useParams();
+                                            return <EditFolder folderId={routeParams.folder} defaultAgent={defaultAgent}/>;
+                                        }
+                                        return <Edit/>;
+                                    })()
+                                }
+                            />
+                            <Route
+                                path="/edit/item/:item"
+                                element={
+                                    (() => {
+                                        function Edit(props) {
+                                            const routeParams = useParams();
+                                            return <EditItem itemId={routeParams.item}/>;
+                                        }
+                                        return <Edit/>;
+                                    })()
+                                }
+                            />
+                            <Route
+                                path="/personhood"
+                                element={<Person/>}
+                            />
+                            <Route path="*" element={<ErrorHandler error={{hasError: true, message: "No such page"}}/>}/>
+                        </Routes>
+                    </ErrorBoundary>
                 </>
            }}
         </AuthContext.Consumer>
