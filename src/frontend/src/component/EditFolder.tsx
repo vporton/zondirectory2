@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
@@ -14,6 +14,7 @@ import { parseItemRef, serializeItemRef } from "../data/Data";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 import { Actor, Agent } from "@dfinity/agent";
+import { ErrorContext, ErrorContextType } from "./ErrorBoundary";
 
 export default function EditFolder(props: {super?: boolean, folderId?: string, superFolderId?: string, defaultAgent: Agent | undefined}) {
     const navigate = useNavigate();
@@ -53,6 +54,15 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                 break;
             }
     }
+    // const {setError} = useContext(ErrorContext);
+    console.log("RRR", useContext(ErrorContext)); // FIXME: Remove.
+    const errorContext = useContext(ErrorContext); // FIXME: Remove.
+    const setError = errorContext.setError;
+    // if (errorContext === undefined) alert("DDD"); // FIXME: Remove.
+    // const setError = errorContext.setError.bind(this);
+    // const {setError} = useContext(ErrorContext); // FIXME: Remove.
+    // setError("TEST");
+    // setError("QQQ");
     return (
         <BusyContext.Consumer>
         {({setBusy}) =>
@@ -69,28 +79,33 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                         };
                     }
                     async function submitItem(item: ItemDataWithoutOwner) {
-                        const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
-                        let part, n;
-                        if (props.folderId !== undefined) {
-                            const folder = parseItemRef(props.folderId); // TODO: not here
-                            await backend.setItemData(folder.canister, BigInt(folder.id), item);
-                            part = folder.canister;
-                            n = BigInt(folder.id);
-                        } else {
-                            const transfer: ItemTransferWithoutOwner = {data: item, communal: folderKind == FolderKind.communal};
-                            [part, n] = await backend.createItemData(transfer);
-                        }
-                        const ref = serializeItemRef({canister: part, id: Number(n)}); // TODO: Reduce code
-                        if (!(props.super === true)) { // noComments
-                            await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
-                            await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
-                        } else {
-                            for (const folder of foldersList) {
-                                // TODO: It may fail to parse.
-                                await addToFolder(agent!, {canister: part, id: Number(n)}, parseItemRef(folder[0]), false, folder[1]);
+                        try {
+                            const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
+                            let part, n;
+                            if (props.folderId !== undefined) {
+                                const folder = parseItemRef(props.folderId); // TODO: not here
+                                await backend.setItemData(folder.canister, BigInt(folder.id), item);
+                                part = folder.canister;
+                                n = BigInt(folder.id);
+                            } else {
+                                const transfer: ItemTransferWithoutOwner = {data: item, communal: folderKind == FolderKind.communal};
+                                [part, n] = await backend.createItemData(transfer);
                             }
+                            const ref = serializeItemRef({canister: part, id: Number(n)}); // TODO: Reduce code
+                            if (!(props.super === true)) { // noComments
+                                await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
+                                await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
+                            } else {
+                                for (const folder of foldersList) {
+                                    // TODO: It may fail to parse.
+                                    await addToFolder(agent!, {canister: part, id: Number(n)}, parseItemRef(folder[0]), false, folder[1]);
+                                }
+                            }
+                            navigate("/item/"+ref);
                         }
-                        navigate("/item/"+ref);
+                        catch (e) {
+                            setError(e);
+                        }
                     }
                     setBusy(true);
                     await submitItem(itemData());
