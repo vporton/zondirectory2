@@ -200,7 +200,6 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 <Tab>Comments</Tab>
             </TabList>
             <TabPanel>
-                <button onClick={() => { throw "Test"; }}>TEST</button> {/* FIXME: Remove. */}
                 {!isFolder ? "" : <>
                 <h3>Sub-folders</h3>
                 {subfolders === undefined ? <p>Loading...</p> :

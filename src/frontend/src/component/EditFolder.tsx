@@ -54,15 +54,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                 break;
             }
     }
-    // const {setError} = useContext(ErrorContext);
-    console.log("RRR", useContext(ErrorContext)); // FIXME: Remove.
-    const errorContext = useContext(ErrorContext); // FIXME: Remove.
-    const setError = errorContext.setError;
-    // if (errorContext === undefined) alert("DDD"); // FIXME: Remove.
-    // const setError = errorContext.setError.bind(this);
-    // const {setError} = useContext(ErrorContext); // FIXME: Remove.
-    // setError("TEST");
-    // setError("QQQ");
+    const { setError } = useContext(ErrorContext); // https://github.com/facebook/react/issues/29024
     return (
         <BusyContext.Consumer>
         {({setBusy}) =>
