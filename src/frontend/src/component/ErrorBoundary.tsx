@@ -27,7 +27,6 @@ export class ErrorBoundary extends Component<{children?: ReactNode}, ErrorContex
     }
     public render() {
         const context = this.context;
-        console.log("PPP", context); // FIXME: Remove.
         return !this.context ? "" : context.hasError ?
             <ErrorHandler error={context.message}/> : this.props.children;
     }
