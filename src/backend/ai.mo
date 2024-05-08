@@ -108,7 +108,7 @@ module {
             headers = [
                 {name = "Content-Type"; value = "application/json"},
                 {name = "Authorization"; value = "Bearer " # Config.openaiApiKey},
-                {name = "X-My-Security"; value = Config.cloudfrontSecurityKey},
+                {name = "X-JoinProxy-Key"; value = "Bearer " # Config.proxySecurityKey},
             ];
             max_response_bytes = ?10000;
             method = #post;
