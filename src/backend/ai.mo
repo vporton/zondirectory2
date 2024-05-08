@@ -19,7 +19,7 @@ import lib "lib";
 module {
     // TODO: The below code is too specialized. Possibly, generalize it.
 
-    let promptBase = "Classify the following message as spam or hate speech (answer \"yes\") or not spam (answer \"no\"). Answer only \"yes\" or \"no\" and nothing else. The message follows:\n\n";
+    let promptBase = "Classify the following message as spam, hate speech, illegal content, or threats (answer \"yes\") or none of these (answer \"no\"). Answer only \"yes\" or \"no\" and nothing else. The message follows:\n\n";
 
     private func encodeNat16(n: Nat): Text {
         var n16 = Nat16.fromNat(n);
