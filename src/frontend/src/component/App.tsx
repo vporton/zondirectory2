@@ -1,6 +1,6 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Component, ErrorInfo, ReactNode, createContext, useEffect, useState } from "react";
+import { Component, ErrorInfo, ReactNode, createContext, useEffect, useMemo, useState } from "react";
 import { Button, Container, Nav, Navbar } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
@@ -70,6 +70,24 @@ export default function App() {
             </Container>
         </>
     );
+}
+
+/// Defined outside of other functions not to re-initialize when the tree is updated.
+function Edit1(props: {defaultAgent: Agent | undefined}) {
+    const routeParams = useParams();
+    return <EditFolder superFolderId={routeParams.folder} defaultAgent={props.defaultAgent}/>;
+}
+
+/// Defined outside of other functions not to re-initialize when the tree is updated.
+function Edit2(props: {defaultAgent: Agent | undefined}) {
+    const routeParams = useParams();
+    return <EditFolder folderId={routeParams.folder} defaultAgent={props.defaultAgent}/>;
+}
+
+/// Defined outside of other functions not to re-initialize when the tree is updated.
+function Edit3(props) {
+    const routeParams = useParams();
+    return <EditItem itemId={routeParams.item}/>;
 }
 
 function MyRouted(props: {defaultAgent: Agent | undefined}) {
@@ -161,15 +179,7 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             />
                             <Route
                                 path="/create-subfolder/for-folder/:folder"
-                                element={
-                                    (() => {
-                                        function Edit(props) {
-                                            const routeParams = useParams();
-                                            return <EditFolder superFolderId={routeParams.folder} defaultAgent={defaultAgent}/>;
-                                        }
-                                        return <Edit/>;
-                                    })()
-                                }
+                                element={<Edit1 defaultAgent={defaultAgent}/>}
                             />
                             <Route
                                 path="/create-superfolder/for-folder/:folder"
@@ -177,27 +187,11 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             />
                             <Route
                                 path="/edit/folder/:folder"
-                                element={
-                                    (() => {
-                                        function Edit(props) {
-                                            const routeParams = useParams();
-                                            return <EditFolder folderId={routeParams.folder} defaultAgent={defaultAgent}/>;
-                                        }
-                                        return <Edit/>;
-                                    })()
-                                }
+                                element={<Edit2 defaultAgent={defaultAgent}/>}
                             />
                             <Route
                                 path="/edit/item/:item"
-                                element={
-                                    (() => {
-                                        function Edit(props) {
-                                            const routeParams = useParams();
-                                            return <EditItem itemId={routeParams.item}/>;
-                                        }
-                                        return <Edit/>;
-                                    })()
-                                }
+                                element={<Edit3/>}
                             />
                             <Route
                                 path="/personhood"

@@ -134,9 +134,9 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                                 Renaming communal folders (not yet implemented) is by voting, too.</p>
                         </TabPanel>
                     </Tabs>
-                    <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
-                    <p>Title: <input type="text" required={true} defaultValue={title} onChange={e => setTitle(e.target.value)}/></p>
-                    <p>Short (meta) description: <textarea defaultValue={shortDescription} onChange={e => setShortDescription(e.target.value)}/></p>
+                    <p>Language: <input type="text" required={true} value={locale} onChange={e => setLocale(e.target.value)}/></p>
+                    <p>Title: <input type="text" required={true} value={title} onChange={e => setTitle(e.target.value)}/></p>
+                    <p>Short (meta) description: <textarea value={shortDescription} onChange={e => setShortDescription(e.target.value)}/></p>
                     <EditFoldersList
                         defaultFolders={superFolder === undefined ? [] : [[superFolder, 'beginning']]}
                         onChangeFolders={setFoldersList}

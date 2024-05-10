@@ -1,7 +1,7 @@
 import { Agent, HttpAgent, Identity } from "@dfinity/agent";
 import { AuthClient, AuthClientCreateOptions, AuthClientLoginOptions } from "@dfinity/auth-client";
 import { Principal } from "@dfinity/principal";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getIsLocal } from "../../util/client";
 // import sha256 from 'crypto-js/sha256';
 // import * as base64 from 'base64-js';
@@ -82,10 +82,13 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
     await updateClient(auth.authClient);
   }
 
-  const defaultAgent = new HttpAgent(); // TODO: options
-  if (getIsLocal()) {
-    defaultAgent.fetchRootKey();
-  }
+  const defaultAgent = useMemo<HttpAgent>(() => {
+    const agent = new HttpAgent(); // TODO: options
+    if (getIsLocal()) {
+      agent.fetchRootKey();
+    }
+    return agent;
+  }, []);
 
   return <AuthContext.Provider value={{...auth, login, logout, defaultAgent}}>{props.children}</AuthContext.Provider>;
 };
