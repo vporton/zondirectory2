@@ -135,11 +135,11 @@ shared actor class ZonBackend() = this {
       let itemId = maxId;
       maxId += 1;
       let itemKey = "i/" # Nat.toText(itemId);
-      let timeStream = await NacDBIndex.reorderCreateOrder(Blob.toArray(GUID.nextGuid(guidGen)));
-      let votesStream = await NacDBIndex.reorderCreateOrder(Blob.toArray(GUID.nextGuid(guidGen)));
+      let timeStream = await NacDBIndex.reorderCreateOrder(GUID.nextGuid(guidGen));
+      let votesStream = await NacDBIndex.reorderCreateOrder(GUID.nextGuid(guidGen));
       let item2 = #communal { timeStream; votesStream; isFolder = item.data.details == #folder };
       let variantValue = Nat.toText(variantId) # "@" # Principal.toText(variantCanisterId);
-      await NacDBIndex.reorderAdd(Blob.toArray(GUID.nextGuid(guidGen)), {
+      await NacDBIndex.reorderAdd(GUID.nextGuid(guidGen), {
         hardCap = ?100; key = -2; order = votesStream; value = variantValue; // TODO: Take position `key` configurable.
       });
 
