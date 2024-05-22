@@ -1,43 +1,45 @@
 import React, { Component, ErrorInfo, ReactNode, useContext } from "react";
-import { Link } from "react-router-dom";
+import { ErrorContext } from "./ErrorContext";
 
-export class ErrorContextType {
-    hasError: boolean;
-    message: string | undefined;
-    constructor() {
-        this.hasError = false;
-    }
-    setError(e: any) {
-        this.hasError = true;
-        this.message = e;
-    }
-};
-
-export const ErrorContext = React.createContext(new ErrorContextType());
-
-export class ErrorBoundary extends Component<{children?: ReactNode}, ErrorContextType> {
-    static contextType = ErrorContext;
-    declare context: React.ContextType<typeof ErrorContext>;
-    public static getDerivedStateFromError(error: ErrorContextType): ErrorContextType
-    {
-        return error;
-    }
-    public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error("Uncaught error:", error, errorInfo);
-    }
-    public render() {
-        const context = this.context;
-        return !this.context ? "" : context.hasError ?
-            <ErrorHandler error={context.message}/> : this.props.children;
-    }
+interface ErrorBoundaryProps {
+  children: ReactNode;
 }
 
-export function ErrorHandler({ error }) {
-    return (
-      <div role="alert">
-        <h2>Error</h2>
-        <p><Link to="/" onClick={() => error.hasError = false}>Reset error and go to homepage</Link></p>
-        <p style={{color: 'red'}}>{error.message}</p>
-      </div>
-    );
+class ErrorBoundary extends Component<ErrorBoundaryProps> {
+  static contextType = ErrorContext;
+  context!: React.ContextType<typeof ErrorContext>;
+
+  public static getDerivedStateFromError(error: Error): null {
+    return null;
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+    if (this.context) {
+      this.context.setError(error.message);
+    }
+  }
+
+  public render() {
+    if (this.context && this.context.hasError) {
+      return <ErrorHandler error={this.context.message} />;
+    }
+    return this.props.children;
+  }
 }
+
+interface ErrorHandlerProps {
+  error: string | undefined;
+}
+
+function ErrorHandler({ error }: ErrorHandlerProps) {
+  return (
+    <div role="alert">
+      <h2>Error</h2>
+      <p style={{ color: 'red' }}>{error}</p>
+    </div>
+  );
+}
+
+export { ErrorBoundary, ErrorHandler };
+

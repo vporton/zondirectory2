@@ -14,7 +14,7 @@ import { parseItemRef, serializeItemRef } from "../data/Data";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 import { Actor, Agent } from "@dfinity/agent";
-import { ErrorContext, ErrorContextType } from "./ErrorBoundary";
+import { ErrorContext } from "./ErrorContext";
 
 export default function EditFolder(props: {super?: boolean, folderId?: string, superFolderId?: string, defaultAgent: Agent | undefined}) {
     const navigate = useNavigate();
