@@ -59,13 +59,17 @@ export default function App() {
                     },
                 }}}>
                     <BrowserRouter>
-                        <BusyContext.Provider value={{busy, setBusy}}>
-                            {busy ? <p>Processing...</p> :
-                            <AuthContext.Consumer>
-                                {({defaultAgent}) => <MyRouted defaultAgent={defaultAgent}/>}
-                            </AuthContext.Consumer>
-                            }
-                        </BusyContext.Provider>
+                        <ErrorProvider>
+                            <ErrorBoundary>
+                                <BusyContext.Provider value={{busy, setBusy}}>
+                                    {busy ? <p>Processing...</p> :
+                                    <AuthContext.Consumer>
+                                        {({defaultAgent}) => <MyRouted defaultAgent={defaultAgent}/>}
+                                    </AuthContext.Consumer>
+                                    }
+                                </BusyContext.Provider>
+                            </ErrorBoundary>
+                        </ErrorProvider>
                     </BrowserRouter>
                 </AuthProvider>
             </Container>
@@ -144,65 +148,61 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             </Nav>
                         </Navbar>
                     </nav>
-                    <ErrorProvider>
-                        <ErrorBoundary>
-                            <Routes>
-                                <Route
-                                    path=""
-                                    element={<RootRedirector root={root}/>}
-                                />
-                                <Route
-                                    path="/latest"
-                                    element={<AllItems defaultAgent={defaultAgent}/>}
-                                />
-                                <Route
-                                    path="/item/:id"
-                                    element={<ShowItem/>}
-                                />
-                                <Route
-                                    path="/subfolders-of/:id"
-                                    element={<SubFolders data-dir="sub" defaultAgent={defaultAgent}/>}
-                                />
-                                <Route
-                                    path="/superfolders-of/:id"
-                                    element={<SubFolders data-dir="super" defaultAgent={defaultAgent}/>}
-                                />
-                                <Route
-                                    path="/create"
-                                    element={<EditItem/>}
-                                />
-                                <Route
-                                    path="/create/for-folder/:folder"
-                                    element={<EditItem/>}
-                                />
-                                <Route
-                                    path="/create/comment/:folder"
-                                    element={<EditItem comment={true}/>}
-                                />
-                                <Route
-                                    path="/create-subfolder/for-folder/:folder"
-                                    element={<Edit1 defaultAgent={defaultAgent}/>}
-                                />
-                                <Route
-                                    path="/create-superfolder/for-folder/:folder"
-                                    element={<EditFolder super={true} defaultAgent={defaultAgent}/>}
-                                />
-                                <Route
-                                    path="/edit/folder/:folder"
-                                    element={<Edit2 defaultAgent={defaultAgent}/>}
-                                />
-                                <Route
-                                    path="/edit/item/:item"
-                                    element={<Edit3/>}
-                                />
-                                <Route
-                                    path="/personhood"
-                                    element={<Person/>}
-                                />
-                                <Route path="*" element={<ErrorHandler error={"No such page"}/>}/>
-                            </Routes>
-                        </ErrorBoundary>
-                    </ErrorProvider>
+                    <Routes>
+                        <Route
+                            path=""
+                            element={<RootRedirector root={root}/>}
+                        />
+                        <Route
+                            path="/latest"
+                            element={<AllItems defaultAgent={defaultAgent}/>}
+                        />
+                        <Route
+                            path="/item/:id"
+                            element={<ShowItem/>}
+                        />
+                        <Route
+                            path="/subfolders-of/:id"
+                            element={<SubFolders data-dir="sub" defaultAgent={defaultAgent}/>}
+                        />
+                        <Route
+                            path="/superfolders-of/:id"
+                            element={<SubFolders data-dir="super" defaultAgent={defaultAgent}/>}
+                        />
+                        <Route
+                            path="/create"
+                            element={<EditItem/>}
+                        />
+                        <Route
+                            path="/create/for-folder/:folder"
+                            element={<EditItem/>}
+                        />
+                        <Route
+                            path="/create/comment/:folder"
+                            element={<EditItem comment={true}/>}
+                        />
+                        <Route
+                            path="/create-subfolder/for-folder/:folder"
+                            element={<Edit1 defaultAgent={defaultAgent}/>}
+                        />
+                        <Route
+                            path="/create-superfolder/for-folder/:folder"
+                            element={<EditFolder super={true} defaultAgent={defaultAgent}/>}
+                        />
+                        <Route
+                            path="/edit/folder/:folder"
+                            element={<Edit2 defaultAgent={defaultAgent}/>}
+                        />
+                        <Route
+                            path="/edit/item/:item"
+                            element={<Edit3/>}
+                        />
+                        <Route
+                            path="/personhood"
+                            element={<Person/>}
+                        />
+                        <Route path="*" element={<ErrorHandler error={"No such page"}/>}/>
+                    </Routes>
                 </>
            }}
         </AuthContext.Consumer>

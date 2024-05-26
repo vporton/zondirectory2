@@ -161,7 +161,7 @@ shared actor class ZonBackend() = this {
       };
       let guid = GUID.nextGuid(guidGen);
       // TODO: race condition
-      await NacDBIndex.reorderAdd(Blob.toArray(guid), {
+      await NacDBIndex.reorderAdd(guid, {
         order = timeStream;
         key = timeScanSK;
         value = variantValue;

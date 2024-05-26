@@ -36,10 +36,9 @@ function ErrorHandler({ error }: ErrorHandlerProps) {
   return (
     <div role="alert">
       <h2>Error</h2>
-      <p style={{ color: 'red' }}>{error}</p>
+      <p style={{ color: 'red' }}>{error?.toString()}</p>
     </div>
   );
 }
 
 export { ErrorBoundary, ErrorHandler };
-

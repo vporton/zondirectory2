@@ -9,7 +9,7 @@
         "dist/frontend/"
       ],
       "type": "assets",
-      "dependencies": ["main"]
+      "dependencies": ["main", "personhood", "internet_identity"]
     },
     "main": {
       "main": "src/backend/main.mo",

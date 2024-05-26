@@ -54,7 +54,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                 break;
             }
     }
-    const { setError } = useContext(ErrorContext); // https://github.com/facebook/react/issues/29024
+    const { setError } = useContext(ErrorContext)!;
     return (
         <BusyContext.Consumer>
         {({setBusy}) =>
@@ -96,12 +96,15 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                             navigate("/item/"+ref);
                         }
                         catch (e) {
+                            if (/Canister trapped explicitly: spam/.test(e)) {
+                                e = "Stop spamming our server."
+                            }
                             setError(e);
                         }
                     }
-                    setBusy(true);
+                    // setBusy(true);
                     await submitItem(itemData());
-                    setBusy(false);
+                    // setBusy(false);
                 }
                 async function remove() {
                     if (!window.confirm("Really delete?")) {

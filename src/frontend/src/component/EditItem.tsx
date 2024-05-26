@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
@@ -15,6 +15,7 @@ import { addToMultipleFolders } from "../util/folder";
 import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 import { Actor } from "@dfinity/agent";
+import { ErrorContext } from "./ErrorContext";
 
 export default function EditItem(props: {itemId?: string, comment?: boolean}) {
     const routeParams = useParams();
@@ -44,6 +45,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                 break;
             }
     }
+    const { setError } = useContext(ErrorContext)!;
     return (
             <BusyContext.Consumer>
                 {({setBusy}) =>
@@ -87,23 +89,31 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                             };
                         }
                         async function submitItem(item: ItemDataWithoutOwner) {
-                            const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
-                            let part, n;
-                            if (routeParams.item !== undefined) {
-                                console.log("routeParams.item", routeParams.item    )
-                                const folder = parseItemRef(routeParams.item); // TODO: not here
-                                await backend.setItemData(folder.canister, BigInt(folder.id), item);
-                                part = folder.canister;
-                                n = BigInt(folder.id);
-                            } else {
-                                [part, n] = await backend.createItemData({data: item, communal: folderKind == FolderKind.communal});
+                            try {
+                                const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
+                                let part, n;
+                                if (routeParams.item !== undefined) {
+                                    console.log("routeParams.item", routeParams.item    )
+                                    const folder = parseItemRef(routeParams.item); // TODO: not here
+                                    await backend.setItemData(folder.canister, BigInt(folder.id), item);
+                                    part = folder.canister;
+                                    n = BigInt(folder.id);
+                                } else {
+                                    [part, n] = await backend.createItemData({data: item, communal: folderKind == FolderKind.communal});
+                                }
+                                await backend.setPostText(part, n, 't'+post);
+                                const ref = serializeItemRef({canister: part, id: Number(n)});
+                                // TODO: What to do with this on editing the folder?
+                                await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
+                                await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
+                                navigate("/item/"+ref);
                             }
-                            await backend.setPostText(part, n, 't'+post);
-                            const ref = serializeItemRef({canister: part, id: Number(n)});
-                            // TODO: What to do with this on editing the folder?
-                            await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
-                            await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
-                            navigate("/item/"+ref);
+                            catch (e) {
+                                if (/Canister trapped explicitly: spam/.test(e)) {
+                                    e = "Stop spamming our server."
+                                }
+                                setError(e);
+                            }
                         }
                         setBusy(true);
                         await submitItem(itemData());
