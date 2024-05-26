@@ -4,6 +4,7 @@ interface ErrorContextType {
   hasError: boolean;
   message?: string;
   setError: (message: string) => void;
+  resetError: () => void;
 }
 
 const ErrorContext = createContext<ErrorContextType | undefined>(undefined);
@@ -17,8 +18,13 @@ const ErrorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     setMessage(message);
   };
 
+  const resetError = () => {
+    setHasError(false);
+    setMessage(undefined);
+  };
+
   return (
-    <ErrorContext.Provider value={{ hasError, message, setError }}>
+    <ErrorContext.Provider value={{ hasError, message, setError, resetError }}>
       {children}
     </ErrorContext.Provider>
   );

@@ -49,7 +49,7 @@ export default function App() {
                 <h1>Zon Social Network</h1>
                 <AuthProvider options={{loginOptions: {
                     identityProvider,
-                    maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week // TODO
+                    maxTimeToLive: BigInt(3600) * BigInt(1_000_000_000),
                     windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
                     onSuccess: () => {
                         console.log('Login Successful!');

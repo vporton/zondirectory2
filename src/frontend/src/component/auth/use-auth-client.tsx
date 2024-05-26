@@ -26,8 +26,9 @@ type UseAuthClientOptions = {
 const defaultOptions: UseAuthClientOptions = {
   createOptions: {
     idleOptions: {
-      // Set to true if you do not want idle functionality
-      disableIdle: true, // TODO
+      // Prevent page reload on timeout, not to lose form data:
+			disableIdle: false,
+			disableDefaultIdleCallback: true,
     },
   },
   loginOptions: {
@@ -51,7 +52,7 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
 
   useEffect(() => {
     // Initialize AuthClient
-    AuthClient.create(props.options!.createOptions).then(async (client) => { // TODO: `!`?
+    AuthClient.create(props.options.createOptions ?? defaultOptions.createOptions).then(async (client) => {
       updateClient(client);
     });
   }, []);
