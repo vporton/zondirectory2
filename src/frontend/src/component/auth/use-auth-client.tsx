@@ -50,25 +50,6 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
   // const [principal, setPrincipal] = useState<Principal | undefined>(undefined);
   // const [options, setOptions] = useState<UseAuthClientOptions>(props.options ?? defaultOptions);
 
-  useEffect(() => {
-    // Initialize AuthClient
-    AuthClient.create(props.options.createOptions ?? defaultOptions.createOptions).then(async (client) => {
-      updateClient(client);
-    });
-  }, []);
-
-  async function updateClient(client) {
-    const isAuthenticated = await client.isAuthenticated();
-    const identity = client.getIdentity();
-    const principal = identity.getPrincipal();
-    const agent = new HttpAgent({identity});
-    if (getIsLocal()) {
-      agent.fetchRootKey();
-    }
-
-    setAuth({authClient: client, agent, isAuthenticated, identity, principal, options: props.options});
-  }
-
   const login = async () => {
     auth.authClient!.login({
       ...defaultOptions, ...auth.options.loginOptions,
@@ -83,12 +64,38 @@ export function AuthProvider(props: { children: any, options?: UseAuthClientOpti
     await updateClient(auth.authClient);
   }
 
+  async function updateClient(client) {
+    const isAuthenticated = await client.isAuthenticated();
+    const identity = client.getIdentity();
+    const principal = identity.getPrincipal();
+    const agent = new HttpAgent({identity});
+    if (getIsLocal()) {
+      agent.fetchRootKey();
+    }
+
+    setAuth({authClient: client, agent, isAuthenticated, identity, principal, options: props.options});
+  }
+
   const defaultAgent = useMemo<HttpAgent>(() => {
     const agent = new HttpAgent(); // TODO: options
     if (getIsLocal()) {
       agent.fetchRootKey();
     }
     return agent;
+  }, []);
+
+  useEffect(() => {
+    // Initialize AuthClient
+    const baseOptions = props.options.createOptions ?? defaultOptions.createOptions;
+    AuthClient.create({...baseOptions, idleOptions: {
+        // Prevent page reload on timeout, not to lose form data:
+        disableIdle: false,
+        disableDefaultIdleCallback: true,
+        // onIdle: () => logout(), // FIXME: It crashes: "Cannot read properties of undefined (reading 'isAuthenticated')"
+        // idleTimeout: 1000, // 1 sec
+      }}).then(async (client) => {
+      updateClient(client);
+    });
   }, []);
 
   return <AuthContext.Provider value={{...auth, login, logout, defaultAgent}}>{props.children}</AuthContext.Provider>;
