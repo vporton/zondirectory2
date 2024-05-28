@@ -200,10 +200,10 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
 
     /// reorder methods ///
 
-    public shared({caller}) func reorderCreateOrder(guid: GUID.GUID): async Reorder.Order {
+    public shared({caller}) func reorderCreateOrder(guid: [Nat8]): async Reorder.Order {
         checkCaller(caller);
 
-        await* Reorder.createOrder(guid, {
+        await* Reorder.createOrder(Blob.fromArray(guid), {
             index = this;
             dbIndex;
             orderer;
@@ -211,14 +211,14 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         });
     };
 
-    public shared({caller}) func reorderAdd(guid: GUID.GUID, options: {
+    public shared({caller}) func reorderAdd(guid: [Nat8], options: {
         order: Reorder.Order;
         key: Int;
         value: Text;
     }): async () {
         checkCaller(caller);
 
-        await* Reorder.add(guid, {
+        await* Reorder.add(Blob.fromArray(guid), {
             index = this;
             dbIndex;
             orderer;
@@ -229,7 +229,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         });
     };
 
-    public shared({caller}) func reorderMove(guid: GUID.GUID, options: {
+    public shared({caller}) func reorderMove(guid: [Nat8], options: {
         order: Reorder.Order;
         value: Text;
         relative: Bool;
@@ -237,7 +237,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     }): async () {
         checkCaller(caller);
 
-        await* Reorder.move(guid, {
+        await* Reorder.move(Blob.fromArray(guid), {
             index = this;
             dbIndex;
             orderer;
@@ -248,13 +248,13 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
        });
     };
 
-    public shared({caller}) func reorderDelete(guid: GUID.GUID, options: {
+    public shared({caller}) func reorderDelete(guid: [Nat8], options: {
         order: Reorder.Order;
         value: Text;
     }): async () {
         checkCaller(caller);
 
-        await* Reorder.delete(guid, {
+        await* Reorder.delete(Blob.fromArray(guid), {
             index = this;
             dbIndex;
             orderer;

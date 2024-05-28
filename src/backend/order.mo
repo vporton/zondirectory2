@@ -88,7 +88,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
       timeScanSK;
     };
     
-    let guid = GUID.nextGuid(guidGen);
+    let guid = Blob.toArray(GUID.nextGuid(guidGen));
 
     // TODO: race condition
     await NacDBIndex.reorderAdd(guid, {
@@ -161,7 +161,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let stream1 = switch (streams1t) {
       case (?stream) { stream };
       case null {
-        let v = await NacDBIndex.reorderCreateOrder(GUID.nextGuid(guidGen));
+        let v = await NacDBIndex.reorderCreateOrder(Blob.toArray(GUID.nextGuid(guidGen)));
         streamsVar1[links] := ?v;
         v;
       };
@@ -173,7 +173,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let stream2 = switch (streams2t) {
       case (?stream) { stream };
       case null {
-        let v = await NacDBIndex.reorderCreateOrder(GUID.nextGuid(guidGen));
+        let v = await NacDBIndex.reorderCreateOrder(Blob.toArray(GUID.nextGuid(guidGen)));
         streamsVar2[links] := ?v;
         v;
       };
@@ -244,7 +244,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
                     switch (reverseStream[index]) {
                       case (?reverseOrder) {
                         Debug.print("q=" # q # ", parent=" # debug_show(w1i) # "@" # w2 # ", kind=" # reverseKind);
-                        await NacDBIndex.reorderDelete(GUID.nextGuid(guidGen), { order = reverseOrder; value });
+                        await NacDBIndex.reorderDelete(Blob.toArray(GUID.nextGuid(guidGen)), { order = reverseOrder; value });
                       };
                       case null {};
                     };
@@ -382,7 +382,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
     let order = switch (streamsVar[links]) {
       case (?order) { order };
       case null {
-        await NacDBIndex.reorderCreateOrder(GUID.nextGuid(guidGen));
+        await NacDBIndex.reorderCreateOrder(Blob.toArray(GUID.nextGuid(guidGen)));
       };
     };
     if (streamsVar[links] == null) {
@@ -391,7 +391,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
       await parentCanister.putAttribute({ sk = "i/" # Nat.toText(parent); key = "sv"; value = data });
     };
 
-    await NacDBIndex.reorderMove(GUID.nextGuid(guidGen), {
+    await NacDBIndex.reorderMove(Blob.toArray(GUID.nextGuid(guidGen)), {
       order;
       value = Nat.toText(child) # "@" # Principal.toText(childPrincipal);
       relative = true;
@@ -411,7 +411,7 @@ shared({caller = initialOwner}) actor class Orders() = this {
   func removeFromAllTimeStream(itemId: (Principal, Nat)): async* () {
     let globalTimeStream = await NacDBIndex.getAllItemsStream();
     let value = Nat.toText(itemId.1) # "@" # Principal.toText(itemId.0);
-    await NacDBIndex.reorderDelete(GUID.nextGuid(guidGen), { order = globalTimeStream; value });
+    await NacDBIndex.reorderDelete(Blob.toArray(GUID.nextGuid(guidGen)), { order = globalTimeStream; value });
   };
 
   // TODO: Below functions?
