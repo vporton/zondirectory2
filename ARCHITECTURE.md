@@ -40,5 +40,9 @@ However, we should not remove old down votes.
 * votes/votes: item -> comments
 
 Allowed number of votes:
-- 10 per day
-- additional 10 votes (not per day) for each message
+
+- unlimited
+
+Allowed creation of child/parent relations
+
+- 3 for each message, but not more than 20 total (to avoid market of selling accounts with many points)
