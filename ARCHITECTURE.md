@@ -45,4 +45,4 @@ Allowed number of votes:
 
 Allowed creation of child/parent relations
 
-- 3 for each message, but not more than 20 total (to avoid market of selling accounts with many points)
+- 4 for each message, but not more than 20 total (to avoid market for accounts with many points)
