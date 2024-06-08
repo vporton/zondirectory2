@@ -184,6 +184,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             <meta name="canonical" content={`https://zoncircle.com/item/${idParam!}`}/>
             <title>{isFolder ? `${title} (folder) - Zon` : `${title} - Zon`}</title>
             <meta name="description" content={description}/>
+            (!superfolders || superfolders.length === 0 ? <meta name="robots" content="noindex"/>) {/* anti-search-spam measure */}
         </Helmet>
         {/* FIXME: `!` on the next line */}
         <h2><ItemType item={data!}/>{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
