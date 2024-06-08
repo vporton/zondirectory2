@@ -26,7 +26,7 @@ shared actor class ZonBackend() = this {
   /// Some Global Variables ///
   stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0)); // FIXME: Gather randomness.
 
-  stable let orderer = Reorder.createOrderer({queueLengths = 20}); // TODO: What's the number?
+  // stable let orderer = Reorder.createOrderer({queueLengths = 20}); // TODO: What's the number?
 
   // See ARCHITECTURE.md for database structure
 
