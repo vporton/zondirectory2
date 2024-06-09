@@ -15,7 +15,8 @@ import DBConfig "../libs/configs/db.config";
 import lib "lib";
 import AI "ai";
 import AITypes "HttpTypes";
-  shared({caller = initialOwner}) actor class Orders() = this {
+
+shared({caller = initialOwner}) actor class Orders() = this {
   stable var owners = [initialOwner];
 
   func checkCaller(caller: Principal) {
