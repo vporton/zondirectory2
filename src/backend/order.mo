@@ -368,6 +368,9 @@ shared({caller = initialOwner}) actor class Orders() = this {
       if (changeDown) {
         down2 += if (difference > 0) { -1 } else { 1 };
       };
+      if (up2 + down2 >= 20 and up2 * 4 <= up2 + down2) { // Remove severely voted down items.
+        // TODO
+      };
       // TODO: Take advantage of `oldTotalsPrincipal` as a hint:
       ignore await CanDBIndex.putAttributeNoDuplicates("user", { sk = totalVotesSK; key = "v"; value = #tuple([#int up2, #int down2]) }); // TODO: race condition
     };
