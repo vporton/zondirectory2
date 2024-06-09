@@ -21,11 +21,11 @@ import lib "lib";
 import DBConfig "../libs/configs/db.config";
 
 shared({caller = initialOwner}) actor class Orders() = this {
-  stable var owners = [initialOwner]; // FIXME: Initialize in Makefile.
+  stable var owners = [initialOwner];
 
   func checkCaller(caller: Principal) {
     if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
-      Debug.trap("order: not allowed");
+      Debug.trap("item: not allowed");
     }
   };
 
@@ -38,6 +38,19 @@ shared({caller = initialOwner}) actor class Orders() = this {
   public query func getOwners(): async [Principal] { owners };
 
   stable var initialized: Bool = false;
+
+  public shared({ caller }) func init(_owners: [Principal]): async () { // FIXME: Initialize in Makefile.
+    checkCaller(caller);
+    ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles); // TODO: another number of cycles?
+    if (initialized) {
+        Debug.trap("already initialized");
+    };
+
+    owners := _owners;
+    MyCycles.addPart<system>(DBConfig.dbOptions.partitionCycles);
+
+    initialized := true;
+  };
 
 
 }
