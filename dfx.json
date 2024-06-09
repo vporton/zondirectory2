@@ -16,6 +16,11 @@
       "type": "motoko",
       "dependencies": ["items", "CanDBIndex", "NacDBIndex"]
     },
+    "users": {
+      "main": "src/backend/users.mo",
+      "type": "motoko",
+      "dependencies": ["CanDBIndex", "NacDBIndex"]
+    },
     "items": {
       "main": "src/backend/items.mo",
       "type": "motoko",

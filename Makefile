@@ -36,6 +36,10 @@ init-NacDBIndex:
 init-items:
 	. ./.env && dfx canister call --network $(NETWORK) items init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; })"
 
+.PHONY: init-users
+init-users:
+	. ./.env && dfx canister call --network $(NETWORK) users init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; })"
+
 .PHONY: init-createItemData
 init-createItemData:
 	mainItem=`dfx canister call --network $(NETWORK) items createItemData \
