@@ -1,17 +1,11 @@
-import Nac "mo:nacdb/NacDB";
 import Principal "mo:base/Principal";
-import Blob "mo:base/Blob";
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Array "mo:base/Array";
-import Reorder "mo:nacdb-reorder/Reorder";
-import order "canister:order";
 import GUID "mo:nacdb/GUID";
-import Itertools "mo:itertools/Iter";
 
 import CanDBIndex "canister:CanDBIndex";
-import NacDBIndex "canister:NacDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
 import MyCycles "mo:nacdb/Cycles";
 import DBConfig "../libs/configs/db.config";
@@ -31,8 +25,6 @@ shared actor class ZonBackend() = this {
   // See ARCHITECTURE.md for database structure
 
   // TODO: Avoid duplicate user nick names.
-
-  stable var maxId: Nat = 0;
 
   stable var founder: ?Principal = null;
 
@@ -108,143 +100,6 @@ shared actor class ZonBackend() = this {
       let (part, n) = rootItem!;
       (Principal.fromActor(part), n);
     };
-  };
-
-  public query func checkSpamTransform(args: AITypes.TransformArgs): async AITypes.HttpResponsePayload {
-    AI.removeHTTPHeaders(args);
-  };
-
-  private func itemCheckSpam(item: lib.ItemDataWithoutOwner): async* () {
-    if (not (await* AI.checkSpam(item.title # "\n" # item.description, checkSpamTransform))) {
-      Debug.trap("spam");
-    };
-  };
-
-  public shared({caller}) func createItemData(item: lib.ItemTransferWithoutOwner)
-    : async (Principal, Nat)
-  {
-    await* itemCheckSpam(item.data);
-    let (canisterId, itemId) = if (item.communal) {
-      let variant: lib.ItemVariant = { creator = caller; item = item.data; };
-      let variantId = maxId;
-      maxId += 1;
-      let variantKey = "r/" # Nat.toText(variantId);
-      let variantCanisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
-        "main", { sk = variantKey; key = "i"; value = lib.serializeItemVariant(variant) }
-      );
-      let itemId = maxId;
-      maxId += 1;
-      let itemKey = "i/" # Nat.toText(itemId);
-      let timeStream = await NacDBIndex.reorderCreateOrder(GUID.nextGuid(guidGen));
-      let votesStream = await NacDBIndex.reorderCreateOrder(GUID.nextGuid(guidGen));
-      let item2 = #communal { timeStream; votesStream; isFolder = item.data.details == #folder };
-      let variantValue = Nat.toText(variantId) # "@" # Principal.toText(variantCanisterId);
-      await NacDBIndex.reorderAdd(GUID.nextGuid(guidGen), {
-        hardCap = ?100; key = -2; order = votesStream; value = variantValue; // TODO: Take position `key` configurable.
-      });
-
-      // Put variant in time stream // TODO: duplicate code
-      let scanResult = await timeStream.order.0.scanLimitOuter({
-        dir = #fwd;
-        outerKey = timeStream.order.1;
-        lowerBound = "";
-        upperBound = "x";
-        limit = 1;
-        ascending = ?true;
-      });
-      let timeScanSK = if (scanResult.results.size() == 0) { // empty list
-        0;
-      } else {
-        let t = scanResult.results[0].0;
-        let n = lib.decodeInt(Text.fromIter(Itertools.takeWhile(t.chars(), func (c: Char): Bool { c != '#' })));
-        n - 1;
-      };
-      let guid = GUID.nextGuid(guidGen);
-      // TODO: race condition
-      await NacDBIndex.reorderAdd(guid, {
-        order = timeStream;
-        key = timeScanSK;
-        value = variantValue;
-        hardCap = DBConfig.dbOptions.hardCap;
-      });
-
-      let itemCanisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
-        "main", { sk = itemKey; key = "i"; value = lib.serializeItem(item2) }
-      );
-      (itemCanisterId, itemId);
-    } else {
-      let item2: lib.Item = #owned { creator = caller; item = item.data; edited = false };
-      let itemId = maxId;
-      maxId += 1;
-      let key = "i/" # Nat.toText(itemId);
-      let canisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
-        "main", { sk = key; key = "i"; value = lib.serializeItem(item2) }
-      );
-      (canisterId, itemId);
-    };
-
-    await order.insertIntoAllTimeStream((canisterId, itemId));
-    (canisterId, itemId);
-  };
-
-  // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
-  public shared({caller}) func setItemData(canisterId: Principal, itemId: Nat, item: lib.ItemDataWithoutOwner) {
-    await* itemCheckSpam(item);
-    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # Nat.toText(itemId); // TODO: better encoding
-    switch (await db.getAttribute({sk = key}, "i")) {
-      case (?oldItemRepr) {
-        let oldItem = lib.deserializeItem(oldItemRepr);
-        let item2: lib.ItemData = { item = item; creator = caller; edited = true }; // TODO: edited only if actually changed
-        lib.onlyItemOwner(caller, oldItem); // also rejects changing communal items.
-        await db.putAttribute({sk = key; key = "i"; value = lib.serializeItem(#owned item2)});
-      };
-      case null { Debug.trap("no item") };
-    };
-  };
-
-  // TODO: If item set is successful and setPostText is unsuccessful, this is counter-intuitive.
-  public shared({caller}) func setPostText(canisterId: Principal, _itemId: Nat, text: Text) {
-    if (not (await* AI.checkSpam(text, checkSpamTransform))) {
-      Debug.trap("spam");
-    };
-
-    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # Nat.toText(_itemId); // TODO: better encoding
-    switch (await db.getAttribute({sk = key}, "i")) {
-      case (?oldItemRepr) {
-        let oldItem = lib.deserializeItem(oldItemRepr);
-        lib.onlyItemOwner(caller, oldItem);
-        switch (oldItem) {
-          case (#owned data) {
-            switch (data.item.details) {
-              case (#post) {};
-              case _ { Debug.trap("not a post"); };
-            };
-          };
-          case (#communal _) { Debug.trap("programming error") };
-        };
-        await db.putAttribute({ sk = key; key = "t"; value = #text(text) });
-      };
-      case _ { Debug.trap("no item") };
-    };
-  };
-
-  // TODO: Also remove voting data.
-  public shared({caller}) func removeItem(canisterId: Principal, itemId: Nat) {
-    // We first remove links, then the item itself, in order to avoid race conditions when displaying.
-    await order.removeItemLinks((canisterId, itemId));
-    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # Nat.toText(itemId);
-    let ?oldItemRepr = await db.getAttribute({sk = key}, "i") else {
-      Debug.trap("no item");
-    };
-    let oldItem = lib.deserializeItem(oldItemRepr);
-    // if (oldItem.item.communal) { // FIXME
-    //   Debug.trap("it's communal");
-    // };
-    lib.onlyItemOwner(caller, oldItem);
-    await db.delete({sk = key});
   };
 
   // TODO: Set maximum lengths on user nick, chirp length, etc.
