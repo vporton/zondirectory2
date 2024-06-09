@@ -323,7 +323,6 @@ shared({caller = initialOwner}) actor class Items() = this {
   };
 
   func removeItemLinks(itemId: (Principal, Nat)): async* () {
-    // FIXME: Also delete the other end.
     await* _removeStream("st", itemId);
     await* _removeStream("sv", itemId);
     await* _removeStream("rst", itemId);
