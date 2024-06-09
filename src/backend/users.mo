@@ -5,7 +5,6 @@ import CanDBPartition "../storage/CanDBPartition";
 import MyCycles "mo:nacdb/Cycles";
 import DBConfig "../libs/configs/db.config";
 import lib "lib";
-// import ICRC1Types "mo:icrc1/ICRC1/Types";
 
 actor Users {
   /// Initialization ///
