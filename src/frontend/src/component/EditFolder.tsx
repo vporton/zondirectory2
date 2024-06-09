@@ -72,7 +72,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                     }
                     async function submitItem(item: ItemDataWithoutOwner) {
                         try {
-                            const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
+                            const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_ITEMS!, agent});
                             let part, n;
                             if (props.folderId !== undefined) {
                                 const folder = parseItemRef(props.folderId); // TODO: not here
@@ -110,7 +110,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                     if (!window.confirm("Really delete?")) {
                         return;
                     }
-                    const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
+                    const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_ITEMS!, agent});
                     const folder = parseItemRef(props.folderId!); // TODO: not here
                     await backend.removeItem(folder.canister, BigInt(folder.id));
                     navigate("/");

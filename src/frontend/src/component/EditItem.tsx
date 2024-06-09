@@ -90,7 +90,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                         }
                         async function submitItem(item: ItemDataWithoutOwner) {
                             try {
-                                const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
+                                const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_ITEMS!, agent});
                                 let part, n;
                                 if (routeParams.item !== undefined) {
                                     const folder = parseItemRef(routeParams.item); // TODO: not here
@@ -122,7 +122,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                         if (!window.confirm("Really delete?")) {
                             return;
                         }
-                        const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
+                        const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_ITEMS!, agent});
                         const folder = parseItemRef(props.itemId!); // TODO: not here
                         await backend.removeItem(folder.canister, BigInt(folder.id));
                         navigate("/");

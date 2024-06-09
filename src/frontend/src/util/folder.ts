@@ -1,4 +1,4 @@
-import { idlFactory as orderIdlFactory } from "../../../declarations/order";
+import { idlFactory as itemsIdlFactory } from "../../../declarations/items";
 import { _SERVICE as Orders } from "../../../declarations/order/order.did";
 import { Actor, Agent } from "@dfinity/agent";
 import { getIsLocal } from "./client";
@@ -7,9 +7,9 @@ import { Principal } from "@dfinity/principal";
 import { ItemRef, parseItemRef } from "../data/Data";
 
 export async function addToFolder(agent: Agent, catId: ItemRef, itemId: ItemRef, comment: boolean, side: 'beginning' | 'end') {
-    const orderClient: Orders = Actor.createActor(orderIdlFactory, {canisterId: process.env.CANISTER_ID_ORDER!, agent});
+    const itemsClient: Orders = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_ITEMS!, agent});
     const side2 = side === 'beginning' ? {beginning: null} : {end: null};
-    await orderClient.addItemToFolder(
+    await itemsClient.addItemToFolder(
         [catId.canister, BigInt(catId.id)],
         [itemId.canister, BigInt(itemId.id)],
         comment,

@@ -46,9 +46,9 @@ export default function UpDown(props: {
             }
         }      
 
-        const order = Actor.createActor(orderIdlFactory, {canisterId: process.env.CANISTER_ID_ORDER!, agent});
+        const items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_ITEMS!, agent});
         try {
-            await order.vote(
+            await items.vote(
                 props.parent.id.canister,
                 BigInt(props.parent.id.id),
                 props.item.id.canister,
