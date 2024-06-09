@@ -235,9 +235,8 @@ shared({caller = initialOwner}) actor class Items() = this {
     });
   };
 
-  func removeItemFromFolder(parent: (Principal, Nat), child: (Principal, Nat)): async* () {
-    // TODO
-  };
+  // func removeItemFromFolder(parent: (Principal, Nat), child: (Principal, Nat)): async* () {
+  // };
 
   // Public API //
 
@@ -501,9 +500,10 @@ shared({caller = initialOwner}) actor class Items() = this {
       if (changeDown) {
         down2 += if (difference > 0) { -1 } else { 1 };
       };
-      if (up2 + down2 >= 20 and up2 * 4 <= up2 + down2) { // Remove severely voted down items.
-        await* removeItemFromFolder((parentPrincipal, parent), (childPrincipal, child));
-      };
+      // Just don't show instead of removal.
+      // if (up2 + down2 >= 20 and up2 * 4 <= up2 + down2) { // Remove severely voted down items.
+      //   await* removeItemFromFolder((parentPrincipal, parent), (childPrincipal, child));
+      // };
       // TODO: Take advantage of `oldTotalsPrincipal` as a hint:
       ignore await CanDBIndex.putAttributeNoDuplicates("user", { sk = totalVotesSK; key = "v"; value = #tuple([#int up2, #int down2]) }); // TODO: race condition
     };
