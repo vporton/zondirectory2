@@ -231,11 +231,11 @@ shared actor class ZonBackend() = this {
   };
 
   // TODO: Also remove voting data.
-  public shared({caller}) func removeItem(canisterId: Principal, _itemId: Nat) {
+  public shared({caller}) func removeItem(canisterId: Principal, itemId: Nat) {
     // We first remove links, then the item itself, in order to avoid race conditions when displaying.
-    await order.removeItemLinks((canisterId, _itemId));
+    await order.removeItemLinks((canisterId, itemId));
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # Nat.toText(_itemId);
+    let key = "i/" # Nat.toText(itemId);
     let ?oldItemRepr = await db.getAttribute({sk = key}, "i") else {
       Debug.trap("no item");
     };
