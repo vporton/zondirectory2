@@ -4,8 +4,8 @@ import { Button } from "react-bootstrap";
 import { useNavigate, useParams } from "react-router-dom";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
-import { idlFactory as mainIdlFactory } from "../../../declarations/main";
-import { ItemDataWithoutOwner, ItemTransferWithoutOwner, _SERVICE as ZonBackend } from "../../../declarations/main/main.did";
+import { idlFactory as itemsIdlFactory } from "../../../declarations/items";
+import { ItemDataWithoutOwner, ItemTransferWithoutOwner, _SERVICE as Items } from "../../../declarations/items/items.did";
 import { idlFactory as canDBPartitionIdlFactory } from "../../../declarations/CanDBPartition";
 import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import EditFoldersList from "./EditFoldersList";
@@ -72,7 +72,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                     }
                     async function submitItem(item: ItemDataWithoutOwner) {
                         try {
-                            const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
+                            const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
                             let part, n;
                             if (props.folderId !== undefined) {
                                 const folder = parseItemRef(props.folderId); // TODO: not here
@@ -110,7 +110,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                     if (!window.confirm("Really delete?")) {
                         return;
                     }
-                    const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
+                    const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
                     const folder = parseItemRef(props.folderId!); // TODO: not here
                     await backend.removeItem(folder.canister, BigInt(folder.id));
                     navigate("/");

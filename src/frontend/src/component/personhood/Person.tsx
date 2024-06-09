@@ -11,7 +11,6 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import { ethers } from 'ethers'
 import { Helmet } from 'react-helmet';
 // import 'bootstrap/dist/css/bootstrap.min.css';
-import { idlFactory as mainIdlFactory } from '../../../../declarations/main';
 import { idlFactory as canDBIndexIdl } from '../../../../declarations/CanDBIndex';
 import { idlFactory as personhoodIdl } from '../../../../declarations/personhood';
 import { _SERVICE as Personhood } from '../../../../declarations/personhood/personhood.did';

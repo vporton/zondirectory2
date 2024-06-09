@@ -2,7 +2,7 @@ import React, { useContext, useRef, useState } from "react";
 import { ItemData, ItemTransfer } from "../../../../declarations/CanDBPartition/CanDBPartition.did";
 import { AuthContext } from "../auth/use-auth-client";
 import { ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../../data/Data";
-import { idlFactory as orderIdlFactory } from "../../../../declarations/main";
+import { idlFactory as itemsIdlFactory } from "../../../../declarations/items";
 import { Actor, Agent } from "@dfinity/agent";
 import Button from "react-bootstrap/esm/Button";
 import Modal from 'react-bootstrap/Modal';

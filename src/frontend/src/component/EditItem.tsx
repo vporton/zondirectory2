@@ -5,8 +5,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { Helmet } from 'react-helmet';
 import 'react-tabs/style/react-tabs.css';
-import { idlFactory as mainIdlFactory } from "../../../declarations/main";
-import { ItemDataWithoutOwner, ZonBackend } from "../../../declarations/main/main.did";
+import { idlFactory as itemsIdlFactory } from "../../../declarations/items";
+import { ItemDataWithoutOwner, Items } from "../../../declarations/items/items.did";
 import { idlFactory as canDBPartitionIdlFactory } from "../../../declarations/CanDBPartition";
 import { CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import EditFoldersList from "./EditFoldersList";
@@ -90,10 +90,9 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                         }
                         async function submitItem(item: ItemDataWithoutOwner) {
                             try {
-                                const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
+                                const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
                                 let part, n;
                                 if (routeParams.item !== undefined) {
-                                    console.log("routeParams.item", routeParams.item    )
                                     const folder = parseItemRef(routeParams.item); // TODO: not here
                                     await backend.setItemData(folder.canister, BigInt(folder.id), item);
                                     part = folder.canister;
@@ -123,7 +122,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                         if (!window.confirm("Really delete?")) {
                             return;
                         }
-                        const backend: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
+                        const backend: Items = Actor.createActor(itemsIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent});
                         const folder = parseItemRef(props.itemId!); // TODO: not here
                         await backend.removeItem(folder.canister, BigInt(folder.id));
                         navigate("/");
