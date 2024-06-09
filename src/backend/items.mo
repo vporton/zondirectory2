@@ -16,7 +16,7 @@ import lib "lib";
 import AI "ai";
 import AITypes "HttpTypes";
 
-shared({caller = initialOwner}) actor class Orders() = this {
+shared({caller = initialOwner}) actor class Items() = this {
   stable var owners = [initialOwner];
 
   func checkCaller(caller: Principal) {
