@@ -243,7 +243,6 @@ shared({caller = initialOwner}) actor class Orders() = this {
                   case (?reverseStream) {
                     switch (reverseStream[index]) {
                       case (?reverseOrder) {
-                        Debug.print("q=" # q # ", parent=" # debug_show(w1i) # "@" # w2 # ", kind=" # reverseKind);
                         await NacDBIndex.reorderDelete(Blob.toArray(GUID.nextGuid(guidGen)), { order = reverseOrder; value });
                       };
                       case null {};
