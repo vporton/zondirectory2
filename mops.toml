@@ -21,7 +21,7 @@ CanDBMulti = "https://github.com/vporton/CanDBMulti#v0.10.0@86d00711216349ba4879
 xtended-numbers = "0.2.1"
 "json.mo" = "0.1.2"
 nacdb-reorder = "3.0.0"
-passport-client = "0.4.6"
+passport-client = "0.4.7"
 cycles-simple = "0.11.0"
 stablehashmap = "1.0.0"
 
