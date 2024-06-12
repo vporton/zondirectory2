@@ -16,6 +16,11 @@
       "type": "motoko",
       "dependencies": ["items", "CanDBIndex", "NacDBIndex"]
     },
+    "battery": {
+      "main": "src/backend/battery.mo",
+      "type": "motoko",
+      "dependencies": []
+    },
     "users": {
       "main": "src/backend/users.mo",
       "type": "motoko",
@@ -43,12 +48,12 @@
     "CanDBIndex": {
       "main": "src/storage/CanDBIndex.mo",
       "type": "motoko",
-      "dependencies": []
+      "dependencies": ["battery"]
     },
     "NacDBIndex": {
       "main": "src/storage/NacDBIndex.mo",
       "type": "motoko",
-      "dependencies": []
+      "dependencies": ["battery"]
     },
     "CanDBPartition": {
       "main": "src/storage/CanDBPartition.mo",

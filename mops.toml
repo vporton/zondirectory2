@@ -22,6 +22,8 @@ xtended-numbers = "0.2.1"
 "json.mo" = "0.1.2"
 nacdb-reorder = "3.0.0"
 passport-client = "0.4.6"
+cycles-simple = "0.11.0"
+stablehashmap = "1.0.0"
 
 [dev-dependencies]
 matchers = "https://github.com/kritzcreek/motoko-matchers#v1.3.0"

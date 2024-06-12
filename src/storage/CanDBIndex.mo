@@ -13,6 +13,7 @@ import Time "mo:base/Time";
 import CanDB "mo:candb/CanDB";
 import Multi "mo:CanDBMulti/Multi";
 import Entity "mo:candb/Entity";
+import Battery "canister:battery";
 import lib "../backend/lib";
 import PassportConfig "../libs/configs/passport.config";
 
@@ -123,6 +124,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
       owners = ?controllers;
     });
     let newStorageCanisterPrincipal = Principal.fromActor(newStorageCanister);
+    Battery.addCanDBPartition(newStorageCanisterPrincipal);
     await CA.updateCanisterSettings({
       canisterId = newStorageCanisterPrincipal;
       settings = {

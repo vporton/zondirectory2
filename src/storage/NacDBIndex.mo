@@ -11,6 +11,7 @@ import Result "mo:base/Result";
 import Buffer "mo:stable-buffer/StableBuffer";
 import Cycles "mo:base/ExperimentalCycles";
 import Partition "./NacDBPartition";
+import Battery "canister:battery";
 import DBConfig "../libs/configs/db.config";
 
 shared({caller = initialOwner}) actor class NacDBIndex() = this {
@@ -48,14 +49,14 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     stable var initialized = false;
 
     public shared({caller}) func init(_owners: [Principal]) : async () {
-        // // checkCaller(caller); // FIXME
+        checkCaller(caller);
         if (initialized) {
             Debug.trap("already initialized");
         };
 
         owners := _owners;
-        Cycles.add<system>(500_000_000_000);
-        StableBuffer.add(dbIndex.canisters, await Partition.Partition(ownersOrSelf()));
+        let part = await* _createPartition();
+        StableBuffer.add(dbIndex.canisters, part);
 
         allItemsStream := ?(await* Reorder.createOrder(GUID.nextGuid(guidGen), {
             index = this;
@@ -65,6 +66,13 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         }));
 
         initialized := true;
+    };
+
+    private func _createPartition(): async* Partition.Partition {
+        Cycles.add<system>(500_000_000_000);
+        let part = await Partition.Partition(ownersOrSelf());
+        Battery.addNacDBPartition(Principal.fromActor(part));
+        part;
     };
 
     // TODO: Move this function below.
@@ -84,9 +92,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
 
     public shared({caller}) func createPartition(): async Principal {
         checkCaller(caller);
-
-        Cycles.add<system>(500_000_000_000);
-        Principal.fromActor(await Partition.Partition(ownersOrSelf()));
+        Principal.fromActor(await* _createPartition());
     };
 
     public shared({caller}) func createPartitionImpl(): async Principal {

@@ -15,7 +15,7 @@ deploy:
 	dfx ledger fabricate-cycles --amount 1000000000 --canister main
 
 .PHONY: init
-init: fabricate-cycles init-main init-CanDBIndex init-NacDBIndex init-items init-createItemData
+init: fabricate-cycles init-main init-battery init-CanDBIndex init-NacDBIndex init-items init-createItemData
 
 .PHONY: init-main
 init-main:
@@ -26,11 +26,11 @@ init-main:
 
 .PHONY: init-CanDBIndex
 init-CanDBIndex:
-	. ./.env && dfx canister call --network $(NETWORK) CanDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ITEMS\"; principal \"$$CANISTER_ID_PERSONHOOD\" })"
+	. ./.env && dfx canister call --network $(NETWORK) CanDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_BATTERY"; principal \"$$CANISTER_ID_ITEMS\"; principal \"$$CANISTER_ID_PERSONHOOD\" })"
 
 .PHONY: init-NacDBIndex
 init-NacDBIndex:
-	. ./.env && dfx canister call --network $(NETWORK) NacDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ITEMS\" })"
+	. ./.env && dfx canister call --network $(NETWORK) NacDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_BATTERY"; principal \"$$CANISTER_ID_ITEMS\" })"
 
 .PHONY: init-items
 init-items:
@@ -38,6 +38,10 @@ init-items:
 
 .PHONY: init-users
 init-users:
+	. ./.env && dfx canister call --network $(NETWORK) users init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; })"
+
+.PHONY: init-battery
+init-battery:
 	. ./.env && dfx canister call --network $(NETWORK) users init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; })"
 
 .PHONY: init-createItemData
