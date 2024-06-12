@@ -14,7 +14,7 @@
     "main": {
       "main": "src/backend/main.mo",
       "type": "motoko",
-      "dependencies": ["items", "CanDBIndex", "NacDBIndex"]
+      "dependencies": ["items", "users", "CanDBIndex", "NacDBIndex"]
     },
     "battery": {
       "main": "src/backend/battery.mo",
