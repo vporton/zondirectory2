@@ -4,12 +4,12 @@ import GUID "mo:nacdb/GUID";
 import StableBuffer "mo:stable-buffer/StableBuffer";
 import Principal "mo:base/Principal";
 import Debug "mo:base/Debug";
-import MyCycles "mo:nacdb/Cycles";
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import Result "mo:base/Result";
 import Buffer "mo:stable-buffer/StableBuffer";
+import Cycles "mo:base/ExperimentalCycles";
 import Partition "./NacDBPartition";
 import DBConfig "../libs/configs/db.config";
 
@@ -49,13 +49,12 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
 
     public shared({caller}) func init(_owners: [Principal]) : async () {
         // // checkCaller(caller); // FIXME
-        ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
         if (initialized) {
             Debug.trap("already initialized");
         };
 
         owners := _owners;
-        MyCycles.addPart<system>(DBConfig.dbOptions.partitionCycles);
+        Cycles.add<system>(500_000_000_000);
         StableBuffer.add(dbIndex.canisters, await Partition.Partition(ownersOrSelf()));
 
         allItemsStream := ?(await* Reorder.createOrder(GUID.nextGuid(guidGen), {
@@ -77,7 +76,6 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     };
 
     public query func getCanisters(): async [Principal] {
-        // ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
         let iter = Iter.map(Nac.getCanisters(dbIndex).vals(), func(x: Nac.PartitionCanister): Principal {
             Principal.fromActor(x);
         });
@@ -87,15 +85,13 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     public shared({caller}) func createPartition(): async Principal {
         checkCaller(caller);
 
-        ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
-        MyCycles.addPart<system>(DBConfig.dbOptions.partitionCycles);
+        Cycles.add<system>(500_000_000_000);
         Principal.fromActor(await Partition.Partition(ownersOrSelf()));
     };
 
     public shared({caller}) func createPartitionImpl(): async Principal {
         checkCaller(caller);
 
-        ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
         await* Nac.createPartitionImpl(this, dbIndex);
     };
 
@@ -104,7 +100,6 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     {
         checkCaller(caller);
 
-        ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
         let r = await* Nac.createSubDB(Blob.fromArray(guid), {
             index = this;
             dbIndex;
@@ -154,7 +149,6 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     public shared({caller}) func deleteSubDB(guid: [Nat8], {outerCanister: Principal; outerKey: Nac.OuterSubDBKey}) : async () {
         checkCaller(caller);
 
-        ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
         let outer: Nac.OuterCanister = actor (Principal.toText(outerCanister));
         await* Nac.deleteSubDB(Blob.fromArray(guid), {dbOptions = DBConfig.dbOptions; dbIndex; outerCanister = outer; outerKey});
     };
@@ -163,7 +157,6 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         checkCaller(caller);
 
         let outer: Nac.OuterCanister = actor (Principal.toText(outerCanister));
-        ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
         await* Nac.delete(Blob.fromArray(guid), {dbIndex; outerCanister = outer; outerKey; sk});
     };
 
@@ -176,7 +169,6 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
     }) : async Result.Result<{inner: {canister: Principal; key: Nac.InnerSubDBKey}; outer: {canister: Principal; key: Nac.OuterSubDBKey}}, Text> {
         checkCaller(caller);
 
-        ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
         let result = await* Nac.insert(Blob.fromArray(guid), {
             indexCanister = Principal.fromActor(this);
             outerCanister = outerCanister;

@@ -10,7 +10,6 @@ import Itertools "mo:itertools/Iter";
 import CanDBIndex "canister:CanDBIndex";
 import NacDBIndex "canister:NacDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
-import MyCycles "mo:nacdb/Cycles";
 import DBConfig "../libs/configs/db.config";
 import lib "lib";
 import AI "ai";
@@ -37,13 +36,11 @@ shared({caller = initialOwner}) actor class Items() = this {
 
   public shared({ caller }) func init(_owners: [Principal]): async () { // FIXME: Initialize in Makefile.
     checkCaller(caller);
-    ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles); // TODO: another number of cycles?
     if (initialized) {
         Debug.trap("already initialized");
     };
 
     owners := _owners;
-    MyCycles.addPart<system>(DBConfig.dbOptions.partitionCycles);
 
     initialized := true;
   };

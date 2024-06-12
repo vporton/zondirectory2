@@ -10,7 +10,6 @@ import Token "mo:icrc1/ICRC1/Canisters/Token";
 import BTree "mo:stableheapbtreemap/BTree";
 import ICRC1Types "mo:icrc1/ICRC1/Types";
 import CanDBPartition "../storage/CanDBPartition";
-import MyCycles "mo:nacdb/Cycles";
 import lib "lib";
 import PST "canister:pst";
 import Fractions "../libs/helpers/fractions.helper";
@@ -38,13 +37,11 @@ shared({caller = initialOwner}) actor class Payments() = this {
 
   public shared({ caller }) func init(_owners: [Principal]): async () {
     checkCaller(caller);
-    ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles); // TODO: another number of cycles?
     if (initialized) {
         Debug.trap("already initialized");
     };
 
     owners := _owners;
-    MyCycles.addPart<system>(DBConfig.dbOptions.partitionCycles);
     initialized := true;
   };
 

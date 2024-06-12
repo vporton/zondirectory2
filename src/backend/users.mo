@@ -2,7 +2,6 @@ import Principal "mo:base/Principal";
 import Debug "mo:base/Debug";
 import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
-import MyCycles "mo:nacdb/Cycles";
 import DBConfig "../libs/configs/db.config";
 import lib "lib";
 
@@ -12,8 +11,6 @@ actor Users {
   stable var initialized: Bool = false;
 
   public shared({ caller }) func init(): async () {
-    ignore MyCycles.topUpCycles<system>(DBConfig.dbOptions.partitionCycles);
-
     if (initialized) {
       Debug.trap("already initialized");
     };
