@@ -29,6 +29,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
     useEffect(() => {
         if (props.folderId !== undefined) {
             const folderId = parseItemRef(props.folderId);
@@ -61,6 +62,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
             <AuthContext.Consumer>
             {({agent, isAuthenticated}) => {
                 async function submit() {
+                    setIsSubmitting(true);
                     function itemData(): ItemDataWithoutOwner {
                         return {
                             locale,
@@ -148,7 +150,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                         noComments={props.super === true}
                     />
                     <p>
-                        <Button onClick={submit} disabled={!isAuthenticated}>Save</Button>{" "}
+                        <Button onClick={submit} disabled={!isAuthenticated || isSubmitting}>Save</Button>{" "}
                         {props.folderId !== undefined &&
                             <Button onClick={remove} disabled={!isAuthenticated}>Delete</Button>
                         }
