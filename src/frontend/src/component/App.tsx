@@ -29,6 +29,7 @@ import Person from "./personhood/Person";
 import { AllItems } from "./AllItems";
 import { ErrorBoundary, ErrorHandler } from "./ErrorBoundary";
 import { ErrorProvider } from "./ErrorContext";
+import Prefs from "./Prefs";
 
 export const BusyContext = createContext<any>(undefined); // TODO: type
  
@@ -207,6 +208,10 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                         <Route
                             path="/personhood"
                             element={<Person/>}
+                        />
+                        <Route
+                            path="/prefs"
+                            element={<Prefs/>}
                         />
                         <Route path="*" element={<ErrorHandler error={"No such page"}/>}/>
                     </Routes>
