@@ -45,7 +45,9 @@ export default function App() {
             </Helmet>
             <Container>
                 <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
-                    It is a preliminary alpha-test version. All data is likely to be deleted before the release.
+                    It is a preliminary beta version. Some features are missing, notably
+                    images/media and monetization.
+                    Neither security of your data, nor any quality of service is warranted.
                 </p>
                 <h1>Zon Social Network</h1>
                 <AuthProvider options={{loginOptions: {
@@ -142,7 +144,7 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                                 <Nav.Link onClick={() => navigate("/latest")}>Latest posts</Nav.Link>{" "}
                             </Nav>
                             <Nav>
-                                <NavDropdown title="User" id="user-menu">
+                                <NavDropdown title="User">
                                     <NavDropdown.Item onClick={() => navigate("/personhood")}>
                                         Verify Your Account
                                     </NavDropdown.Item>
@@ -153,6 +155,24 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                             </Nav>
                             <Nav>
                                 <Nav.Link href="https://docs.zoncircle.com">Our site</Nav.Link>
+                            </Nav>
+                            <Nav>
+                                <Nav.Link href="https://docs.zoncircle.com/invest/">Invest</Nav.Link>
+                            </Nav>
+                            <Nav>
+                                <NavDropdown title="About">
+                                    <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/">Blog</NavDropdown.Item>
+                                    <NavDropdown.Item href="https://docs.zoncircle.com/about-us/">About Us</NavDropdown.Item>
+                                    <NavDropdown.Item href="https://docs.zoncircle.com/our-partners/">Our Partners</NavDropdown.Item>
+                                    <NavDropdown.Item href="https://docs.zoncircle.com/#team">The Team</NavDropdown.Item>
+                                    <NavDropdown.Item href="https://docs.zoncircle.com/carbon-pledge/">Carbon Pledge</NavDropdown.Item>
+                                </NavDropdown>
+                            </Nav>
+                            <Nav>
+                                <NavDropdown title="Blog">
+                                    <NavDropdown.Item href="https://docs.zoncircle.com/author/user/">CEO's posts</NavDropdown.Item>
+                                    <NavDropdown.Item href="https://docs.zoncircle.com/social-media/">Social Media</NavDropdown.Item>
+                                </NavDropdown>
                             </Nav>
                         </Navbar>
                     </nav>
