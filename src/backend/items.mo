@@ -193,6 +193,7 @@ shared({caller = initialOwner}) actor class Items() = this {
   };
 
   public shared({caller}) func removeItem(canisterId: Principal, itemId: Nat) {
+    checkCaller(caller);
     await* _removeItem(caller, canisterId, itemId);
   };
 
@@ -608,10 +609,10 @@ shared({caller = initialOwner}) actor class Items() = this {
         let w1o = words.next();
         let w2o = words.next();
         let (?w1, ?w2) = (w1o, w2o) else {
-          Debug.trap("order: programming error");
+          Debug.trap("items: programming error");
         };
         let ?w1i = Nat.fromText(w1) else {
-          Debug.trap("order: programming error");
+          Debug.trap("items: programming error");
         };
         await* _removeItem(caller, Principal.fromText(w2), w1i);
       };
