@@ -193,7 +193,6 @@ shared({caller = initialOwner}) actor class Items() = this {
   };
 
   public shared({caller}) func removeItem(canisterId: Principal, itemId: Nat) {
-    checkCaller(caller);
     await* _removeItem(caller, canisterId, itemId);
   };
 
@@ -561,8 +560,6 @@ shared({caller = initialOwner}) actor class Items() = this {
   };
 
   func getUserTimeStream(user: Principal, hint : ?Principal): async* Reorder.Order {
-    checkCaller(user);
-
     let sk = "u/" # Principal.toText(user);
     switch (await CanDBIndex.getAttributeByHint("user", hint, {sk; subkey = "t"})) {
       case (?(_, ?(#tuple tup))) {
