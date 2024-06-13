@@ -1,7 +1,7 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Component, ErrorInfo, ReactNode, createContext, useEffect, useMemo, useState } from "react";
-import { Button, Container, Nav, Navbar } from 'react-bootstrap';
+import { Button, Container, Nav, NavDropdown, Navbar } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
     BrowserRouter as Router,
@@ -141,7 +141,14 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
                                 <Nav.Link onClick={() => navigate("/latest")}>Latest posts</Nav.Link>{" "}
                             </Nav>
                             <Nav>
-                                <Nav.Link onClick={() => navigate("/personhood")}>Verify Your Account</Nav.Link>
+                                <NavDropdown title="User" id="user-menu">
+                                    <NavDropdown.Item onClick={() => navigate("/personhood")}>
+                                        Verify Your Account
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item onClick={() => navigate("/prefs")}>
+                                        Settings
+                                    </NavDropdown.Item>
+                                </NavDropdown>
                             </Nav>
                             <Nav>
                                 <Nav.Link href="https://docs.zoncircle.com">Our site</Nav.Link>

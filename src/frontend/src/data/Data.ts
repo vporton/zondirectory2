@@ -174,7 +174,7 @@ export async function loadTotalVotes(agent: Agent, parent: ItemRef, child: ItemR
     const canDBIndex: CanDBIndex = Actor.createActor(canDBIndexIdl, {canisterId: process.env.CANISTER_ID_CANDBINDEX!, agent})
     let results = await canDBIndex.getFirstAttribute(
         pk,
-        {sk: `w/${parent.id}/${child.id}`, key: "v"},
+        {sk: `w/${parent.id}/${child.id}`, subkey: "v"},
     );
     if (results.length === 0) {
         return {up: 0, down: 0};
@@ -188,7 +188,7 @@ export async function loadUserVote(agent: Agent, principal: Principal, parent: I
     const canDBIndex: CanDBIndex = Actor.createActor(canDBIndexIdl, {canisterId: process.env.CANISTER_ID_CANDBINDEX!, agent})
     let results = await canDBIndex.getFirstAttribute(
         pk,
-        {sk: `v/${principal.toString()}/${parent.id}/${child.id}`, key: "v"},
+        {sk: `v/${principal.toString()}/${parent.id}/${child.id}`, subkey: "v"},
     );
     return results.length === 0 ? 0 : (results[0][1][0] as any).int;
 }

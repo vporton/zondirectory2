@@ -15,7 +15,7 @@ actor Personhood {
     func controlEthereumAddress(caller: Principal, address: Text): async* () {
         let callerText = Principal.toText(caller);
         // TODO: race:
-        let pa = await CanDBIndex.getFirstAttribute("user", { sk = address; key = "p" });
+        let pa = await CanDBIndex.getFirstAttribute("user", { sk = address; subkey = "p" });
         switch (pa) {
             case (?(p, ?#text a)) {
                 if (a != callerText) {
@@ -26,7 +26,8 @@ actor Personhood {
                 // TODO: Optimize performance:
                 ignore await CanDBIndex.putAttributeNoDuplicates(
                     "user",
-                    { sk = address; key = "p"; value = #text callerText },
+                    null, // TODO
+                    { sk = address; subkey = "p"; value = #text callerText },
                 );
             };
         };
