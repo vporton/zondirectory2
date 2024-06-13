@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode, useContext } from "react";
 import { ErrorContext } from "./ErrorContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "react-bootstrap";
 
 interface ErrorBoundaryProps {
@@ -35,12 +35,14 @@ interface ErrorHandlerProps {
 }
 
 function ErrorHandler({ error }: ErrorHandlerProps) {
+  const navigate = useNavigate();
   const { resetError } = useContext(ErrorContext)!;
+  // TODO: Go back, not to the homepage.
   return (
     <div role="alert">
       <h2>Error</h2>
       <p style={{ color: 'red' }}>{error?.toString()}</p>
-      <p><Button onClick={resetError}>Return back.</Button></p>
+      <p><Button onClick={() => { resetError(); navigate("/")}}>Return back.</Button></p>
     </div>
   );
 }
