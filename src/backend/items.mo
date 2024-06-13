@@ -4,6 +4,7 @@ import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Array "mo:base/Array";
+import Int "mo:base/Int";
 import Reorder "mo:nacdb-reorder/Reorder";
 import GUID "mo:nacdb/GUID";
 import Itertools "mo:itertools/Iter";
@@ -123,6 +124,7 @@ shared({caller = initialOwner}) actor class Items() = this {
     };
 
     await* insertIntoAllTimeStream((canisterId, itemId));
+    await* insertIntoUserTimeStream(caller, (canisterId, itemId));
     (canisterId, itemId);
   };
 
@@ -170,7 +172,7 @@ shared({caller = initialOwner}) actor class Items() = this {
   };
 
   // TODO: Also remove voting data.
-  public shared({caller}) func removeItem(canisterId: Principal, itemId: Nat) {
+  func _removeItem(caller: Principal, canisterId: Principal, itemId: Nat): async* () {
     // We first remove links, then the item itself, in order to avoid race conditions when displaying.
     await* removeItemLinks((canisterId, itemId));
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
@@ -184,6 +186,10 @@ shared({caller = initialOwner}) actor class Items() = this {
     // };
     lib.onlyItemOwner(caller, oldItem);
     await db.delete({sk = key});
+  };
+
+  public shared({caller}) func removeItem(canisterId: Principal, itemId: Nat) {
+    await* _removeItem(caller, canisterId, itemId);
   };
 
   /// Order of items ///
@@ -537,6 +543,11 @@ shared({caller = initialOwner}) actor class Items() = this {
     await* addItemToList(globalTimeStream, itemId, #beginning); // TODO: Implement #beginning special case.
   };
 
+  func insertIntoUserTimeStream(user: Principal, itemId: (Principal, Nat)): async* () {
+    let userTimeStream = await* getUserTimeStream(user, null); // TODO: hint
+    await* addItemToList(userTimeStream, itemId, #beginning);
+  };
+
   /// Remove item from the beginning of the global list.
   func removeFromAllTimeStream(itemId: (Principal, Nat)): async* () {
     let globalTimeStream = await NacDBIndex.getAllItemsStream();
@@ -544,8 +555,8 @@ shared({caller = initialOwner}) actor class Items() = this {
     await NacDBIndex.reorderDelete(GUID.nextGuid(guidGen), { order = globalTimeStream; value });
   };
 
-  public shared({caller}) func getUserTimeStream(user: Principal, hint : ?Principal): async Reorder.Order {
-    checkCaller(caller);
+  func getUserTimeStream(user: Principal, hint : ?Principal): async* Reorder.Order {
+    checkCaller(user);
 
     let sk = "u/" # Principal.toText(user);
     switch (await CanDBIndex.getAttributeByHint("user", hint, {sk; subkey = "t"})) {
@@ -553,8 +564,8 @@ shared({caller = initialOwner}) actor class Items() = this {
         switch (tup[0], tup[1], tup[2], tup[3]) {
           case (#text orderPart, #int order, #text reversePart, #int reverse) {
             {
-              order = (actor(orderPart), order);
-              reverse = (actor(reversePart), reverse);
+              order = (actor(orderPart), Int.abs(order));
+              reverse = (actor(reversePart), Int.abs(reverse));
             };
           };
           case _ { Debug.trap("programming error"); };
@@ -562,7 +573,10 @@ shared({caller = initialOwner}) actor class Items() = this {
       };
       case _ {
         let stream = await NacDBIndex.reorderCreateOrder(GUID.nextGuid(guidGen));
-        let tup = #tuple([#text(stream.order.0), #int(stream.order.1), #text(stream.reverse.0), #int(stream.reverse.1)]);
+        let tup = #tuple([
+          #text(Principal.toText(Principal.fromActor(stream.order.0))), #int(stream.order.1),
+          #text(Principal.toText(Principal.fromActor(stream.reverse.0))), #int(stream.reverse.1),
+        ]);
         // TODO: Instead of ignore, store hint in cookie (here and in other places):
         ignore await CanDBIndex.putAttributeNoDuplicates("user", hint, {
           sk;
@@ -570,6 +584,35 @@ shared({caller = initialOwner}) actor class Items() = this {
           value = tup;
         });
         stream;
+      };
+    };
+  };
+
+  /// USE WITH CAUTION!
+  public shared({caller}) func deleteAllUserPosts() {
+    let stream = await* getUserTimeStream(caller, null); // TODO: hint
+    let part: Nac.PartitionCanister = stream.reverse.0;
+    // let ?inner = await part.getInner({outerKey = stream.order.1}) else {
+    //   return; // Debug.trap("programming error"); // TODO: just return?
+    // };
+    loop {
+      // Delete max. 50 posts in one step.
+      let results = (await part.scanLimitOuter({outerKey = stream.reverse.1; lowerBound = ""; upperBound = "x"; dir = #fwd; limit = 50}))
+        .results;
+      if (Array.size(results) == 0) {
+        return;
+      };
+      for ((k, _v) in results.vals()) {
+        let words = Text.split(k, #char '@'); // a bit inefficient
+        let w1o = words.next();
+        let w2o = words.next();
+        let (?w1, ?w2) = (w1o, w2o) else {
+          Debug.trap("order: programming error");
+        };
+        let ?w1i = Nat.fromText(w1) else {
+          Debug.trap("order: programming error");
+        };
+        await* _removeItem(caller, Principal.fromText(w2), w1i);
       };
     };
   };
