@@ -501,7 +501,7 @@ module {
   };
 
   public func deserializeKarma(attr: Entity.AttributeValue): Karma {
-    let res = label r {
+    label r {
       switch (attr) {
         case (#tuple arr) {
           let a: [var Nat] = Array.tabulateVar<Nat>(3, func _ = 0);
