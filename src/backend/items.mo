@@ -124,11 +124,15 @@ shared({caller = initialOwner}) actor class Items() = this {
     };
 
     await* insertIntoAllTimeStream((canisterId, itemId));
-    await* insertIntoUserTimeStream(caller, (canisterId, itemId));
+    if (not item.communal) {
+      await* insertIntoUserTimeStream(caller, (canisterId, itemId));
+    };
     (canisterId, itemId);
   };
 
-  // We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
+  /// We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
+  ///
+  /// FIXME: Converting to communal (here or in other place?) and then excluding from user list.
   public shared({caller}) func setItemData(canisterId: Principal, itemId: Nat, item: lib.ItemDataWithoutOwner) {
     await* itemCheckSpam(item);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
