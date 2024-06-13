@@ -36,12 +36,12 @@ shared({caller = initialOwner}) actor class Users() = this {
     initialized := true;
   };
 
-  public shared({caller}) func setUserData(_partitionId: ?Principal, user: lib.User) {
+  public shared({caller}) func setUserData(partitionId: ?Principal, user: lib.User) {
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti
-    ignore await CanDBIndex.putAttributeNoDuplicates("user", {
+    ignore await CanDBIndex.putAttributeNoDuplicates("user", partitionId, {
         sk = key;
-        key = "u";
+        subkey = "u";
         value = lib.serializeUser(user);
       },
     );

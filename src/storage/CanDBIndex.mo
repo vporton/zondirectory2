@@ -11,7 +11,7 @@ import Principal "mo:base/Principal";
 import Array "mo:base/Array";
 import Time "mo:base/Time";
 import CanDB "mo:candb/CanDB";
-import Multi "mo:CanDBMulti/Multi";
+import Multi "mo:candb-multi/Multi";
 import Entity "mo:candb/Entity";
 import Battery "canister:battery";
 import lib "../backend/lib";
@@ -209,33 +209,45 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
 
   public shared({caller}) func getFirstAttribute(
     pk: Text,
-    options: { sk: Entity.SK; key: Entity.AttributeKey }
+    options: { sk: Entity.SK; subkey: Entity.AttributeKey }
   ) : async ?(Principal, ?Entity.AttributeValue) {
     await* Multi.getFirstAttribute(pkToCanisterMap, pk, options);
   };
 
   public shared({caller}) func putAttributeNoDuplicates(
       pk: Text,
-      options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue }
+      hint: ?Principal,
+      options: { sk: Entity.SK; subkey: Entity.AttributeKey; value: Entity.AttributeValue }
   ) : async Principal {
     checkCaller(caller);
 
-    await* Multi.putAttributeNoDuplicates(pkToCanisterMap, pk, options);
+    await* Multi.putAttributeNoDuplicates(pkToCanisterMap, pk, hint, options);
   };
 
   public shared({caller}) func putAttributeWithPossibleDuplicate(
     pk: Text,
-    options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue }
+    options: { sk: Entity.SK; subkey: Entity.AttributeKey; value: Entity.AttributeValue }
   ) : async Principal {
+    checkCaller(caller);
+
     await* Multi.putAttributeWithPossibleDuplicate(pkToCanisterMap, pk, options);
+  };
+
+  public shared({caller}) func getAttributeByHint(pk : Text, hint : ?Principal, options : {
+    sk : Entity.SK;
+    subkey : Entity.AttributeKey;
+  }): async ?(Principal, ?Entity.AttributeValue) {
+    checkCaller(caller);
+
+    await* Multi.getAttributeByHint(pkToCanisterMap, pk, hint, options);
   };
 
   func setVotingDataImpl(user: Principal, partitionId: ?Principal, voting: lib.VotingScore): async* () {
     let sk = "u/" # Principal.toText(user); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti
-    ignore await* Multi.putAttributeNoDuplicates(pkToCanisterMap, "user", {
+    ignore await* Multi.putAttributeNoDuplicates(pkToCanisterMap, "user", partitionId, {
       sk;
-      key = "v";
+      subkey = "v";
       value = lib.serializeVoting(voting);
     });
   };
@@ -256,7 +268,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
   func getVotingData(caller: Principal, partitionId: ?Principal): async* ?lib.VotingScore {
     let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti
-    let res = await* Multi.getAttributeByHint(pkToCanisterMap, "user", partitionId, {sk; key = "v"});
+    let res = await* Multi.getAttributeByHint(pkToCanisterMap, "user", partitionId, {sk; subkey = "v"});
     do ? { lib.deserializeVoting(res!.1!) };
   };
 

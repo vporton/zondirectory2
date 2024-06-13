@@ -2,7 +2,7 @@ import Array "mo:base/Array";
 import CA "mo:candb/CanisterActions";
 import Entity "mo:candb/Entity";
 import CanDB "mo:candb/CanDB";
-import Multi "mo:CanDBMulti/Multi";
+import Multi "mo:candb-multi/Multi";
 import RBT "mo:stable-rbtree/StableRBTree";
 import Principal "mo:base/Principal";
 import Bool "mo:base/Bool";
@@ -76,7 +76,7 @@ shared actor class CanDBPartition(options: {
   // };
 
   public shared({caller}) func delete(options: CanDB.DeleteOptions): async () {
-    // checkCaller(caller); // FIXME: Uncomment.
+    checkCaller(caller);
 
     CanDB.delete(db, options);
   };
@@ -175,7 +175,7 @@ shared actor class CanDBPartition(options: {
 
   // CanDBMulti //
 
-  public shared({caller}) func putAttribute(options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue }): async () {
+  public shared({caller}) func putAttribute(options: { sk: Entity.SK; subkey: Entity.AttributeKey; value: Entity.AttributeValue }): async () {
     checkCaller(caller);
     ignore await* Multi.replaceAttribute(db, options);
   };
@@ -185,7 +185,7 @@ shared actor class CanDBPartition(options: {
     await* Multi.putExisting(db, options);
   };
 
-  public shared({caller}) func putExistingAttribute(options: { sk: Entity.SK; key: Entity.AttributeKey; value: Entity.AttributeValue })
+  public shared({caller}) func putExistingAttribute(options: { sk: Entity.SK; subkey: Entity.AttributeKey; value: Entity.AttributeValue })
     : async Bool
   {
     checkCaller(caller);

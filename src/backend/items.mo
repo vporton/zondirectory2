@@ -69,7 +69,7 @@ shared({caller = initialOwner}) actor class Items() = this {
       maxId += 1;
       let variantKey = "r/" # Nat.toText(variantId);
       let variantCanisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
-        "main", { sk = variantKey; key = "i"; value = lib.serializeItemVariant(variant) }
+        "main", { sk = variantKey; subkey = "i"; value = lib.serializeItemVariant(variant) }
       );
       let itemId = maxId;
       maxId += 1;
@@ -108,7 +108,7 @@ shared({caller = initialOwner}) actor class Items() = this {
       });
 
       let itemCanisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
-        "main", { sk = itemKey; key = "i"; value = lib.serializeItem(item2) }
+        "main", { sk = itemKey; subkey = "i"; value = lib.serializeItem(item2) }
       );
       (itemCanisterId, itemId);
     } else {
@@ -117,7 +117,7 @@ shared({caller = initialOwner}) actor class Items() = this {
       maxId += 1;
       let key = "i/" # Nat.toText(itemId);
       let canisterId = await CanDBIndex.putAttributeWithPossibleDuplicate(
-        "main", { sk = key; key = "i"; value = lib.serializeItem(item2) }
+        "main", { sk = key; subkey = "i"; value = lib.serializeItem(item2) }
       );
       (canisterId, itemId);
     };
@@ -136,7 +136,7 @@ shared({caller = initialOwner}) actor class Items() = this {
         let oldItem = lib.deserializeItem(oldItemRepr);
         let item2: lib.ItemData = { item = item; creator = caller; edited = true }; // TODO: edited only if actually changed
         lib.onlyItemOwner(caller, oldItem); // also rejects changing communal items.
-        await db.putAttribute({sk = key; key = "i"; value = lib.serializeItem(#owned item2)});
+        await db.putAttribute({sk = key; subkey = "i"; value = lib.serializeItem(#owned item2)});
       };
       case null { Debug.trap("no item") };
     };
@@ -163,7 +163,7 @@ shared({caller = initialOwner}) actor class Items() = this {
           };
           case (#communal _) { Debug.trap("programming error") };
         };
-        await db.putAttribute({ sk = key; key = "t"; value = #text(text) });
+        await db.putAttribute({ sk = key; subkey = "t"; value = #text(text) });
       };
       case _ { Debug.trap("no item") };
     };
@@ -318,8 +318,8 @@ shared({caller = initialOwner}) actor class Items() = this {
     await* addItemToList(stream2, catId, side);
     let itemData1 = lib.serializeStreams(Array.freeze(streamsVar1));
     let itemData2 = lib.serializeStreams(Array.freeze(streamsVar2));
-    await itemId1.putAttribute({ sk = "i/" # Nat.toText(catId.1); key = key1; value = itemData1 });
-    await itemId1.putAttribute({ sk = "i/" # Nat.toText(itemId.1); key = key2; value = itemData2 });
+    await itemId1.putAttribute({ sk = "i/" # Nat.toText(catId.1); subkey = key1; value = itemData1 });
+    await itemId1.putAttribute({ sk = "i/" # Nat.toText(itemId.1); subkey = key2; value = itemData2 });
   };
 
   func removeItemLinks(itemId: (Principal, Nat)): async* () {
@@ -446,7 +446,7 @@ shared({caller = initialOwner}) actor class Items() = this {
     // let votingPower = Float.toInt(Float.fromInt(value) * PCB.adjustVotingPower(user)); // TODO: `Float.toInt` is a hack.
 
     let userVotesSK = "v/" # Principal.toText(caller) # "/" # Nat.toText(parent) # "/" # Nat.toText(child);
-    let oldVotes = await CanDBIndex.getFirstAttribute("user", { sk = userVotesSK; key = "v" }); // TODO: race condition
+    let oldVotes = await CanDBIndex.getFirstAttribute("user", { sk = userVotesSK; subkey = "v" }); // TODO: race condition
     let (principal, oldValue) = switch (oldVotes) {
       case (?oldVotes) { (?oldVotes.0, oldVotes.1) };
       case null { (null, null) };
@@ -465,11 +465,11 @@ shared({caller = initialOwner}) actor class Items() = this {
       return;
     };
     // TODO: Take advantage of `principal` as a hint.
-    ignore await CanDBIndex.putAttributeNoDuplicates("user", { sk = userVotesSK; key = "v"; value = #int votingPower });
+    ignore await CanDBIndex.putAttributeNoDuplicates("user", null, { sk = userVotesSK; subkey = "v"; value = #int votingPower });
 
     // Update total votes for the given parent/child:
     let totalVotesSK = "w/" # Nat.toText(parent) # "/" # Nat.toText(child);
-    let oldTotals = await CanDBIndex.getFirstAttribute("user", { sk = totalVotesSK; key = "v" }); // TODO: race condition
+    let oldTotals = await CanDBIndex.getFirstAttribute("user", { sk = totalVotesSK; subkey = "v" }); // TODO: race condition
     let (up, down, oldTotalsPrincipal) = switch (oldTotals) {
       case (?(oldTotalsPrincipal, ?(#tuple(a)))) {
         let (#int up, #int down) = (a[0], a[1]) else {
@@ -501,8 +501,7 @@ shared({caller = initialOwner}) actor class Items() = this {
       // if (up2 + down2 >= 20 and up2 * 4 <= up2 + down2) { // Remove severely voted down items.
       //   await* removeItemFromFolder((parentPrincipal, parent), (childPrincipal, child));
       // };
-      // TODO: Take advantage of `oldTotalsPrincipal` as a hint:
-      ignore await CanDBIndex.putAttributeNoDuplicates("user", { sk = totalVotesSK; key = "v"; value = #tuple([#int up2, #int down2]) }); // TODO: race condition
+      ignore await CanDBIndex.putAttributeNoDuplicates("user", oldTotalsPrincipal, { sk = totalVotesSK; subkey = "v"; value = #tuple([#int up2, #int down2]) }); // TODO: race condition
     };
 
     let parentCanister = actor(Principal.toText(parentPrincipal)) : CanDBPartition.CanDBPartition;
@@ -521,7 +520,7 @@ shared({caller = initialOwner}) actor class Items() = this {
     if (streamsVar[links] == null) {
       streamsVar[links] := ?order;
       let data = lib.serializeStreams(Array.freeze(streamsVar));
-      await parentCanister.putAttribute({ sk = "i/" # Nat.toText(parent); key = "sv"; value = data });
+      await parentCanister.putAttribute({ sk = "i/" # Nat.toText(parent); subkey = "sv"; value = data });
     };
 
     await NacDBIndex.reorderMove(GUID.nextGuid(guidGen), {
@@ -543,6 +542,36 @@ shared({caller = initialOwner}) actor class Items() = this {
     let globalTimeStream = await NacDBIndex.getAllItemsStream();
     let value = Nat.toText(itemId.1) # "@" # Principal.toText(itemId.0);
     await NacDBIndex.reorderDelete(GUID.nextGuid(guidGen), { order = globalTimeStream; value });
+  };
+
+  public shared({caller}) func getUserTimeStream(user: Principal, hint : ?Principal): async Reorder.Order {
+    checkCaller(caller);
+
+    let sk = "u/" # Principal.toText(user);
+    switch (await CanDBIndex.getAttributeByHint("user", hint, {sk; subkey = "t"})) {
+      case (?(_, ?(#tuple tup))) {
+        switch (tup[0], tup[1], tup[2], tup[3]) {
+          case (#text orderPart, #int order, #text reversePart, #int reverse) {
+            {
+              order = (actor(orderPart), order);
+              reverse = (actor(reversePart), reverse);
+            };
+          };
+          case _ { Debug.trap("programming error"); };
+        };
+      };
+      case _ {
+        let stream = await NacDBIndex.reorderCreateOrder(GUID.nextGuid(guidGen));
+        let tup = #tuple([#text(stream.order.0), #int(stream.order.1), #text(stream.reverse.0), #int(stream.reverse.1)]);
+        // TODO: Instead of ignore, store hint in cookie (here and in other places):
+        ignore await CanDBIndex.putAttributeNoDuplicates("user", hint, {
+          sk;
+          subkey = "t";
+          value = tup;
+        });
+        stream;
+      };
+    };
   };
 
   // TODO: Below functions?
