@@ -592,9 +592,6 @@ shared({caller = initialOwner}) actor class Items() = this {
   public shared({caller}) func deleteAllUserPosts() {
     let stream = await* getUserTimeStream(caller, null); // TODO: hint
     let part: Nac.PartitionCanister = stream.reverse.0;
-    // let ?inner = await part.getInner({outerKey = stream.order.1}) else {
-    //   return; // Debug.trap("programming error"); // TODO: just return?
-    // };
     loop {
       // Delete max. 50 posts in one step.
       let results = (await part.scanLimitOuter({outerKey = stream.reverse.1; lowerBound = ""; upperBound = "x"; dir = #fwd; limit = 50}))
