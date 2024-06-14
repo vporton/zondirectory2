@@ -17,7 +17,7 @@ import { BusyContext } from "./App";
 import { Actor } from "@dfinity/agent";
 import { ErrorContext } from "./ErrorContext";
 
-export default function EditItem(props: {itemId?: string, comment?: boolean, userScore: number | undefined}) {
+export default function EditItem(props: {itemId?: string, comment?: boolean}) {
     const routeParams = useParams();
     const navigate = useNavigate();
     const [mainFolder, setMainFolder] = useState<string | undefined>(undefined); // TODO: For a comment, it may be not a folder.
@@ -159,7 +159,6 @@ export default function EditItem(props: {itemId?: string, comment?: boolean, use
                             defaultAntiComments={props.comment === true && mainFolder !== undefined ? [[mainFolder, 'beginning']] : []}
                             onChangeFolders={setFoldersList}
                             onChangeAntiComments={setAntiCommentsList}
-                            userScore={props.userScore}
                         />
                         <p>
                             <Button onClick={submit} disabled={!isAuthenticated || isSubmitting}>Submit</Button>

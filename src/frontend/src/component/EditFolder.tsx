@@ -21,7 +21,6 @@ export default function EditFolder(props: {
     folderId?: string,
     superFolderId?: string,
     defaultAgent: Agent | undefined,
-    userScore: number | undefined,
 }) {
     const navigate = useNavigate();
     const [superFolder, setSuperFolder] = useState<string | undefined>();
@@ -154,7 +153,6 @@ export default function EditFolder(props: {
                         onChangeAntiComments={setAntiCommentsList}
                         reverse={props.super === true}
                         noComments={props.super === true}
-                        userScore={props.userScore}
                     />
                     <p>
                         <Button onClick={submit} disabled={!isAuthenticated || isSubmitting}>Save</Button>{" "}

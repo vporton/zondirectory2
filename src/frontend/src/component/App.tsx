@@ -1,6 +1,6 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Component, ErrorInfo, ReactNode, createContext, useEffect, useMemo, useState } from "react";
+import { Component, ErrorInfo, ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Button, Container, Nav, NavDropdown, Navbar } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
@@ -30,7 +30,7 @@ import { AllItems } from "./AllItems";
 import { ErrorBoundary, ErrorHandler } from "./ErrorBoundary";
 import { ErrorProvider } from "./ErrorContext";
 import Prefs from "./Prefs";
-import { MainContext } from './MainContext';
+import { MainContext, MainContextType, MainProvider } from './MainContext';
 
 export const BusyContext = createContext<any>(undefined); // TODO: type
  
@@ -65,13 +65,15 @@ export default function App() {
                     <BrowserRouter>
                         <ErrorProvider>
                             <ErrorBoundary>
-                                <BusyContext.Provider value={{busy, setBusy}}>
-                                    {busy ? <p>Processing...</p> :
-                                    <AuthContext.Consumer>
-                                        {({defaultAgent}) => <MyRouted defaultAgent={defaultAgent}/>}
-                                    </AuthContext.Consumer>
-                                    }
-                                </BusyContext.Provider>
+                                <MainProvider>
+                                    <BusyContext.Provider value={{busy, setBusy}}>
+                                        {busy ? <p>Processing...</p> :
+                                        <AuthContext.Consumer>
+                                            {({defaultAgent}) => <MyRouted defaultAgent={defaultAgent}/>}
+                                        </AuthContext.Consumer>
+                                        }
+                                    </BusyContext.Provider>
+                                </MainProvider>
                             </ErrorBoundary>
                         </ErrorProvider>
                     </BrowserRouter>
@@ -82,21 +84,21 @@ export default function App() {
 }
 
 /// Defined outside of other functions not to re-initialize when the tree is updated.
-function Edit1(props: {defaultAgent: Agent | undefined, userScore: number | undefined}) {
+function Edit1(props: {defaultAgent: Agent | undefined}) {
     const routeParams = useParams();
-    return <EditFolder superFolderId={routeParams.folder} defaultAgent={props.defaultAgent} userScore={props.userScore}/>;
+    return <EditFolder superFolderId={routeParams.folder} defaultAgent={props.defaultAgent}/>;
 }
 
 /// Defined outside of other functions not to re-initialize when the tree is updated.
-function Edit2(props: {defaultAgent: Agent | undefined, userScore: number | undefined}) {
+function Edit2(props: {defaultAgent: Agent | undefined}) {
     const routeParams = useParams();
-    return <EditFolder folderId={routeParams.folder} defaultAgent={props.defaultAgent} userScore={props.userScore}/>;
+    return <EditFolder folderId={routeParams.folder} defaultAgent={props.defaultAgent}/>;
 }
 
 /// Defined outside of other functions not to re-initialize when the tree is updated.
-function Edit3(props: {userScore: number | undefined}) {
+function Edit3(props: {}) {
     const routeParams = useParams();
-    return <EditItem itemId={routeParams.item} userScore={props.userScore}/>;
+    return <EditItem itemId={routeParams.item}/>;
 }
 
 function MyRouted(props: {defaultAgent: Agent | undefined}) {
@@ -104,18 +106,13 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
     return (
         <AuthContext.Consumer>
             {({isAuthenticated, principal, authClient, defaultAgent, options, login, logout}) =>
-                <MainContext.Consumer>
-                {({userScore}) =>
-                    <MyInner
-                        isAuthenticated={isAuthenticated}
-                        login={login}
-                        logout={logout}
-                        principal={principal}
-                        defaultAgent={defaultAgent}
-                        userScore={userScore}
-                    />
-                }
-                </MainContext.Consumer>
+                <MyInner
+                    isAuthenticated={isAuthenticated}
+                    login={login}
+                    logout={logout}
+                    principal={principal}
+                    defaultAgent={defaultAgent}
+                />
             }
         </AuthContext.Consumer>
     );
@@ -127,7 +124,6 @@ function MyInner(props: {
     logout?: () => Promise<void>,
     principal?: Principal,
     defaultAgent?: Agent,
-    userScore: number | undefined,
 }) {
     const navigate = useNavigate();
     const signin = () => {
@@ -136,16 +132,17 @@ function MyInner(props: {
     const signout = async () => {
         await props.logout!(); // TODO: `!`
     };
+    const {userScore, setUserScore} = useContext<MainContextType>(MainContext);
     async function fetchUserScore() {
         // TODO: If we have a hint, skip update call.
         const MainCanister: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent: props.defaultAgent})
         const data0 = await MainCanister.getUserScore([]); // TODO: hint
         if (data0.length === 0) {
-            setUserScore(0);
+            setUserScore!(0);
         } else {
             const [data] = data0;
             let [part, id] = data! as [Principal, bigint];
-            setUserScore(Number(id));
+            setUserScore!(Number(id));
         }
     }
     useEffect(() => {
@@ -245,31 +242,31 @@ function MyInner(props: {
             />
             <Route
                 path="/create"
-                element={<EditItem userScore={userScore}/>}
+                element={<EditItem/>}
             />
             <Route
                 path="/create/for-folder/:folder"
-                element={<EditItem userScore={userScore}/>}
+                element={<EditItem/>}
             />
             <Route
                 path="/create/comment/:folder"
-                element={<EditItem comment={true} userScore={userScore}/>}
+                element={<EditItem comment={true}/>}
             />
             <Route
                 path="/create-subfolder/for-folder/:folder"
-                element={<Edit1 defaultAgent={props.defaultAgent} userScore={userScore}/>}
+                element={<Edit1 defaultAgent={props.defaultAgent}/>}
             />
             <Route
                 path="/create-superfolder/for-folder/:folder"
-                element={<EditFolder super={true} defaultAgent={props.defaultAgent} userScore={userScore}/>}
+                element={<EditFolder super={true} defaultAgent={props.defaultAgent}/>}
             />
             <Route
                 path="/edit/folder/:folder"
-                element={<Edit2 defaultAgent={props.defaultAgent} userScore={userScore}/>}
+                element={<Edit2 defaultAgent={props.defaultAgent}/>}
             />
             <Route
                 path="/edit/item/:item"
-                element={<Edit3 userScore={userScore}/>}
+                element={<Edit3/>}
             />
             <Route
                 path="/personhood"

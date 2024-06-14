@@ -1,6 +1,7 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap"; // TODO: Import by one component.
+import { MainContext, MainContextType } from "./MainContext";
 
 export default function EditFoldersList(props: {
     defaultFolders?: [string, 'beginning' | 'end'][],
@@ -9,20 +10,20 @@ export default function EditFoldersList(props: {
     onChangeAntiComments?: (folders: [string, 'beginning' | 'end'][]) => void,
     noComments?: boolean,
     reverse?: boolean,
-    userScore: number | undefined,
 }) {
+    const {userScore} = useContext<MainContextType>(MainContext);
     const [folders, _setFolders] = useState<[string, 'beginning' | 'end'][] | undefined>(undefined);
     const [antiComments, _setAntiComments] = useState<[string, 'beginning' | 'end'][] | undefined>(undefined);
     const [side, setSide] = useState<{ [i: number]: 'beginning' | 'end' }>({});
     function setFolders(data: [string, 'beginning' | 'end'][]) {
-        if ((folders?.length ?? 0) + (antiComments?.length ?? 0) + 1 >= (props.userScore ?? 0)) {
-            alert("Can't put in more folders than your score!");
+        if ((folders?.length ?? 0) + (antiComments?.length ?? 0) > (userScore ?? 0) + Number(process.env.REACT_APP_POST_SCORE)) {
+            alert(`Can't add more folders because you have a low score!`);
         }
         _setFolders(data);
     }
     function setAntiComments(data: [string, 'beginning' | 'end'][]) {
-        if ((folders?.length ?? 0) + (antiComments?.length ?? 0) + 1 >= (props.userScore ?? 0)) {
-            alert("Can't put in more folders than your score!");
+        if ((folders?.length ?? 0) + (antiComments?.length ?? 0) > (userScore ?? 0) + Number(process.env.REACT_APP_POST_SCORE)) {
+            alert(`Can't add more folders because you have a low score!`);
         }
         _setAntiComments(data);
     }
