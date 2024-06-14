@@ -16,6 +16,7 @@ import ConfigMisc "../libs/configs/misc.config";
 import lib "lib";
 import AI "ai";
 import AITypes "HttpTypes";
+import RateLimit "rateLimit";
 
 shared({caller = initialOwner}) actor class Items() = this {
   stable var owners = [initialOwner];
@@ -48,6 +49,8 @@ shared({caller = initialOwner}) actor class Items() = this {
   };
 
   /// Items ///
+
+  let updateRequests = RateLimit.newRequests();
 
   stable var maxId: Nat = 0;
 
@@ -736,4 +739,30 @@ shared({caller = initialOwner}) actor class Items() = this {
   // func setVotes2(parent: Nat64, child: Nat64, prefix1: Text, prefix2: Text) {
 
   // }
+
+  /// System ///
+
+  system func inspect({
+    arg : Blob;
+    caller : Principal;
+    msg :
+      {
+        #addItemToFolder :
+          () ->
+            ((Principal, Nat), (Principal, Nat), Bool, {#beginning; #end});
+        #checkSpamTransform : () -> AITypes.TransformArgs;
+        #createItemData : () -> lib.ItemTransferWithoutOwner;
+        #deleteAllUserPosts : () -> ();
+        #getOwners : () -> ();
+        #init : () -> [Principal];
+        #removeItem : () -> (Principal, Nat);
+        #setItemData : () -> (Principal, Nat, lib.ItemDataWithoutOwner);
+        #setOwners : () -> [Principal];
+        #setPostText : () -> (Principal, Nat, Text);
+        #vote : () -> (Principal, Nat, Principal, Nat, Int, Bool);
+      };
+  }): Bool {
+    RateLimit.checkRequest(updateRequests, caller);
+    true;
+  }
 }
