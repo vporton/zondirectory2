@@ -133,23 +133,6 @@ function MyInner(props: {
         await props.logout!(); // TODO: `!`
     };
     const {userScore, setUserScore} = useContext<MainContextType>(MainContext);
-    async function fetchUserScore() {
-        // TODO: If we have a hint, skip update call.
-        const MainCanister: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent: props.defaultAgent})
-        const data0 = await MainCanister.getUserScore([]); // TODO: hint
-        if (data0.length === 0) {
-            setUserScore!(0);
-        } else {
-            const [data] = data0;
-            let [part, id] = data! as [Principal, bigint];
-            setUserScore!(Number(id));
-        }
-    }
-    useEffect(() => {
-        if (props.principal !== undefined) {
-            fetchUserScore().then(() => {});
-        }
-    }, [props.principal]);
     const [root, setRoot] = useState("");
     async function fetchRootItem() {
         const MainCanister: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent: props.defaultAgent})
