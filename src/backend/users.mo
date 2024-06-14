@@ -47,10 +47,6 @@ shared({caller = initialOwner}) actor class Users() = this {
     );
   };
 
-  /// FIXME: Should also remove all his/her items.
-  /// FIXME: Present this in UI for legal reasons.
-  /// TODO: For it to work, need user streams
-  ///       (by time only, because it's undetermined whether user stream is owned or communal).
   public shared({caller}) func removeUser(canisterId: Principal) {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "u/" # Principal.toText(caller);
