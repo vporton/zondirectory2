@@ -9,10 +9,23 @@ export default function EditFoldersList(props: {
     onChangeAntiComments?: (folders: [string, 'beginning' | 'end'][]) => void,
     noComments?: boolean,
     reverse?: boolean,
+    userScore: number | undefined,
 }) {
-    const [folders, setFolders] = useState<[string, 'beginning' | 'end'][] | undefined>(undefined);
-    const [antiComments, setAntiComments] = useState<[string, 'beginning' | 'end'][] | undefined>(undefined);
+    const [folders, _setFolders] = useState<[string, 'beginning' | 'end'][] | undefined>(undefined);
+    const [antiComments, _setAntiComments] = useState<[string, 'beginning' | 'end'][] | undefined>(undefined);
     const [side, setSide] = useState<{ [i: number]: 'beginning' | 'end' }>({});
+    function setFolders(data: [string, 'beginning' | 'end'][]) {
+        if ((folders?.length ?? 0) + (antiComments?.length ?? 0) + 1 >= (props.userScore ?? 0)) {
+            alert("Can't put in more folders than your score!");
+        }
+        _setFolders(data);
+    }
+    function setAntiComments(data: [string, 'beginning' | 'end'][]) {
+        if ((folders?.length ?? 0) + (antiComments?.length ?? 0) + 1 >= (props.userScore ?? 0)) {
+            alert("Can't put in more folders than your score!");
+        }
+        _setAntiComments(data);
+    }
     useEffect(() => {
         if (folders === undefined && props.defaultFolders?.length !== 0) {
             setFolders(props.defaultFolders ?? []);
@@ -102,7 +115,11 @@ export default function EditFoldersList(props: {
                                 );
                             })}
                         </ul>
-                        <p><Button disabled={folders === undefined} onClick={() => setFolders(folders!.concat([["", 'beginning']]))}>Add</Button></p>
+                        <p>
+                            <Button disabled={folders === undefined} onClick={() => setFolders(folders!.concat([["", 'beginning']]))}>
+                                Add
+                            </Button>
+                        </p>
                     </Col>
                     {!props.noComments &&
                     <Col>
@@ -117,7 +134,11 @@ export default function EditFoldersList(props: {
                                 );
                             })}
                         </ul>
-                        <p><Button disabled={antiComments === undefined} onClick={() => setAntiComments(antiComments!.concat([["", 'beginning']]))}>Add</Button></p>
+                        <p>
+                            <Button disabled={antiComments === undefined} onClick={() => setAntiComments(antiComments!.concat([["", 'beginning']]))}>
+                                Add
+                            </Button>
+                        </p>
                     </Col>}
                 </Row>
             </Container>

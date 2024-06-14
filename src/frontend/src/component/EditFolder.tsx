@@ -16,7 +16,13 @@ import { BusyContext } from "./App";
 import { Actor, Agent } from "@dfinity/agent";
 import { ErrorContext } from "./ErrorContext";
 
-export default function EditFolder(props: {super?: boolean, folderId?: string, superFolderId?: string, defaultAgent: Agent | undefined}) {
+export default function EditFolder(props: {
+    super?: boolean,
+    folderId?: string,
+    superFolderId?: string,
+    defaultAgent: Agent | undefined,
+    userScore: number | undefined,
+}) {
     const navigate = useNavigate();
     const [superFolder, setSuperFolder] = useState<string | undefined>();
     const [foldersList, setFoldersList] = useState<[string, 'beginning' | 'end'][]>([]);
@@ -148,6 +154,7 @@ export default function EditFolder(props: {super?: boolean, folderId?: string, s
                         onChangeAntiComments={setAntiCommentsList}
                         reverse={props.super === true}
                         noComments={props.super === true}
+                        userScore={props.userScore}
                     />
                     <p>
                         <Button onClick={submit} disabled={!isAuthenticated || isSubmitting}>Save</Button>{" "}

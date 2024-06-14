@@ -2,6 +2,9 @@ import Principal "mo:base/Principal";
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
+import Int "mo:base/Int";
+import Multi "mo:candb-multi/Multi";
+import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
 import DBConfig "../libs/configs/db.config";
 // import ICRC1Types "mo:icrc1/ICRC1/Types";
@@ -66,6 +69,17 @@ shared actor class ZonBackend() = this {
     do ? {
       let (part, n) = rootItem!;
       (Principal.fromActor(part), n);
+    };
+  };
+
+  public shared({caller}) func getUserScore(hint: ?Principal): async ?(Principal, Nat) {
+    let sk = "u/" # Principal.toText(caller);
+    let ?(part, v) = await CanDBIndex.getAttributeByHint("user", hint, {sk; subkey = "p"}) else {
+      return null;
+    };
+    switch (v) {
+      case (?(#int n)) ?(part, Int.abs(n));
+      case _ null;
     };
   };
 

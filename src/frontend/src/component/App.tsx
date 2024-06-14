@@ -30,6 +30,7 @@ import { AllItems } from "./AllItems";
 import { ErrorBoundary, ErrorHandler } from "./ErrorBoundary";
 import { ErrorProvider } from "./ErrorContext";
 import Prefs from "./Prefs";
+import { MainContext } from './MainContext';
 
 export const BusyContext = createContext<any>(undefined); // TODO: type
  
@@ -81,25 +82,77 @@ export default function App() {
 }
 
 /// Defined outside of other functions not to re-initialize when the tree is updated.
-function Edit1(props: {defaultAgent: Agent | undefined}) {
+function Edit1(props: {defaultAgent: Agent | undefined, userScore: number | undefined}) {
     const routeParams = useParams();
-    return <EditFolder superFolderId={routeParams.folder} defaultAgent={props.defaultAgent}/>;
+    return <EditFolder superFolderId={routeParams.folder} defaultAgent={props.defaultAgent} userScore={props.userScore}/>;
 }
 
 /// Defined outside of other functions not to re-initialize when the tree is updated.
-function Edit2(props: {defaultAgent: Agent | undefined}) {
+function Edit2(props: {defaultAgent: Agent | undefined, userScore: number | undefined}) {
     const routeParams = useParams();
-    return <EditFolder folderId={routeParams.folder} defaultAgent={props.defaultAgent}/>;
+    return <EditFolder folderId={routeParams.folder} defaultAgent={props.defaultAgent} userScore={props.userScore}/>;
 }
 
 /// Defined outside of other functions not to re-initialize when the tree is updated.
-function Edit3(props) {
+function Edit3(props: {userScore: number | undefined}) {
     const routeParams = useParams();
-    return <EditItem itemId={routeParams.item}/>;
+    return <EditItem itemId={routeParams.item} userScore={props.userScore}/>;
 }
 
 function MyRouted(props: {defaultAgent: Agent | undefined}) {
+    const contextValue = useAuth();
+    return (
+        <AuthContext.Consumer>
+            {({isAuthenticated, principal, authClient, defaultAgent, options, login, logout}) =>
+                <MainContext.Consumer>
+                {({userScore}) =>
+                    <MyInner
+                        isAuthenticated={isAuthenticated}
+                        login={login}
+                        logout={logout}
+                        principal={principal}
+                        defaultAgent={defaultAgent}
+                        userScore={userScore}
+                    />
+                }
+                </MainContext.Consumer>
+            }
+        </AuthContext.Consumer>
+    );
+}
+
+function MyInner(props: {
+    isAuthenticated: boolean,
+    login?: (callback?: () => Promise<void>) => void,
+    logout?: () => Promise<void>,
+    principal?: Principal,
+    defaultAgent?: Agent,
+    userScore: number | undefined,
+}) {
     const navigate = useNavigate();
+    const signin = () => {
+        props.login!(); // TODO: `!`
+    };
+    const signout = async () => {
+        await props.logout!(); // TODO: `!`
+    };
+    async function fetchUserScore() {
+        // TODO: If we have a hint, skip update call.
+        const MainCanister: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent: props.defaultAgent})
+        const data0 = await MainCanister.getUserScore([]); // TODO: hint
+        if (data0.length === 0) {
+            setUserScore(0);
+        } else {
+            const [data] = data0;
+            let [part, id] = data! as [Principal, bigint];
+            setUserScore(Number(id));
+        }
+    }
+    useEffect(() => {
+        if (props.principal !== undefined) {
+            fetchUserScore().then(() => {});
+        }
+    }, [props.principal]);
     const [root, setRoot] = useState("");
     async function fetchRootItem() {
         const MainCanister: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent: props.defaultAgent})
@@ -120,123 +173,113 @@ function MyRouted(props: {defaultAgent: Agent | undefined}) {
             <p>Loading...</p>
         );
     }
-    const contextValue = useAuth();
-    return (
-        <AuthContext.Consumer>
-            {({isAuthenticated, principal, authClient, defaultAgent, options, login, logout}) => {
-                const signin = () => {
-                    login!(); // TODO: `!`
-                };
-                const signout = async () => {
-                    await logout!(); // TODO: `!`
-                };
-                return <>
-                    <p>
-                        Logged in as: {isAuthenticated ? <small>{principal?.toString()}</small> : "(none)"}{" "}
-                        {isAuthenticated ? <Button onClick={signout}>Logout</Button> : <Button onClick={signin}>Login</Button>}
-                    </p>
-                    <nav>
-                        <Navbar className="bg-body-secondary" style={{width: "auto"}}>
-                            <Nav>
-                                <Nav.Link onClick={() => navigate("/item/"+root)}>Main folder</Nav.Link>{" "}
-                            </Nav>
-                            <Nav>
-                                <Nav.Link onClick={() => navigate("/latest")}>Latest posts</Nav.Link>{" "}
-                            </Nav>
-                            <Nav>
-                                <NavDropdown title="User">
-                                    <NavDropdown.Item onClick={() => navigate("/personhood")}>
-                                        Verify Your Account
-                                    </NavDropdown.Item>
-                                    <NavDropdown.Item onClick={() => navigate("/prefs")}>
-                                        Settings
-                                    </NavDropdown.Item>
-                                </NavDropdown>
-                            </Nav>
-                            <Nav>
-                                <Nav.Link href="https://docs.zoncircle.com">Our site</Nav.Link>
-                            </Nav>
-                            <Nav>
-                                <Nav.Link href="https://docs.zoncircle.com/invest/">Invest</Nav.Link>
-                            </Nav>
-                            <Nav>
-                                <NavDropdown title="About">
-                                    <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/">Blog</NavDropdown.Item>
-                                    <NavDropdown.Item href="https://docs.zoncircle.com/about-us/">About Us</NavDropdown.Item>
-                                    <NavDropdown.Item href="https://docs.zoncircle.com/our-partners/">Our Partners</NavDropdown.Item>
-                                    <NavDropdown.Item href="https://docs.zoncircle.com/#team">The Team</NavDropdown.Item>
-                                    <NavDropdown.Item href="https://docs.zoncircle.com/carbon-pledge/">Carbon Pledge</NavDropdown.Item>
-                                </NavDropdown>
-                            </Nav>
-                            <Nav>
-                                <NavDropdown title="Blog">
-                                    <NavDropdown.Item href="https://docs.zoncircle.com/author/user/">CEO's posts</NavDropdown.Item>
-                                    <NavDropdown.Item href="https://docs.zoncircle.com/social-media/">Social Media</NavDropdown.Item>
-                                </NavDropdown>
-                            </Nav>
-                        </Navbar>
-                    </nav>
-                    <Routes>
-                        <Route
-                            path=""
-                            element={<RootRedirector root={root}/>}
-                        />
-                        <Route
-                            path="/latest"
-                            element={<AllItems defaultAgent={defaultAgent}/>}
-                        />
-                        <Route
-                            path="/item/:id"
-                            element={<ShowItem/>}
-                        />
-                        <Route
-                            path="/subfolders-of/:id"
-                            element={<SubFolders data-dir="sub" defaultAgent={defaultAgent}/>}
-                        />
-                        <Route
-                            path="/superfolders-of/:id"
-                            element={<SubFolders data-dir="super" defaultAgent={defaultAgent}/>}
-                        />
-                        <Route
-                            path="/create"
-                            element={<EditItem/>}
-                        />
-                        <Route
-                            path="/create/for-folder/:folder"
-                            element={<EditItem/>}
-                        />
-                        <Route
-                            path="/create/comment/:folder"
-                            element={<EditItem comment={true}/>}
-                        />
-                        <Route
-                            path="/create-subfolder/for-folder/:folder"
-                            element={<Edit1 defaultAgent={defaultAgent}/>}
-                        />
-                        <Route
-                            path="/create-superfolder/for-folder/:folder"
-                            element={<EditFolder super={true} defaultAgent={defaultAgent}/>}
-                        />
-                        <Route
-                            path="/edit/folder/:folder"
-                            element={<Edit2 defaultAgent={defaultAgent}/>}
-                        />
-                        <Route
-                            path="/edit/item/:item"
-                            element={<Edit3/>}
-                        />
-                        <Route
-                            path="/personhood"
-                            element={<Person/>}
-                        />
-                        <Route
-                            path="/prefs"
-                            element={<Prefs/>}
-                        />
-                        <Route path="*" element={<ErrorHandler error={"No such page"}/>}/>
-                    </Routes>
-                </>
-           }}
-        </AuthContext.Consumer>
-    );
+
+    return <>
+        <p>
+            Logged in as: {props.isAuthenticated ? <small>{props.principal?.toString()}</small> : "(none)"}{" "}
+            {props.isAuthenticated
+                ? <><Button onClick={signout}>Logout</Button> Your score: {userScore}</>
+                : <Button onClick={signin}>Login</Button>}
+        </p>
+        <nav>
+            <Navbar className="bg-body-secondary" style={{width: "auto"}}>
+                <Nav>
+                    <Nav.Link onClick={() => navigate("/item/"+root)}>Main folder</Nav.Link>{" "}
+                </Nav>
+                <Nav>
+                    <Nav.Link onClick={() => navigate("/latest")}>Latest posts</Nav.Link>{" "}
+                </Nav>
+                <Nav>
+                    <NavDropdown title="User">
+                        <NavDropdown.Item onClick={() => navigate("/personhood")}>
+                            Verify Your Account
+                        </NavDropdown.Item>
+                        <NavDropdown.Item onClick={() => navigate("/prefs")}>
+                            Settings
+                        </NavDropdown.Item>
+                    </NavDropdown>
+                </Nav>
+                <Nav>
+                    <Nav.Link href="https://docs.zoncircle.com">Our site</Nav.Link>
+                </Nav>
+                <Nav>
+                    <Nav.Link href="https://docs.zoncircle.com/invest/">Invest</Nav.Link>
+                </Nav>
+                <Nav>
+                    <NavDropdown title="About">
+                        <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/">Blog</NavDropdown.Item>
+                        <NavDropdown.Item href="https://docs.zoncircle.com/about-us/">About Us</NavDropdown.Item>
+                        <NavDropdown.Item href="https://docs.zoncircle.com/our-partners/">Our Partners</NavDropdown.Item>
+                        <NavDropdown.Item href="https://docs.zoncircle.com/#team">The Team</NavDropdown.Item>
+                        <NavDropdown.Item href="https://docs.zoncircle.com/carbon-pledge/">Carbon Pledge</NavDropdown.Item>
+                    </NavDropdown>
+                </Nav>
+                <Nav>
+                    <NavDropdown title="Blog">
+                        <NavDropdown.Item href="https://docs.zoncircle.com/author/user/">CEO's posts</NavDropdown.Item>
+                        <NavDropdown.Item href="https://docs.zoncircle.com/social-media/">Social Media</NavDropdown.Item>
+                    </NavDropdown>
+                </Nav>
+            </Navbar>
+        </nav>
+        <Routes>
+            <Route
+                path=""
+                element={<RootRedirector root={root}/>}
+            />
+            <Route
+                path="/latest"
+                element={<AllItems defaultAgent={props.defaultAgent}/>}
+            />
+            <Route
+                path="/item/:id"
+                element={<ShowItem/>}
+            />
+            <Route
+                path="/subfolders-of/:id"
+                element={<SubFolders data-dir="sub" defaultAgent={props.defaultAgent}/>}
+            />
+            <Route
+                path="/superfolders-of/:id"
+                element={<SubFolders data-dir="super" defaultAgent={props.defaultAgent}/>}
+            />
+            <Route
+                path="/create"
+                element={<EditItem userScore={userScore}/>}
+            />
+            <Route
+                path="/create/for-folder/:folder"
+                element={<EditItem userScore={userScore}/>}
+            />
+            <Route
+                path="/create/comment/:folder"
+                element={<EditItem comment={true} userScore={userScore}/>}
+            />
+            <Route
+                path="/create-subfolder/for-folder/:folder"
+                element={<Edit1 defaultAgent={props.defaultAgent} userScore={userScore}/>}
+            />
+            <Route
+                path="/create-superfolder/for-folder/:folder"
+                element={<EditFolder super={true} defaultAgent={props.defaultAgent} userScore={userScore}/>}
+            />
+            <Route
+                path="/edit/folder/:folder"
+                element={<Edit2 defaultAgent={props.defaultAgent} userScore={userScore}/>}
+            />
+            <Route
+                path="/edit/item/:item"
+                element={<Edit3 userScore={userScore}/>}
+            />
+            <Route
+                path="/personhood"
+                element={<Person/>}
+            />
+            <Route
+                path="/prefs"
+                element={<Prefs/>}
+            />
+            <Route path="*" element={<ErrorHandler error={"No such page"}/>}/>
+        </Routes>
+    </>
 }
