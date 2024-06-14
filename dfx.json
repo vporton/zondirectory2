@@ -9,12 +9,12 @@
         "dist/frontend/"
       ],
       "type": "assets",
-      "dependencies": ["main", "personhood", "internet_identity"]
+      "dependencies": ["main"]
     },
     "main": {
       "main": "src/backend/main.mo",
       "type": "motoko",
-      "dependencies": ["items", "users", "CanDBIndex", "NacDBIndex"]
+      "dependencies": ["items", "users", "CanDBIndex", "NacDBIndex", "personhood", "internet_identity"]
     },
     "battery": {
       "main": "src/backend/battery.mo",
