@@ -232,7 +232,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         value: Text;
         relative: Bool;
         newKey: Int;
-    }): async () {
+    }): async Bool {
         checkCaller(caller);
 
         await* Reorder.move(Blob.fromArray(guid), {
