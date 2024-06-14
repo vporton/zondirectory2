@@ -15,6 +15,7 @@ import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 import { Actor, Agent } from "@dfinity/agent";
 import { ErrorContext } from "./ErrorContext";
+import { MainContext, MainContextType } from "./MainContext";
 
 export default function EditFolder(props: {
     super?: boolean,
@@ -23,6 +24,7 @@ export default function EditFolder(props: {
     defaultAgent: Agent | undefined,
 }) {
     const navigate = useNavigate();
+    const {fetchUserScore} = useContext<MainContextType>(MainContext);
     const [superFolder, setSuperFolder] = useState<string | undefined>();
     const [foldersList, setFoldersList] = useState<[string, 'beginning' | 'end'][]>([]);
     const [antiCommentsList, setAntiCommentsList] = useState<[string, 'beginning' | 'end'][]>([]);
@@ -101,6 +103,7 @@ export default function EditFolder(props: {
                                 }
                             }
                             navigate("/item/"+ref);
+                            await fetchUserScore!(); // TODO: `!`
                         }
                         catch (e) {
                             if (/Canister trapped explicitly: spam/.test(e)) {

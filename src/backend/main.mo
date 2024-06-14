@@ -72,8 +72,8 @@ shared actor class ZonBackend() = this {
     };
   };
 
-  public shared({caller}) func getUserScore(hint: ?Principal): async ?(Principal, Nat) {
-    let sk = "u/" # Principal.toText(caller);
+  public shared func getUserScore(user: Principal, hint: ?Principal): async ?(Principal, Nat) {
+    let sk = "u/" # Principal.toText(user);
     let ?(part, v) = await CanDBIndex.getAttributeByHint("user", hint, {sk; subkey = "p"}) else {
       return null;
     };

@@ -277,6 +277,25 @@ shared({caller = initialOwner}) actor class Items() = this {
     } else {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rsv", #end);
     };
+
+    // TODO: Check that the item was not in this folder already:
+    let userSK = "u/" # Principal.toText(caller);
+    let (hint1, n) = switch (await CanDBIndex.getAttributeByHint("user", null, {sk = userSK; subkey = "p"})) { // TODO: add hint
+      case (?(part, v)) { 
+        switch (v) {
+          case (?(#int n)) (?part, Int.abs(n));
+          case _ (null, 0);
+        };
+      };
+      case null {
+        (null, 0);
+      };
+    };
+    let value = Nat.min(n + ConfigMisc.postScore, ConfigMisc.scoreLimit);
+    let newHint2 = await CanDBIndex.putAttributeNoDuplicates(
+      "user", hint1, {sk = userSK; subkey = "p"; value = #int value}
+    );
+    ignore newHint2; // TODO
   };
 
   /// `key1` and `key2` are like `"st"` and `"rst"`
@@ -534,31 +553,13 @@ shared({caller = initialOwner}) actor class Items() = this {
       await parentCanister.putAttribute({ sk = "i/" # Nat.toText(parent); subkey = "sv"; value = data });
     };
 
-    let alreadyExisted = await NacDBIndex.reorderMove(GUID.nextGuid(guidGen), {
+    ignore await NacDBIndex.reorderMove(GUID.nextGuid(guidGen), {
       order;
       value = Nat.toText(child) # "@" # Principal.toText(childPrincipal);
       relative = true;
       newKey = -difference * 2**16;
     });
-    if (not alreadyExisted) {
-      let userSK = "u/" # Principal.toText(caller);
-      let (hint1, n) = switch (await CanDBIndex.getAttributeByHint("user", null, {sk = userSK; subkey = "p"})) { // TODO: add hint
-        case (?(part, v)) { 
-          switch (v) {
-            case (?(#int n)) (?part, Int.abs(n));
-            case _ (null, 0);
-          };
-        };
-        case null {
-          (null, 0);
-        };
-      };
-      let value = Nat.min(n + ConfigMisc.postScore, ConfigMisc.scoreLimit);
-      let newHint2 = await CanDBIndex.putAttributeNoDuplicates(
-        "user", hint1, {sk = userSK; subkey = "p"; value = #int value}
-      );
-      ignore newHint2; // TODO
-    };
+    ();
   };
 
   /// Insert item into the beginning of the global list.

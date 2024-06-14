@@ -16,10 +16,12 @@ import { AuthContext } from "./auth/use-auth-client";
 import { BusyContext } from "./App";
 import { Actor } from "@dfinity/agent";
 import { ErrorContext } from "./ErrorContext";
+import { MainContext, MainContextType } from "./MainContext";
 
 export default function EditItem(props: {itemId?: string, comment?: boolean}) {
     const routeParams = useParams();
     const navigate = useNavigate();
+    const {fetchUserScore} = useContext<MainContextType>(MainContext);
     const [mainFolder, setMainFolder] = useState<string | undefined>(undefined); // TODO: For a comment, it may be not a folder.
     const [foldersList, setFoldersList] = useState<[string, 'beginning' | 'end'][]>([]);
     const [antiCommentsList, setAntiCommentsList] = useState<[string, 'beginning' | 'end'][]>([]);
@@ -108,6 +110,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                                 await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
                                 await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
                                 navigate("/item/"+ref);
+                                await fetchUserScore!(); // TODO: `!`
                             }
                             catch (e) {
                                 if (/Canister trapped explicitly: spam/.test(e)) {
