@@ -12,6 +12,8 @@ import Nat16 "mo:base/Nat16";
 import Nat8 "mo:base/Nat8";
 import Buffer "mo:base/Buffer";
 import RBTree "mo:base/RBTree";
+import Nat64 "mo:base/Nat64";
+import Bool "mo:base/Bool";
 import Itertools "mo:itertools/Iter";
 import Types "HttpTypes";
 import Call "canister:call";
@@ -34,10 +36,9 @@ module {
         lib.encodeBlob(blob);
     };
 
-    // TODO: Cache the return value.
-    private func fullPrompt(textToCheck: Text): Text {
-        let prompt = promptBase # textToCheck;
-        let prompt2Parts = Iter.map(prompt.chars(), func (c: Char): Text {
+    private func jsonEncodeString(s: Text): Text {
+        // TODO: Rename variables in this function.
+        let prompt2Parts = Iter.map(s.chars(), func (c: Char): Text {
             if (c == '\"') {
                 "\\\"";
             } else if (c == '\\') {
@@ -52,13 +53,19 @@ module {
         let ?prompt3 = prompt2 else {
             Debug.trap("programming error");
         };
+        prompt3;
+    };
+
+    // TODO: Cache the return value.
+    private func fullPrompt(textToCheck: Text): Text {
+        let prompt = jsonEncodeString(promptBase # textToCheck);
         JSON.show(#Object([
             ("model", #String("gpt-3.5-turbo")),
             ("max_tokens", #Number(1)), // answer: yes or no
             ("temperature", #Number(0)),
             ("messages", #Array([
                 #Object([("role", #String("system")), ("content", #String("You are an automated email filter."))]),
-                #Object([("role", #String("user")), ("content", #String(prompt3))]),
+                #Object([("role", #String("user")), ("content", #String(prompt))]),
             ])),
         ]));
     };
@@ -124,10 +131,207 @@ module {
             bodyText,
             {
                 timeout = 60_000_000_000; // 1 min
-                max_response_bytes = ?1564;
+                max_response_bytes = ?(1564 + Nat64.fromNat(Text.size(bodyText)));
                 cycles = 49765600;
             },
         );
+    };
+
+    private func retrieveAndStoreInVectorDB(itemId: Text, text: Text): async* () {
+        let embedding = await* retrieveEmbedding(text);
+        await* storeInVectorDB(itemId, embedding);
+    };
+
+    private func retrieveEmbedding<system>(
+        text: Text,
+    ): async* [Float] {
+        let headers = Http.headersNew();
+        for (h in Config.openaiRequestHeaders.vals()) {
+            headers.put(h.name, [h.value]);
+        };
+        let body = JSON.show(#Object([
+            ("input", #String(Text.fromIter(Itertools.take(text.chars(), 750)))),
+            ("model", #String("text-embedding-3-small")),
+        ]));
+        let jsonRes = await* obtainSuccessfulJSONResponse(
+            Config.openaiUrlBase # "v1/embeddings",
+            headers,
+            body,
+            {
+                timeout = 60_000_000_000; // 1 min
+                max_response_bytes = ?7750;
+                cycles = 55240000;
+            },
+        );
+        let dataObj = getJSONSubObject(jsonRes, "data");
+        let embedding = getJSONSubObject(dataObj, "embedding");
+        let #Array(embeddingArray) = embedding else {
+            Debug.trap("embedding: not JSON array type");
+        };
+        Iter.toArray(Iter.map(embeddingArray.vals(), func (x: JSON.JSON): Float {
+            let #Float(x2) = x else {
+                Debug.trap("embedding: not JSON float type");
+            };
+            x2;
+        }));
+    };
+
+    private func storeInVectorDB(
+        itemId: Text,
+        embedding: [Float],
+    ): async* () {
+        let headers = Http.headersNew();
+        for (h in Config.pineconeRequestHeaders.vals()) {
+            headers.put(h.name, [h.value]);
+        };
+        let values = Iter.map(embedding.vals(), func (x: Float): JSON.JSON { #Float(x) });
+        let body = JSON.show(#Object([
+            ("vectors",
+                #Array([ // one element
+                    #Object([
+                        ("id", #String(itemId)),
+                        ("values", #Array(values)),
+                    ])
+                ])
+            ),
+        ]));
+        let jsonRes = await* obtainSuccessfulJSONResponse(
+            Config.pineconeUrlBase # "vectors/upsert",
+            headers,
+            body,
+            {
+                timeout = 60_000_000_000; // 1 min
+                max_response_bytes = ?7750; // FIXME
+                cycles = 55240000; // FIXME
+            },
+        );        
+    };
+
+    /// Return the list of IDs (in current version of one ID) along with their similarity scores.
+    private func queryVectorDBForSimilar(vector: [Float]): async* ?[(Text, Float)] {
+        let headers = Http.headersNew();
+        for (h in Config.pineconeRequestHeaders.vals()) {
+            headers.put(h.name, [h.value]);
+        };
+        let values = Iter.map(embedding.vals(), func (x: Float): JSON.JSON { #Float(x) });
+        let body = JSON.show(#Object([
+            ("vector", values),
+            ("topK", #Number 1),
+        ]));
+        let jsonRes = await* obtainSuccessfulJSONResponse(
+            Config.pineconeUrlBase # "query",
+            headers,
+            body,
+            {
+                timeout = 60_000_000_000; // 1 min
+                max_response_bytes = ?7750; // FIXME
+                cycles = 55240000; // FIXME
+            },
+        );
+        let matches = getJSONSubObject(choice, "matches");
+        let #Array(mathesArr) = matches else {
+            Debug.trap("wrong Pinecone search results");
+        };
+        if (Array.size(mathesArr) == 0) {
+            return null;
+        };
+        let elt = mathesArr[0];
+        let #String id = getJSONSubObject(json, "id") else {
+            Debug.trap("wrong vector ID");
+        };
+        let #Float score = getJSONSubObject(json, "score") else {
+            Debug.trap("score");
+        };
+        Debug.print("SCORE: " # debug_show(score));
+        ?[(id, score)];
+    };
+
+    private func fullPrompt2(newPost: Text, similarText: Text): Text {
+        let genericPrompt = "You are an AI moderator for a social network. Your job is to identify repetitive posts.\n\nDetermine if the new post is duplicate content. Consider that posts with different chapters and links, like \"Chapter 1. Link: https://example.com/1\" and \"Chapter 2. Link: https://example.com/2\", should pass moderation as \"Not duplicate\". Answer only \"Duplicate\" or \"Not duplicate\" and nothing else.\n\nNew Post: <<{_NEWPOST_}>>\n\nHere is the most similar post found in the database: <<{SIMILARPOST}>>";
+        let prompt0 = Text.replace(genericPrompt, #text "_NEWPOST_", newPost);
+        let prompt = Text.replace(genericPrompt, #text "_SIMILARPOST_", similarText); // TODO: The newPost may contain the string _SIMILARPOST_.
+        JSON.show(#Object([
+            ("model", #String("gpt-3.5-turbo")),
+            ("max_tokens", #Number(2)), // "Not duplicate" is 2 tokens
+            ("temperature", #Number(0)),
+            ("messages", #Array([
+                #Object([("role", #String("system")), ("content", #String("You are an automated email filter."))]),
+                #Object([("role", #String("user")), ("content", #String(prompt))]),
+            ])),
+        ]));
+    };
+
+    private func aiStage2<system>(newPost: Text, similarText: Text): async* JSON.JSON {
+        let bodyText = fullPrompt(newPost, similarText);
+        let headers = Http.headersNew();
+        for (h in Config.openaiRequestHeaders.vals()) {
+            headers.put(h.name, [h.value]);
+        };
+        await* obtainSuccessfulJSONResponse(
+            Config.openaiUrlBase # "v1/chat/completions",
+            headers,
+            bodyText,
+            {
+                timeout = 60_000_000_000; // 1 min
+                max_response_bytes = ?(1564 + Nat64.fromNat(Text.size(bodyText))); // FIXME
+                cycles = 49765600; // FIXME
+            },
+        );
+    };
+
+    private func smartlyRejectSimilar(text: Text): async* () {
+        let ourEmbedding = await* retrieveEmbedding(text);
+        let ?similar = await* queryVectorDBForSimilar(ourEmbedding) else {
+            return; // OK, because nothing similar
+        };
+        let (closestId, closestScore) = similar[0];
+        // FIXME: If high score, omit the further.
+        let words = Text.split(closestId, #char '@'); // a bit inefficient
+        let w1o = words.next();
+        let w2o = words.next();
+        let (?w1, ?w2) = (w1o, w2o) else {
+            Debug.trap("order: programming error");
+        };
+        let ?w1i = Nat.fromText(w1) else {
+            Debug.trap("order: programming error");
+        };
+        let closestPartition: Can.PartitionCanister = actor(w2);
+    
+        let key = "i/" # Nat.toText(closestId);
+        let item = switch (await db.getAttribute({sk = key}, "i")) {
+            case (?oldItemRepr) {
+                lib.deserializeItem(oldItemRepr);
+            };
+            case null { Debug.trap("no item") };
+        };
+        let closestText = switch (await db.getAttribute({sk = key}, "t")) {
+            case (?text) {
+                if (text == "") {
+                    "";
+                } else {
+                    let iter = text.chars();
+                    iter.next(); // skip type marker
+                    Text.fromIter(iter);
+                }
+            };
+            case null { "" };
+        };
+        let closestFullText = item.title # "\n\n" # item.description # "\n\n" # closestText;
+
+        let json = aiStage2(test, closestFullText);
+        let choices = getJSONSubObject(json, "choices");
+        let #Array(choicesArr) = choices else {
+            Debug.trap("Not JSON array.");
+        };
+        let choice = choicesArr[0];
+        let message = getJSONSubObject(choice, "message");
+        let content = getJSONSubObject(message, "content");
+        let #String(contentText) = content else {
+            Debug.trap("JSON: not text.");
+        };
+        if (contentText.toLowercase() != "not duplicate") {
+            Debug.trap("this text is already present in our DB");
+        }
     };
 
     private func getJSONSubObject(json: JSON.JSON, name: Text): JSON.JSON {
