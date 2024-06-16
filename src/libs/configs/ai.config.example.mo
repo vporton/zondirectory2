@@ -1,5 +1,7 @@
 module {
-    public let openaiApiKey = "<key>";
-    public let cloudfrontSecurityKey = "<key>";
-    public let openaiApiUrl = "<URL>"; // with trailing slash
+    public let openaiUrlBase = "https://api.openai.com/";
+    public let openaiRequestHeaders = [ // Same-named headers are not supported.
+        {name = "Content-Type"; value = "application/json"},
+        {name = "Authorization"; value = "Bearer XXX"},
+    ];
 }

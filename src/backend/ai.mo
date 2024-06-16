@@ -1,4 +1,4 @@
-import Cycles "mo:base/ExperimentalCycles";
+import Http "mo:join-proxy-motoko";
 import JSON "mo:json.mo";
 import Blob "mo:base/Blob";
 import Char "mo:base/Char";
@@ -11,8 +11,10 @@ import Nat32 "mo:base/Nat32";
 import Nat16 "mo:base/Nat16";
 import Nat8 "mo:base/Nat8";
 import Buffer "mo:base/Buffer";
+import RBTree "mo:base/RBTree";
 import Itertools "mo:itertools/Iter";
 import Types "HttpTypes";
+import Call "canister:call";
 import Config "../libs/configs/ai.config";
 import lib "lib";
 
@@ -61,27 +63,38 @@ module {
         ]));
     };
 
-    // The management canister (used internally).
-    let ic : Types.IC = actor ("aaaaa-aa");
-
-    /// Obtain a response from Gitcoin Passport API and check that it's OK.
-    private func obtainSuccessfulResponse(request: Types.HttpRequestArgs): async* Text {
-        Cycles.add<system>(40_000_000); // FIXME
-        let response: Types.HttpResponsePayload = await ic.http_request(request);
-        let ?body = Text.decodeUtf8(Blob.fromArray(response.body)) else {
-            Debug.trap("AI response is not UTF-8");
+    func obtainSuccessfulResponse(
+        url: Text,
+        headers: RBTree.RBTree<Text, [Text]>,
+        abody: Text,
+        params: {timeout: Nat; max_response_bytes: ?Nat64; cycles: Nat}
+    ) : async* Text {
+        let res = await Call.callHttp(
+            {
+                url;
+                headers = headers.share();
+                body = Text.encodeUtf8(abody);
+                method = #post;
+            },
+            params,
+        );
+        let ?body = Text.decodeUtf8(res.body) else {
+            Debug.trap("non UTF-8 response");
         };
-        if (response.status != 200) {
-            Debug.print("AI HTTP response code " # Nat.toText(response.status));
-            Debug.print("BODY: " # body);
-            Debug.trap("AI HTTP response code " # Nat.toText(response.status));
+        if (res.status != 200) {
+            Debug.trap("invalid response from proxy: " # body);
         };
         body;
     };
 
     /// Obtain a response from Gitcoin Passport API and convert it to JSON.
-    private func obtainSuccessfulJSONResponse(request: Types.HttpRequestArgs): async* JSON.JSON {
-        let body = await* obtainSuccessfulResponse(request);
+    private func obtainSuccessfulJSONResponse(
+        url: Text,
+        headers: RBTree.RBTree<Text, [Text]>,
+        abody: Text,
+        params: {timeout: Nat; max_response_bytes: ?Nat64; cycles: Nat}
+    ): async* JSON.JSON {
+        let body = await* obtainSuccessfulResponse(url, headers, abody, params);
         let ?json = JSON.parse(body) else {
             Debug.trap("AI response is not JSON");
         };
@@ -97,28 +110,24 @@ module {
         };
     };
 
-    private func requestAI<system>(
+    private func aiCompletion<system>(
         textToCheck: Text,
-        transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload,
     ): async* JSON.JSON {
         let bodyText = fullPrompt(textToCheck);
-        let body = Blob.toArray(Text.encodeUtf8(bodyText));
-        let request : Types.HttpRequestArgs = {
-            body = ?body;
-            headers = [
-                {name = "Content-Type"; value = "application/json"},
-                {name = "Authorization"; value = "Bearer " # Config.openaiApiKey},
-                {name = "X-JoinProxy-Key"; value = "Bearer " # Config.proxySecurityKey},
-            ];
-            max_response_bytes = ?10000;
-            method = #post;
-            url = Config.openaiApiUrl # "v1/chat/completions";
-            transform = ?{
-                function = transform;
-                context = ""; // Blob.fromArray([]);
-            };
+        let headers = Http.headersNew();
+        for (h in Config.openaiRequestHeaders.vals()) {
+            headers.put(h.name, [h.value]);
         };
-        await* obtainSuccessfulJSONResponse(request);
+        await* obtainSuccessfulJSONResponse(
+            Config.openaiUrlBase # "v1/chat/completions",
+            headers,
+            bodyText,
+            {
+                timeout = 60_000_000_000; // 1 min
+                max_response_bytes = ?1564;
+                cycles = 49765600;
+            },
+        );
     };
 
     private func getJSONSubObject(json: JSON.JSON, name: Text): JSON.JSON {
@@ -136,9 +145,8 @@ module {
     /// `choices[0].message.content`
     private func obtainAICompletion(
         textToCheck: Text,
-        transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload,
     ): async* Text {
-        let json = await* requestAI(textToCheck, transform);
+        let json = await* aiCompletion(textToCheck);
         let choices = getJSONSubObject(json, "choices");
         let #Array(choicesArr) = choices else {
             Debug.trap("Not JSON array.");
@@ -156,9 +164,8 @@ module {
     /// FIXME: Limit the length of the text.
     public func checkSpam(
         textToCheck: Text,
-        transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload,
     ): async* Bool {
-        let res = await* obtainAICompletion(textToCheck, transform);
+        let res = await* obtainAICompletion(textToCheck);
         Text.toLowercase(Text.fromIter(Itertools.take(res.chars(), 3))) != "yes";
     };
 }

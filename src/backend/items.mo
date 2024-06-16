@@ -54,10 +54,6 @@ shared({caller = initialOwner}) actor class Items() = this {
 
   stable var maxId: Nat = 0;
 
-  public query func checkSpamTransform(args: AITypes.TransformArgs): async AITypes.HttpResponsePayload {
-    AI.removeHTTPHeaders(args);
-  };
-
   private func itemCheckSpam(item: lib.ItemDataWithoutOwner): async* () {
     if (not (await* AI.checkSpam(item.title # "\n" # item.description, checkSpamTransform))) {
       Debug.trap("spam");
@@ -154,7 +150,7 @@ shared({caller = initialOwner}) actor class Items() = this {
 
   // TODO: If item set is successful and setPostText is unsuccessful, this is counter-intuitive.
   public shared({caller}) func setPostText(canisterId: Principal, _itemId: Nat, text: Text) {
-    if (not (await* AI.checkSpam(text, checkSpamTransform))) {
+    if (not (await* AI.checkSpam(text))) {
       Debug.trap("spam");
     };
 

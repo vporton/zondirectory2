@@ -24,6 +24,7 @@ passport-client = "0.4.7"
 cycles-simple = "0.11.0"
 stablehashmap = "1.0.0"
 candb-multi = "0.11.8"
+join-proxy-motoko = "https://github.com/vporton/join-proxy-motoko#master@3582456b29cb81e0e304f7df2a3935da670725f6"
 
 [dev-dependencies]
 matchers = "https://github.com/kritzcreek/motoko-matchers#v1.3.0"

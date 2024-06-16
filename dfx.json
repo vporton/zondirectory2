@@ -29,12 +29,16 @@
     "items": {
       "main": "src/backend/items.mo",
       "type": "motoko",
-      "dependencies": ["CanDBIndex", "NacDBIndex"]
+      "dependencies": ["CanDBIndex", "NacDBIndex", "call"]
     },
     "personhood": {
       "main": "src/backend/personhood.mo",
       "type": "motoko",
       "dependencies": ["ic_eth", "CanDBIndex"]
+    },
+    "call": {
+      "main": "src/backend/http/call.mo",
+      "type": "motoko"
     },
     "payments": {
       "main": "src/backend/payments.mo",
