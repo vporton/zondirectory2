@@ -143,7 +143,7 @@ module {
     };
 
     /// `choices[0].message.content`
-    private func obtainAICompletion(
+    private func autoModerator(
         textToCheck: Text,
     ): async* Text {
         let json = await* aiCompletion(textToCheck);
@@ -165,7 +165,7 @@ module {
     public func checkSpam(
         textToCheck: Text,
     ): async* Bool {
-        let res = await* obtainAICompletion(textToCheck);
+        let res = await* autoModerator(textToCheck);
         Text.toLowercase(Text.fromIter(Itertools.take(res.chars(), 3))) != "yes";
     };
 }
