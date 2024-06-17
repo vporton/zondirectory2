@@ -49,7 +49,10 @@ export const BusyWidget: React.FC<{children: React.ReactNode}> = (props: { child
     }, [])
     return <>
         <div id="overlay" style={{display: (busy ? 'flex' : 'none')}}>
-            <div id="overlayInside">Wait...</div>
+            <div id="overlayInside">
+                Wait...<br/>
+                Creating a post can take awhile, because we store it in a blockchain.
+            </div>
         </div>
         <div id="content">
             {props.children}
