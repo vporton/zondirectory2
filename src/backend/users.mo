@@ -52,4 +52,16 @@ shared({caller = initialOwner}) actor class Users() = this {
     let key = "u/" # Principal.toText(caller);
     await db.delete({sk = key});
   };
+
+  // FIXME
+  // system func inspect({
+  //     arg : Blob;
+  //     caller : Principal;
+  //     msg :
+  //       {
+  //       };
+  //   }): Bool {
+  //       // checkCaller(caller);
+  //       true;
+  //   }
 }

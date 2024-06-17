@@ -106,4 +106,23 @@ shared actor class ZonBackend() = this {
   public shared func get_trusted_origins(): async [Text] {
     return [];
   };
+
+  // FIXME
+  system func inspect({
+      arg : Blob;
+      caller : Principal;
+      msg :
+        {
+          #getRootItem : () -> ();
+          #getUserScore : () -> (Principal, ?Principal);
+          #get_trusted_origins : () -> ();
+          #init : () -> ();
+          #removeMainOwner : () -> ();
+          #setMainOwner : () -> Principal;
+          #setRootItem : () -> (Principal, Nat)
+        }
+    }): Bool {
+        // checkCaller(caller);
+        true;
+    }
 }
