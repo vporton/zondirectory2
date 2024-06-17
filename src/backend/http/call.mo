@@ -45,10 +45,12 @@ shared({caller = initialOwner}) actor class HttpCaller() = this {
         v;
     };
 
-    public shared func callHttp(
+    public shared({caller}) func callHttp(
         request: Http.WrappedHttpRequest,
         params: {timeout: Nat; max_response_bytes: ?Nat64; cycles: Nat}
     ): async Types.HttpResponsePayload {
+        checkCaller(caller);
+
         Cycles.add<system>(params.cycles);
         await* Http.checkedHttpRequestWrapped(requestsChecker(), request, ?{ function = transform; context = "" }, params);
     };
