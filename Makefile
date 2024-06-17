@@ -15,7 +15,7 @@ deploy:
 	dfx ledger fabricate-cycles --amount 1000000000 --canister main
 
 .PHONY: init
-init: fabricate-cycles init-main init-battery init-CanDBIndex init-NacDBIndex init-items init-createItemData
+init: fabricate-cycles init-main init-battery init-CanDBIndex init-NacDBIndex init-items init-call init-createItemData
 
 .PHONY: init-main
 init-main:
@@ -39,6 +39,10 @@ init-items:
 .PHONY: init-users
 init-users:
 	. ./.env && dfx canister call --network $(NETWORK) users init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; })"
+
+.PHONY: init-call
+init-call:
+	. ./.env && dfx canister call --network $(NETWORK) call init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ITEMS\"; })"
 
 .PHONY: init-battery
 init-battery:

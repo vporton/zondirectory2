@@ -55,9 +55,12 @@ shared({caller = initialOwner}) actor class Items() = this {
   stable var maxId: Nat = 0;
 
   private func itemCheckSpam(item: lib.ItemDataWithoutOwner): async* () {
-    if (not (await* AI.checkSpam(item.title # "\n" # item.description, checkSpamTransform))) {
+    if (not (await* AI.checkSpam(item.title # "\n" # item.description))) {
       Debug.trap("spam");
     };
+
+    // FIXME: Also blog post text.
+    await* AI.smartlyRejectSimilar(item.title # "\n" # item.description);
   };
 
   public shared({caller}) func createItemData(item: lib.ItemTransferWithoutOwner)
@@ -127,6 +130,8 @@ shared({caller = initialOwner}) actor class Items() = this {
     if (not item.communal) {
       await* insertIntoUserTimeStream(caller, (canisterId, itemId));
     };
+    // FIXME: Also text. FIXME: also on update.
+    await* AI.retrieveAndStoreInVectorDB(Nat.toText(itemId) # "@" # Principal.toText(canisterId), item.data.title # "\n" # item.data.description);
     (canisterId, itemId);
   };
 
