@@ -24,25 +24,25 @@ export const BusyWidget: React.FC<{children: React.ReactNode}> = (props: { child
         document.addEventListener('DOMContentLoaded', function () {
             const overlay = document.getElementById('overlay')!;
         
-            // Запретить фокус на элементах внутри overlay
+            // Prevent focus on elements inside the overlay
             overlay.addEventListener('focus', (event) => {
                 event.stopPropagation();
                 overlay.focus();
             }, true);
         
-            // Обработчик для перехвата всех событий клавиатуры
+            // Handler to intercept all keyboard events
             overlay.addEventListener('keydown', (event) => {
                 event.stopPropagation();
                 event.preventDefault();
             });
         
-            // Перехват всех событий клика
+            // Intercept all click events
             overlay.addEventListener('click', (event) => {
                 event.stopPropagation();
                 event.preventDefault();
             });
         
-            // Принудительно устанавливаем фокус на overlay
+            // Force focus on the overlay
             overlay.tabIndex = 0;
             overlay.focus();
         });
