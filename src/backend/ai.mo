@@ -295,7 +295,7 @@ module {
         if (closestScore < 0.75) {
             return; // OK, because nothing similar
         };
-        Debug.trap("too similar to existing message")
+        Debug.trap("too similar to existing message");
     };
 
     private func getJSONSubObject(json: JSON.JSON, name: Text): JSON.JSON {
