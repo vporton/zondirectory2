@@ -60,5 +60,5 @@ shared({caller = initialOwner}) actor class Battery() = this {
 
     private func topUpAllCanisters(): async () {
         await* CyclesSimple.topUpAllCanisters(battery);
-    }
+    };
 }
