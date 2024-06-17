@@ -66,6 +66,9 @@ shared({caller = initialOwner}) actor class Items() = this {
   public shared({caller}) func createItemData(item: lib.ItemTransferWithoutOwner)
     : async (Principal, Nat)
   {
+    if (Text.size(item.data.title) == 0) {
+      Debug.trap("no item title");
+    };
     await* itemCheckSpam(item.data);
     let (canisterId, itemId) = if (item.communal) {
       let variant: lib.ItemVariant = { creator = caller; item = item.data; };
@@ -139,6 +142,9 @@ shared({caller = initialOwner}) actor class Items() = this {
   ///
   /// FIXME: Converting to communal (here or in other place?) and then excluding from user list.
   public shared({caller}) func setItemData(canisterId: Principal, itemId: Nat, item: lib.ItemDataWithoutOwner) {
+    if (Text.size(item.title) == 0) {
+      Debug.trap("no item title");
+    };
     await* itemCheckSpam(item);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(itemId); // TODO: better encoding
