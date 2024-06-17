@@ -37,7 +37,6 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
     const [post, setPost] = useState("");
     enum SelectedTab {selectedLink, selectedOther}
     const [selectedTab, setSelectedTab] = useState(SelectedTab.selectedLink);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     function onSelectTab(index) {
         switch (index) {
             case 0:
@@ -49,13 +48,14 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
             }
     }
     const { setError } = useContext(ErrorContext)!;
+    const { setBusy } = useContext(BusyContext)!;
     return (
             <BusyContext.Consumer>
                 {({setBusy}) =>
                 <AuthContext.Consumer>
                     {({agent, defaultAgent, isAuthenticated}) => {
                     async function submit() {
-                        setIsSubmitting(true);
+                        setBusy(true);
                         if (props.itemId !== undefined) {
                             const itemId = parseItemRef(props.itemId);
                             const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: itemId.canister, agent: defaultAgent});
@@ -119,7 +119,6 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                                 setError(e);
                             }
                         }
-                        setBusy(true);
                         await submitItem(itemData());
                         setBusy(false);
                     }
@@ -164,7 +163,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                             onChangeAntiComments={setAntiCommentsList}
                         />
                         <p>
-                            <Button onClick={submit} disabled={!isAuthenticated || isSubmitting}>Submit</Button>
+                            <Button onClick={submit} disabled={!isAuthenticated}>Submit</Button>
                             {props.itemId !== undefined &&
                                 <Button onClick={remove} disabled={!isAuthenticated}>Delete</Button>
                             }

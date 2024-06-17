@@ -36,7 +36,6 @@ export default function EditFolder(props: {
     const [locale, setLocale] = useState('en'); // TODO: user's locale
     const [title, setTitle] = useState("");
     const [shortDescription, setShortDescription] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
     useEffect(() => {
         if (props.folderId !== undefined) {
             const folderId = parseItemRef(props.folderId);
@@ -63,13 +62,14 @@ export default function EditFolder(props: {
             }
     }
     const { setError } = useContext(ErrorContext)!;
+    const { setBusy } = useContext(BusyContext)!;
     return (
         <BusyContext.Consumer>
         {({setBusy}) =>
             <AuthContext.Consumer>
             {({agent, isAuthenticated}) => {
                 async function submit() {
-                    setIsSubmitting(true);
+                    setBusy(true);
                     function itemData(): ItemDataWithoutOwner {
                         return {
                             locale,
@@ -112,9 +112,8 @@ export default function EditFolder(props: {
                             setError(e);
                         }
                     }
-                    // setBusy(true);
                     await submitItem(itemData());
-                    // setBusy(false);
+                    setBusy(false);
                 }
                 async function remove() {
                     if (!window.confirm("Really delete?")) {
@@ -158,7 +157,7 @@ export default function EditFolder(props: {
                         noComments={props.super === true}
                     />
                     <p>
-                        <Button onClick={submit} disabled={!isAuthenticated || isSubmitting}>Save</Button>{" "}
+                        <Button onClick={submit} disabled={!isAuthenticated}>Save</Button>{" "}
                         {props.folderId !== undefined &&
                             <Button onClick={remove} disabled={!isAuthenticated}>Delete</Button>
                         }
