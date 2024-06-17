@@ -61,21 +61,21 @@ export default function App() {
                         console.error('Login Failed: ', error);
                     },
                 }}}>
-                    <BrowserRouter>
-                        <ErrorProvider>
-                            <ErrorBoundary>
-                                <MainProvider>
-                                    <BusyProvider>
-                                        <BusyWidget>
+                    <BusyProvider>
+                        <BusyWidget>
+                            <BrowserRouter>
+                                <ErrorProvider>
+                                    <ErrorBoundary>
+                                        <MainProvider>
                                             <AuthContext.Consumer>
                                                 {({defaultAgent}) => <MyRouted defaultAgent={defaultAgent}/>}
                                             </AuthContext.Consumer>
-                                        </BusyWidget>
-                                    </BusyProvider>
-                                </MainProvider>
-                            </ErrorBoundary>
-                        </ErrorProvider>
-                    </BrowserRouter>
+                                        </MainProvider>
+                                    </ErrorBoundary>
+                                </ErrorProvider>
+                            </BrowserRouter>
+                        </BusyWidget>   
+                    </BusyProvider>
                 </AuthProvider>
             </Container>
         </>
