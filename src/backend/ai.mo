@@ -295,56 +295,7 @@ module {
         if (closestScore < 0.75) {
             return; // OK, because nothing similar
         };
-        // FIXME: If high score, omit the further.
-        let words = Text.split(closestId, #char '@'); // a bit inefficient
-        let w1o = words.next();
-        let w2o = words.next();
-        let (?w1, ?w2) = (w1o, w2o) else {
-            Debug.trap("order: programming error");
-        };
-        let ?w1i = Nat.fromText(w1) else {
-            Debug.trap("order: programming error");
-        };
-        let closestPartition: CanDBPartition.CanDBPartition = actor(w2);
-    
-        let key = "i/" # closestId;
-        let item0 = await closestPartition.getItem(Option.unwrap(Nat.fromText(closestId)));
-        let ?item = item0 else {
-            Debug.trap("programming error");
-        };
-        let closestText = switch (await closestPartition.getAttribute({sk = key}, "t")) {
-            case (?#text text) {
-                if (text == "") {
-                    "";
-                } else {
-                    let iter = text.chars();
-                    ignore iter.next(); // skip type marker
-                    Text.fromIter(iter);
-                }
-            };
-            case null { "" };
-            case _ {
-                Debug.trap("programming error");
-            }
-        };
-        let closestFullText = item.data.item.title # "\n\n" # item.data.item.description # "\n\n" # closestText;
-
-        Debug.print("SS" # debug_show((text, closestFullText)));
-        let json = await* aiStage2(text, closestFullText);
-        Debug.print("TT");
-        let choices = getJSONSubObject(json, "choices");
-        let #Array(choicesArr) = choices else {
-            Debug.trap("Not JSON array.");
-        };
-        let choice = choicesArr[0];
-        let message = getJSONSubObject(choice, "message");
-        let content = getJSONSubObject(message, "content");
-        let #String(contentText) = content else {
-            Debug.trap("JSON: not text.");
-        };
-        if (Text.toLowercase(contentText) != "not duplicate") {
-            Debug.trap("this text is already present in our DB");
-        }
+        Debug.trap("too similar to existing message")
     };
 
     private func getJSONSubObject(json: JSON.JSON, name: Text): JSON.JSON {
