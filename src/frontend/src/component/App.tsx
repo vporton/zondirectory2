@@ -47,7 +47,7 @@ export default function App() {
             <Container>
                 <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
                     It is a preliminary beta version. Some features are missing, notably
-                    images/media and monetization.
+                    images/media, communal items (collective editing) and monetization.
                     Neither security of your data, nor any quality of service is warranted.
                 </p>
                 <h1>Zon Social Network</h1>
