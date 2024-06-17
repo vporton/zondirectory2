@@ -28,10 +28,18 @@ Button.thumbs.active {
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 9999;
     pointer-events: all;
+    justify-content: center;
+    align-items: center;
     display: none;
+}
+
+#overlayInside {
+    color: white;
+    font-size: 28px;
+    font-family: Arial, sans-serif;
 }
 
 #content {
     position: relative;
-    z-index: 1; /* Контент должен иметь более низкий z-index */
+    z-index: 1;
 }
