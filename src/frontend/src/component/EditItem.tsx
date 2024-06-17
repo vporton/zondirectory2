@@ -13,7 +13,7 @@ import EditFoldersList from "./EditFoldersList";
 import { parseItemRef, serializeItemRef } from "../data/Data";
 import { addToMultipleFolders } from "../util/folder";
 import { AuthContext } from "./auth/use-auth-client";
-import { BusyContext } from "./App";
+import { BusyContext } from "./busy";
 import { Actor } from "@dfinity/agent";
 import { ErrorContext } from "./ErrorContext";
 import { MainContext, MainContextType } from "./MainContext";

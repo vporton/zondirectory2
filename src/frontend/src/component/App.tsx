@@ -31,9 +31,8 @@ import { ErrorBoundary, ErrorHandler } from "./ErrorBoundary";
 import { ErrorProvider } from "./ErrorContext";
 import Prefs from "./Prefs";
 import { MainContext, MainContextType, MainProvider } from './MainContext';
+import { BusyContext, BusyProvider, BusyWidget } from "./busy";
 
-export const BusyContext = createContext<any>(undefined); // TODO: type
- 
 export default function App() {
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
     const identityProvider = getIsLocal() ? `http://${identityCanister}.localhost:8000` : `https://identity.ic0.app`;
@@ -47,7 +46,7 @@ export default function App() {
             <Container>
                 <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
                     It is a preliminary beta version. Some features are missing, notably
-                    images/media and monetization.
+                    images/media, communal items (collective editing) and monetization.
                     Neither security of your data, nor any quality of service is warranted.
                 </p>
                 <h1>Zon Social Network</h1>
@@ -66,13 +65,13 @@ export default function App() {
                         <ErrorProvider>
                             <ErrorBoundary>
                                 <MainProvider>
-                                    <BusyContext.Provider value={{busy, setBusy}}>
-                                        {busy ? <p>Processing...</p> :
-                                        <AuthContext.Consumer>
-                                            {({defaultAgent}) => <MyRouted defaultAgent={defaultAgent}/>}
-                                        </AuthContext.Consumer>
-                                        }
-                                    </BusyContext.Provider>
+                                    <BusyProvider>
+                                        <BusyWidget>
+                                            <AuthContext.Consumer>
+                                                {({defaultAgent}) => <MyRouted defaultAgent={defaultAgent}/>}
+                                            </AuthContext.Consumer>
+                                        </BusyWidget>
+                                    </BusyProvider>
                                 </MainProvider>
                             </ErrorBoundary>
                         </ErrorProvider>
