@@ -48,7 +48,7 @@ export const BusyWidget: React.FC<{children: React.ReactNode}> = (props: { child
         });
     }, [])
     return <>
-        <div id="overlay" style={{display: (/*busy*/true ? 'flex' : 'none')}}>
+        <div id="overlay" style={{display: (busy ? 'flex' : 'none')}}>
             <div id="overlayInside">Wait...</div>
         </div>
         <div id="content">
