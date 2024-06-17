@@ -43,3 +43,9 @@ Button.thumbs.active {
     position: relative;
     z-index: 1;
 }
+
+/* TODO: Make this work. */
+.wideDialog {
+    width: 100% !important;
+    max-width: 100% !important;
+}

@@ -1,7 +1,8 @@
 import React, { Component, ErrorInfo, ReactNode, useContext } from "react";
 import { ErrorContext } from "./ErrorContext";
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "react-bootstrap";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -23,10 +24,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps> {
   }
 
   public render() {
-    if (this.context && this.context.hasError) {
-      return <ErrorHandler error={this.context.message} />;
-    }
-    return this.props.children;
+    return <>
+      <ErrorHandler error={this.context?.message?.toString()}/>
+      {this.props.children}
+    </>;
   }
 }
 
@@ -37,13 +38,22 @@ interface ErrorHandlerProps {
 function ErrorHandler({ error }: ErrorHandlerProps) {
   const navigate = useNavigate();
   const { resetError } = useContext(ErrorContext)!;
-  // TODO: Go back, not to the homepage.
   return (
-    <div role="alert">
-      <h2>Error</h2>
-      <p style={{ color: 'red' }}>{error?.toString()}</p>
-      <p><Button onClick={() => { resetError(); navigate("/")}}>Return back.</Button></p>
-    </div>
+    <Modal show={error !== undefined} className="wideDialog">
+      <Modal.Header closeButton>
+        <Modal.Title>
+        Error
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p style={{ color: 'red' }}>{error}</p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={resetError}>
+        Close
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 }
 
