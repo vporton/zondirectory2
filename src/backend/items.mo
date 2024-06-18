@@ -156,7 +156,7 @@ shared({caller = initialOwner}) actor class Items() = this {
 
   /// We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
   ///
-  /// FIXME: Converting to communal (here or in other place?) and then excluding from user list.
+  /// TODO: Converting to communal (here or in other place?) and then excluding from user list.
   public shared({caller}) func setItemData(canisterId: Principal, itemId: Nat, item: lib.ItemDataWithoutOwner, text: Text) {
     if (Text.size(item.title) == 0) {
       Debug.trap("no item title");
@@ -192,9 +192,12 @@ shared({caller = initialOwner}) actor class Items() = this {
       Debug.trap("no item");
     };
     let oldItem = lib.deserializeItem(oldItemRepr);
-    // if (oldItem.item.communal) { // FIXME
-    //   Debug.trap("it's communal");
-    // };
+    switch (oldItem) {
+      case (#communal _) {
+        Debug.trap("it's communal");
+      };
+      case _ {};
+    };
     lib.onlyItemOwner(caller, oldItem);
     await db.delete({sk = key});
   };
@@ -270,9 +273,12 @@ shared({caller = initialOwner}) actor class Items() = this {
     };
     let folderItem = lib.deserializeItem(folderItemData);
 
-    // if (not folderItem.item.communal) { // FIXME
-    //   lib.onlyItemOwner(caller, folderItem);
-    // };
+    switch (folderItem) {
+      case (#communal _) {};
+      case #owned {
+        lib.onlyItemOwner(caller, folderItem);
+      };
+    };
     if (not lib.isFolder(folderItem) and not comment) {
       Debug.trap("not a folder");
     };
