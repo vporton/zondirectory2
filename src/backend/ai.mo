@@ -329,7 +329,6 @@ module {
     };
 
     /// Result `false` means spam.
-    /// FIXME: Limit the length of the text.
     public func checkSpam(
         textToCheck: Text,
     ): async* Bool {
