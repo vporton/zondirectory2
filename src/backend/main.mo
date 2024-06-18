@@ -1,3 +1,4 @@
+import RateLimit "rateLimit";
 import Principal "mo:base/Principal";
 import Debug "mo:base/Debug";
 import Array "mo:base/Array";
@@ -123,6 +124,8 @@ shared({caller = initialOwner}) actor class ZonBackend() = this {
   //   return [];
   // };
 
+  let updateRequests = RateLimit.newRequests();
+
   system func inspect({
     // arg : Blob;
     caller : Principal;
@@ -139,8 +142,12 @@ shared({caller = initialOwner}) actor class ZonBackend() = this {
       }
   }): Bool {
     switch (msg) {
-      case (#getOwners _ or #getRootItem _ or #getUserScore _) {
+      case (#getOwners _ or #getRootItem _) {
         false; // query only
+      };
+      case (#getUserScore _) {
+        RateLimit.checkRequest(updateRequests, caller);
+        true;
       };
       case _ {
         checkCaller(caller);
