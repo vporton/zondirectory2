@@ -58,7 +58,6 @@ shared({caller = initialOwner}) actor class Items() = this {
       Debug.trap("spam");
     };
 
-    // FIXME: Also blog post text.
     await* AI.smartlyRejectSimilar(item.title # "\n" # item.description # "\n" # text);
   };
 
