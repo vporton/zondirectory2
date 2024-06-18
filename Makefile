@@ -20,7 +20,6 @@ init: fabricate-cycles init-main init-battery init-CanDBIndex init-NacDBIndex in
 .PHONY: init-main
 init-main:
 	dfx canister --network $(NETWORK) call main init '()'
-# FIXME: Which canisters to allow calls?
 
 #	. ./.env && dfx canister call --network $(NETWORK) payments init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\" })"
 
@@ -46,7 +45,7 @@ init-call:
 
 .PHONY: init-battery
 init-battery:
-	. ./.env && dfx canister call --network $(NETWORK) battery init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; })"
+	. ./.env && dfx canister call --network $(NETWORK) battery init "(vec { principal \"$(FOUNDER)\"; })"
 
 .PHONY: init-createItemData
 init-createItemData:
