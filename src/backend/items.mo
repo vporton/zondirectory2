@@ -68,7 +68,7 @@ shared({caller = initialOwner}) actor class Items() = this {
     if (Text.size(item.data.title) == 0) {
       Debug.trap("no item title");
     };
-    checkItemSize(item);
+    checkItemSize(item.data);
     await* itemCheckSpam(item.data);
     let (canisterId, itemId) = if (item.communal) {
       let variant: lib.ItemVariant = { creator = caller; item = item.data; };
