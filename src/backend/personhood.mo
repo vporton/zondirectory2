@@ -1,7 +1,7 @@
 import Time "mo:base/Time";
 import Debug "mo:base/Debug";
 import Principal "mo:base/Principal";
-
+import RateLimit "rateLimit";
 import CanDBIndex "canister:CanDBIndex";
 import ic_eth "canister:ic_eth";
 import Types "mo:passport-client/lib/Types";
@@ -9,6 +9,8 @@ import V "mo:passport-client/lib/Verifier";
 import PassportConfig "../libs/configs/passport.config";
 
 actor Personhood {
+    let updateRequests = RateLimit.newRequests();
+
     /// Shared ///
 
     // TODO: canister hint for ethereumAddress
@@ -85,4 +87,26 @@ actor Personhood {
     public shared query func removeHTTPHeaders(args: Types.TransformArgs): async Types.HttpResponsePayload {
         V.removeHTTPHeaders(args);
     };
+
+  system func inspect({
+    // arg : Blob;
+    caller : Principal;
+    msg :
+      {
+        #getEthereumSigningMessage : () -> ();
+        #removeHTTPHeaders : () -> Types.TransformArgs;
+        #scoreBySignedEthereumAddress :
+          () -> {address : Text; nonce : Text; signature : Text};
+        #submitSignedEthereumAddressForScore :
+          () -> {address : Text; nonce : Text; signature : Text}
+      }
+  }): Bool {
+    switch (msg) {
+        case (#removeHTTPHeaders _) { false }; // query-only
+        case _ {
+            RateLimit.checkRequest(updateRequests, caller);
+            true;
+        }
+    };
+  };
 }

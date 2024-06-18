@@ -15,7 +15,6 @@ import DBConfig "../libs/configs/db.config";
 import ConfigMisc "../libs/configs/misc.config";
 import lib "lib";
 import AI "ai";
-import AITypes "HttpTypes";
 import RateLimit "rateLimit";
 
 shared({caller = initialOwner}) actor class Items() = this {
@@ -69,6 +68,7 @@ shared({caller = initialOwner}) actor class Items() = this {
     if (Text.size(item.data.title) == 0) {
       Debug.trap("no item title");
     };
+    checkItemSize(item);
     await* itemCheckSpam(item.data);
     let (canisterId, itemId) = if (item.communal) {
       let variant: lib.ItemVariant = { creator = caller; item = item.data; };
@@ -138,6 +138,12 @@ shared({caller = initialOwner}) actor class Items() = this {
     (canisterId, itemId);
   };
 
+  func checkItemSize(item: lib.ItemDataWithoutOwner) {
+    if (Text.size(item.title) + Text.size(item.description) > 2048) {
+      Debug.trap("title or description too long");
+    };
+  };
+
   /// We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
   ///
   /// FIXME: Converting to communal (here or in other place?) and then excluding from user list.
@@ -145,6 +151,7 @@ shared({caller = initialOwner}) actor class Items() = this {
     if (Text.size(item.title) == 0) {
       Debug.trap("no item title");
     };
+    checkItemSize(item);
     await* itemCheckSpam(item);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(itemId); // TODO: better encoding
@@ -156,6 +163,12 @@ shared({caller = initialOwner}) actor class Items() = this {
         await db.putAttribute({sk = key; subkey = "i"; value = lib.serializeItem(#owned item2)});
       };
       case null { Debug.trap("no item") };
+    };
+  };
+
+  func checkPostSize(text: Text) {
+    if (Text.size(text) > 80 * 1024) {
+      Debug.trap("text too long (max 80KB)");
     };
   };
 
@@ -757,7 +770,6 @@ shared({caller = initialOwner}) actor class Items() = this {
         #addItemToFolder :
           () ->
             ((Principal, Nat), (Principal, Nat), Bool, {#beginning; #end});
-        #checkSpamTransform : () -> AITypes.TransformArgs;
         #createItemData : () -> lib.ItemTransferWithoutOwner;
         #deleteAllUserPosts : () -> ();
         #getOwners : () -> ();
@@ -769,7 +781,26 @@ shared({caller = initialOwner}) actor class Items() = this {
         #vote : () -> (Principal, Nat, Principal, Nat, Int, Bool);
       };
   }): Bool {
-    RateLimit.checkRequest(updateRequests, caller);
+    switch (msg) {
+      case (#getOwners _ or #init _ or #setOwners _) {
+        checkCaller(caller);
+      };
+      case _ {
+        RateLimit.checkRequest(updateRequests, caller);
+        switch (msg) {
+          case (#setPostText t) {
+            checkPostSize(t().2);
+          };
+          case (#createItemData a) {
+            checkItemSize(a().data);
+          };
+          case (#setItemData a) {
+            checkItemSize(a().2);
+          };
+          case _ {};
+        }
+      };
+    };
     true;
   }
 }

@@ -1,15 +1,30 @@
 import Principal "mo:base/Principal";
 import Debug "mo:base/Debug";
-import Text "mo:base/Text";
+import Array "mo:base/Array";
 import Nat "mo:base/Nat";
 import Int "mo:base/Int";
-import Multi "mo:candb-multi/Multi";
 import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
-import DBConfig "../libs/configs/db.config";
-// import ICRC1Types "mo:icrc1/ICRC1/Types";
 
-shared actor class ZonBackend() = this {
+shared({caller = initialOwner}) actor class ZonBackend() = this {
+  stable var owners = [initialOwner];
+
+  func checkCaller(caller: Principal) {
+    if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
+      Debug.trap("item: not allowed");
+    }
+  };
+
+  public shared({caller = caller}) func setOwners(_owners: [Principal]): async () {
+    checkCaller(caller);
+
+    owners := _owners;
+  };
+
+  public query func getOwners(): async [Principal] { owners };
+
+  stable var initialized: Bool = false;
+
   /// External Canisters ///
 
   // See ARCHITECTURE.md for database structure
@@ -20,9 +35,9 @@ shared actor class ZonBackend() = this {
 
   /// Initialization ///
 
-  stable var initialized: Bool = false;
-
   public shared({ caller }) func init(): async () {
+    checkCaller(caller);
+
     if (initialized) {
       Debug.trap("already initialized");
     };
@@ -103,26 +118,34 @@ shared actor class ZonBackend() = this {
   //   // await db.put({sk = "a/" # Principal.toText(caller); attributes = [("v", #text (buyerAffiliateStr # "/" # sellerAffiliateStr))]});
   // };
 
-  public shared func get_trusted_origins(): async [Text] {
-    return [];
-  };
+  // What is it?
+  // public shared func get_trusted_origins(): async [Text] {
+  //   return [];
+  // };
 
-  // FIXME
   system func inspect({
-      arg : Blob;
-      caller : Principal;
-      msg :
-        {
-          #getRootItem : () -> ();
-          #getUserScore : () -> (Principal, ?Principal);
-          #get_trusted_origins : () -> ();
-          #init : () -> ();
-          #removeMainOwner : () -> ();
-          #setMainOwner : () -> Principal;
-          #setRootItem : () -> (Principal, Nat)
-        }
-    }): Bool {
-        // checkCaller(caller);
+    // arg : Blob;
+    caller : Principal;
+    msg :
+      {
+        #getOwners : () -> ();
+        #getRootItem : () -> ();
+        #getUserScore : () -> (Principal, ?Principal);
+        #init : () -> ();
+        #removeMainOwner : () -> ();
+        #setMainOwner : () -> Principal;
+        #setOwners : () -> [Principal];
+        #setRootItem : () -> (Principal, Nat)
+      }
+  }): Bool {
+    switch (msg) {
+      case (#getOwners _ or #getRootItem _ or #getUserScore _) {
+        false; // query only
+      };
+      case _ {
+        checkCaller(caller);
         true;
-    }
+      };
+    };
+  };
 }

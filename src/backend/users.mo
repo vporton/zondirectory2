@@ -3,6 +3,7 @@ import Debug "mo:base/Debug";
 import Array "mo:base/Array";
 import CanDBIndex "canister:CanDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
+import RateLimit "rateLimit";
 import lib "lib";
 
 shared({caller = initialOwner}) actor class Users() = this {
@@ -36,6 +37,8 @@ shared({caller = initialOwner}) actor class Users() = this {
     initialized := true;
   };
 
+  let updateRequests = RateLimit.newRequests();
+
   public shared({caller}) func setUserData(partitionId: ?Principal, user: lib.User) {
     let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
     // TODO: Add Hint to CanDBMulti
@@ -53,15 +56,26 @@ shared({caller = initialOwner}) actor class Users() = this {
     await db.delete({sk = key});
   };
 
-  // FIXME
-  // system func inspect({
-  //     arg : Blob;
-  //     caller : Principal;
-  //     msg :
-  //       {
-  //       };
-  //   }): Bool {
-  //       // checkCaller(caller);
-  //       true;
-  //   }
+  system func inspect({
+      arg : Blob;
+      caller : Principal;
+      msg :
+        {
+          #getOwners : () -> ();
+          #init : () -> ();
+          #removeUser : () -> Principal;
+          #setOwners : () -> [Principal];
+          #setUserData : () -> (?Principal, lib.User)
+        };
+    }): Bool {
+      switch (msg) {
+        case (#getOwners _ or #init _ or #setOwners _) {
+          checkCaller(caller);
+        };
+        case (#removeUser _ or #setUserData _) {
+          RateLimit.checkRequest(updateRequests, caller);
+        };
+      };
+      true;
+    };
 }

@@ -72,7 +72,7 @@ shared({caller = initialOwner}) actor class HttpCaller() = this {
     };
 
     system func inspect({
-        // caller : Principal;
+        caller : Principal;
         // arg : Blob;
         msg : {
             #callHttp :
@@ -87,13 +87,14 @@ shared({caller = initialOwner}) actor class HttpCaller() = this {
         }
     }) : Bool {
         switch (msg) {
+            case (#callHttp _ or #getOwners _ or #init _ or #setOwners _) {
+                checkCaller(caller);
+                true;
+            };
             case (#checkRequest hash) {
                 Http.checkHttpRequest(requestsChecker(), hash());
             };
-            case _ {
-                // Should here check permissions:
-                true;
-            }
+            case (#transform _) { false }; // only query
         };
     };
 }
