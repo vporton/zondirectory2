@@ -62,13 +62,13 @@ shared({caller = initialOwner}) actor class Items() = this {
     await* AI.smartlyRejectSimilar(item.title # "\n" # item.description);
   };
 
-  public shared({caller}) func createItemData(item: lib.ItemTransferWithoutOwner)
+  public shared({caller}) func createItemData(item: lib.ItemTransferWithoutOwner, text: Text)
     : async (Principal, Nat)
   {
     if (Text.size(item.data.title) == 0) {
       Debug.trap("no item title");
     };
-    checkItemSize(item.data);
+    checkItemSize(item.data, text);
     await* itemCheckSpam(item.data);
     let (canisterId, itemId) = if (item.communal) {
       let variant: lib.ItemVariant = { creator = caller; item = item.data; };
@@ -133,25 +133,36 @@ shared({caller = initialOwner}) actor class Items() = this {
     if (not item.communal) {
       await* insertIntoUserTimeStream(caller, (canisterId, itemId));
     };
-    // FIXME: Also text. FIXME: also on update.
-    await* AI.retrieveAndStoreInVectorDB(Nat.toText(itemId) # "@" # Principal.toText(canisterId), item.data.title # "\n" # item.data.description);
+
+    if (text != "") {
+      var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
+      let key = "i/" # Nat.toText(itemId); // TODO: better encoding
+      await db.putAttribute({ sk = key; subkey = "t"; value = #text(text) });
+    };
+    await* AI.retrieveAndStoreInVectorDB(
+      Nat.toText(itemId) # "@" # Principal.toText(canisterId),
+      item.data.title # "\n" # item.data.description # "\n" # text);
     (canisterId, itemId);
   };
 
-  func checkItemSize(item: lib.ItemDataWithoutOwner) {
+  func checkItemSize(item: lib.ItemDataWithoutOwner, text: Text) {
     if (Text.size(item.title) + Text.size(item.description) > 2048) {
       Debug.trap("title or description too long");
     };
+    if (Text.size(text) > 80 * 1024) {
+      Debug.trap("text too long (max 80KB)");
+    };
+
   };
 
   /// We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
   ///
   /// FIXME: Converting to communal (here or in other place?) and then excluding from user list.
-  public shared({caller}) func setItemData(canisterId: Principal, itemId: Nat, item: lib.ItemDataWithoutOwner) {
+  public shared({caller}) func setItemData(canisterId: Principal, itemId: Nat, item: lib.ItemDataWithoutOwner, text: Text) {
     if (Text.size(item.title) == 0) {
       Debug.trap("no item title");
     };
-    checkItemSize(item);
+    checkItemSize(item, text);
     await* itemCheckSpam(item);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(itemId); // TODO: better encoding
@@ -164,39 +175,12 @@ shared({caller = initialOwner}) actor class Items() = this {
       };
       case null { Debug.trap("no item") };
     };
-  };
 
-  func checkPostSize(text: Text) {
-    if (Text.size(text) > 80 * 1024) {
-      Debug.trap("text too long (max 80KB)");
-    };
-  };
+    await db.putAttribute({ sk = key; subkey = "t"; value = #text(text) });
 
-  // TODO: If item set is successful and setPostText is unsuccessful, this is counter-intuitive.
-  public shared({caller}) func setPostText(canisterId: Principal, _itemId: Nat, text: Text) {
-    if (not (await* AI.checkSpam(text))) {
-      Debug.trap("spam");
-    };
-
-    var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # Nat.toText(_itemId); // TODO: better encoding
-    switch (await db.getAttribute({sk = key}, "i")) {
-      case (?oldItemRepr) {
-        let oldItem = lib.deserializeItem(oldItemRepr);
-        lib.onlyItemOwner(caller, oldItem);
-        switch (oldItem) {
-          case (#owned data) {
-            switch (data.item.details) {
-              case (#post) {};
-              case _ { Debug.trap("not a post"); };
-            };
-          };
-          case (#communal _) { Debug.trap("programming error") };
-        };
-        await db.putAttribute({ sk = key; subkey = "t"; value = #text(text) });
-      };
-      case _ { Debug.trap("no item") };
-    };
+    await* AI.retrieveAndStoreInVectorDB(
+      Nat.toText(itemId) # "@" # Principal.toText(canisterId),
+      item.title # "\n" # item.description # "\n" # text);
   };
 
   // TODO: Also remove voting data.
@@ -770,15 +754,14 @@ shared({caller = initialOwner}) actor class Items() = this {
         #addItemToFolder :
           () ->
             ((Principal, Nat), (Principal, Nat), Bool, {#beginning; #end});
-        #createItemData : () -> lib.ItemTransferWithoutOwner;
+        #createItemData : () -> (lib.ItemTransferWithoutOwner, Text);
         #deleteAllUserPosts : () -> ();
         #getOwners : () -> ();
         #init : () -> [Principal];
         #removeItem : () -> (Principal, Nat);
-        #setItemData : () -> (Principal, Nat, lib.ItemDataWithoutOwner);
+        #setItemData : () -> (Principal, Nat, lib.ItemDataWithoutOwner, Text);
         #setOwners : () -> [Principal];
-        #setPostText : () -> (Principal, Nat, Text);
-        #vote : () -> (Principal, Nat, Principal, Nat, Int, Bool);
+        #vote : () -> (Principal, Nat, Principal, Nat, Int, Bool)
       };
   }): Bool {
     switch (msg) {
@@ -788,14 +771,13 @@ shared({caller = initialOwner}) actor class Items() = this {
       case _ {
         RateLimit.checkRequest(updateRequests, caller);
         switch (msg) {
-          case (#setPostText t) {
-            checkPostSize(t().2);
-          };
           case (#createItemData a) {
-            checkItemSize(a().data);
+            let d = a();
+            checkItemSize(d.0.data, d.1);
           };
           case (#setItemData a) {
-            checkItemSize(a().2);
+            let d = a();
+            checkItemSize(d.2, d.3);
           };
           case _ {};
         }

@@ -98,13 +98,12 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                                 let part, n;
                                 if (routeParams.item !== undefined) {
                                     const folder = parseItemRef(routeParams.item); // TODO: not here
-                                    await backend.setItemData(folder.canister, BigInt(folder.id), item);
+                                    await backend.setItemData(folder.canister, BigInt(folder.id), item, 't'+post);
                                     part = folder.canister;
                                     n = BigInt(folder.id);
                                 } else {
-                                    [part, n] = await backend.createItemData({data: item, communal: folderKind == FolderKind.communal});
+                                    [part, n] = await backend.createItemData({data: item, communal: folderKind == FolderKind.communal}, 't'+post);
                                 }
-                                await backend.setPostText(part, n, 't'+post);
                                 const ref = serializeItemRef({canister: part, id: Number(n)});
                                 // TODO: What to do with this on editing the folder?
                                 await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);

@@ -85,12 +85,12 @@ export default function EditFolder(props: {
                             let part, n;
                             if (props.folderId !== undefined) {
                                 const folder = parseItemRef(props.folderId); // TODO: not here
-                                await backend.setItemData(folder.canister, BigInt(folder.id), item);
+                                await backend.setItemData(folder.canister, BigInt(folder.id), item, "");
                                 part = folder.canister;
                                 n = BigInt(folder.id);
                             } else {
                                 const transfer: ItemTransferWithoutOwner = {data: item, communal: folderKind == FolderKind.communal};
-                                [part, n] = await backend.createItemData(transfer);
+                                [part, n] = await backend.createItemData(transfer, "");
                             }
                             const ref = serializeItemRef({canister: part, id: Number(n)}); // TODO: Reduce code
                             if (!(props.super === true)) { // noComments
