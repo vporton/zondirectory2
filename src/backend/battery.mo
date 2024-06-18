@@ -40,11 +40,18 @@ shared({caller = initialOwner}) actor class Battery() = this {
             threshold = 3_000_000_000_000;
             installAmount = 1_000_000_000_000;
         });
-        timer := ?(Timer.recurringTimer<system>(#seconds 3600, topUpAllCanisters));
+        initTimer<system>();
 
         initialized := true;
     };
 
+    system func postupgrade() {
+        initTimer<system>();
+    };
+
+    func initTimer<system>() {
+        timer := ?(Timer.recurringTimer<system>(#seconds 3600, topUpAllCanisters));
+    };
 
     stable let battery = CyclesSimple.newBattery();
 
