@@ -36,7 +36,7 @@ shared({caller = initialOwner}) actor class Items() = this {
 
   stable var initialized: Bool = false;
 
-  public shared({ caller }) func init(_owners: [Principal]): async () { // FIXME: Initialize in Makefile.
+  public shared({ caller }) func init(_owners: [Principal]): async () {
     checkCaller(caller);
     if (initialized) {
         Debug.trap("already initialized");
@@ -53,13 +53,13 @@ shared({caller = initialOwner}) actor class Items() = this {
 
   stable var maxId: Nat = 0;
 
-  private func itemCheckSpam(item: lib.ItemDataWithoutOwner): async* () {
+  private func itemCheckSpam(item: lib.ItemDataWithoutOwner, text: Text): async* () {
     if (not (await* AI.checkSpam(item.title # "\n" # item.description))) {
       Debug.trap("spam");
     };
 
     // FIXME: Also blog post text.
-    await* AI.smartlyRejectSimilar(item.title # "\n" # item.description);
+    await* AI.smartlyRejectSimilar(item.title # "\n" # item.description # "\n" # text);
   };
 
   public shared({caller}) func createItemData(item: lib.ItemTransferWithoutOwner, text: Text)
@@ -69,7 +69,7 @@ shared({caller = initialOwner}) actor class Items() = this {
       Debug.trap("no item title");
     };
     checkItemSize(item.data, text);
-    await* itemCheckSpam(item.data);
+    await* itemCheckSpam(item.data, text);
     let (canisterId, itemId) = if (item.communal) {
       let variant: lib.ItemVariant = { creator = caller; item = item.data; };
       let variantId = maxId;
@@ -163,7 +163,7 @@ shared({caller = initialOwner}) actor class Items() = this {
       Debug.trap("no item title");
     };
     checkItemSize(item, text);
-    await* itemCheckSpam(item);
+    await* itemCheckSpam(item, text);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(itemId); // TODO: better encoding
     switch (await db.getAttribute({sk = key}, "i")) {
