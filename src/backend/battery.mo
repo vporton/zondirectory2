@@ -8,8 +8,7 @@ shared({caller = initialOwner}) actor class Battery() = this {
     stable var owners = [initialOwner];
 
     func checkCaller(caller: Principal) {
-        // TODO: It isn't really necessary to call itself.
-        if (caller != Principal.fromActor(this) and Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
+        if (Array.find(owners, func(e: Principal): Bool { e == caller; }) == null) {
             Debug.trap("NacDBIndex: not allowed");
         }
     };

@@ -15,7 +15,7 @@ shared ({ caller = initialOwner }) actor class PST() : async ICRC1.FullInterface
         min_burn_amount = 100_000;
         minting_account = { owner = Principal.fromText("aaaaa-aa"); subaccount = null; }; // nobody
         name = "Zon Directory PST token";
-        symbol = "ZDPST"; // FIXME
+        symbol = "ZDPST"; // TODO
     });
 
     /// Functions for the ICRC1 token standard

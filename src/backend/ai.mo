@@ -207,8 +207,8 @@ module {
             body,
             {
                 timeout = 60_000_000_000; // 1 min
-                max_response_bytes = ?7750; // FIXME
-                cycles = 55240000; // FIXME
+                max_response_bytes = ?7750; // TODO
+                cycles = 55240000; // TODO
             },
         );        
     };
@@ -230,8 +230,8 @@ module {
             body,
             {
                 timeout = 60_000_000_000; // 1 min
-                max_response_bytes = ?7750; // FIXME
-                cycles = 55240000; // FIXME
+                max_response_bytes = ?7750; // TODO
+                cycles = 55240000; // TODO
             },
         );
         let matches = getJSONSubObject(jsonRes, "matches");
@@ -280,8 +280,8 @@ module {
             bodyText,
             {
                 timeout = 60_000_000_000; // 1 min
-                max_response_bytes = ?(1564 + Nat64.fromNat(Text.size(bodyText))); // FIXME
-                cycles = 49765600; // FIXME
+                max_response_bytes = ?(1564 + Nat64.fromNat(Text.size(bodyText))); // TODO
+                cycles = 49765600; // TODO
             },
         );
     };

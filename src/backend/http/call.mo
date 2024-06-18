@@ -24,7 +24,7 @@ shared({caller = initialOwner}) actor class HttpCaller() = this {
 
     stable var initialized: Bool = false;
 
-    public shared({ caller }) func init(_owners: [Principal]): async () { // FIXME: Initialize in Makefile.
+    public shared({ caller }) func init(_owners: [Principal]): async () {
         checkCaller(caller);
         if (initialized) {
             Debug.trap("already initialized");

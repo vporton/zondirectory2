@@ -85,7 +85,7 @@ shared({caller = initialOwner}) actor class Items() = this {
       let item2 = #communal { timeStream; votesStream; isFolder = item.data.details == #folder };
       let variantValue = Nat.toText(variantId) # "@" # Principal.toText(variantCanisterId);
       await NacDBIndex.reorderAdd(GUID.nextGuid(guidGen), {
-        hardCap = ?100; key = -2; order = votesStream; value = variantValue; // TODO: Take position `key` configurable.
+        hardCap = ?100; key = -2; order = votesStream; value = variantValue; // TODO: Make position `key` configurable.
       });
 
       // Put variant in time stream // TODO: duplicate code
@@ -135,7 +135,7 @@ shared({caller = initialOwner}) actor class Items() = this {
 
     if (text != "") {
       var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-      let key = "i/" # Nat.toText(itemId); // TODO: better encoding
+      let key = "i/" # Nat.toText(itemId);
       await db.putAttribute({ sk = key; subkey = "t"; value = #text(text) });
     };
     await* AI.retrieveAndStoreInVectorDB(
@@ -164,7 +164,7 @@ shared({caller = initialOwner}) actor class Items() = this {
     checkItemSize(item, text);
     await* itemCheckSpam(item, text);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
-    let key = "i/" # Nat.toText(itemId); // TODO: better encoding
+    let key = "i/" # Nat.toText(itemId);
     switch (await db.getAttribute({sk = key}, "i")) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
@@ -182,7 +182,7 @@ shared({caller = initialOwner}) actor class Items() = this {
       item.title # "\n" # item.description # "\n" # text);
   };
 
-  // TODO: Also remove voting data.
+  // FIXME: Also remove voting data.
   func _removeItem(caller: Principal, canisterId: Principal, itemId: Nat): async* () {
     // We first remove links, then the item itself, in order to avoid race conditions when displaying.
     await* removeItemLinks((canisterId, itemId));
@@ -275,7 +275,7 @@ shared({caller = initialOwner}) actor class Items() = this {
 
     switch (folderItem) {
       case (#communal _) {};
-      case #owned {
+      case (#owned _) {
         lib.onlyItemOwner(caller, folderItem);
       };
     };
@@ -314,7 +314,7 @@ shared({caller = initialOwner}) actor class Items() = this {
   func addToStreams(
     catId: (Principal, Nat),
     itemId: (Principal, Nat),
-    comment: Bool, // FIXME: Use it.
+    comment: Bool, // TODO: unused
     links: lib.StreamsLinks,
     itemId1: CanDBPartition.CanDBPartition,
     key1: Text,

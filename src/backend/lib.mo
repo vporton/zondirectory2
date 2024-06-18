@@ -129,7 +129,6 @@ module {
   // TODO: Add `license` field?
   // TODO: Images.
   // TODO: Item version.
-  // FIXME: Checking whether it's a folder in `order.mo` does not work.
   /// The type of stored item in DB.
   ///
   /// Stored at `"i/" # ID` attribute `"i"`.
@@ -391,7 +390,6 @@ module {
     Debug.trap("wrong item format");
   };
 
-  // FIXME: Should be `Item` instead of `ItemData`.
   public func serializeItem(item: Item): Entity.AttributeValue {
     let buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(8);
     buf.add(#int 0); // version

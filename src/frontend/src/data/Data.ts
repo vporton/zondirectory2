@@ -2,7 +2,7 @@ import { Principal } from "@dfinity/principal";
 import {idlFactory as canDBPartitionIdl } from "../../../declarations/CanDBPartition";
 import { _SERVICE as CanDBPartition, ItemData, ItemTransfer, Streams } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { idlFactory as nacDBPartitionIdl } from "../../../declarations/NacDBPartition";
-import { _SERVICE as NacDBPartition } from "../../../declarations/NacDBPartition/NacDBPartition.did"; // FIXME
+import { _SERVICE as NacDBPartition } from "../../../declarations/NacDBPartition/NacDBPartition.did";
 import { Actor, Agent, HttpAgent } from "@dfinity/agent";
 import { idlFactory as canDBIndexIdl } from "../../../declarations/CanDBIndex";
 import { _SERVICE as CanDBIndex } from "../../../declarations/CanDBIndex/CanDBIndex.did";
