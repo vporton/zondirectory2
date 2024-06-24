@@ -544,7 +544,6 @@ module {
 
   /// More user info: Voting ///
 
-  // TODO: Also store, how much votings were done.
   public type VotingScore = {
     points: Float; // Gitcoin score
     lastChecked: Time.Time;
