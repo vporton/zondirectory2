@@ -9,7 +9,7 @@ all: deploy init
 
 .PHONY: deploy
 deploy:
-	dfx deploy --network $(NETWORK) -v
+	dfx deploy --network $(NETWORK) -v frontend
 
 .PHONY: fabricate-cycles
 	test "$(NETWORK)" = local && dfx ledger fabricate-cycles --amount 100000000 --canister main
