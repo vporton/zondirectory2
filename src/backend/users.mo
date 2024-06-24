@@ -40,7 +40,7 @@ shared({caller = initialOwner}) actor class Users() = this {
   let updateRequests = RateLimit.newRequests();
 
   public shared({caller}) func setUserData(partitionId: ?Principal, user: lib.User) {
-    let key = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
+    let key = "u/" # Principal.toText(caller);
     // TODO: Add Hint to CanDBMulti
     ignore await CanDBIndex.putAttributeNoDuplicates("user", partitionId, {
         sk = key;

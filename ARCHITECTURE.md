@@ -22,8 +22,6 @@
 
 ### Variant votes:
 
-TODO:
-
 For streams of variants re-voting up should remove the previous vote up.
 We also should remove old up votes (after 15 new votes).
 However, we should not remove old down votes.

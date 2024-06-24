@@ -243,7 +243,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
   };
 
   func setVotingDataImpl(user: Principal, partitionId: ?Principal, voting: lib.VotingScore): async* () {
-    let sk = "u/" # Principal.toText(user); // TODO: Should use binary encoding.
+    let sk = "u/" # Principal.toText(user);
     // TODO: Add Hint to CanDBMulti
     ignore await* Multi.putAttributeNoDuplicates(pkToCanisterMap, "user", partitionId, {
       sk;
@@ -258,7 +258,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
   };
 
   // public shared({caller}) func getUser(userId: Principal, partitionId: ?Principal): async ?lib.User {
-  //   let sk = "u/" # Principal.toText(userId); // TODO: Should use binary encoding.
+  //   let sk = "u/" # Principal.toText(userId);
   //   // TODO: Add Hint to CanDBMulti
   //   let res = await* Multi.getAttributeByHint(pkToCanisterMap, "user", partitionId, {sk; key = "u"});
   //   do ? { lib.deserializeUser(res!.1!) };
@@ -266,15 +266,13 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
 
   // TODO: Here should be a shared function:
   func getVotingData(caller: Principal, partitionId: ?Principal): async* ?lib.VotingScore {
-    let sk = "u/" # Principal.toText(caller); // TODO: Should use binary encoding.
+    let sk = "u/" # Principal.toText(caller);
     // TODO: Add Hint to CanDBMulti
     let res = await* Multi.getAttributeByHint(pkToCanisterMap, "user", partitionId, {sk; subkey = "v"});
     do ? { lib.deserializeVoting(res!.1!) };
   };
 
   func sybilScoreImpl(user: Principal): async* (Bool, Float) {
-    // checkCaller(user); // TODO: enable?
-
     let voting = await* getVotingData(user, null); // TODO: hint `partitionId`, not null
     switch (voting) {
       case (?voting) {
@@ -296,7 +294,6 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
   };
 
   public shared func checkSybil(user: Principal): async () {
-    // checkCaller(user); // TODO: enable?
     if (PassportConfig.skipSybil) {
       return;
     };

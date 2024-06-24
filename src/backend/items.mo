@@ -296,9 +296,8 @@ shared({caller = initialOwner}) actor class Items() = this {
       await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rsv", #end);
     };
 
-    // TODO: Check that the item was not in this folder already:
     let userSK = "u/" # Principal.toText(caller);
-    let (hint1, n) = switch (await CanDBIndex.getAttributeByHint("user", null, {sk = userSK; subkey = "p"})) { // TODO: add hint
+    let (hint1, n) = switch (await CanDBIndex.getAttributeByHint("user", null, {sk = userSK; subkey = "p"})) { // : add hint
       case (?(part, v)) { 
         switch (v) {
           case (?(#int n)) (?part, Int.abs(n));
@@ -532,7 +531,6 @@ shared({caller = initialOwner}) actor class Items() = this {
       };
     };
 
-    // TODO: Check this block of code for errors.
     let changeUp = (votingPower == 1 and oldValue2 != 1) or (oldValue2 == 1 and votingPower != 1);
     let changeDown = (votingPower == -1 and oldValue2 != -1) or (oldValue2 == -1 and votingPower != -1);
     var up2 = up;
