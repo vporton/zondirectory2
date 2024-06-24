@@ -153,7 +153,7 @@ shared actor class CanDBPartition(options: {
             switch (await itemCanister.getAttribute({sk = "r/" # itemId}, "i")) {
               case (?data) {
                 let variant = lib.deserializeItemVariant(data);
-                ?{ data = { creator = Principal.fromText("aaaaa-aa"); item = variant.item; edited = true }; communal = true }; // FIXME: principal
+                ?{ data = { creator = Principal.fromText("aaaaa-aa"); item = variant.item; edited = true }; communal = true };
               };
               case null { return null };
             };

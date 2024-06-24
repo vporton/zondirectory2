@@ -61,7 +61,7 @@ export default function EditItem(props: {itemId?: string, comment?: boolean}) {
                             const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: itemId.canister, agent: defaultAgent});
                             actor.getItem(BigInt(itemId.id))
                                 .then((item0) => {
-                                    const item1 = item0[0]!; // FIXME: `!`
+                                    const item1 = item0[0]!; // TODO: `!`
                                     const item = item1.data.item;
                                     setFolderKind(item1.communal ? FolderKind.communal : FolderKind.owned);
                                     setLocale(item.locale);

@@ -186,7 +186,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             <meta name="description" content={description}/>
             {/*(!superfolders || superfolders.length === 0 ? <meta name="robots" content="noindex"/>)*/} {/* anti-search-spam measure */}
         </Helmet>
-        {/* FIXME: `!` on the next line */}
+        {/* TODO: `!` on the next line */}
         <h2><ItemType item={data!}/>{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h2>
         <p>Creator: <small>{creator.toString()}</small></p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
@@ -207,7 +207,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 <ul>
                     {subfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
                         <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
-                             {/* FIXME: `!` below */}
+                             {/* TODO: `!` below */}
                             <UpDown
                                 parent={{id}}
                                 item={x}
@@ -262,7 +262,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 <h3>Items</h3>
                 {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) => 
                     <div key={serializeItemRef(x.id)}>
-                        {/* FIXME: `!` in `props.defaultAgent!` */}
+                        {/* TODO: `!` in `props.defaultAgent!` */}
                         <p lang={x.item.data.item.locale}>
                             <UpDown
                                 parent={{id}}
@@ -291,7 +291,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 <h3>Comments</h3>
                 {comments === undefined ? <p>Loading...</p> : comments.map(x => 
                     <div key={serializeItemRef(x.id)}>
-                        {/* FIXME: `!` in `props.defaultAgent!` */}
+                        {/* TODO: `!` in `props.defaultAgent!` */}
                         <p lang={x.item.data.item.locale}>
                             <UpDown
                                 parent={{id}}
