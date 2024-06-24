@@ -506,8 +506,7 @@ shared({caller = initialOwner}) actor class Items() = this {
     if (difference == 0) {
       return;
     };
-    // TODO: Take advantage of `principal` as a hint.
-    ignore await CanDBIndex.putAttributeNoDuplicates("user", null, { sk = userVotesSK; subkey = "v"; value = #int votingPower });
+    ignore await CanDBIndex.putAttributeNoDuplicates("user", principal, { sk = userVotesSK; subkey = "v"; value = #int votingPower });
 
     // Update total votes for the given parent/child:
     let totalVotesSK = "w/" # Nat.toText(parent) # "/" # Nat.toText(child);
