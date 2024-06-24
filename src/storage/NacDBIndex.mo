@@ -38,7 +38,7 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         Buffer.toArray(buf);
     };
     
-    stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0)); // FIXME: Gather randomness.
+    stable var guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
 
     stable var dbIndex: Nac.DBIndex = Nac.createDBIndex(DBConfig.dbOptions);
 
@@ -57,6 +57,8 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         owners := _owners;
         let part = await* _createPartition();
         StableBuffer.add(dbIndex.canisters, part);
+
+        guidGen := GUID.init(Array.subArray(Blob.toArray(await SubnetManager.raw_rand()), 0, 16));
 
         allItemsStream := ?(await* Reorder.createOrder(GUID.nextGuid(guidGen), {
             index = this;

@@ -5,6 +5,7 @@ import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import Array "mo:base/Array";
 import Int "mo:base/Int";
+import Blob "mo:base/Blob";
 import Reorder "mo:nacdb-reorder/Reorder";
 import GUID "mo:nacdb/GUID";
 import Itertools "mo:itertools/Iter";
@@ -43,6 +44,11 @@ shared({caller = initialOwner}) actor class Items() = this {
     };
 
     owners := _owners;
+
+    let SubnetManager : actor {
+      raw_rand() : async Blob;
+    } = actor "aaaaa-aa";
+    guidGen := GUID.init(Array.subArray(Blob.toArray(await SubnetManager.raw_rand()), 0, 16));
 
     initialized := true;
   };
@@ -182,7 +188,7 @@ shared({caller = initialOwner}) actor class Items() = this {
       item.title # "\n" # item.description # "\n" # text);
   };
 
-  // FIXME: Also remove voting data.
+  /// I don't remove voting data, as it is a supposedly rare occurence of removing an item.
   func _removeItem(caller: Principal, canisterId: Principal, itemId: Nat): async* () {
     // We first remove links, then the item itself, in order to avoid race conditions when displaying.
     await* removeItemLinks((canisterId, itemId));
@@ -208,7 +214,7 @@ shared({caller = initialOwner}) actor class Items() = this {
 
   /// Order of items ///
 
-  stable let guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0)); // FIXME: Gather randomness.
+  stable var guidGen = GUID.init(Array.tabulate<Nat8>(16, func _ = 0));
 
   func addItemToList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat), side: { #beginning; #end; #zero }): async* () {
     let scanItemInfo = Nat.toText(itemToAdd.1) # "@" # Principal.toText(itemToAdd.0);
