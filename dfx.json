@@ -101,6 +101,11 @@
     "local": {
       "bind": "localhost:8000",
       "type": "ephemeral"
+    },
+    "remote": {
+      "id": {
+        "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+      }
     }
   },
   "metadata": [
