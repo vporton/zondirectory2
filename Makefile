@@ -9,10 +9,10 @@ all: deploy init
 
 .PHONY: deploy
 deploy:
-	dfx deploy -vv
+	dfx deploy --network $(NETWORK) -v
 
 .PHONY: fabricate-cycles
-	dfx ledger fabricate-cycles --amount 1000000000 --canister main
+	test "$(NETWORK)" = local && dfx ledger fabricate-cycles --amount 100000000 --canister main
 
 .PHONY: init
 init: fabricate-cycles init-main init-battery init-CanDBIndex init-NacDBIndex init-items init-call init-createItemData
