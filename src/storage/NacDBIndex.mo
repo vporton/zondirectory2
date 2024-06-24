@@ -58,6 +58,9 @@ shared({caller = initialOwner}) actor class NacDBIndex() = this {
         let part = await* _createPartition();
         StableBuffer.add(dbIndex.canisters, part);
 
+        let SubnetManager : actor {
+            raw_rand() : async Blob;
+        } = actor "aaaaa-aa";
         guidGen := GUID.init(Array.subArray(Blob.toArray(await SubnetManager.raw_rand()), 0, 16));
 
         allItemsStream := ?(await* Reorder.createOrder(GUID.nextGuid(guidGen), {
