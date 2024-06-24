@@ -2,7 +2,7 @@
 
 NETWORK = local
 
-FOUNDER = racnx-sccpy-mgfgr-rgb67-bvwyx-gjkad-lyw33-prq23-yw24r-eb65i-oqe
+FOUNDER = $(shell dfx identity get-principal)
 
 .PHONY: all
 all: deploy init
