@@ -19,7 +19,7 @@ import Itertools "mo:itertools/Iter";
 import Types "HttpTypes";
 import CanDBPartition "../storage/CanDBPartition";
 import Call "canister:call";
-import Config "../libs/configs/ai.config";
+import Config "../libs/configs/stage/ai.config";
 import lib "lib";
 
 module {
