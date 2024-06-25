@@ -11,8 +11,20 @@
   "NacDBPartition": {
     "ic": "iqufl-yiaaa-aaaap-qbqaa-cai"
   },
+  "battery": {
+    "ic": "jd7t5-hyaaa-aaaap-qhnna-cai"
+  },
+  "call": {
+    "ic": "je6vj-kaaaa-aaaap-qhnnq-cai"
+  },
   "frontend": {
     "ic": "i6wid-dyaaa-aaaap-qbqba-cai"
+  },
+  "ic_eth": {
+    "ic": "jrzee-liaaa-aaaap-qhnoa-cai"
+  },
+  "items": {
+    "ic": "jwycq-gqaaa-aaaap-qhnoq-cai"
   },
   "main": {
     "ic": "nmzlm-vaaaa-aaaap-qbp2a-cai"
@@ -23,7 +35,13 @@
   "payments": {
     "ic": "nc3ge-oqaaa-aaaap-qbp3a-cai"
   },
+  "personhood": {
+    "ic": "j73jm-qyaaa-aaaap-qhnpa-cai"
+  },
   "pst": {
     "ic": "nf2aq-diaaa-aaaap-qbp3q-cai"
+  },
+  "users": {
+    "ic": "jy2py-5aaaa-aaaap-qhnpq-cai"
   }
 }

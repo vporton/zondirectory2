@@ -6,7 +6,7 @@ import CanDBIndex "canister:CanDBIndex";
 import ic_eth "canister:ic_eth";
 import Types "mo:passport-client/lib/Types";
 import V "mo:passport-client/lib/Verifier";
-import PassportConfig "../libs/configs/passport.config";
+import PassportConfig "../libs/configs/stage/passport.config";
 
 actor Personhood {
     let updateRequests = RateLimit.newRequests();
