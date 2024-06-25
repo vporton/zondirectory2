@@ -5,7 +5,7 @@ include metaconfig.mk
 
 NETWORK = local
 
-FOUNDER = $(shell dfx identity get-principal)
+FOUNDER = $(shell dfx identity --network $(NETWORK) get-principal)
 
 .PHONY: all
 all: deploy init
