@@ -134,7 +134,7 @@ module {
             {
                 timeout = 60_000_000_000; // 1 min
                 max_response_bytes = ?(1564 + Nat64.fromNat(Text.size(bodyText)));
-                cycles = 49765600;
+                cycles = 90_000_000;
             },
         );
     };
@@ -281,7 +281,7 @@ module {
             {
                 timeout = 60_000_000_000; // 1 min
                 max_response_bytes = ?(1564 + Nat64.fromNat(Text.size(bodyText))); // TODO
-                cycles = 49765600; // TODO
+                cycles = 90_000_000; // TODO
             },
         );
     };
