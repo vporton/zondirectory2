@@ -163,7 +163,7 @@ module {
             {
                 timeout = 60_000_000_000; // 1 min
                 max_response_bytes = ?7750;
-                cycles = 55240000;
+                cycles = 150_000_000;
             },
         );
         let dataObj = getJSONSubObject(jsonRes, "data");
@@ -208,7 +208,7 @@ module {
             {
                 timeout = 60_000_000_000; // 1 min
                 max_response_bytes = ?7750; // TODO
-                cycles = 55240000; // TODO
+                cycles = 150_000_000; // TODO
             },
         );        
     };
@@ -231,7 +231,7 @@ module {
             {
                 timeout = 60_000_000_000; // 1 min
                 max_response_bytes = ?7750; // TODO
-                cycles = 55240000; // TODO
+                cycles = 150_000_000; // TODO
             },
         );
         let matches = getJSONSubObject(jsonRes, "matches");

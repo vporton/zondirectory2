@@ -1,47 +1,32 @@
 {
   "CanDBIndex": {
-    "ic": "n674v-zqaaa-aaaap-qbpza-cai"
-  },
-  "CanDBPartition": {
-    "ic": "m5tvt-niaaa-aaaap-qbp7q-cai"
+    "ic": "sqkzo-iyaaa-aaaak-qinmq-cai"
   },
   "NacDBIndex": {
-    "ic": "nz62b-uiaaa-aaaap-qbpzq-cai"
-  },
-  "NacDBPartition": {
-    "ic": "iqufl-yiaaa-aaaap-qbqaa-cai"
+    "ic": "szjss-6qaaa-aaaak-qinna-cai"
   },
   "battery": {
-    "ic": "jd7t5-hyaaa-aaaap-qhnna-cai"
+    "ic": "s6iug-tiaaa-aaaak-qinnq-cai"
   },
   "call": {
-    "ic": "je6vj-kaaaa-aaaap-qhnnq-cai"
+    "ic": "slpfl-saaaa-aaaak-qinoa-cai"
   },
   "frontend": {
-    "ic": "i6wid-dyaaa-aaaap-qbqba-cai"
+    "ic": "smod7-7yaaa-aaaak-qinoq-cai"
   },
   "ic_eth": {
-    "ic": "jrzee-liaaa-aaaap-qhnoa-cai"
+    "ic": "sfnid-jqaaa-aaaak-qinpa-cai"
   },
   "items": {
-    "ic": "jwycq-gqaaa-aaaap-qhnoq-cai"
+    "ic": "scmox-eiaaa-aaaak-qinpq-cai"
   },
   "main": {
-    "ic": "nmzlm-vaaaa-aaaap-qbp2a-cai"
-  },
-  "order": {
-    "ic": "nlyny-yyaaa-aaaap-qbp2q-cai"
-  },
-  "payments": {
-    "ic": "nc3ge-oqaaa-aaaap-qbp3a-cai"
+    "ic": "x6xus-paaaa-aaaak-qinqa-cai"
   },
   "personhood": {
-    "ic": "j73jm-qyaaa-aaaap-qhnpa-cai"
-  },
-  "pst": {
-    "ic": "nf2aq-diaaa-aaaap-qbp3q-cai"
+    "ic": "xzwsg-cyaaa-aaaak-qinqq-cai"
   },
   "users": {
-    "ic": "jy2py-5aaaa-aaaap-qhnpq-cai"
+    "ic": "xqvz2-uqaaa-aaaak-qinra-cai"
   }
 }
