@@ -15,7 +15,7 @@ import Multi "mo:candb-multi/Multi";
 import Entity "mo:candb/Entity";
 import Battery "canister:battery";
 import lib "../backend/lib";
-import PassportConfig "../libs/configs/passport.config";
+import PassportConfig "../libs/configs/stage/passport.config";
 
 shared({caller = initialOwner}) actor class CanDBIndex() = this {
   stable var owners: [Principal] = [initialOwner];
@@ -276,7 +276,6 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     let voting = await* getVotingData(user, null); // TODO: hint `partitionId`, not null
     switch (voting) {
       case (?voting) {
-        Debug.print("VOTING: " # debug_show(voting));
         if (voting.lastChecked + 150 * 24 * 3600 * 1_000_000_000 >= Time.now() and // TODO: Make configurable.
           voting.points >= PassportConfig.minimumScore)
         {
