@@ -29,3 +29,4 @@ dist/
 # config
 .env
 *.config.mo
+metaconfig.mk

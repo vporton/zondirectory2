@@ -1,5 +1,8 @@
 #!/usr/bin/make -f
 
+SHELL = /bin/bash
+include metaconfig.mk
+
 NETWORK = local
 
 FOUNDER = $(shell dfx identity get-principal)
@@ -9,7 +12,11 @@ all: deploy init
 
 .PHONY: deploy
 deploy:
-	dfx deploy --network $(NETWORK) -v frontend
+	cleanup() { rm -f src/libs/configs/stage/*; } && \
+	  trap "cleanup" EXIT && \
+	  mkdir -p src/libs/configs/stage && \
+	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
+	  dfx deploy --network $(NETWORK) -v frontend
 
 .PHONY: fabricate-cycles
 	test "$(NETWORK)" = local && dfx ledger fabricate-cycles --amount 100000000 --canister main
