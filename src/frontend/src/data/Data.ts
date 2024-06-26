@@ -54,8 +54,8 @@ export class ItemDB {
             client.getItem(BigInt(obj.itemRef.id)),
             client.getStreams(BigInt(obj.itemRef.id), "s" + kind),
             client.getStreams(BigInt(obj.itemRef.id), "rs" + kind),
-        ]) as [ItemTransfer[] | [], Streams[] | [], Streams[] | []];
-        obj.item = item[0]; // TODO: if no such item
+        ]) as [ItemTransfer, Streams[] | [], Streams[] | []];
+        obj.item = item;
         obj.streams = _unwrap(streams);
         obj.streamsRev = _unwrap(streamsRev);
         return obj;
@@ -104,7 +104,7 @@ export class ItemDB {
         return items4.map(({order, id, item}) => ({
             order,
             id,
-            item: item[0],
+            item,
         }));
     }
     async subFolders(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemTransfer}[]> {

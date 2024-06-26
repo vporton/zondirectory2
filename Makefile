@@ -16,7 +16,19 @@ deploy:
 	  trap "cleanup" EXIT && \
 	  mkdir -p src/libs/configs/stage && \
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
-	  dfx deploy --network $(NETWORK) -vv frontend
+	  dfx generate --network $(NETWORK) -v CanDBPartition && \
+	  dfx generate --network $(NETWORK) -v NacDBPartition && \
+	  dfx deploy --network $(NETWORK) -v frontend
+
+.PHONY: generate
+generate:
+	cleanup() { rm -f src/libs/configs/stage/*; } && \
+	  trap "cleanup" EXIT && \
+	  mkdir -p src/libs/configs/stage && \
+	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
+	  dfx generate --network $(NETWORK) -v CanDBPartition && \
+	  dfx generate --network $(NETWORK) -v NacDBPartition && \
+	  dfx generate --network $(NETWORK) -v
 
 .PHONY: fabricate-cycles
 	test "$(NETWORK)" = local && dfx ledger fabricate-cycles --amount 100000000 --canister main

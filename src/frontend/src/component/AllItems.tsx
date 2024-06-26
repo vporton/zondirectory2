@@ -44,7 +44,7 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
         return items4.map(({order, id, item}) => ({
             order,
             id,
-            item: item[0]!,
+            item,
         }));
     }
 

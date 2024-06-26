@@ -1,9 +1,6 @@
 import { idlFactory as itemsIdlFactory } from "../../../declarations/items";
-import { _SERVICE as Orders } from "../../../declarations/order/order.did";
+import { _SERVICE as Orders } from "../../../declarations/items/items.did";
 import { Actor, Agent } from "@dfinity/agent";
-import { getIsLocal } from "./client";
-import { ItemId } from './types';
-import { Principal } from "@dfinity/principal";
 import { ItemRef, parseItemRef } from "../data/Data";
 
 export async function addToFolder(agent: Agent, catId: ItemRef, itemId: ItemRef, comment: boolean, side: 'beginning' | 'end') {

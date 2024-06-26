@@ -119,14 +119,13 @@ shared actor class CanDBPartition(options: {
   // Application-specific code //
 
   // TODO: Retrieve virtual items.
-  // TODO: `?lib.ItemData` -> `lib.ItemData`?
-  public shared func getItem(itemId: Nat): async ?lib.ItemTransfer {
+  public shared func getItem(itemId: Nat): async lib.ItemTransfer {
     let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "i");
     switch (data) {
       case (?data) {
         let item = lib.deserializeItem(data);
         switch (item) {
-          case (#owned item2) { ?{ data = { creator = item2.creator; item = item2.item; edited = item2.edited }; communal = false } };
+          case (#owned item2) { { data = { creator = item2.creator; item = item2.item; edited = item2.edited }; communal = false } };
           case (#communal c) {
             let scanResult = await c.votesStream.order.0.scanLimitOuter({
               dir = #fwd;
@@ -153,14 +152,14 @@ shared actor class CanDBPartition(options: {
             switch (await itemCanister.getAttribute({sk = "r/" # itemId}, "i")) {
               case (?data) {
                 let variant = lib.deserializeItemVariant(data);
-                ?{ data = { creator = Principal.fromText("aaaaa-aa"); item = variant.item; edited = true }; communal = true };
+                { data = { creator = Principal.fromText("aaaaa-aa"); item = variant.item; edited = true }; communal = true };
               };
-              case null { return null };
+              case null { Debug.trap("no such item"); };
             };
           };
         };
       };
-      case null { null };
+      case null { Debug.trap("no such item"); };
     };
   };
 
