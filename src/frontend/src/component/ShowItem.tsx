@@ -83,7 +83,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     useEffect(() => {
         updateVotes(props.defaultAgent!, id, principal, comments!, setTotalVotesComments, setUserVoteComments).then(() => {}); // TODO: `!`
     }, [comments, principal]);
-    useEffect(() => { // TODO
+    useEffect(() => {
         if (id !== undefined) {
             console.log("Loading from AppData");
             AppData.create(props.defaultAgent!, serializeItemRef(id), streamKind).then(data => { // TODO: `!`
@@ -121,7 +121,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 });
             });
         }
-    }, [id, props.defaultAgent, streamKind]); // TODO: more tight choice
+    }, [id, props.defaultAgent, streamKind]);
     function moreSubfolders(event: any) {
         event.preventDefault();
         navigate(`/subfolders-of/`+serializeItemRef(id))
