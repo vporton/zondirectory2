@@ -237,8 +237,6 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     sk : Entity.SK;
     subkey : Entity.AttributeKey;
   }): async ?(Principal, ?Entity.AttributeValue) {
-    checkCaller(caller);
-
     await* Multi.getAttributeByHint(pkToCanisterMap, pk, hint, options);
   };
 
