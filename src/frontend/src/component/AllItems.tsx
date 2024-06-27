@@ -9,7 +9,7 @@ import { Actor, Agent } from "@dfinity/agent";
 import { ItemRef, serializeItemRef } from "../data/Data";
 import { ItemTransfer } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { Principal } from "@dfinity/principal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import ItemType from "./misc/ItemType";
 import Nav from "react-bootstrap/esm/Nav";
@@ -55,7 +55,9 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
         }
         return await aList({lowerBound, limit})
     }
-    getItems().then(items => setItems(items));
+    useEffect(() => {
+        getItems().then(items => setItems(items));
+    }, []);
     
     return <>
         <Helmet>
