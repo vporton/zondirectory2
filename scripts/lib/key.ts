@@ -4,8 +4,8 @@ import {Ed25519KeyIdentity} from '@dfinity/identity';
 import {Secp256k1KeyIdentity} from '@dfinity/identity-secp256k1';
 import pemfile from 'pem-file';
 
-export function decodeFile(fileName) {
-    const rawKey = fs.readFileSync(fileName);
+export function decodeFile(rawKey) {
+    // const rawKey = fs.readFileSync(fileName);
     let buf: Buffer = pemfile.decode(rawKey);
 	if (rawKey.includes('EC PRIVATE KEY')) {
 		if (buf.length != 118) {

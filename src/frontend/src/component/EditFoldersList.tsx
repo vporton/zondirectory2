@@ -96,7 +96,7 @@ export default function EditFoldersList(props: {
 
     return (
         <>
-            <h2>{props.reverse ? `Folders to post` : `Post to folders`}</h2>
+            <h1>{props.reverse ? `Folders to post` : `Post to folders`}</h1>
             <p>TODO: Visual editor of folders; TODO: Limited to ?? posts per day; TODO: begin/end works only for owned folders</p>
             <Container>
                 <Row>

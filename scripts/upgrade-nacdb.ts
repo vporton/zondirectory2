@@ -3,20 +3,27 @@ global.fetch = fetch;
 
 require("dotenv").config();
 import { loadWasm } from "candb-client-typescript/dist/ClientUtil";
-import { NacDBIndex, idlFactory as nacDBIndexIdl } from "../out/src/storage/NacDBIndex";
+import { idlFactory as nacDBIndexIdl } from '../src/declarations/NacDBIndex';
+import { _SERVICE as NacDBIndex } from "../src/declarations/NacDBIndex/NacDBIndex.did";
 import { Actor, HttpAgent } from "@dfinity/agent";
-import { Principal } from "@dfinity/principal";
 import { decodeFile } from "./lib/key";
+import { exec } from 'child_process';
 
 const isLocal = process.env.DFX_NETWORK !== "ic";
 
 // const MANAGEMENT_CANISTER_ID = Principal.fromText('aaaaa-aa');
 
+function commandOutput(command): Promise<string> {
+  return new Promise((resolve) => exec(command, function(error, stdout, stderr){ resolve(stdout); }));
+}
+
 async function upgradePartitions() {
-    const serviceWasmModulePath = process.argv[2];
+    const net = process.argv[2];
+    const serviceWasmModulePath = `.dfx/${net}/canisters/NacDBPartition/NacDBPartition.wasm`;
     const serviceWasm = loadWasm(serviceWasmModulePath);
 
-    const identity = decodeFile(process.env.HOME+"/.config/dfx/identity/default/identity.pem");
+    const key = await commandOutput("dfx identity export Zon");
+    const identity = decodeFile(key);
 
     const agent = new HttpAgent({host: isLocal ? "http://localhost:8000" : "https://icp-api.io", identity});
     if (isLocal) {

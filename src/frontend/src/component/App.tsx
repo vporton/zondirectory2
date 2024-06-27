@@ -13,6 +13,7 @@ import {
     useParams,
     Link,
     BrowserRouter,
+    useLocation,
 } from "react-router-dom";
 import { Actor, Agent, getDefaultAgent } from '@dfinity/agent';
 import SubFolders from "./SubFolders";
@@ -135,6 +136,7 @@ function MyInner(props: {
     };
     const {userScore, setUserScore} = useContext<MainContextType>(MainContext);
     const [root, setRoot] = useState("");
+    const location = useLocation();
     async function fetchRootItem() {
         const MainCanister: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent: props.defaultAgent})
         const data0 = await MainCanister.getRootItem();
@@ -143,7 +145,9 @@ function MyInner(props: {
         let item = { canister: part, id: Number(id) };
         setRoot(serializeItemRef(item));
     }
-    fetchRootItem().then(() => {});
+    if (location.pathname === '/') {
+        fetchRootItem().then(() => {});
+    }
     function RootRedirector(props: {root: string}) {
         useEffect(() => {
             if (root !== "") {
