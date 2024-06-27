@@ -44,12 +44,14 @@ export default function App() {
                 <meta name="description" content="A fusion of social network, marketplace, and web directory"/>
             </Helmet>
             <Container>
-                <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
-                    It is a preliminary beta version. Some features are missing, notably
-                    images/media, communal items (collective editing) and monetization.
-                    Neither security of your data, nor any quality of service is warranted.
-                </p>
-                <h1>Zon Social Network</h1>
+                <header>
+                    <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
+                        It is a preliminary beta version. Some features are missing, notably
+                        images/media, communal items (collective editing) and monetization.
+                        Neither security of your data, nor any quality of service is warranted.
+                    </p>
+                </header>
+                <div>Zon Social Network</div>
                 <AuthProvider options={{loginOptions: {
                     identityProvider,
                     maxTimeToLive: BigInt(3600) * BigInt(1_000_000_000),

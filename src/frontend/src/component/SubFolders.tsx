@@ -74,7 +74,7 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
                 <title>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: {title}</title>
                 <meta name="robots" content="noindex"/>
             </Helmet>
-            <h2>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: <a href='#' onClick={() => navigate(`/item/`+id)}>{title}</a></h2>
+            <h1>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: <a href='#' onClick={() => navigate(`/item/`+id)}>{title}</a></h1>
             <p>Sort by:{" "}
                 <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
                 <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
