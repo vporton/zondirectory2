@@ -11,24 +11,38 @@ FOUNDER = $(shell dfx identity --network $(NETWORK) get-principal)
 all: deploy init
 
 .PHONY: deploy
-deploy:
-	cleanup() { rm -f src/libs/configs/stage/*; } && \
+deploy: compile-candbpart compile-nacdbpart 
+	cleanup() { rm -f src/libs/configs/stage/*; mv -f .env .env.$(NETWORK); } && \
 	  trap "cleanup" EXIT && \
 	  mkdir -p src/libs/configs/stage && \
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
+	  cp .env.$(NETWORK) .env \
 	  dfx generate --network $(NETWORK) -v CanDBPartition && \
 	  dfx generate --network $(NETWORK) -v NacDBPartition && \
-	  dfx deploy --network $(NETWORK) -v frontend
+	  dfx deploy --network $(NETWORK) -v frontend && \
+	  npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
+	  npx ts-node scripts/upgrade-nacdb.ts $(NETWORK)
 
 .PHONY: generate
 generate:
-	cleanup() { rm -f src/libs/configs/stage/*; } && \
+	cleanup() { rm -f src/libs/configs/stage/*; ; mv -f .env .env.$(NETWORK); } && \
 	  trap "cleanup" EXIT && \
 	  mkdir -p src/libs/configs/stage && \
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
+	  cp .env.$(NETWORK) .env \
 	  dfx generate --network $(NETWORK) -v CanDBPartition && \
 	  dfx generate --network $(NETWORK) -v NacDBPartition && \
 	  dfx generate --network $(NETWORK) -v
+
+compile-candbpart:
+	mkdir -p .dfx/$(NETWORK)/canisters/CanDBPartition
+	`dfx cache show`/moc -o .dfx/$(NETWORK)/canisters/CanDBPartition/CanDBPartition.wasm \
+	  `mops sources` src/storage/CanDBPartition.mo
+
+compile-nacdbpart:
+	mkdir -p .dfx/$(NETWORK)/canisters/NacDBPartition
+	`dfx cache show`/moc -o .dfx/$(NETWORK)/canisters/NacDBPartition/NacDBPartition.wasm \
+	  `mops sources` src/storage/NacDBPartition.mo
 
 .PHONY: fabricate-cycles
 	test "$(NETWORK)" = local && dfx ledger fabricate-cycles --amount 100000000 --canister main
