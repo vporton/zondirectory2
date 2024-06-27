@@ -51,7 +51,7 @@ export const BusyWidget: React.FC<{children: React.ReactNode}> = (props: { child
         <div id="overlay" style={{display: (busy ? 'flex' : 'none')}}>
             <div id="overlayInside">
                 Wait...<br/>
-                Creating a post can take awhile, because we store it in a blockchain.
+                Creating a post can take awhile, because we check it for spam and store it in a blockchain.
             </div>
         </div>
         <div id="content">
