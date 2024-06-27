@@ -51,7 +51,7 @@ export default function App() {
                         Neither security of your data, nor any quality of service is warranted.
                     </p>
                 </header>
-                <div>Zon Social Network</div>
+                <div style={{fontSize: '200%'}}>Zon Social Network</div>
                 <AuthProvider options={{loginOptions: {
                     identityProvider,
                     maxTimeToLive: BigInt(3600) * BigInt(1_000_000_000),
