@@ -5,7 +5,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "./auth/use-auth-client";
 import { ItemDB, ItemRef, loadTotalVotes, loadUserVote, parseItemRef, serializeItemRef } from "../data/Data";
 import ItemType from "./misc/ItemType";
-import { Button, Nav } from "react-bootstrap";
+import { Button, Col, Container, Nav, Row } from "react-bootstrap";
 import { ItemData, ItemTransfer } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
@@ -201,133 +201,152 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 <Tab>Comments</Tab>
             </TabList>
             <TabPanel>
-                {!isFolder ? "" : <>
-                <h3>Sub-folders</h3>
-                {subfolders === undefined ? <p>Loading...</p> :
-                <ul>
-                    {subfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
-                        <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
-                             {/* TODO: `!` below */}
-                            <UpDown
-                                parent={{id}}
-                                item={x}
-                                agent={props.defaultAgent!}
-                                userVote={userVoteSubFolders[serializeItemRef(x.id)]}
-                                totalVotes={totalVotesSubFolders[serializeItemRef(x.id)]}
-                                onSetUserVote={(id: ItemRef, v: number) =>
-                                    setUserVoteSubFolders({...userVoteSubFolders, [serializeItemRef(id)]: v})}
-                                onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
-                                    setTotalVotesSubFolders({...totalVotesSubFolders, [serializeItemRef(id)]: v})}
-                                onUpdateList={() => xdata!.subFolders().then(x => setSubfolders(x))}
-                            />
-                            <ItemType item={x.item}/>
-                            <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                            [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
-                        </li>)}
-                </ul>}
-                <p>
-                    <a href="#" onClick={e => moreSubfolders(e)}>More...</a> <a href={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</a>
-                </p>
-            </>}
-            <h3>Super-folders</h3>
-            <p><small>Voting in this stream not yet implemented.</small></p>
-            {superfolders === undefined ? <p>Loading...</p> :
-            <ul>
-                {superfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
-                    <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
-                        {/* TODO: up/down here is complicated by exchanhing parent/child. */}
-                        {/*<UpDown
-                            parent={{id}}
-                            item={x}
-                            agent={props.defaultAgent}
-                            userVote={userVoteSuperFolders[serializeItemRef(x.id)]}
-                            totalVotes={totalVotesSuperFolders[serializeItemRef(x.id)]}
-                            onSetUserVote={(id: ItemRef, v: number) =>
-                                setUserVoteSuperFolders({...userVoteSuperFolders, [serializeItemRef(id)]: v})}
-                            onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
-                                setTotalVotesSuperFolders({...totalVotesSubFolders, [serializeItemRef(id)]: v})}
-                            onUpdateList={() => xdata.superFolders().then(x => {
-                                console.log(x)
-                                setSuperfolders(x);
-                            })}
-                        />*/}
-                        <ItemType item={x.item}/>
-                        <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                        [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
-                    </li>)}
-            </ul>}
-            {/* TODO: Create super-folder */}
-            <p><a href="#" onClick={e => moreSuperfolders(e)}>More...</a> <a href={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</a></p>
+                <Container>
+                    <Row>
+                    {!isFolder ? "" : <>
+                        <Col>
+                            <h3>Sub-folders</h3>
+                            {subfolders === undefined ? <p>Loading...</p> :
+                            <ul>
+                                {subfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
+                                    <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
+                                        {/* TODO: `!` below */}
+                                        <UpDown
+                                            parent={{id}}
+                                            item={x}
+                                            agent={props.defaultAgent!}
+                                            userVote={userVoteSubFolders[serializeItemRef(x.id)]}
+                                            totalVotes={totalVotesSubFolders[serializeItemRef(x.id)]}
+                                            onSetUserVote={(id: ItemRef, v: number) =>
+                                                setUserVoteSubFolders({...userVoteSubFolders, [serializeItemRef(id)]: v})}
+                                            onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
+                                                setTotalVotesSubFolders({...totalVotesSubFolders, [serializeItemRef(id)]: v})}
+                                            onUpdateList={() => xdata!.subFolders().then(x => setSubfolders(x))}
+                                        />
+                                        <ItemType item={x.item}/>
+                                        <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                                        [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                                    </li>)}
+                            </ul>}
+                            <p>
+                                <a href="#" onClick={e => moreSubfolders(e)}>More...</a> <a href={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</a>
+                            </p>
+                        </Col>
+                    </>}
+                        <Col>
+                            <h3>Super-folders</h3>
+                            <p><small>Voting in this stream not yet implemented.</small></p>
+                            {superfolders === undefined ? <p>Loading...</p> :
+                            <ul>
+                                {superfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
+                                    <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
+                                        {/* TODO: up/down here is complicated by exchanhing parent/child. */}
+                                        {/*<UpDown
+                                            parent={{id}}
+                                            item={x}
+                                            agent={props.defaultAgent}
+                                            userVote={userVoteSuperFolders[serializeItemRef(x.id)]}
+                                            totalVotes={totalVotesSuperFolders[serializeItemRef(x.id)]}
+                                            onSetUserVote={(id: ItemRef, v: number) =>
+                                                setUserVoteSuperFolders({...userVoteSuperFolders, [serializeItemRef(id)]: v})}
+                                            onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
+                                                setTotalVotesSuperFolders({...totalVotesSubFolders, [serializeItemRef(id)]: v})}
+                                            onUpdateList={() => xdata.superFolders().then(x => {
+                                                console.log(x)
+                                                setSuperfolders(x);
+                                            })}
+                                        />*/}
+                                        <ItemType item={x.item}/>
+                                        <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                                        [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                                    </li>)}
+                            </ul>}
+                            {/* TODO: Create super-folder */}
+                            <p><a href="#" onClick={e => moreSuperfolders(e)}>More...</a> <a href={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</a></p>
+                        </Col>
             {!isFolder ? "" : <>
-                <h3>Items</h3>
-                {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) => 
-                    <div key={serializeItemRef(x.id)}>
-                        {/* TODO: `!` in `props.defaultAgent!` */}
-                        <p lang={x.item.data.item.locale}>
-                            <UpDown
-                                parent={{id}}
-                                item={x}
-                                agent={props.defaultAgent!}
-                                userVote={userVoteItems[serializeItemRef(x.id)]}
-                                totalVotes={totalVotesItems[serializeItemRef(x.id)]}
-                                onSetUserVote={(id: ItemRef, v: number) =>
-                                    setUserVoteItems({...userVoteItems, [serializeItemRef(id)]: v})}
-                                onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
-                                    setTotalVotesItems({...totalVotesItems, [serializeItemRef(id)]: v})}
-                                onUpdateList={() => xdata.items().then(x => setItems(x))}
-                            />{" "}
-                            {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
-                            {(x.item.data.item.details as any).link ? <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a> : x.item.data.item.title}
-                            {" "}<a href={`/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
-                            {" "}[<Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
-                        </p>
-                        <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
-                    </div>
-            )}
-            <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                <a href={`/create/for-folder/${serializeItemRef(id)}`}>Create</a></p></>}
+                        <Col>
+                            <h3>Items</h3>
+                            {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) => 
+                                <div key={serializeItemRef(x.id)}>
+                                    {/* TODO: `!` in `props.defaultAgent!` */}
+                                    <p lang={x.item.data.item.locale}>
+                                        <UpDown
+                                            parent={{id}}
+                                            item={x}
+                                            agent={props.defaultAgent!}
+                                            userVote={userVoteItems[serializeItemRef(x.id)]}
+                                            totalVotes={totalVotesItems[serializeItemRef(x.id)]}
+                                            onSetUserVote={(id: ItemRef, v: number) =>
+                                                setUserVoteItems({...userVoteItems, [serializeItemRef(id)]: v})}
+                                            onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
+                                                setTotalVotesItems({...totalVotesItems, [serializeItemRef(id)]: v})}
+                                            onUpdateList={() => xdata.items().then(x => setItems(x))}
+                                        />{" "}
+                                        {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
+                                        {(x.item.data.item.details as any).link ? <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a> : x.item.data.item.title}
+                                        {" "}<a href={`/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
+                                        {" "}[<Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                                    </p>
+                                    <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
+                                </div>
+                            )}
+                            <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
+                                <a href={`/create/for-folder/${serializeItemRef(id)}`}>Create</a></p>
+                        </Col>
+                    </>}
+                    </Row>
+                </Container>
             </TabPanel>
             <TabPanel>
-                <h3>Comments</h3>
-                {comments === undefined ? <p>Loading...</p> : comments.map(x => 
-                    <div key={serializeItemRef(x.id)}>
-                        {/* TODO: `!` in `props.defaultAgent!` */}
-                        <p lang={x.item.data.item.locale}>
-                            <UpDown
-                                parent={{id}}
-                                item={x}
-                                agent={props.defaultAgent!}
-                                userVote={userVoteComments[serializeItemRef(x.id)]}
-                                totalVotes={totalVotesComments[serializeItemRef(x.id)]}
-                                onSetUserVote={(id: ItemRef, v: number) =>
-                                    setUserVoteComments({...userVoteComments, [serializeItemRef(id)]: v})}
-                                onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
-                                    setTotalVotesComments({...totalVotesComments, [serializeItemRef(id)]: v})}
-                                onUpdateList={() => xdata.comments().then(x => setComments(x))}
-                                isComment={true}
-                            />
-                            {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
-                            {(x.item.data.item.details as any).link ? <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a> : x.item.data.item.title}
-                            {" "}<a href={`/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
-                        </p>
-                        <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
-                    </div>
-                )}
-                <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                    <a href={`/create/comment/${serializeItemRef(id)}`}>Create</a></p>
-                <h3>Comment on</h3>
-                <p><small>Voting in this stream not yet implemented.</small></p>
-                {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: ItemTransfer}) => 
-                    <div key={serializeItemRef(item.id)}>
-                        <p lang={item.item.data.item.locale}>
-                            {item.item.data.item.price ? <>({item.item.data.item.price} ICP) </> : ""}
-                            {(item.item.data.item.details as any).link ? <a href={(item.item.data.item.details as any).link}>{item.item.data.item.title}</a> : item.item.data.item.title}
-                            {" "}<a href={`/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
-                        </p>
-                        <p lang={item.item.data.item.locale} style={{marginLeft: '1em'}}>{item.item.data.item.description}</p>
-                    </div>
-                )}
-                <p><a href="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}</p>
+                <Container>
+                    <Row>
+                        <Col>
+                            <h3>Comments</h3>
+                            {comments === undefined ? <p>Loading...</p> : comments.map(x => 
+                                <div key={serializeItemRef(x.id)}>
+                                    {/* TODO: `!` in `props.defaultAgent!` */}
+                                    <p lang={x.item.data.item.locale}>
+                                        <UpDown
+                                            parent={{id}}
+                                            item={x}
+                                            agent={props.defaultAgent!}
+                                            userVote={userVoteComments[serializeItemRef(x.id)]}
+                                            totalVotes={totalVotesComments[serializeItemRef(x.id)]}
+                                            onSetUserVote={(id: ItemRef, v: number) =>
+                                                setUserVoteComments({...userVoteComments, [serializeItemRef(id)]: v})}
+                                            onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
+                                                setTotalVotesComments({...totalVotesComments, [serializeItemRef(id)]: v})}
+                                            onUpdateList={() => xdata.comments().then(x => setComments(x))}
+                                            isComment={true}
+                                        />
+                                        {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
+                                        {(x.item.data.item.details as any).link ? <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a> : x.item.data.item.title}
+                                        {" "}<a href={`/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
+                                    </p>
+                                    <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
+                                </div>
+                            )}
+                            <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
+                                <a href={`/create/comment/${serializeItemRef(id)}`}>Create</a></p>
+                        </Col>
+                        <Col>
+                            <h3>Comment on</h3>
+                            <p><small>Voting in this stream not yet implemented.</small></p>
+                            {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: ItemTransfer}) => 
+                                <div key={serializeItemRef(item.id)}>
+                                    <p lang={item.item.data.item.locale}>
+                                        {item.item.data.item.price ? <>({item.item.data.item.price} ICP) </> : ""}
+                                        {(item.item.data.item.details as any).link ? <a href={(item.item.data.item.details as any).link}>{item.item.data.item.title}</a> : item.item.data.item.title}
+                                        {" "}<a href={`/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
+                                    </p>
+                                    <p lang={item.item.data.item.locale} style={{marginLeft: '1em'}}>{item.item.data.item.description}</p>
+                                </div>
+                            )}
+                            <p><a href="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}</p>
+                        </Col>
+                    </Row>
+                </Container>
             </TabPanel>
         </Tabs>
     </>
