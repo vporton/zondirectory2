@@ -50,15 +50,11 @@ export class ItemDB {
         try { // FIXME: Remove.
         const obj = new ItemDB(agent, itemId);
         const client: CanDBPartition = Actor.createActor(canDBPartitionIdl, {canisterId: obj.itemRef.canister, agent});
-        const r = await Promise.all([
+        const [item, streams, streamsRev] = await Promise.all([
             client.getItem(BigInt(obj.itemRef.id)),
             client.getStreams(BigInt(obj.itemRef.id), "s" + kind),
             client.getStreams(BigInt(obj.itemRef.id), "rs" + kind),
         ]);
-        const [item, streams, streamsRev] = r as [ItemTransfer, Streams[] | [], Streams[] | []];
-        // const item = await client.getItem(BigInt(obj.itemRef.id));
-        // const streams = await client.getStreams(BigInt(obj.itemRef.id), "s" + kind);
-        // const streamsRev = await client.getStreams(BigInt(obj.itemRef.id), "rs" + kind);
         obj.item = item;
         obj.streams = _unwrap(streams);
         obj.streamsRev = _unwrap(streamsRev);
