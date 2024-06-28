@@ -50,20 +50,15 @@ export class ItemDB {
         try { // FIXME: Remove.
         const obj = new ItemDB(agent, itemId);
         const client: CanDBPartition = Actor.createActor(canDBPartitionIdl, {canisterId: obj.itemRef.canister, agent});
-        // FIXME: Retrieve both by one call:
-        // const r = await Promise.all([
-        //     client.getItem(BigInt(obj.itemRef.id)),
-        //     client.getStreams(BigInt(obj.itemRef.id), "s" + kind),
-        //     client.getStreams(BigInt(obj.itemRef.id), "rs" + kind),
-        // ]);
-        // const [item, streams, streamsRev] = r as [ItemTransfer, Streams[] | [], Streams[] | []];
-        console.log("YY", obj.itemRef.id);
-        const item = await client.getItem(BigInt(obj.itemRef.id));
-        console.log("YY0");
-        const streams = await client.getStreams(BigInt(obj.itemRef.id), "s" + kind);
-        console.log("YY1");
-        const streamsRev = await client.getStreams(BigInt(obj.itemRef.id), "rs" + kind);
-        console.log("YY2");
+        const r = await Promise.all([
+            client.getItem(BigInt(obj.itemRef.id)),
+            client.getStreams(BigInt(obj.itemRef.id), "s" + kind),
+            client.getStreams(BigInt(obj.itemRef.id), "rs" + kind),
+        ]);
+        const [item, streams, streamsRev] = r as [ItemTransfer, Streams[] | [], Streams[] | []];
+        // const item = await client.getItem(BigInt(obj.itemRef.id));
+        // const streams = await client.getStreams(BigInt(obj.itemRef.id), "s" + kind);
+        // const streamsRev = await client.getStreams(BigInt(obj.itemRef.id), "rs" + kind);
         obj.item = item;
         obj.streams = _unwrap(streams);
         obj.streamsRev = _unwrap(streamsRev);
