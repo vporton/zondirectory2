@@ -47,7 +47,6 @@ export class ItemDB {
     }
     /// `"t" | "v"` - time, votes.
     static async create(agent: Agent, itemId: string, kind: "t" | "v"): Promise<ItemDB> {
-        try { // FIXME: Remove.
         const obj = new ItemDB(agent, itemId);
         const client: CanDBPartition = Actor.createActor(canDBPartitionIdl, {canisterId: obj.itemRef.canister, agent});
         const [item, streams, streamsRev] = await Promise.all([
@@ -58,8 +57,6 @@ export class ItemDB {
         obj.item = item;
         obj.streams = _unwrap(streams);
         obj.streamsRev = _unwrap(streamsRev);
-        return obj;
-        } catch(e) { console.log("ZZ", e); alert(e) }
     }
     async locale(): Promise<string> {
         return this.item.data.item.locale;
