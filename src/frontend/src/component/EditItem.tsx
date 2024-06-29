@@ -97,7 +97,7 @@ export default function EditItem(props: {
                                 locale,
                                 title,
                                 description: shortDescription,
-                                details: selectedTab == SelectedTab.selectedLink ? {link: link} :
+                                details: selectedTab == SelectedTab.selectedLink ? (link !== "" ? {link: link} : {message: null}) :
                                     isPost ? {post: null} : {message: null},
                                 price: 0.0, // TODO
                             };
