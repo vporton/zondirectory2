@@ -136,7 +136,6 @@ function MyInner(props: {
     };
     const {userScore, setUserScore} = useContext<MainContextType>(MainContext);
     const [root, setRoot] = useState("");
-    const location = useLocation();
     async function fetchRootItem() {
         const MainCanister: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent: props.defaultAgent})
         const data0 = await MainCanister.getRootItem();
