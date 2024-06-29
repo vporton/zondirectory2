@@ -292,7 +292,7 @@ module {
             return; // OK, because nothing similar
         };
         let (closestId, closestScore) = similar[0];
-        if (closestScore < 0.75) {
+        if (closestScore < 0.89) {
             return; // OK, because nothing similar
         };
         Debug.trap("too similar to existing message");

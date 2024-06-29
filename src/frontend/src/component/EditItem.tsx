@@ -67,7 +67,7 @@ export default function EditItem(props: {
                     console.log(item!.details);
                     if ('post' in item!.details) {
                         setSelectedTab(SelectedTab.selectedOther);
-                        const t = (await actor.getAttribute({sk: "i/" + this.itemRef.id}, "t") as any)[0]; // TODO: error handling
+                        const t = (await actor.getAttribute({sk: "i/" + itemId.id}, "t") as any)[0]; // TODO: error handling
                         setPost(t === undefined ? "" : Object.values(t)[0] as string);
                     }
                 });

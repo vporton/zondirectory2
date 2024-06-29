@@ -19,7 +19,7 @@ deploy: compile-candbpart compile-nacdbpart
 	  cp .env.$(NETWORK) .env && \
 	  dfx generate -v CanDBPartition && \
 	  dfx generate -v NacDBPartition && \
-	  dfx deploy --network $(NETWORK) -v frontend && \
+	  dfx deploy --yes --network $(NETWORK) -v frontend && \
 	  npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
 	  npx ts-node scripts/upgrade-nacdb.ts $(NETWORK)
 
