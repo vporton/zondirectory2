@@ -145,9 +145,9 @@ function MyInner(props: {
         let item = { canister: part, id: Number(id) };
         setRoot(serializeItemRef(item));
     }
-    if (location.pathname === '/') {
+    useEffect(() => {
         fetchRootItem().then(() => {});
-    }
+    }, []);
     function RootRedirector(props: {root: string}) {
         useEffect(() => {
             if (root !== "") {
