@@ -45,7 +45,7 @@ export class ItemDB {
         this.agent = agent;
         this.itemRef = parseItemRef(itemId);
     }
-    /// `"t" | "v"` - time, votes,.
+    /// `"t" | "v"` - time, votes.
     static async create(agent: Agent, itemId: string, kind: "t" | "v"): Promise<ItemDB> {
         try { // FIXME: Remove.
         const obj = new ItemDB(agent, itemId);
