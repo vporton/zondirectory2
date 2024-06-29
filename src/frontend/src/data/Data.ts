@@ -57,6 +57,7 @@ export class ItemDB {
         obj.item = item;
         obj.streams = _unwrap(streams);
         obj.streamsRev = _unwrap(streamsRev);
+        return obj;
     }
     async locale(): Promise<string> {
         return this.item.data.item.locale;
