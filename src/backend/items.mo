@@ -166,15 +166,11 @@ shared({caller = initialOwner}) actor class Items() = this {
   public shared({caller}) func setItemData(canisterId: Principal, itemId: Nat, item: lib.ItemDataWithoutOwner, text: Text)
     : async ()
   {
-    Debug.print("setItemData: " # debug_show(item));
     if (Text.size(item.title) == 0) {
       Debug.trap("no item title");
     };
-    Debug.print("Z0");
     checkItemSize(item, text);
-    Debug.print("Z1");
     await* itemCheckSpam(item, text);
-    Debug.print("Z2");
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(itemId);
     let oldItemReprOpt = await db.getAttribute({sk = key}, "i");
