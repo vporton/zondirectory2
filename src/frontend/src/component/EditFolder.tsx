@@ -85,7 +85,9 @@ export default function EditFolder(props: {
                             let part, n;
                             if (props.folderId !== undefined) {
                                 const folder = parseItemRef(props.folderId); // TODO: not here
-                                await backend.setItemData(folder.canister, BigInt(folder.id), item, "");
+                                console.log("AA")
+                                console.log(await backend.setItemData(folder.canister, BigInt(folder.id), item, ""));
+                                console.log("BB")
                                 part = folder.canister;
                                 n = BigInt(folder.id);
                             } else {
@@ -107,7 +109,7 @@ export default function EditFolder(props: {
                         }
                         catch (e) {
                             if (/Canister trapped explicitly: spam/.test(e)) {
-                                e = "Stop spamming our server."
+                                e = "Stop spamming our server.";
                             }
                             setError(e);
                         }

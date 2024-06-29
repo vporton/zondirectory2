@@ -127,7 +127,6 @@ export default function EditItem(props: {
                                     e = "Stop spamming our server.";
                                 }
                                 setError(e.toString());
-                                return;
                             }
                         }
                         const item = itemData();

@@ -163,7 +163,9 @@ shared({caller = initialOwner}) actor class Items() = this {
   /// We don't check that owner exists: If a user lost his/her item, that's his/her problem, not ours.
   ///
   /// TODO: Converting to communal (here or in other place?) and then excluding from user list.
-  public shared({caller}) func setItemData(canisterId: Principal, itemId: Nat, item: lib.ItemDataWithoutOwner, text: Text) {
+  public shared({caller}) func setItemData(canisterId: Principal, itemId: Nat, item: lib.ItemDataWithoutOwner, text: Text)
+    : async ()
+  {
     Debug.print("setItemData: " # debug_show(item));
     if (Text.size(item.title) == 0) {
       Debug.trap("no item title");

@@ -14,6 +14,7 @@ const ErrorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const [message, setMessage] = useState<string | undefined>(undefined);
 
   const setError = (message: string) => {
+    console.log("ERROR: " + message);
     setHasError(true);
     setMessage(message);
   };
