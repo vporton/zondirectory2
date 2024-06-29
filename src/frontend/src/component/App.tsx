@@ -98,9 +98,9 @@ function Edit2(props: {defaultAgent: Agent | undefined}) {
 }
 
 /// Defined outside of other functions not to re-initialize when the tree is updated.
-function Edit3(props: {}) {
+function Edit3(props: {defaultAgent: Agent | undefined}) {
     const routeParams = useParams();
-    return <EditItem itemId={routeParams.item}/>;
+    return <EditItem itemId={routeParams.item} defaultAgent={props.defaultAgent}/>;
 }
 
 function MyRouted(props: {defaultAgent: Agent | undefined}) {
@@ -230,15 +230,15 @@ function MyInner(props: {
             />
             <Route
                 path="/create"
-                element={<EditItem/>}
+                element={<EditItem defaultAgent={props.defaultAgent}/>}
             />
             <Route
                 path="/create/for-folder/:folder"
-                element={<EditItem/>}
+                element={<EditItem defaultAgent={props.defaultAgent}/>}
             />
             <Route
                 path="/create/comment/:folder"
-                element={<EditItem comment={true}/>}
+                element={<EditItem comment={true} defaultAgent={props.defaultAgent}/>}
             />
             <Route
                 path="/create-subfolder/for-folder/:folder"
@@ -254,7 +254,7 @@ function MyInner(props: {
             />
             <Route
                 path="/edit/item/:item"
-                element={<Edit3/>}
+                element={<Edit3 defaultAgent={props.defaultAgent}/>}
             />
             <Route
                 path="/personhood"

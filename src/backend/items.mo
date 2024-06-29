@@ -164,18 +164,25 @@ shared({caller = initialOwner}) actor class Items() = this {
   ///
   /// TODO: Converting to communal (here or in other place?) and then excluding from user list.
   public shared({caller}) func setItemData(canisterId: Principal, itemId: Nat, item: lib.ItemDataWithoutOwner, text: Text) {
+    Debug.print("setItemData: " # debug_show(item));
     if (Text.size(item.title) == 0) {
       Debug.trap("no item title");
     };
+    Debug.print("Z0");
     checkItemSize(item, text);
+    Debug.print("Z1");
     await* itemCheckSpam(item, text);
+    Debug.print("Z2");
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(itemId);
-    switch (await db.getAttribute({sk = key}, "i")) {
+    let oldItemReprOpt = await db.getAttribute({sk = key}, "i");
+    Debug.print("AA: " # debug_show(oldItemReprOpt));
+    switch (oldItemReprOpt) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
         let item2: lib.ItemData = { item = item; creator = caller; edited = true }; // TODO: edited only if actually changed
         lib.onlyItemOwner(caller, oldItem); // also rejects changing communal items.
+        Debug.print("item2: " # debug_show(item2));
         await db.putAttribute({sk = key; subkey = "i"; value = lib.serializeItem(#owned item2)});
       };
       case null { Debug.trap("no item") };
