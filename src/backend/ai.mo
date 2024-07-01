@@ -252,40 +252,6 @@ module {
         ?[(id, score)];
     };
 
-    private func fullPrompt2(newPost: Text, similarText: Text): Text {
-        let genericPrompt = "You are an AI moderator for a social network. Your job is to identify repetitive posts.\n\nDetermine if the new post is duplicate content. Consider that posts with different chapters and links, like \"Chapter 1. Link: https://example.com/1\" and \"Chapter 2. Link: https://example.com/2\", should pass moderation as \"Not duplicate\". Answer only \"Duplicate\" or \"Not duplicate\" and nothing else.\n\nNew Post: <<{_NEWPOST_}>>\n\nHere is the most similar post found in the database: <<{SIMILARPOST}>>";
-        let prompt0 = Text.replace(genericPrompt, #text "_NEWPOST_", newPost);
-        let prompt = Text.replace(prompt0, #text "_SIMILARPOST_", similarText); // TODO: The newPost may contain the string _SIMILARPOST_.
-        let res = JSON.show(#Object([
-            ("model", #String("gpt-3.5-turbo")),
-            ("max_tokens", #Number(2)), // "Not duplicate" is 2 tokens
-            ("temperature", #Number(0)),
-            ("messages", #Array([
-                #Object([("role", #String("system")), ("content", #String("You are an automated email filter."))]),
-                #Object([("role", #String("user")), ("content", #String(jsonEncodeString(prompt)))]),
-            ])),
-        ]));
-        res;
-    };
-
-    private func aiStage2<system>(newPost: Text, similarText: Text): async* JSON.JSON {
-        let bodyText = fullPrompt2(newPost, similarText);
-        let headers = Http.headersNew();
-        for (h in Config.openaiRequestHeaders.vals()) {
-            headers.put(h.name, [h.value]);
-        };
-        await* obtainSuccessfulJSONResponse(
-            Config.openaiUrlBase # "v1/chat/completions",
-            headers,
-            bodyText,
-            {
-                timeout = 60_000_000_000; // 1 min
-                max_response_bytes = ?(1564 + Nat64.fromNat(Text.size(bodyText))); // TODO
-                cycles = 90_000_000; // TODO
-            },
-        );
-    };
-
     public func smartlyRejectSimilar(text: Text): async* () {
         let ourEmbedding = await* retrieveEmbedding(text);
         let ?similar = await* queryVectorDBForSimilar(ourEmbedding) else {
