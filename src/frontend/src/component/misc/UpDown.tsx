@@ -7,7 +7,7 @@ import { Actor, Agent } from "@dfinity/agent";
 import Button from "react-bootstrap/esm/Button";
 import Modal from 'react-bootstrap/Modal';
 import Nav from "react-bootstrap/esm/Nav";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function UpDown(props: {
     parent: {id: ItemRef},
@@ -76,7 +76,6 @@ export default function UpDown(props: {
         return props.totalVotes ? `Up: ${props.totalVotes.up} Down: ${props.totalVotes.down}` : "";
     }
 
-    const navigate = useNavigate();
     // TODO: Is it OK to have a separate modal for each item?
     return (
         <span title={votesTitle()}>
@@ -89,9 +88,9 @@ export default function UpDown(props: {
                     <Modal.Body>
                     <p>Confirm that you are a real person:</p>
                     <p>
-                        <Nav.Link onClick={() => navigate("/personhood")} style={{color: 'blue'}}>
+                        <Link className="nav-item" to="/personhood" style={{color: 'blue'}}>
                             Verify Your Account
-                        </Nav.Link>
+                        </Link>
                     </p>
                     </Modal.Body>
                     <Modal.Footer>

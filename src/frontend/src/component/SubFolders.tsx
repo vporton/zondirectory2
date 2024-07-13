@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { AppData } from "../DataDispatcher";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { ItemRef, serializeItemRef } from "../data/Data";
 import { ItemData, ItemTransfer } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import ItemType from "./misc/ItemType";
@@ -20,7 +20,6 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
         setStreamKind(e.currentTarget.value);
     }
 
-    const navigate = useNavigate();
     useEffect(() => {
         if (id !== undefined) {
             AppData.create(props.defaultAgent!, id, streamKind).then(data => { // TODO: `!`
@@ -74,7 +73,7 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
                 <title>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: {title}</title>
                 <meta name="robots" content="noindex"/>
             </Helmet>
-            <h1>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: <a href='#' onClick={() => navigate(`/item/`+id)}>{title}</a></h1>
+            <h1>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: <Link className="nav-item" to={`/item/`+id}>{title}</Link></h1>
             <p>Sort by:{" "}
                 <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
                 <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}

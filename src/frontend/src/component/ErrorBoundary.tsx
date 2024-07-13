@@ -36,7 +36,6 @@ interface ErrorHandlerProps {
 }
 
 function ErrorHandler({ error }: ErrorHandlerProps) {
-  const navigate = useNavigate();
   const { resetError } = useContext(ErrorContext)!;
   return (
     <Modal show={error !== undefined} className="wideDialog">
