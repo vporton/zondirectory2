@@ -168,26 +168,26 @@ function MyInner(props: {
         <nav>
             <Navbar className="bg-body-secondary" style={{width: "auto"}}>
                 <Nav>
-                    <Nav.Link onClick={() => navigate("/item/"+root)}>Main folder</Nav.Link>{" "}
+                    <Link className="nav-link" to={"/item/"+root}>Main folder</Link>{" "}
                 </Nav>
                 <Nav>
-                    <Nav.Link onClick={() => navigate("/latest")}>Latest posts</Nav.Link>{" "}
+                    <Link className="nav-link" to="/latest">Latest posts</Link>{" "}
                 </Nav>
                 <Nav>
                     <NavDropdown title="User">
-                        <NavDropdown.Item onClick={() => navigate("/personhood")}>
+                        <Link className="nav-link" to="/personhood">
                             Verify Your Account
-                        </NavDropdown.Item>
-                        <NavDropdown.Item onClick={() => navigate("/prefs")}>
+                        </Link>
+                        <Link className="nav-link" to="/prefs">
                             Settings
-                        </NavDropdown.Item>
+                        </Link>
                     </NavDropdown>
                 </Nav>
                 <Nav>
-                    <Nav.Link href="https://docs.zoncircle.com">Our site</Nav.Link>
+                    <a className="nav-link" href="https://docs.zoncircle.com">Our site</a>
                 </Nav>
                 <Nav>
-                    <Nav.Link href="https://docs.zoncircle.com/invest/">Invest</Nav.Link>
+                    <a className="nav-link" href="https://docs.zoncircle.com/invest/">Invest</a>
                 </Nav>
                 <Nav>
                     <NavDropdown title="About">
