@@ -214,7 +214,7 @@ module {
     };
 
     /// Return the list of IDs (in current version of one ID) along with their similarity scores.
-    private func queryVectorDBForSimilar(vector: [Float]): async* ?[(Text, Float)] {
+    private func queryVectorDBForSimilar(vector: [Float], numResults: Nat): async* ?[(Text, Float)] {
         let headers = Http.headersNew();
         for (h in Config.pineconeRequestHeaders.vals()) {
             headers.put(h.name, [h.value]);
@@ -222,7 +222,7 @@ module {
         let values = Iter.toArray(Iter.map(vector.vals(), func (x: Float): JSON.JSON { #Float(x) }));
         let body = JSON.show(#Object([
             ("vector", #Array(values)),
-            ("topK", #Number 1),
+            ("topK", #Number numResults),
         ]));
         let jsonRes = await* obtainSuccessfulJSONResponse(
             Config.pineconeUrlBase # "query",
@@ -252,12 +252,12 @@ module {
         ?[(id, score)];
     };
 
-    public func smartlyRejectSimilar(text: Text): async* () {
+    public func smartlyRejectSimilar(ourId: ?Text, text: Text, numResults: Nat): async* () {
         let ourEmbedding = await* retrieveEmbedding(text);
-        let ?similar = await* queryVectorDBForSimilar(ourEmbedding) else {
+        let ?similar = await* queryVectorDBForSimilar(ourEmbedding, numResults) else {
             return; // OK, because nothing similar
         };
-        let (closestId, closestScore) = similar[0];
+        let (closestId, closestScore) = if (?(similar[0].0) == ourId) { similar[0] } else { similar[1] };
         if (closestScore < 0.89) {
             return; // OK, because nothing similar
         };

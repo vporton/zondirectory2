@@ -59,12 +59,16 @@ shared({caller = initialOwner}) actor class Items() = this {
 
   stable var maxId: Nat = 0;
 
-  private func itemCheckSpam(item: lib.ItemDataWithoutOwner, text: Text): async* () {
+  private func itemCheckSpam(ourId: ?Text, item: lib.ItemDataWithoutOwner, text: Text): async* () {
     if (not (await* AI.checkSpam(item.title # "\n" # item.description))) {
       Debug.trap("spam");
     };
 
-    await* AI.smartlyRejectSimilar(item.title # "\n" # item.description # "\n" # text);
+    let numResults = switch(ourId) {
+      case (?_) { 2 };
+      case (null) { 1 };
+    };
+    await* AI.smartlyRejectSimilar(ourId, item.title # "\n" # item.description # "\n" # text, numResults);
   };
 
   public shared({caller}) func createItemData(item: lib.ItemTransferWithoutOwner, text: Text)
@@ -74,7 +78,7 @@ shared({caller = initialOwner}) actor class Items() = this {
       Debug.trap("no item title");
     };
     checkItemSize(item.data, text);
-    await* itemCheckSpam(item.data, text);
+    await* itemCheckSpam(null, item.data, text);
     let (canisterId, itemId) = if (item.communal) {
       let variant: lib.ItemVariant = { creator = caller; item = item.data; };
       let variantId = maxId;
@@ -170,7 +174,7 @@ shared({caller = initialOwner}) actor class Items() = this {
       Debug.trap("no item title");
     };
     checkItemSize(item, text);
-    await* itemCheckSpam(item, text);
+    await* itemCheckSpam(?(Nat.toText(itemId) # "@" # Principal.toText(canisterId)), item, text);
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(itemId);
     let oldItemReprOpt = await db.getAttribute({sk = key}, "i");
