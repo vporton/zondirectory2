@@ -178,13 +178,11 @@ shared({caller = initialOwner}) actor class Items() = this {
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(itemId);
     let oldItemReprOpt = await db.getAttribute({sk = key}, "i");
-    Debug.print("AA: " # debug_show(oldItemReprOpt));
     switch (oldItemReprOpt) {
       case (?oldItemRepr) {
         let oldItem = lib.deserializeItem(oldItemRepr);
         let item2: lib.ItemData = { item = item; creator = caller; edited = true }; // TODO: edited only if actually changed
         lib.onlyItemOwner(caller, oldItem); // also rejects changing communal items.
-        Debug.print("item2: " # debug_show(item2));
         await db.putAttribute({sk = key; subkey = "i"; value = lib.serializeItem(#owned item2)});
       };
       case null { Debug.trap("no item") };

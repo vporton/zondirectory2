@@ -257,7 +257,14 @@ module {
         let ?similar = await* queryVectorDBForSimilar(ourEmbedding, numResults) else {
             return; // OK, because nothing similar
         };
-        let (closestId, closestScore) = if (?(similar[0].0) == ourId) { similar[0] } else { similar[1] };
+        let (closestId, closestScore) = if (?(similar[0].0) == ourId) {
+            if (Array.size(similar) <= 1) {
+                return;
+            };
+            similar[1];
+        } else {
+            similar[0];
+        };
         if (closestScore < 0.89) {
             return; // OK, because nothing similar
         };

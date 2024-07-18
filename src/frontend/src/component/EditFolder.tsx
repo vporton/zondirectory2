@@ -85,9 +85,7 @@ export default function EditFolder(props: {
                             let part, n;
                             if (props.folderId !== undefined) {
                                 const folder = parseItemRef(props.folderId); // TODO: not here
-                                console.log("AA")
                                 console.log(await backend.setItemData(folder.canister, BigInt(folder.id), item, ""));
-                                console.log("BB")
                                 part = folder.canister;
                                 n = BigInt(folder.id);
                             } else {
