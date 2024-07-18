@@ -176,7 +176,7 @@ export default function EditItem(props: {
                         <p>
                             <Button onClick={submit} disabled={!isAuthenticated}>Submit</Button>
                             {props.itemId !== undefined &&
-                                <Button onClick={remove} disabled={!isAuthenticated}>Delete</Button>
+                                <>{" "}<Button onClick={remove} disabled={!isAuthenticated}>Delete</Button></>
                             }
                         </p>
                     </>;
