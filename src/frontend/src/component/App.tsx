@@ -56,7 +56,7 @@ export default function App() {
                 <AuthProvider options={{loginOptions: {
                     identityProvider,
                     maxTimeToLive: BigInt(3600) * BigInt(1_000_000_000),
-                    windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
+                    windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=586,left=100,top=100",
                     onSuccess: () => {
                         console.log('Login Successful!');
                     },
