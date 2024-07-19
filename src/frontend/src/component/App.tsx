@@ -163,7 +163,7 @@ function MyInner(props: {
             Logged in as: {props.isAuthenticated ? <small>{props.principal?.toString()}</small> : "(none)"}{" "}
             {props.isAuthenticated
                 ? <><Button onClick={signout}>Logout</Button> Your score: {userScore}</>
-                : <Button onClick={signin}>Login</Button>}
+                : <Button onClick={signin}>Login/Register</Button>}
         </p>
         <nav>
             <Navbar className="bg-body-secondary" style={{width: "auto"}}>
