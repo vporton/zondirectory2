@@ -200,6 +200,7 @@ function MyInner(props: {
                 </Nav>
                 <Nav>
                     <NavDropdown title="Blog">
+                        <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/">All posts</NavDropdown.Item>
                         <NavDropdown.Item href="https://docs.zoncircle.com/author/user/">CEO's posts</NavDropdown.Item>
                         <NavDropdown.Item href="https://docs.zoncircle.com/social-media/">Social Media</NavDropdown.Item>
                     </NavDropdown>
