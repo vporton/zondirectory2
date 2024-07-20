@@ -284,8 +284,13 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                             onUpdateList={() => xdata.items().then(x => setItems(x))}
                                         />{" "}
                                         {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
-                                        {(x.item.data.item.details as any).link ? <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a> : x.item.data.item.title}
-                                        {" "}<a href={`/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
+                                        {(x.item.data.item.details as any).link ?
+                                            <>
+                                                <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a>{" "}
+                                                <a href={`/item/${serializeItemRef(x.id)}`}>[H]</a>
+                                            </> :
+                                            <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>}
+                                        
                                         {" "}[<Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
                                     </p>
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
@@ -321,8 +326,14 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                             isComment={true}
                                         />
                                         {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
-                                        {(x.item.data.item.details as any).link ? <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a> : x.item.data.item.title}
-                                        {" "}<a href={`/item/${serializeItemRef(x.id)}`} title="Homepage">[H]</a>
+                                        {(x.item.data.item.details as any).link ?
+                                            <>
+                                                <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a>{" "}
+                                                <a href={`/item/${serializeItemRef(x.id)}`}>[H]</a>
+                                            </> :
+                                            <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                                        }
+                                        
                                     </p>
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                                 </div>
@@ -337,8 +348,13 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                 <div key={serializeItemRef(item.id)}>
                                     <p lang={item.item.data.item.locale}>
                                         {item.item.data.item.price ? <>({item.item.data.item.price} ICP) </> : ""}
-                                        {(item.item.data.item.details as any).link ? <a href={(item.item.data.item.details as any).link}>{item.item.data.item.title}</a> : item.item.data.item.title}
-                                        {" "}<a href={`/item/${serializeItemRef(item.id)}`} title="Homepage">[H]</a>
+                                        {(item.item.data.item.details as any).link ?
+                                            <>
+                                                <a href={(item.item.data.item.details as any).link}>{item.item.data.item.title}</a>{" "}
+                                                <a href={`/item/${serializeItemRef(item.id)}`}>[H]</a>
+                                            </> :
+                                            <a href={`/item/${serializeItemRef(item.id)}`}>{item.item.data.item.title}</a>}
+                                        
                                     </p>
                                     <p lang={item.item.data.item.locale} style={{marginLeft: '1em'}}>{item.item.data.item.description}</p>
                                 </div>
