@@ -78,7 +78,7 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
                     <ItemType item={x.item}/>
                     <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
                     {x.item.data.creator.compareTo(principal) === 'eq' &&
-                        <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
+                        <Button href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
                     }
                 </li>)}
         </ul>}
