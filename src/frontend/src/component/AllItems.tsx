@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import ItemType from "./misc/ItemType";
 import Nav from "react-bootstrap/esm/Nav";
+import Button from "react-bootstrap/Button";
 import { useAuth } from "./auth/use-auth-client";
 
 export function AllItems(props: {defaultAgent: Agent | undefined}) {
@@ -77,7 +78,7 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
                     <ItemType item={x.item}/>
                     <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
                     {x.item.data.creator.compareTo(principal) === 'eq' &&
-                        <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
+                        <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
                     }
                 </li>)}
         </ul>}

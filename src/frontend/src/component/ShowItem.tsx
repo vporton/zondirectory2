@@ -192,8 +192,8 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
         <p>Creator: <small>{creator !== undefined && creator.toString()}</small>
             {creator !== undefined && principal !== undefined && creator.compareTo(principal) === 'eq' &&
                 <>
-                    {" "}|{" "}
-                    <Nav.Link href={`/edit/folder/${serializeItemRef(id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
+                    {" "}
+                    <Nav.Link href={`/edit/folder/${serializeItemRef(id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
                 </>
             }
         </p>
@@ -234,7 +234,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         <ItemType item={x.item}/>
                                         <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
                                         {x.item.data.creator.compareTo(principal!) === 'eq' &&
-                                            <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
+                                            <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
                                         }
                                     </li>)}
                             </ul>}
@@ -269,7 +269,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         <ItemType item={x.item}/>
                                         <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
                                         {x.item.data.creator.compareTo(principal!) === 'eq' &&
-                                            <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
+                                            <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
                                         }
                                     </li>)}
                             </ul>}
@@ -304,7 +304,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                             <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>}
                                         {" "}
                                         {x.item.data.creator.compareTo(principal!) === 'eq' &&
-                                            <Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
+                                            <Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
                                         }
                                     </p>
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
