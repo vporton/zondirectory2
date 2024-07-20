@@ -225,7 +225,9 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         />
                                         <ItemType item={x.item}/>
                                         <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                                        [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                                        {x.item.data.creator.compareTo(principal) === 'eq' &&
+                                            <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
+                                        }
                                     </li>)}
                             </ul>}
                             <p>
@@ -258,7 +260,9 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         />*/}
                                         <ItemType item={x.item}/>
                                         <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                                        [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                                        {x.item.data.creator.compareTo(principal) === 'eq' &&
+                                            <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
+                                        }
                                     </li>)}
                             </ul>}
                             {/* TODO: Create super-folder */}
@@ -290,8 +294,10 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                                 <a href={`/item/${serializeItemRef(x.id)}`}>[H]</a>
                                             </> :
                                             <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>}
-                                        
-                                        {" "}[<Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                                        {" "}
+                                        {x.item.data.creator.compareTo(principal) === 'eq' &&
+                                            <Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
+                                        }
                                     </p>
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                                 </div>

@@ -13,9 +13,12 @@ import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import ItemType from "./misc/ItemType";
 import Nav from "react-bootstrap/esm/Nav";
+import { useAuth } from "./auth/use-auth-client";
 
 export function AllItems(props: {defaultAgent: Agent | undefined}) {
     const [items, setItems] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
+
+    const { principal } = useAuth();
 
     // TODO: duplicate code
     async function aList(opts?: {lowerBound?: string, limit?: number})
@@ -73,7 +76,9 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
                 <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
                     <ItemType item={x.item}/>
                     <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                    [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                    {x.item.data.creator.compareTo(principal) === 'eq' &&
+                        <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
+                    }
                 </li>)}
         </ul>}
         {/* TODO: Load More button */}
