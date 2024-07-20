@@ -11,6 +11,7 @@ import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
 import { Agent } from "@dfinity/agent";
+import { Principal } from "@dfinity/principal";
 
 export default function ShowItem() {
     return (
@@ -30,13 +31,13 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     useEffect(() => {
         setId(parseItemRef(idParam!))
     }, [idParam]);
-    const { principal } = useContext(AuthContext) as any;
+    const { principal } = useContext(AuthContext);
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [postText, setPostText] = useState("");
     const [type, setType] = useState<string | undefined>(undefined);
-    const [creator, setCreator] = useState("");
+    const [creator, setCreator] = useState<Principal | undefined>();
     const [subfolders, setSubfolders] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
     const [superfolders, setSuperfolders] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
     const [items, setItems] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
@@ -93,7 +94,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
                 data.postText().then(x => setPostText(x !== undefined ? x.substring(1) : "")); // strip `t` denoting that it's a text // TODO: `!`
-                data.creator().then(x => setCreator(x.toString())); // TODO
+                data.creator().then(x => setCreator(x));
                 data.subFolders().then(x => setSubfolders(x));
                 data.superFolders().then(x => {
                     setSuperfolders(x);
@@ -188,7 +189,14 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
         </Helmet>
         {/* TODO: `!` on the next line */}
         <h1><ItemType item={data!}/>{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h1>
-        <p>Creator: <small>{creator.toString()}</small></p>
+        <p>Creator: <small>{creator !== undefined && creator.toString()}</small>
+            {creator !== undefined && principal !== undefined && creator.compareTo(principal) === 'eq' &&
+                <>
+                    {" "}|{" "}
+                    <Nav.Link href={`/edit/folder/${serializeItemRef(id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
+                </>
+            }
+        </p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         {postText !== "" ? <p lang={locale}>{postText}</p> : ""}
         <p>Sort by:{" "}
@@ -225,7 +233,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         />
                                         <ItemType item={x.item}/>
                                         <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                                        {x.item.data.creator.compareTo(principal) === 'eq' &&
+                                        {x.item.data.creator.compareTo(principal!) === 'eq' &&
                                             <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
                                         }
                                     </li>)}
@@ -260,7 +268,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         />*/}
                                         <ItemType item={x.item}/>
                                         <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                                        {x.item.data.creator.compareTo(principal) === 'eq' &&
+                                        {x.item.data.creator.compareTo(principal!) === 'eq' &&
                                             <Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
                                         }
                                     </li>)}
@@ -295,7 +303,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                             </> :
                                             <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>}
                                         {" "}
-                                        {x.item.data.creator.compareTo(principal) === 'eq' &&
+                                        {x.item.data.creator.compareTo(principal!) === 'eq' &&
                                             <Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>[Edit]</Nav.Link>
                                         }
                                     </p>
