@@ -198,7 +198,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             }
         </p>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
-        {postText !== "" ? <p lang={locale}>{postText}</p> : ""}
+        {postText !== "" ? <p lang={locale} style={{whiteSpace: 'break-spaces'}}>{postText}</p> : ""}
         <p>Sort by:{" "}
             <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
             <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
