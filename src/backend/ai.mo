@@ -62,7 +62,7 @@ module {
     private func fullPrompt(textToCheck: Text): Text {
         let prompt = jsonEncodeString(promptBase # textToCheck);
         JSON.show(#Object([
-            ("model", #String("gpt-3.5-turbo")),
+            ("model", #String("gpt-4o-mini")),
             ("max_tokens", #Number(1)), // answer: yes or no
             ("temperature", #Number(0)),
             ("messages", #Array([
