@@ -193,7 +193,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             {creator !== undefined && principal !== undefined && creator.compareTo(principal) === 'eq' &&
                 <>
                     {" "}
-                    <Button href={`/edit/folder/${serializeItemRef(id)}`}>Edit</Button>
+                    <Button href={`/edit/${isFolder ? 'folder' : 'item'}/${serializeItemRef(id)}`}>Edit</Button>
                 </>
             }
         </p>
