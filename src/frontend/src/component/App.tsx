@@ -1,6 +1,6 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Component, ErrorInfo, ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
+import { Component, ErrorInfo, ReactNode, Suspense, createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Button, Container, Nav, NavDropdown, Navbar } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
@@ -26,7 +26,6 @@ import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
 import { idlFactory as mainIdlFactory } from "../../../declarations/main";
 import { _SERVICE as ZonBackend } from "../../../declarations/main/main.did";
 import { Helmet } from 'react-helmet';
-import Person from "./personhood/Person";
 import { AllItems } from "./AllItems";
 import { ErrorBoundary, ErrorHandler } from "./ErrorBoundary";
 import { ErrorProvider } from "./ErrorContext";
@@ -158,6 +157,8 @@ function MyInner(props: {
         );
     }
 
+    const Person = React.lazy(() => import('./personhood/Person'));
+
     return <>
         <p>
             Logged in as: {props.isAuthenticated ? <small>{props.principal?.toString()}</small> : "(none)"}{" "}
@@ -258,7 +259,7 @@ function MyInner(props: {
             />
             <Route
                 path="/personhood"
-                element={<Person/>}
+                element={<Suspense fallback={<div>Loading...</div>}><Person/></Suspense>}
             />
             <Route
                 path="/prefs"
