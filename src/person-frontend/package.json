@@ -1,0 +1,30 @@
+{
+    "name": "person-frontend",
+    "private": true,
+    "version": "0.0.1",
+    "description": "Humanity verification",
+    "keywords": [
+      "Internet Computer",
+      "Motoko",
+      "JavaScript",
+      "Canister"
+    ],
+    "scripts": {
+      "build": "webpack -o ../../dist/person",
+      "prebuild": "",
+      "start": "webpack serve --mode development --env development --static-public-path /person --client-web-socket-url-pathname /person",
+      "deploy:local": "dfx deploy --network=local",
+      "deploy:ic": "dfx deploy --network=ic"
+    },
+    "dependencies": {
+    },
+    "devDependencies": {
+    },
+    "browserslist": [
+      "last 2 chrome version",
+      "last 2 firefox version",
+      "last 2 safari version",
+      "last 2 edge version"
+    ]
+  }
+  
