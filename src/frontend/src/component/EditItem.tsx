@@ -68,7 +68,7 @@ export default function EditItem(props: {
                     if ('post' in item!.details) {
                         setSelectedTab(SelectedTab.selectedOther);
                         const t = (await actor.getAttribute({sk: "i/" + itemId.id}, "t") as any)[0]; // TODO: error handling
-                        setPost(t === undefined ? "" : Object.values(t)[0] as string);
+                        setPost(t === undefined ? "" : (Object.values(t)[0] as string).substring(1)); // remove leading text type
                     }
                 });
             // actor.getItem(BigInt(itemId.id))
@@ -149,8 +149,8 @@ export default function EditItem(props: {
                         </Helmet>
                         <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
                         <p>Title: <input type="text" required={true} defaultValue={title} onChange={e => setTitle(e.target.value)}/></p>
-                        <p>Short (meta) description: <textarea defaultValue={shortDescription
-                        } onChange={e => setShortDescription(e.target.value)}/></p>
+                        <p>Short (meta) description: <textarea defaultValue={shortDescription}
+                            onChange={e => setShortDescription(e.target.value)}/></p>
                         {/* TODO (should not because complicates ordering?):
                         <p>Link type:
                             <label><input type="radio" name="kind" value="0" required={true}/> Directory entry</label>
