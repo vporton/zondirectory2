@@ -76,11 +76,11 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
             {items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
                 <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
                     <ItemType item={x.item}/>
-                    <a href={`/${(x.item.data.item.details as any).folder !== undefined ? 'folder' : 'item'}/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                    <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
                     {x.item.data.creator.compareTo(principal) === 'eq' &&
                         <>
                             {" "}
-                            <Button href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
+                            <Button href={`/edit/${(x.item.data.item.details as any).folder !== undefined ? 'folder' : 'item'}/${serializeItemRef(x.id)}`}>Edit</Button>
                         </>
                     }
                 </li>)}
