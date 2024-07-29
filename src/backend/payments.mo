@@ -336,6 +336,6 @@ shared({caller = initialOwner}) actor class Payments() = this {
         ignore BTree.delete<Principal, OutgoingPayment>(ourDebts, Principal.compare, caller);
       };
       case (null) {};
-    }
+    };
   };
 }
