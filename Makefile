@@ -23,6 +23,15 @@ deploy: compile-candbpart compile-nacdbpart
 	  npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
 	  npx ts-node scripts/upgrade-nacdb.ts $(NETWORK)
 
+.PHONY: deploy-payments
+deploy-payments:
+	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && mv -f .env .env.$(NETWORK); } && \
+	  trap "cleanup" EXIT && \
+	  mkdir -p src/libs/configs/stage && \
+	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
+	  cp .env.$(NETWORK) .env && \
+	  dfx deploy --network $(NETWORK) -v payments
+
 .PHONY: generate
 generate:
 	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && mv -f .env .env.$(NETWORK); } && \

@@ -43,7 +43,7 @@
     "payments": {
       "main": "src/backend/payments.mo",
       "type": "motoko",
-      "dependencies": ["pst"]
+      "dependencies": []
     },
     "pst": {
       "main": "src/backend/pst.mo",

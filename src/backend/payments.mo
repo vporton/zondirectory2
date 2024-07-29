@@ -11,7 +11,7 @@ import BTree "mo:stableheapbtreemap/BTree";
 import ICRC1Types "mo:icrc1/ICRC1/Types";
 import CanDBPartition "../storage/CanDBPartition";
 import lib "lib";
-import PST "canister:pst";
+// import PST "canister:pst";
 import Fractions "../libs/helpers/fractions.helper";
 import DBConfig "../libs/configs/db.config";
 
@@ -264,17 +264,17 @@ shared({caller = initialOwner}) actor class Payments() = this {
   // TODO: Set a heavy transfer fee of the PST to ensure that `lastTotalDivedends` doesn't take much memory.
   stable var lastTotalDivedends: BTree.BTree<Principal, Nat> = BTree.init<Principal, Nat>(null);
 
-  func _dividendsOwing(_account: Principal): async Nat {
-    let lastTotal = switch (BTree.get(lastTotalDivedends, Principal.compare, _account)) {
-      case (?value) { value };
-      case (null) { 0 };
-    };
-    let _newDividends = Int.abs((totalDividends: Int) - lastTotal);
-    // rounding down
-    let balance = await PST.icrc1_balance_of({owner = _account; subaccount = null});
-    let total = await PST.icrc1_total_supply();
-    balance * _newDividends / total;
-  };
+  // func _dividendsOwing(_account: Principal): async Nat {
+  //   let lastTotal = switch (BTree.get(lastTotalDivedends, Principal.compare, _account)) {
+  //     case (?value) { value };
+  //     case (null) { 0 };
+  //   };
+  //   let _newDividends = Int.abs((totalDividends: Int) - lastTotal);
+  //   // rounding down
+  //   let balance = await PST.icrc1_balance_of({owner = _account; subaccount = null});
+  //   let total = await PST.icrc1_total_supply();
+  //   balance * _newDividends / total;
+  // };
 
   func recalculateShareholdersDebt(_amount: Nat, _buyerAffiliate: ?Principal, _sellerAffiliate: ?Principal) {
     // Affiliates are delivered by frontend.
