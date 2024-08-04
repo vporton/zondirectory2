@@ -17,6 +17,7 @@ import ConfigMisc "../libs/configs/misc.config";
 import lib "lib";
 import AI "ai";
 import RateLimit "rateLimit";
+import NacDBPartition "../storage/NacDBPartition";
 
 shared({caller = initialOwner}) actor class Items() = this {
   stable var owners = [initialOwner];
@@ -225,7 +226,7 @@ shared({caller = initialOwner}) actor class Items() = this {
 
   func addItemToList(theSubDB: Reorder.Order, itemToAdd: (Principal, Nat), side: { #beginning; #end; #zero }): async* () {
     let scanItemInfo = Nat.toText(itemToAdd.1) # "@" # Principal.toText(itemToAdd.0);
-    let theSubDB2: Nac.OuterCanister = theSubDB.order.0;
+    let theSubDB2: NacDBPartition.Partition = actor(Principal.toText(Principal.fromActor(theSubDB.order.0)));
     if (await theSubDB2.hasByOuter({outerKey = theSubDB.reverse.1; sk = scanItemInfo})) {
       return; // prevent duplicate
     };
@@ -636,7 +637,7 @@ shared({caller = initialOwner}) actor class Items() = this {
   /// USE WITH CAUTION!
   public shared({caller}) func deleteAllUserPosts() {
     let stream = await* getUserTimeStream(caller, null); // TODO: hint
-    let part: Nac.PartitionCanister = stream.reverse.0;
+    let part: NacDBPartition.Partition = actor(Principal.toText(Principal.fromActor(stream.reverse.0)));
     loop {
       // Delete max. 50 posts in one step.
       let results = (await part.scanLimitOuter({outerKey = stream.reverse.1; lowerBound = ""; upperBound = "x"; dir = #fwd; limit = 50}))
