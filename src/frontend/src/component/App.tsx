@@ -185,10 +185,10 @@ function MyInner(props: {
                     </NavDropdown>
                 </Nav>
                 <Nav>
-                    <a className="nav-link" href="https://docs.zoncircle.com">Our site</a>
+                    <Link className="nav-link" to="https://docs.zoncircle.com">Our site</Link>
                 </Nav>
                 <Nav>
-                    <a className="nav-link" href="https://docs.zoncircle.com/invest/">Invest</a>
+                    <Link className="nav-link" to="https://docs.zoncircle.com/invest/">Invest</Link>
                 </Nav>
                 <Nav>
                     <NavDropdown title="About">

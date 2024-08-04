@@ -232,7 +232,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                             onUpdateList={() => xdata!.subFolders().then(x => setSubfolders(x))}
                                         />
                                         <ItemType item={x.item}/>
-                                        <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                                        <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>
                                         {" "}
                                         {x.item.data.creator.compareTo(principal!) === 'eq' &&
                                             <Button href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
@@ -240,7 +240,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                     </li>)}
                             </ul>}
                             <p>
-                                <a href="#" onClick={e => moreSubfolders(e)}>More...</a> <a href={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</a>
+                                <Link to="#" onClick={e => moreSubfolders(e)}>More...</Link> <Link to={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</Link>
                             </p>
                         </Col>
                     </>}
@@ -268,7 +268,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                             })}
                                         />*/}
                                         <ItemType item={x.item}/>
-                                        <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                                        <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>
                                         {x.item.data.creator.compareTo(principal!) === 'eq' &&
                                             <>
                                                 {" "}
@@ -278,7 +278,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                     </li>)}
                             </ul>}
                             {/* TODO: Create super-folder */}
-                            <p><a href="#" onClick={e => moreSuperfolders(e)}>More...</a> <a href={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</a></p>
+                            <p><Link to="#" onClick={e => moreSuperfolders(e)}>More...</Link> <Link to={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
                         </Col>
             {!isFolder ? "" : <>
                         <Col>
@@ -302,10 +302,10 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
                                         {(x.item.data.item.details as any).link ?
                                             <>
-                                                <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a>{" "}
-                                                <a href={`/item/${serializeItemRef(x.id)}`}>[H]</a>
+                                                <Link to={(x.item.data.item.details as any).link}>{x.item.data.item.title}</Link>{" "}
+                                                <Link to={`/item/${serializeItemRef(x.id)}`}>[H]</Link>
                                             </> :
-                                            <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>}
+                                            <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>}
                                         {" "}
                                         {x.item.data.creator.compareTo(principal!) === 'eq' &&
                                             <Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
@@ -314,8 +314,8 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                                <a href={`/create/for-folder/${serializeItemRef(id)}`}>Create</a></p>
+                            <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
+                                <Link to={`/create/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
                         </Col>
                     </>}
                     </Row>
@@ -346,18 +346,18 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
                                         {(x.item.data.item.details as any).link ?
                                             <>
-                                                <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a>{" "}
-                                                <a href={`/item/${serializeItemRef(x.id)}`}>[H]</a>
+                                                <Link to={(x.item.data.item.details as any).link}>{x.item.data.item.title}</Link>{" "}
+                                                <Link to={`/item/${serializeItemRef(x.id)}`}>[H]</Link>
                                             </> :
-                                            <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                                            <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>
                                         }
                                         
                                     </p>
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                                <a href={`/create/comment/${serializeItemRef(id)}`}>Create</a></p>
+                            <p><Link to="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
+                                <Link to={`/create/comment/${serializeItemRef(id)}`}>Create</Link></p>
                         </Col>
                         <Col>
                             <h3>Comment on</h3>
@@ -368,16 +368,16 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         {item.item.data.item.price ? <>({item.item.data.item.price} ICP) </> : ""}
                                         {(item.item.data.item.details as any).link ?
                                             <>
-                                                <a href={(item.item.data.item.details as any).link}>{item.item.data.item.title}</a>{" "}
-                                                <a href={`/item/${serializeItemRef(item.id)}`}>[H]</a>
+                                                <Link to={(item.item.data.item.details as any).link}>{item.item.data.item.title}</Link>{" "}
+                                                <Link to={`/item/${serializeItemRef(item.id)}`}>[H]</Link>
                                             </> :
-                                            <a href={`/item/${serializeItemRef(item.id)}`}>{item.item.data.item.title}</a>}
+                                            <Link to={`/item/${serializeItemRef(item.id)}`}>{item.item.data.item.title}</Link>}
                                         
                                     </p>
                                     <p lang={item.item.data.item.locale} style={{marginLeft: '1em'}}>{item.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><a href="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}</p>
+                            <p><Link to="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}</p>
                         </Col>
                     </Row>
                 </Container>

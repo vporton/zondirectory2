@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "react-router-dom";
 import { idlFactory as canDBPartitionIdl } from "../../../declarations/CanDBPartition";
 import { _SERVICE as CanDBPartition } from "../../../declarations/CanDBPartition/CanDBPartition.did";
 import { idlFactory as nacDBPartitionIdl } from "../../../declarations/NacDBPartition";
@@ -76,7 +77,7 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
             {items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
                 <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
                     <ItemType item={x.item}/>
-                    <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                    <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>
                     {x.item.data.creator.compareTo(principal) === 'eq' &&
                         <>
                             {" "}

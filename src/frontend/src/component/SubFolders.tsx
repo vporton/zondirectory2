@@ -83,13 +83,13 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
                     <li key={serializeItemRef(x.id as any)}>
                         <p>
                             <ItemType item={x.item}/>
-                            <a lang={x.item.data.item.locale} href={`/item/${serializeItemRef(x.id as any)}`}>{x.item.data.item.title}</a>
+                            <Link lang={x.item.data.item.locale} to={`/item/${serializeItemRef(x.id as any)}`}>{x.item.data.item.title}</Link>
                         </p>
                         {x.item.data.item.description ? <p lang={x.item.data.item.locale}><small>{x.item.data.item.description}</small></p> : ""}
                     </li>)}
             </ul>
-            <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                <a href={`/create/for-folder/${id}`}>Create</a></p>
+            <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
+                <Link to={`/create/for-folder/${id}`}>Create</Link></p>
         </>
     );
 }
