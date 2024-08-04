@@ -32,7 +32,7 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
         // const client: NacDBPartition = Actor.createActor(nacDBPartitionIdl, {canisterId: outerCanister, agent: this.agent });
         // const {canister: innerPart, key: innerKey} = (await client.getInner({outerKey}) as any)[0]; // TODO: error handling
         const client2 = Actor.createActor(nacDBPartitionIdl, {canisterId: Principal.from(order.order[0]).toText(), agent: props.defaultAgent });
-        const items = ((await client2.scanLimitOuter({outerKey: order.order[1], lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as
+        const items = ((await client2.scanLimitOuterComposite({outerKey: order.order[1], lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as
             [[string, {text: string}]] | [];
         const items1aa = items.length === 0 ? [] : items.map(x => ({key: x[0], text: x[1].text}));
         const items1a: {order: string, principal: string, id: number}[] = items1aa.map(x => {
@@ -42,7 +42,7 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
         const items2 = items1a.map(({order, principal, id}) => { return {canister: Principal.from(principal), id, order} });
         const items3 = items2.map(id => (async () => {
             const part: CanDBPartition = Actor.createActor(canDBPartitionIdl, {canisterId: id.canister, agent: props.defaultAgent });
-            return {order: id.order, id, item: await part.getItem(BigInt(id.id))};
+            return {order: id.order, id, item: await part.getItemComposite(BigInt(id.id))};
         })());
         const items4 = await Promise.all(items3);
         return items4.map(({order, id, item}) => ({

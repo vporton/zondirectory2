@@ -56,7 +56,7 @@ export default function EditItem(props: {
         if (props.itemId !== undefined) {
             const itemId = parseItemRef(props.itemId);
             const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: itemId.canister, agent: props.defaultAgent});
-            actor.getItem(BigInt(itemId.id))
+            actor.getItemComposite(BigInt(itemId.id))
                 .then(async (itemx) => {
                     const item = itemx ? itemx!.data.item : undefined;
                     const communal = itemx[0]?.communal; // TODO: Simplify.
@@ -71,7 +71,7 @@ export default function EditItem(props: {
                         setPost(t === undefined ? "" : (Object.values(t)[0] as string).substring(1)); // remove leading text type
                     }
                 });
-            // actor.getItem(BigInt(itemId.id))
+            // actor.getItemComposite(BigInt(itemId.id))
             //     .then((itemx) => {
             //         const item = itemx ? itemx!.data.item : undefined;
             //         const communal = itemx[0]?.communal; // TODO: Simplify.

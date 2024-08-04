@@ -50,7 +50,7 @@ export class ItemDB {
         const obj = new ItemDB(agent, itemId);
         const client: CanDBPartition = Actor.createActor(canDBPartitionIdl, {canisterId: obj.itemRef.canister, agent});
         const [item, streams, streamsRev] = await Promise.all([
-            client.getItem(BigInt(obj.itemRef.id)),
+            client.getItemComposite(BigInt(obj.itemRef.id)),
             client.getStreams(BigInt(obj.itemRef.id), "s" + kind),
             client.getStreams(BigInt(obj.itemRef.id), "rs" + kind),
         ]);
@@ -97,7 +97,7 @@ export class ItemDB {
         const items2 = items1a.map(({order, principal, id}) => { return {canister: Principal.from(principal), id, order} });
         const items3 = items2.map(id => (async () => {
             const part: CanDBPartition = Actor.createActor(canDBPartitionIdl, {canisterId: id.canister, agent: this.agent });
-            return {order: id.order, id, item: await part.getItem(BigInt(id.id))};
+            return {order: id.order, id, item: await part.getItemComposite(BigInt(id.id))};
         })());
         const items4 = await Promise.all(items3);
         return items4.map(({order, id, item}) => ({

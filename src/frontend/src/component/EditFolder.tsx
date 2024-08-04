@@ -40,7 +40,7 @@ export default function EditFolder(props: {
         if (props.folderId !== undefined) {
             const folderId = parseItemRef(props.folderId);
             const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: folderId.canister, agent: props.defaultAgent});
-            actor.getItem(BigInt(folderId.id))
+            actor.getItemComposite(BigInt(folderId.id))
                 .then((itemx) => {
                     const item = itemx ? itemx!.data.item : undefined;
                     const communal = itemx[0]?.communal; // TODO: Simplify.
