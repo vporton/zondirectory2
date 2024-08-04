@@ -145,9 +145,6 @@ shared actor class CanDBPartition(options: {
             let (?itemId, ?itemCanisterId) = (w1o, w2o) else {
               Debug.trap("order: programming error");
             };
-            // let ?itemId = Nat.fromText(w1) else {
-            //   Debug.trap("order: programming error");
-            // };
             let itemCanister: CanDBPartition = actor(itemCanisterId);
             switch (await itemCanister.getAttribute({sk = "r/" # itemId}, "i")) {
               case (?data) {
