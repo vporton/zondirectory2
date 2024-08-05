@@ -160,13 +160,13 @@ function MyInner(props: {
     const Person = React.lazy(() => import('./personhood/Person'));
 
     return <>
-        <p>
-            Logged in as: {props.isAuthenticated ? <small>{props.principal?.toString()}</small> : "(none)"}{" "}
-            {props.isAuthenticated
-                ? <><Button onClick={signout}>Logout</Button> Your score: {userScore}</>
-                : <Button onClick={signin}>Login/Register</Button>}
-        </p>
         <nav>
+            <p>
+                Logged in as: {props.isAuthenticated ? <small>{props.principal?.toString()}</small> : "(none)"}{" "}
+                {props.isAuthenticated
+                    ? <><Button onClick={signout}>Logout</Button> Your score: {userScore}</>
+                    : <Button onClick={signin}>Login/Register</Button>}
+            </p>
             <Navbar className="bg-body-secondary" style={{width: "auto"}}>
                 <Nav>
                     <Link className="nav-link" to={"/item/"+root}>Main folder</Link>{" "}
