@@ -167,7 +167,7 @@ function MyInner(props: {
                     ? <><Button onClick={signout}>Logout</Button> Your score: {userScore}</>
                     : <Button onClick={signin}>Login/Register</Button>}
             </p>
-            <Navbar className="bg-body-secondary" style={{width: "auto"}}>
+            <Navbar collapseOnSelect className="bg-body-secondary" style={{width: "auto"}}>
                 <Nav>
                     <Link className="nav-link" to={"/item/"+root}>Main folder</Link>{" "}
                 </Nav>

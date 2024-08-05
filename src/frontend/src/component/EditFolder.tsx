@@ -16,6 +16,7 @@ import { BusyContext } from "./busy";
 import { Actor, Agent } from "@dfinity/agent";
 import { ErrorContext } from "./ErrorContext";
 import { MainContext, MainContextType } from "./MainContext";
+import { useBlockTabClose } from '../util/blockClose';
 
 export default function EditFolder(props: {
     super?: boolean,
@@ -23,6 +24,7 @@ export default function EditFolder(props: {
     superFolderId?: string,
     defaultAgent: Agent | undefined,
 }) {
+    const _blockClose = useBlockTabClose();
     const navigate = useNavigate();
     const {fetchUserScore} = useContext<MainContextType>(MainContext);
     const [superFolder, setSuperFolder] = useState<string | undefined>();

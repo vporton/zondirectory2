@@ -17,12 +17,14 @@ import { BusyContext } from "./busy";
 import { Actor, Agent } from "@dfinity/agent";
 import { ErrorContext } from "./ErrorContext";
 import { MainContext, MainContextType } from "./MainContext";
+import { useBlockTabClose } from '../util/blockClose';
 
 export default function EditItem(props: {
     itemId?: string,
     comment?: boolean,
     defaultAgent: Agent | undefined,
 }) {
+    const _blockClose = useBlockTabClose();
     const routeParams = useParams();
     const navigate = useNavigate();
     const {fetchUserScore} = useContext<MainContextType>(MainContext);
