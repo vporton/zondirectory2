@@ -103,7 +103,7 @@ export default function EditFolder(props: {
                                 }
                             }
                             navigate("/item/"+ref);
-                            await fetchUserScore!(); // TODO: `!`
+                            fetchUserScore && await fetchUserScore(); // TODO: wrong thing if `!fetchUserScore`?
                         }
                         catch (e) {
                             if (/Canister trapped explicitly: spam/.test(e)) {

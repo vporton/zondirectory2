@@ -128,10 +128,10 @@ function MyInner(props: {
 }) {
     const navigate = useNavigate();
     const signin = () => {
-        props.login!(); // TODO: `!`
+        props.login && props.login();
     };
     const signout = async () => {
-        await props.logout!(); // TODO: `!`
+        props.logout && await props.logout();
     };
     const {userScore, setUserScore} = useContext<MainContextType>(MainContext);
     const [root, setRoot] = useState("");

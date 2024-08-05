@@ -120,7 +120,7 @@ export default function EditItem(props: {
                                 await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
                                 await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
                                 navigate("/item/"+ref);
-                                await fetchUserScore!(); // TODO: `!`
+                                fetchUserScore && await fetchUserScore(); // TODO: wrong thing if `!fetchUserScore`?
                             }
                             catch (e) {
                                 if (/Canister trapped explicitly: spam/.test(e)) {

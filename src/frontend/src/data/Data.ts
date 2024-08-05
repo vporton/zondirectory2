@@ -76,7 +76,11 @@ export class ItemDB {
     }
     async postText(): Promise<string | undefined> {
         const client = Actor.createActor(canDBPartitionIdl, {canisterId: this.itemRef.canister, agent: this.agent});
-        const t = (await client.getAttribute({sk: "i/" + this.itemRef.id}, "t") as any)[0]; // TODO: error handling
+        const t0 = (await client.getAttribute({sk: "i/" + this.itemRef.id}, "t") as any);
+        if (t0 === undefined) {
+            return undefined;
+        }
+        const t = t0[0];
         return t === undefined ? undefined : Object.values(t)[0] as string;
     }
     // TODO: duplicate code with AllItems
@@ -85,7 +89,11 @@ export class ItemDB {
     {
         const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
         const client: NacDBPartition = Actor.createActor(nacDBPartitionIdl, {canisterId: outerCanister, agent: this.agent });
-        const {canister: innerPart, key: innerKey} = (await client.getInner({outerKey}) as any)[0]; // TODO: error handling
+        const t0 = await client.getInner({outerKey}) as any;
+        if (t0 === undefined) {
+            return [];
+        }
+        const {canister: innerPart, key: innerKey} = t0[0];
         const client2 = Actor.createActor(nacDBPartitionIdl, {canisterId: innerPart, agent: this.agent });
         const items = ((await client2.scanLimitInner({innerKey, lowerBound, upperBound: "x", dir: {fwd: null}, limit: BigInt(limit)})) as any).results as
             [[string, {text: string}]] | [];

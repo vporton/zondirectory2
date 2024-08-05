@@ -8,7 +8,7 @@ import ItemType from "./misc/ItemType";
 import { Agent } from "@dfinity/agent";
 import { Helmet } from "react-helmet";
 
-export default function SubFolders(props: {defaultAgent: Agent | undefined, 'data-dir': 'sub' | 'super'}) { // TODO: any
+export default function SubFolders(props: {defaultAgent: Agent | undefined, 'data-dir': 'sub' | 'super'}) {
     const { id } = useParams();
     const [xdata, setXData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
@@ -21,8 +21,8 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
     }
 
     useEffect(() => {
-        if (id !== undefined) {
-            AppData.create(props.defaultAgent!, id, streamKind).then(data => { // TODO: `!`
+        if (id !== undefined && props.defaultAgent !== undefined) {
+            AppData.create(props.defaultAgent, id, streamKind).then(data => {
                 data.title().then(x => setTitle(x));
                 if (props['data-dir'] == 'super') {
                     data.superFolders().then(x => {
@@ -56,8 +56,7 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
         const promise = props['data-dir'] == 'super'
             ? xdata.superFolders({lowerBound, limit: 10}) : xdata.subFolders({lowerBound, limit: 10});
         promise.then(x => {
-            console.log('X', x)
-            setFolders(folders?.concat(x)); // TODO: `?`?
+            folders && setFolders(folders.concat(x)); // TODO: ?
             if (x.length !== 0) {
                 setItemsLast(x[x.length - 1].order); // duplicate code
             } else {
