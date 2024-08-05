@@ -69,7 +69,7 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
     return (
         <>
             <Helmet>
-                <meta name="canonical" content={`https://zoncircle.com/${props['data-dir'] == 'super' ? "/superfolders-of/" : "/subfolders-of/"}` + id}/>
+                <link rel="canonical" href={`https://zoncircle.com/${props['data-dir'] == 'super' ? "/superfolders-of/" : "/subfolders-of/"}` + id}/>
                 <title>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: {title}</title>
                 <meta name="robots" content="noindex"/>
             </Helmet>

@@ -66,7 +66,7 @@ export function AllItems(props: {defaultAgent: Agent | undefined}) {
     
     return <>
         <Helmet>
-            <meta name="canonical" content="https://zoncircle.com/latest"/>
+            <link rel="canonical" href="https://zoncircle.com/latest"/>
             <title>Latest Added Items - Zon</title>
             <meta name="description" content="Latest added items - Zon Social Media: a fusion of social network, web directory, and marketplace"/>
             <meta name="robots" content="noindex"/>

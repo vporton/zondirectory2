@@ -144,7 +144,7 @@ export default function EditItem(props: {
                     }
                     return <>
                         <Helmet>
-                            <meta name="canonical" content="https://zoncircle.com/create"/>
+                            <link rel="canonical" href="https://zoncircle.com/create"/>
                             <title>Zon Social Media - create a new item</title>
                         </Helmet>
                         <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
