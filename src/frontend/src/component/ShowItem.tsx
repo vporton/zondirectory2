@@ -266,7 +266,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         />*/}
                                         <ItemType item={x.item}/>
                                         <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>
-                                        {x.item.data.creator.compareTo(principal!) === 'eq' &&
+                                        {principal !== undefined && x.item.data.creator.compareTo(principal) === 'eq' &&
                                             <>
                                                 {" "}
                                                 <Button href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
@@ -303,7 +303,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                             </> :
                                             <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>}
                                         {" "}
-                                        {x.item.data.creator.compareTo(principal!) === 'eq' &&
+                                        {principal !== undefined && x.item.data.creator.compareTo(principal) === 'eq' &&
                                             <Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
                                         }
                                     </p>
