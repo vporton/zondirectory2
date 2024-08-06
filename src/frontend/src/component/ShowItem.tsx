@@ -12,6 +12,7 @@ import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
 import { Agent } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
+import { OnpageNavigation } from "./OnpageNavigation";
 
 export default function ShowItem() {
     return (
@@ -62,6 +63,10 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     const [userVoteComments, setUserVoteComments] = useState<{[key: string]: number}>({});
     const [totalVotesCommentsOn, setTotalVotesCommentsOn] = useState<{[key: string]: {up: number, down: number}}>({});
     const [userVoteCommentsOn, setUserVoteCommentsOn] = useState<{[key: string]: number}>({});
+    const [startItemsPage, setStartItemsPage] = useState(new Map([
+        ["nitems", 5],
+    ]));
+    const [itemsPage, setItemsPage] = useState(new Map());
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -98,7 +103,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 data.superFolders().then(x => {
                     setSuperfolders(x);
                 });
-                data.items().then(x => {
+                data.items({limit: startItemsPage.get("nitems")}).then(x => {
                     setItems(x);
                     if (x.length !== 0) {
                         setItemsLast(x[x.length - 1].order); // duplicate code
@@ -137,12 +142,17 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
         }
         const lowerBound = itemsLast + 'x';
         xdata && xdata.items({lowerBound, limit: 10}).then(x => {
-            setItems(items?.concat(x));
+            const newItems = items?.concat(x);
+            if (!newItems) {
+                return;
+            }
+            setItems(newItems);
             if (x.length !== 0) {
                 setItemsLast(x[x.length - 1].order); // duplicate code
             } else {
                 setItemsReachedEnd(true);
             }
+            setItemsPage((old) => old.set("nitems", newItems.length));
         });
     }
     function moreComments(event: any) {
@@ -186,6 +196,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             <meta name="description" content={description}/>
             {/*(!superfolders || superfolders.length === 0 ? <meta name="robots" content="noindex"/>)*/} {/* anti-search-spam measure */}
         </Helmet>
+        <OnpageNavigation startPage={startItemsPage} page={itemsPage}/>
         <h1>{data !== undefined && <ItemType item={data}/>}{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h1>
         <p>Creator: <small>{creator !== undefined && creator.toString()}</small>
             {creator !== undefined && principal !== undefined && creator.compareTo(principal) === 'eq' &&
@@ -277,7 +288,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             {/* TODO: Create super-folder */}
                             <p><Link to="#" onClick={e => moreSuperfolders(e)}>More...</Link> <Link to={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
                         </Col>
-            {!isFolder ? "" : <>
+                    {!isFolder ? "" : <>
                         <Col>
                             <h3>Items</h3>
                             {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) => 

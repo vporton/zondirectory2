@@ -87,7 +87,7 @@ export class ItemDB {
     private async aList(outerCanister, outerKey, opts?: {lowerBound?: string, limit?: number})
         : Promise<{order: string, id: ItemRef, item: ItemTransfer}[]>
     {
-        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
+        const {lowerBound, limit} = opts !== undefined ? {lowerBound: "", ...opts} : {lowerBound: "", limit: 5};
         const client: NacDBPartition = Actor.createActor(nacDBPartitionIdl, {canisterId: outerCanister, agent: this.agent });
         const t0 = await client.getInner({outerKey}) as any;
         if (t0 === undefined) {
@@ -115,7 +115,7 @@ export class ItemDB {
         }));
     }
     async subFolders(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemTransfer}[]> {
-        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
+        const {lowerBound, limit} = opts !== undefined ? {lowerBound: "", ...opts} : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
         }
@@ -126,7 +126,7 @@ export class ItemDB {
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async superFolders(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemTransfer}[]> {
-        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
+        const {lowerBound, limit} = opts !== undefined ? {lowerBound: "", ...opts} : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
         }
@@ -142,7 +142,7 @@ export class ItemDB {
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async items(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemTransfer}[]> {
-        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
+        const {lowerBound, limit} = opts !== undefined ? {lowerBound: "", ...opts} : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
         }
@@ -153,7 +153,7 @@ export class ItemDB {
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async comments(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemTransfer}[]> {
-        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
+        const {lowerBound, limit} = opts !== undefined ? {lowerBound: "", ...opts} : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
         }
@@ -164,7 +164,7 @@ export class ItemDB {
         return await this.aList(outerCanister, outerKey, {lowerBound, limit})
     }
     async antiComments(opts?: {lowerBound?: string, limit?: number}): Promise<{order: string, id: ItemRef, item: ItemTransfer}[]> {
-        const {lowerBound, limit} = opts !== undefined ? opts : {lowerBound: "", limit: 5};
+        const {lowerBound, limit} = opts !== undefined ? {lowerBound: "", ...opts} : {lowerBound: "", limit: 5};
         if (this.agent === undefined) {
             return undefined;
         }
