@@ -62,6 +62,7 @@ export default function App() {
                     onError: (error) => {
                         console.error('Login Failed: ', error);
                     },
+                    derivationOrigin: "https://zoncircle.com",
                 }}}>
                     <BusyProvider>
                         <BusyWidget>
