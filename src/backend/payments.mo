@@ -57,6 +57,7 @@ shared({caller = initialOwner}) actor class Payments() = this {
 
   /// Shares ///
 
+  // TODO: Maybe, use floats instead?
   stable var salesOwnersShare = Fractions.fdiv(1, 10); // 10%
   stable var upvotesOwnersShare = Fractions.fdiv(1, 2); // 50%
   stable var uploadOwnersShare = Fractions.fdiv(3, 20); // 15% // TODO: Delete.
