@@ -102,12 +102,13 @@ shared({caller = initialOwner}) actor class Payments() = this {
 
   /////////////////
 
-  type IncomingPayment = {
-    kind: { #payment; #donation };
-    itemId: Nat;
-    amount: ICRC1Types.Balance;
-    var time: ?Time.Time;
-  };
+  // TODO: needed?
+  // type IncomingPayment = {
+  //   kind: { #payment; #donation };
+  //   itemId: Nat;
+  //   amount: ICRC1Types.Balance;
+  //   var time: ?Time.Time;
+  // };
 
   // func serializePaymentAttr(payment: IncomingPayment): Entity.AttributeValue {
   //   var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(3);
@@ -190,7 +191,7 @@ shared({caller = initialOwner}) actor class Payments() = this {
   // };
 
   // TODO: clean space by removing smallest payments.
-  stable var currentPayments: BTree.BTree<Principal, IncomingPayment> = BTree.init<Principal, IncomingPayment>(null); // TODO: Delete old ones.
+  // stable var currentPayments: BTree.BTree<Principal, IncomingPayment> = BTree.init<Principal, IncomingPayment>(null); // TODO: Delete old ones.
   
   // TODO: clean space by removing smallest debts.
   stable var ourDebts: BTree.BTree<Principal, OutgoingPayment> = BTree.init<Principal, OutgoingPayment>(null);

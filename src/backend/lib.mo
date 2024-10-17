@@ -186,6 +186,7 @@ module {
   public type Streams = [?Reorder.Order];
 
   // TODO: messy order of the below functions
+  // TODO: Use to_candid() instead.
 
   func serializeItemDataWithoutOwnerToBuffer(
     buf: Buffer.Buffer<Entity.AttributeValuePrimitive>,
