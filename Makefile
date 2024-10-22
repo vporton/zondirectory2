@@ -14,12 +14,14 @@ all: deploy init
 deploy: compile-candbpart compile-nacdbpart 
 	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && cp -f .env .env.$(NETWORK); } && \
 	  trap "cleanup" EXIT && \
-	  npm install && \
 	  mkdir -p src/libs/configs/stage && \
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
 	  cp .env.$(NETWORK) .env && \
 	  dfx generate -v CanDBPartition && \
 	  dfx generate -v NacDBPartition && \
+	  dfx generate -v main && \
+	  dfx generate -v items && \
+	  dfx generate -v personhood && \
 	  dfx deploy --yes --network $(NETWORK) -v frontend && \
 	  npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
 	  npx ts-node scripts/upgrade-nacdb.ts $(NETWORK)

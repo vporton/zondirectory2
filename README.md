@@ -26,6 +26,7 @@ Use the following commands:
 # Select Node version
 nvm install v18.19.1
 nvm use v18.19.1
+npm i
 
 # Starts the replica, running in the background
 dfx start --background
