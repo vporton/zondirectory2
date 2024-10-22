@@ -14,6 +14,7 @@ all: deploy init
 deploy: compile-candbpart compile-nacdbpart 
 	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && cp -f .env .env.$(NETWORK); } && \
 	  trap "cleanup" EXIT && \
+	  npm install && \
 	  mkdir -p src/libs/configs/stage && \
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
 	  cp .env.$(NETWORK) .env && \
