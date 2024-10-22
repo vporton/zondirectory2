@@ -12,7 +12,7 @@ import Itertools "mo:itertools/Iter";
 import CanDBIndex "canister:CanDBIndex";
 import NacDBIndex "canister:NacDBIndex";
 import CanDBPartition "../storage/CanDBPartition";
-import DBConfig "../libs/configs/db.config";
+import DBConfig "../libs/configs/db-config";
 import ConfigMisc "../libs/configs/misc.config";
 import lib "lib";
 import AI "ai";

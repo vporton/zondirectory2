@@ -12,7 +12,7 @@ import Buffer "mo:stable-buffer/StableBuffer";
 import Cycles "mo:base/ExperimentalCycles";
 import Partition "./NacDBPartition";
 import Battery "canister:battery";
-import DBConfig "../libs/configs/db.config";
+import DBConfig "../libs/configs/db-config";
 
 shared({caller = initialOwner}) actor class NacDBIndex() = this {
     stable var owners = [initialOwner];

@@ -17,10 +17,13 @@
 /target
 ic_eth.did
 /out
+/managed_context
+/test_suite_analysis
 
 # generated files
 src/declarations/
 our-canisters.json
+/src/libs/configs/stage/
 
 # frontend code
 node_modules/

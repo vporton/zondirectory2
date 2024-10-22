@@ -13,7 +13,7 @@ import CanDBPartition "../storage/CanDBPartition";
 import lib "lib";
 import PST "canister:pst";
 import Fractions "../libs/helpers/fractions.helper";
-import DBConfig "../libs/configs/db.config";
+import DBConfig "../libs/configs/db-config";
 
 shared({caller = initialOwner}) actor class Payments() = this {
   /// Owners ///
