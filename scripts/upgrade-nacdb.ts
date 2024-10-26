@@ -8,6 +8,9 @@ import { _SERVICE as NacDBIndex } from "../src/declarations/NacDBIndex/NacDBInde
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { decodeFile } from "./lib/key";
 import { exec } from 'child_process';
+import dns from 'dns';
+
+dns.setDefaultResultOrder('ipv4first');
 
 const isLocal = process.env.DFX_NETWORK !== "ic";
 
