@@ -25,7 +25,7 @@ async function upgradePartitions() {
     const serviceWasmModulePath = `.dfx/${net}/canisters/NacDBPartition/NacDBPartition.wasm`;
     const serviceWasm = loadWasm(serviceWasmModulePath);
 
-    const key = await commandOutput("dfx identity export `dfx identity get-wallet`");
+    const key = await commandOutput("dfx identity export `dfx identity whoami`");
     const identity = decodeFile(key);
 
     const agent = new HttpAgent({host: isLocal ? "http://localhost:8000" : "https://icp-api.io", identity});
