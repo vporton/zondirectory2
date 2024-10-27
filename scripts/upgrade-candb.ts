@@ -22,7 +22,7 @@ async function upgradePartitions() {
     const serviceWasmModulePath = `.dfx/${net}/canisters/CanDBPartition/CanDBPartition.wasm`;
     const serviceWasm = loadWasm(serviceWasmModulePath);
 
-    const key = await commandOutput("dfx identity export Zon");
+    const key = await commandOutput("dfx identity export `dfx identity get-wallet`");
     const identity = decodeFile(key);
 
     const agent = new HttpAgent({host: isLocal ? "http://localhost:8000" : "https://icp-api.io", identity});
