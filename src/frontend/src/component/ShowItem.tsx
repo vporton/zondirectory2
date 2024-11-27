@@ -11,6 +11,8 @@ import UpDown, { updateVotes } from "./misc/UpDown";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { Helmet } from 'react-helmet';
 import { Agent } from "@dfinity/agent";
+import { Principal } from "@dfinity/principal";
+import { OnpageNavigation } from "./OnpageNavigation";
 
 export default function ShowItem() {
     return (
@@ -30,13 +32,13 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     useEffect(() => {
         setId(parseItemRef(idParam!))
     }, [idParam]);
-    const { principal } = useContext(AuthContext) as any;
+    const { principal } = useContext(AuthContext);
     const [locale, setLocale] = useState("");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [postText, setPostText] = useState("");
     const [type, setType] = useState<string | undefined>(undefined);
-    const [creator, setCreator] = useState("");
+    const [creator, setCreator] = useState<Principal | undefined>();
     const [subfolders, setSubfolders] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
     const [superfolders, setSuperfolders] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
     const [items, setItems] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>(undefined);
@@ -61,6 +63,10 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     const [userVoteComments, setUserVoteComments] = useState<{[key: string]: number}>({});
     const [totalVotesCommentsOn, setTotalVotesCommentsOn] = useState<{[key: string]: {up: number, down: number}}>({});
     const [userVoteCommentsOn, setUserVoteCommentsOn] = useState<{[key: string]: number}>({});
+    const [startItemsPage, setStartItemsPage] = useState(new Map([
+        ["nitems", 5],
+    ]));
+    const [itemsPage, setItemsPage] = useState(new Map());
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -70,35 +76,34 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
         setComments(undefined);
         setAntiComments(undefined);
     }, [id]);
-    // TODO: Are `!`s suitable here?
     useEffect(() => {
-        updateVotes(props.defaultAgent!, id, principal, subfolders!, setTotalVotesSubFolders, setUserVoteSubFolders).then(() => {}); // TODO: `!`
-    }, [subfolders, principal]);
+        props.defaultAgent && subfolders && updateVotes(props.defaultAgent, id, principal, subfolders, setTotalVotesSubFolders, setUserVoteSubFolders).then(() => {});
+    }, [subfolders, principal, props.defaultAgent]);
     useEffect(() => {
-        updateVotes(props.defaultAgent!, id, principal, superfolders!, setTotalVotesSuperFolders, setUserVoteSuperFolders).then(() => {}); // TODO: `!`
-    }, [superfolders, principal]);
+        props.defaultAgent && superfolders && updateVotes(props.defaultAgent, id, principal, superfolders, setTotalVotesSuperFolders, setUserVoteSuperFolders).then(() => {});
+    }, [superfolders, principal, props.defaultAgent]);
     useEffect(() => {
-        updateVotes(props.defaultAgent!, id, principal, items!, setTotalVotesItems, setUserVoteItems).then(() => {}); // TODO: `!`
-    }, [items, principal]);
+        props.defaultAgent && items && updateVotes(props.defaultAgent, id, principal, items, setTotalVotesItems, setUserVoteItems).then(() => {});
+    }, [items, principal, props.defaultAgent]);
     useEffect(() => {
-        updateVotes(props.defaultAgent!, id, principal, comments!, setTotalVotesComments, setUserVoteComments).then(() => {}); // TODO: `!`
-    }, [comments, principal]);
+        props.defaultAgent && comments && updateVotes(props.defaultAgent, id, principal, comments, setTotalVotesComments, setUserVoteComments).then(() => {});
+    }, [comments, principal, props.defaultAgent]);
     useEffect(() => {
-        if (id !== undefined) {
+        if (id !== undefined && props.defaultAgent !== undefined) {
             console.log("Loading from AppData");
-            AppData.create(props.defaultAgent!, serializeItemRef(id), streamKind).then(data => { // TODO: `!`
+            AppData.create(props.defaultAgent, serializeItemRef(id), streamKind).then(data => {
                 setXData(data);
                 setData(data.item);
                 data.locale().then(x => setLocale(x));
                 data.title().then(x => setTitle(x));
                 data.description().then(x => setDescription(x));
-                data.postText().then(x => setPostText(x !== undefined ? x.substring(1) : "")); // strip `t` denoting that it's a text // TODO: `!`
-                data.creator().then(x => setCreator(x.toString())); // TODO
+                data.postText().then(x => setPostText(x !== undefined ? x.substring(1) : "")); // strip `t` denoting that it's a text
+                data.creator().then(x => setCreator(x));
                 data.subFolders().then(x => setSubfolders(x));
                 data.superFolders().then(x => {
                     setSuperfolders(x);
                 });
-                data.items().then(x => {
+                data.items({limit: startItemsPage.get("nitems")}).then(x => {
                     setItems(x);
                     if (x.length !== 0) {
                         setItemsLast(x[x.length - 1].order); // duplicate code
@@ -136,13 +141,18 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             return;
         }
         const lowerBound = itemsLast + 'x';
-        xdata.items({lowerBound, limit: 10}).then(x => {
-            setItems(items?.concat(x));
+        xdata && xdata.items({lowerBound, limit: 10}).then(x => {
+            const newItems = items?.concat(x);
+            if (!newItems) {
+                return;
+            }
+            setItems(newItems);
             if (x.length !== 0) {
                 setItemsLast(x[x.length - 1].order); // duplicate code
             } else {
                 setItemsReachedEnd(true);
             }
+            setItemsPage((old) => old.set("nitems", newItems.length));
         });
     }
     function moreComments(event: any) {
@@ -151,7 +161,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             return;
         }
         const lowerBound = commentsLast + 'x';
-        xdata!.items({lowerBound, limit: 10}).then(x => { // TODO: `!`
+        xdata?.items({lowerBound, limit: 10}).then(x => {
             setItems(comments?.concat(x));
             if (x.length !== 0) {
                 setCommentsLast(x[x.length - 1].order); // duplicate code
@@ -166,7 +176,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             return;
         }
         const lowerBound = antiCommentsLast + 'x';
-        xdata!.items({lowerBound, limit: 10}).then(x => { // TODO: `!`
+        xdata?.items({lowerBound, limit: 10}).then(x => {
             setItems(antiComments?.concat(x));
             if (x.length !== 0) {
                 setAntiCommentsLast(x[x.length - 1].order); // duplicate code
@@ -181,16 +191,25 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     const isFolder = type === 'folder';
     return <>
         <Helmet>
-            <meta name="canonical" content={`https://zoncircle.com/item/${idParam!}`}/>
+            <link rel="canonical" href={`https://zoncircle.com/item/${idParam!}`}/>
             <title>{isFolder ? `${title} (folder) - Zon` : `${title} - Zon`}</title>
             <meta name="description" content={description}/>
             {/*(!superfolders || superfolders.length === 0 ? <meta name="robots" content="noindex"/>)*/} {/* anti-search-spam measure */}
         </Helmet>
-        {/* TODO: `!` on the next line */}
-        <h1><ItemType item={data!}/>{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h1>
-        <p>Creator: <small>{creator.toString()}</small></p>
+        <OnpageNavigation startPage={startItemsPage} page={itemsPage}/>
+        <h1>{data !== undefined && <ItemType item={data}/>}{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h1>
+        <div data-nosnippet="true">
+            <p>Creator: <small>{creator !== undefined && creator.toString()}</small>
+                {creator !== undefined && principal !== undefined && creator.compareTo(principal) === 'eq' &&
+                    <>
+                        {" "}
+                        <Button href={`/edit/${isFolder ? 'folder' : 'item'}/${serializeItemRef(id)}`}>Edit</Button>
+                    </>
+                }
+            </p>
+        </div>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
-        {postText !== "" ? <p lang={locale}>{postText}</p> : ""}
+        {postText !== "" ? <p lang={locale} style={{whiteSpace: 'break-spaces'}}>{postText}</p> : ""}
         <p>Sort by:{" "}
             <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
             <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
@@ -210,8 +229,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             <ul>
                                 {subfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
                                     <li lang={x.item.data.item.locale} key={serializeItemRef(x.id as any)}>
-                                        {/* TODO: `!` below */}
-                                        <UpDown
+                                        {props.defaultAgent && <UpDown
                                             parent={{id}}
                                             item={x}
                                             agent={props.defaultAgent!}
@@ -221,15 +239,18 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                                 setUserVoteSubFolders({...userVoteSubFolders, [serializeItemRef(id)]: v})}
                                             onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
                                                 setTotalVotesSubFolders({...totalVotesSubFolders, [serializeItemRef(id)]: v})}
-                                            onUpdateList={() => xdata!.subFolders().then(x => setSubfolders(x))}
-                                        />
+                                            onUpdateList={() => xdata && xdata.subFolders().then(x => setSubfolders(x))}
+                                        />}
                                         <ItemType item={x.item}/>
-                                        <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                                        [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                                        <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>
+                                        {" "}
+                                        {principal && x.item.data.creator.compareTo(principal) === 'eq' &&
+                                            <Button href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
+                                        }
                                     </li>)}
                             </ul>}
                             <p>
-                                <a href="#" onClick={e => moreSubfolders(e)}>More...</a> <a href={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</a>
+                                <Link to="#" onClick={e => moreSubfolders(e)}>More...</Link> <Link to={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</Link>
                             </p>
                         </Col>
                     </>}
@@ -257,21 +278,25 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                             })}
                                         />*/}
                                         <ItemType item={x.item}/>
-                                        <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
-                                        [<Nav.Link href={`/edit/folder/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                                        <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>
+                                        {principal !== undefined && x.item.data.creator.compareTo(principal) === 'eq' &&
+                                            <>
+                                                {" "}
+                                                <Button href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
+                                            </>
+                                        }
                                     </li>)}
                             </ul>}
                             {/* TODO: Create super-folder */}
-                            <p><a href="#" onClick={e => moreSuperfolders(e)}>More...</a> <a href={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</a></p>
+                            <p><Link to="#" onClick={e => moreSuperfolders(e)}>More...</Link> <Link to={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
                         </Col>
-            {!isFolder ? "" : <>
+                    {!isFolder ? "" : <>
                         <Col>
                             <h3>Items</h3>
                             {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) => 
                                 <div key={serializeItemRef(x.id)}>
-                                    {/* TODO: `!` in `props.defaultAgent!` */}
                                     <p lang={x.item.data.item.locale}>
-                                        <UpDown
+                                        {props.defaultAgent && <UpDown
                                             parent={{id}}
                                             item={x}
                                             agent={props.defaultAgent!}
@@ -281,23 +306,25 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                                 setUserVoteItems({...userVoteItems, [serializeItemRef(id)]: v})}
                                             onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
                                                 setTotalVotesItems({...totalVotesItems, [serializeItemRef(id)]: v})}
-                                            onUpdateList={() => xdata.items().then(x => setItems(x))}
-                                        />{" "}
+                                            onUpdateList={() => xdata && xdata.items().then(x => setItems(x))}
+                                        />}{" "}
                                         {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
                                         {(x.item.data.item.details as any).link ?
                                             <>
-                                                <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a>{" "}
-                                                <a href={`/item/${serializeItemRef(x.id)}`}>[H]</a>
+                                                <Link to={(x.item.data.item.details as any).link}>{x.item.data.item.title}</Link>{" "}
+                                                <Link to={`/item/${serializeItemRef(x.id)}`}>[H]</Link>
                                             </> :
-                                            <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>}
-                                        
-                                        {" "}[<Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}>Edit</Nav.Link>]
+                                            <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>}
+                                        {" "}
+                                        {principal !== undefined && x.item.data.creator.compareTo(principal) === 'eq' &&
+                                            <Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
+                                        }
                                     </p>
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><a href="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                                <a href={`/create/for-folder/${serializeItemRef(id)}`}>Create</a></p>
+                            <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
+                                <Link to={`/create/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
                         </Col>
                     </>}
                     </Row>
@@ -310,9 +337,8 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             <h3>Comments</h3>
                             {comments === undefined ? <p>Loading...</p> : comments.map(x => 
                                 <div key={serializeItemRef(x.id)}>
-                                    {/* TODO: `!` in `props.defaultAgent!` */}
                                     <p lang={x.item.data.item.locale}>
-                                        <UpDown
+                                        {props.defaultAgent && <UpDown
                                             parent={{id}}
                                             item={x}
                                             agent={props.defaultAgent!}
@@ -322,24 +348,24 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                                 setUserVoteComments({...userVoteComments, [serializeItemRef(id)]: v})}
                                             onSetTotalVotes={(id: ItemRef, v: {up: number, down: number}) =>
                                                 setTotalVotesComments({...totalVotesComments, [serializeItemRef(id)]: v})}
-                                            onUpdateList={() => xdata.comments().then(x => setComments(x))}
+                                            onUpdateList={() => xdata && xdata.comments().then(x => setComments(x))}
                                             isComment={true}
-                                        />
+                                        />}
                                         {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
                                         {(x.item.data.item.details as any).link ?
                                             <>
-                                                <a href={(x.item.data.item.details as any).link}>{x.item.data.item.title}</a>{" "}
-                                                <a href={`/item/${serializeItemRef(x.id)}`}>[H]</a>
+                                                <Link to={(x.item.data.item.details as any).link}>{x.item.data.item.title}</Link>{" "}
+                                                <Link to={`/item/${serializeItemRef(x.id)}`}>[H]</Link>
                                             </> :
-                                            <a href={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</a>
+                                            <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>
                                         }
                                         
                                     </p>
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><a href="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}
-                                <a href={`/create/comment/${serializeItemRef(id)}`}>Create</a></p>
+                            <p><Link to="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
+                                <Link to={`/create/comment/${serializeItemRef(id)}`}>Create</Link></p>
                         </Col>
                         <Col>
                             <h3>Comment on</h3>
@@ -350,16 +376,16 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         {item.item.data.item.price ? <>({item.item.data.item.price} ICP) </> : ""}
                                         {(item.item.data.item.details as any).link ?
                                             <>
-                                                <a href={(item.item.data.item.details as any).link}>{item.item.data.item.title}</a>{" "}
-                                                <a href={`/item/${serializeItemRef(item.id)}`}>[H]</a>
+                                                <Link to={(item.item.data.item.details as any).link}>{item.item.data.item.title}</Link>{" "}
+                                                <Link to={`/item/${serializeItemRef(item.id)}`}>[H]</Link>
                                             </> :
-                                            <a href={`/item/${serializeItemRef(item.id)}`}>{item.item.data.item.title}</a>}
+                                            <Link to={`/item/${serializeItemRef(item.id)}`}>{item.item.data.item.title}</Link>}
                                         
                                     </p>
                                     <p lang={item.item.data.item.locale} style={{marginLeft: '1em'}}>{item.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><a href="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</a>{" "}</p>
+                            <p><Link to="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}</p>
                         </Col>
                     </Row>
                 </Container>

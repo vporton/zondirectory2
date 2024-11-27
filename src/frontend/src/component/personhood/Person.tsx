@@ -15,7 +15,7 @@ import { idlFactory as canDBIndexIdl } from '../../../../declarations/CanDBIndex
 import { idlFactory as personhoodIdl } from '../../../../declarations/personhood';
 import { _SERVICE as Personhood } from '../../../../declarations/personhood/personhood.did';
 import config from '../../config.json';
-import ourCanisters from '../../our-canisters.json';
+import ourCanisters from '../../../../our-canisters.json';
 import { Actor, Agent, HttpAgent } from '@dfinity/agent';
 import { ClipLoader } from 'react-spinners';
 import { AuthContext } from '../auth/use-auth-client';
@@ -174,7 +174,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
   return (
     <div className="App">
       <Helmet>
-        <meta name="canonical" content="https://zoncircle.com/personhood"/>
+        <link rel="canonical" href="https://zoncircle.com/personhood"/>
         <title>Zon Social Media - verify your identity</title>
       </Helmet>
       <Container>

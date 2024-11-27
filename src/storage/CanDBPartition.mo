@@ -10,6 +10,7 @@ import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 import lib "../backend/lib";
+import NacDBPartition "NacDBPartition";
 
 shared actor class CanDBPartition(options: {
   partitionKey: Text;
@@ -118,7 +119,6 @@ shared actor class CanDBPartition(options: {
 
   // Application-specific code //
 
-  // TODO: Retrieve virtual items.
   public shared func getItem(itemId: Nat): async lib.ItemTransfer {
     let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "i");
     switch (data) {
@@ -145,9 +145,48 @@ shared actor class CanDBPartition(options: {
             let (?itemId, ?itemCanisterId) = (w1o, w2o) else {
               Debug.trap("order: programming error");
             };
-            // let ?itemId = Nat.fromText(w1) else {
-            //   Debug.trap("order: programming error");
-            // };
+            let itemCanister: CanDBPartition = actor(itemCanisterId);
+            switch (await itemCanister.getAttribute({sk = "r/" # itemId}, "i")) {
+              case (?data) {
+                let variant = lib.deserializeItemVariant(data);
+                { data = { creator = Principal.fromText("aaaaa-aa"); item = variant.item; edited = true }; communal = true };
+              };
+              case null { Debug.trap("no such item"); };
+            };
+          };
+        };
+      };
+      case null { Debug.trap("no such item"); };
+    };
+  };
+
+  public composite query func getItemComposite(itemId: Nat): async lib.ItemTransfer {
+    let data = _getAttribute({sk = "i/" # Nat.toText(itemId)}, "i");
+    switch (data) {
+      case (?data) {
+        let item = lib.deserializeItem(data);
+        switch (item) {
+          case (#owned item2) { { data = { creator = item2.creator; item = item2.item; edited = item2.edited }; communal = false } };
+          case (#communal c) {
+            let o: NacDBPartition.Partition = actor(Principal.toText(Principal.fromActor(c.votesStream.order.0)));
+            let scanResult = await o.scanLimitOuterComposite({
+              dir = #fwd;
+              outerKey = c.votesStream.order.1;
+              lowerBound = "";
+              upperBound = "x";
+              limit = 1;
+              ascending = ?true;
+            });
+            let ref = scanResult.results[0].1;
+            let #text ref2 = ref else {
+              Debug.trap("programming error");
+            };
+            let words = Text.split(ref2, #char '@');
+            let w1o = words.next();
+            let w2o = words.next();
+            let (?itemId, ?itemCanisterId) = (w1o, w2o) else {
+              Debug.trap("order: programming error");
+            };
             let itemCanister: CanDBPartition = actor(itemCanisterId);
             switch (await itemCanister.getAttribute({sk = "r/" # itemId}, "i")) {
               case (?data) {

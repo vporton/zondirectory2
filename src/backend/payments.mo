@@ -13,7 +13,7 @@ import CanDBPartition "../storage/CanDBPartition";
 import lib "lib";
 import PST "canister:pst";
 import Fractions "../libs/helpers/fractions.helper";
-import DBConfig "../libs/configs/db.config";
+import DBConfig "../libs/configs/db-config";
 
 shared({caller = initialOwner}) actor class Payments() = this {
   /// Owners ///
@@ -57,6 +57,7 @@ shared({caller = initialOwner}) actor class Payments() = this {
 
   /// Shares ///
 
+  // TODO: Maybe, use floats instead?
   stable var salesOwnersShare = Fractions.fdiv(1, 10); // 10%
   stable var upvotesOwnersShare = Fractions.fdiv(1, 2); // 50%
   stable var uploadOwnersShare = Fractions.fdiv(3, 20); // 15% // TODO: Delete.
@@ -101,12 +102,13 @@ shared({caller = initialOwner}) actor class Payments() = this {
 
   /////////////////
 
-  type IncomingPayment = {
-    kind: { #payment; #donation };
-    itemId: Nat;
-    amount: ICRC1Types.Balance;
-    var time: ?Time.Time;
-  };
+  // TODO: needed?
+  // type IncomingPayment = {
+  //   kind: { #payment; #donation };
+  //   itemId: Nat;
+  //   amount: ICRC1Types.Balance;
+  //   var time: ?Time.Time;
+  // };
 
   // func serializePaymentAttr(payment: IncomingPayment): Entity.AttributeValue {
   //   var buf = Buffer.Buffer<Entity.AttributeValuePrimitive>(3);
@@ -189,7 +191,7 @@ shared({caller = initialOwner}) actor class Payments() = this {
   // };
 
   // TODO: clean space by removing smallest payments.
-  stable var currentPayments: BTree.BTree<Principal, IncomingPayment> = BTree.init<Principal, IncomingPayment>(null); // TODO: Delete old ones.
+  // stable var currentPayments: BTree.BTree<Principal, IncomingPayment> = BTree.init<Principal, IncomingPayment>(null); // TODO: Delete old ones.
   
   // TODO: clean space by removing smallest debts.
   stable var ourDebts: BTree.BTree<Principal, OutgoingPayment> = BTree.init<Principal, OutgoingPayment>(null);
@@ -336,6 +338,6 @@ shared({caller = initialOwner}) actor class Payments() = this {
         ignore BTree.delete<Principal, OutgoingPayment>(ourDebts, Principal.compare, caller);
       };
       case (null) {};
-    }
+    };
   };
 }

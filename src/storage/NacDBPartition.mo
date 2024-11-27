@@ -7,7 +7,7 @@ import Text "mo:base/Text";
 import Debug "mo:base/Debug";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
-import DBConfig "../libs/configs/db.config";
+import DBConfig "../libs/configs/db-config";
 
 shared({caller}) actor class Partition(
     initialOwners: [Principal],
@@ -123,7 +123,21 @@ shared({caller}) actor class Partition(
     public shared func scanLimitOuter({outerKey: Nac.OuterSubDBKey; lowerBound: Nac.SK; upperBound: Nac.SK; dir: BTree.Direction; limit: Nat})
         : async BTree.ScanLimitResult<Text, Nac.AttributeValue>
     {
-        await* Nac.scanLimitOuter({outerSuperDB = superDB; outerKey; lowerBound; upperBound; dir; limit});
+        let ?{canister = part; key = innerKey} = Nac.getInner({outerKey; superDB}) else {
+            Debug.trap("no sub-DB");
+        };
+        let part2: Partition = actor(Principal.toText(Principal.fromActor(part)));
+        await part2.scanLimitInner({innerKey; lowerBound; upperBound; dir; limit});
+    };
+
+    public composite query func scanLimitOuterComposite({outerKey: Nac.OuterSubDBKey; lowerBound: Nac.SK; upperBound: Nac.SK; dir: BTree.Direction; limit: Nat})
+        : async BTree.ScanLimitResult<Text, Nac.AttributeValue>
+    {
+        let ?{canister = part; key = innerKey} = Nac.getInner({outerKey; superDB}) else {
+            Debug.trap("no sub-DB");
+        };
+        let part2: Partition = actor(Principal.toText(Principal.fromActor(part)));
+        await part2.scanLimitInner({innerKey; lowerBound; upperBound; dir; limit});
     };
 
     public query func scanSubDBs(): async [(Nac.OuterSubDBKey, {canister: Principal; key: Nac.InnerSubDBKey})] {

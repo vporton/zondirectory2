@@ -11,21 +11,29 @@ FOUNDER = $(shell dfx identity --network $(NETWORK) get-principal)
 all: deploy init
 
 .PHONY: deploy
-deploy: compile-candbpart compile-nacdbpart 
-	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && mv -f .env .env.$(NETWORK); } && \
+deploy: compile-candbpart compile-nacdbpart
+	test "$(NETWORK)" != local && git checkout stable
+	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && cp -f .env .env.$(NETWORK); } && \
 	  trap "cleanup" EXIT && \
 	  mkdir -p src/libs/configs/stage && \
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
 	  cp .env.$(NETWORK) .env && \
+	  dfx deploy --yes --network $(NETWORK) ic_eth && \
 	  dfx generate -v CanDBPartition && \
 	  dfx generate -v NacDBPartition && \
+	  dfx generate -v main && \
+	  dfx generate -v items && \
+	  dfx generate -v personhood && \
+	  dfx deploy --yes --network $(NETWORK) personhood && \
+	  python3 node_modules/passport_client_dfinity/scripts/update-canisters.py && \
 	  dfx deploy --yes --network $(NETWORK) -v frontend && \
-	  npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
-	  npx ts-node scripts/upgrade-nacdb.ts $(NETWORK)
+	  export DFX_NETWORK=$(NETWORK) && \
+	    npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
+	    npx ts-node scripts/upgrade-nacdb.ts $(NETWORK)
 
 .PHONY: generate
 generate:
-	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && mv -f .env .env.$(NETWORK); } && \
+	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && cp -f .env .env.$(NETWORK); } && \
 	  trap "cleanup" EXIT && \
 	  mkdir -p src/libs/configs/stage && \
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
@@ -54,49 +62,49 @@ init: fabricate-cycles init-main init-call init-battery init-CanDBIndex init-Nac
 
 .PHONY: init-main
 init-main:
-	cleanup() { test -e .env && mv -f .env .env.$(NETWORK); } && \
+	cleanup() { test -e .env && cp -f .env .env.$(NETWORK); } && \
 	cp -f .env.$(NETWORK) .env && \
 	dfx canister --network $(NETWORK) call main init '()'
 
 .PHONY: init-CanDBIndex
 init-CanDBIndex:
-	cleanup() { test -e .env && mv -f .env .env.$(NETWORK); } && \
+	cleanup() { test -e .env && cp -f .env .env.$(NETWORK); } && \
 	cp -f .env.$(NETWORK) .env && \
 	. ./.env && dfx canister call --network $(NETWORK) CanDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_BATTERY\"; principal \"$$CANISTER_ID_ITEMS\"; principal \"$$CANISTER_ID_PERSONHOOD\" })"
 
 .PHONY: init-NacDBIndex
 init-NacDBIndex:
-	cleanup() { test -e .env && mv -f .env .env.$(NETWORK); } && \
+	cleanup() { test -e .env && cp -f .env .env.$(NETWORK); } && \
 	cp -f .env.$(NETWORK) .env && \
 	. ./.env && dfx canister call --network $(NETWORK) NacDBIndex init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_BATTERY\"; principal \"$$CANISTER_ID_ITEMS\" })"
 
 .PHONY: init-items
 init-items:
-	cleanup() { test -e .env && mv -f .env .env.$(NETWORK); } && \
+	cleanup() { test -e .env && cp -f .env .env.$(NETWORK); } && \
 	cp -f .env.$(NETWORK) .env && \
 	. ./.env && dfx canister call --network $(NETWORK) items init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; })"
 
 .PHONY: init-users
 init-users:
-	cleanup() { test -e .env && mv -f .env .env.$(NETWORK); } && \
+	cleanup() { test -e .env && cp -f .env .env.$(NETWORK); } && \
 	cp -f .env.$(NETWORK) .env && \
 	. ./.env && dfx canister call --network $(NETWORK) users init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; })"
 
 .PHONY: init-call
 init-call:
-	cleanup() { test -e .env && mv -f .env .env.$(NETWORK); } && \
+	cleanup() { test -e .env && cp -f .env .env.$(NETWORK); } && \
 	cp -f .env.$(NETWORK) .env && \
 	. ./.env && dfx canister call --network $(NETWORK) call init "(vec { principal \"$(FOUNDER)\"; principal \"$$CANISTER_ID_MAIN\"; principal \"$$CANISTER_ID_ITEMS\"; })"
 
 .PHONY: init-battery
 init-battery:
-	cleanup() { test -e .env && mv -f .env .env.$(NETWORK); } && \
+	cleanup() { test -e .env && cp -f .env .env.$(NETWORK); } && \
 	cp -f .env.$(NETWORK) .env && \
 	. ./.env && dfx canister call --network $(NETWORK) battery init "(vec { principal \"$(FOUNDER)\"; })"
 
 .PHONY: init-createItemData
 init-createItemData:
-	cleanup() { test -e .env && mv -f .env .env.$(NETWORK); } && \
+	cleanup() { test -e .env && cp -f .env .env.$(NETWORK); } && \
 	cp -f .env.$(NETWORK) .env && \
 	mainItem=`dfx canister call --network $(NETWORK) items createItemData \
 	  '(record { data = record{price = 0.0; locale = "en"; title = "The homepage"; description = ""; details = variant { folder = null }}; communal = true }, "")'`; \

@@ -8,6 +8,9 @@ import { _SERVICE as NacDBIndex } from "../src/declarations/NacDBIndex/NacDBInde
 import { Actor, HttpAgent } from "@dfinity/agent";
 import { decodeFile } from "./lib/key";
 import { exec } from 'child_process';
+import dns from 'dns';
+
+dns.setDefaultResultOrder('ipv4first');
 
 const isLocal = process.env.DFX_NETWORK !== "ic";
 
@@ -22,7 +25,7 @@ async function upgradePartitions() {
     const serviceWasmModulePath = `.dfx/${net}/canisters/NacDBPartition/NacDBPartition.wasm`;
     const serviceWasm = loadWasm(serviceWasmModulePath);
 
-    const key = await commandOutput("dfx identity export Zon");
+    const key = await commandOutput("dfx identity export `dfx identity whoami`");
     const identity = decodeFile(key);
 
     const agent = new HttpAgent({host: isLocal ? "http://localhost:8000" : "https://icp-api.io", identity});

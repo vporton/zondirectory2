@@ -17,12 +17,14 @@ import { BusyContext } from "./busy";
 import { Actor, Agent } from "@dfinity/agent";
 import { ErrorContext } from "./ErrorContext";
 import { MainContext, MainContextType } from "./MainContext";
+import { useBlockTabClose } from '../util/blockClose';
 
 export default function EditItem(props: {
     itemId?: string,
     comment?: boolean,
     defaultAgent: Agent | undefined,
 }) {
+    const _blockClose = useBlockTabClose();
     const routeParams = useParams();
     const navigate = useNavigate();
     const {fetchUserScore} = useContext<MainContextType>(MainContext);
@@ -56,7 +58,7 @@ export default function EditItem(props: {
         if (props.itemId !== undefined) {
             const itemId = parseItemRef(props.itemId);
             const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: itemId.canister, agent: props.defaultAgent});
-            actor.getItem(BigInt(itemId.id))
+            actor.getItemComposite(BigInt(itemId.id))
                 .then(async (itemx) => {
                     const item = itemx ? itemx!.data.item : undefined;
                     const communal = itemx[0]?.communal; // TODO: Simplify.
@@ -68,10 +70,10 @@ export default function EditItem(props: {
                     if ('post' in item!.details) {
                         setSelectedTab(SelectedTab.selectedOther);
                         const t = (await actor.getAttribute({sk: "i/" + itemId.id}, "t") as any)[0]; // TODO: error handling
-                        setPost(t === undefined ? "" : Object.values(t)[0] as string);
+                        setPost(t === undefined ? "" : (Object.values(t)[0] as string).substring(1)); // remove leading text type
                     }
                 });
-            // actor.getItem(BigInt(itemId.id))
+            // actor.getItemComposite(BigInt(itemId.id))
             //     .then((itemx) => {
             //         const item = itemx ? itemx!.data.item : undefined;
             //         const communal = itemx[0]?.communal; // TODO: Simplify.
@@ -120,7 +122,7 @@ export default function EditItem(props: {
                                 await addToMultipleFolders(agent!, foldersList, {canister: part, id: Number(n)}, false);
                                 await addToMultipleFolders(agent!, antiCommentsList, {canister: part, id: Number(n)}, true);
                                 navigate("/item/"+ref);
-                                await fetchUserScore!(); // TODO: `!`
+                                fetchUserScore && await fetchUserScore(); // TODO: wrong thing if `!fetchUserScore`?
                             }
                             catch (e) {
                                 if (/Canister trapped explicitly: spam/.test(e)) {
@@ -144,13 +146,13 @@ export default function EditItem(props: {
                     }
                     return <>
                         <Helmet>
-                            <meta name="canonical" content="https://zoncircle.com/create"/>
+                            <link rel="canonical" href="https://zoncircle.com/create"/>
                             <title>Zon Social Media - create a new item</title>
                         </Helmet>
                         <p>Language: <input type="text" required={true} defaultValue={locale} onChange={e => setLocale(e.target.value)}/></p>
                         <p>Title: <input type="text" required={true} defaultValue={title} onChange={e => setTitle(e.target.value)}/></p>
-                        <p>Short (meta) description: <textarea defaultValue={shortDescription
-                        } onChange={e => setShortDescription(e.target.value)}/></p>
+                        <p>Short (meta) description: <textarea defaultValue={shortDescription}
+                            onChange={e => setShortDescription(e.target.value)}/></p>
                         {/* TODO (should not because complicates ordering?):
                         <p>Link type:
                             <label><input type="radio" name="kind" value="0" required={true}/> Directory entry</label>

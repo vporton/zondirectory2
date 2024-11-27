@@ -1,6 +1,6 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Component, ErrorInfo, ReactNode, createContext, useContext, useEffect, useMemo, useState } from "react";
+import { Component, ErrorInfo, ReactNode, Suspense, createContext, useContext, useEffect, useMemo, useState } from "react";
 import { Button, Container, Nav, NavDropdown, Navbar } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
@@ -26,7 +26,6 @@ import { AuthContext, AuthProvider, useAuth } from './auth/use-auth-client'
 import { idlFactory as mainIdlFactory } from "../../../declarations/main";
 import { _SERVICE as ZonBackend } from "../../../declarations/main/main.did";
 import { Helmet } from 'react-helmet';
-import Person from "./personhood/Person";
 import { AllItems } from "./AllItems";
 import { ErrorBoundary, ErrorHandler } from "./ErrorBoundary";
 import { ErrorProvider } from "./ErrorContext";
@@ -46,11 +45,13 @@ export default function App() {
             </Helmet>
             <Container>
                 <header>
-                    <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
-                        It is a preliminary beta version. Some features are missing, notably
-                        images/media, communal items (collective editing) and monetization.
-                        Neither security of your data, nor any quality of service is warranted.
-                    </p>
+                    <div data-nosnippet="true">
+                        <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
+                            It is a preliminary beta version. Some features are missing, notably
+                            images/media, communal items (collective editing) and monetization.
+                            Neither security of your data, nor any quality of service is warranted.
+                        </p>
+                    </div>
                 </header>
                 <div style={{fontSize: '200%'}}>Zon Social Network</div>
                 <AuthProvider options={{loginOptions: {
@@ -63,6 +64,7 @@ export default function App() {
                     onError: (error) => {
                         console.error('Login Failed: ', error);
                     },
+                    derivationOrigin: "https://zoncircle.com",
                 }}}>
                     <BusyProvider>
                         <BusyWidget>
@@ -129,10 +131,10 @@ function MyInner(props: {
 }) {
     const navigate = useNavigate();
     const signin = () => {
-        props.login!(); // TODO: `!`
+        props.login && props.login();
     };
     const signout = async () => {
-        await props.logout!(); // TODO: `!`
+        props.logout && await props.logout();
     };
     const {userScore, setUserScore} = useContext<MainContextType>(MainContext);
     const [root, setRoot] = useState("");
@@ -158,15 +160,17 @@ function MyInner(props: {
         );
     }
 
+    const Person = React.lazy(() => import('./personhood/Person'));
+
     return <>
-        <p>
-            Logged in as: {props.isAuthenticated ? <small>{props.principal?.toString()}</small> : "(none)"}{" "}
-            {props.isAuthenticated
-                ? <><Button onClick={signout}>Logout</Button> Your score: {userScore}</>
-                : <Button onClick={signin}>Login/Register</Button>}
-        </p>
         <nav>
-            <Navbar className="bg-body-secondary" style={{width: "auto"}}>
+            <p>
+                Logged in as: {props.isAuthenticated ? <small>{props.principal?.toString()}</small> : "(none)"}{" "}
+                {props.isAuthenticated
+                    ? <><Button onClick={signout}>Logout</Button> Your score: {userScore}</>
+                    : <Button onClick={signin}>Login/Register</Button>}
+            </p>
+            <Navbar collapseOnSelect className="bg-body-secondary" style={{width: "auto"}}>
                 <Nav>
                     <Link className="nav-link" to={"/item/"+root}>Main folder</Link>{" "}
                 </Nav>
@@ -184,10 +188,10 @@ function MyInner(props: {
                     </NavDropdown>
                 </Nav>
                 <Nav>
-                    <a className="nav-link" href="https://docs.zoncircle.com">Our site</a>
+                    <Link className="nav-link" to="https://docs.zoncircle.com">Our site</Link>
                 </Nav>
                 <Nav>
-                    <a className="nav-link" href="https://docs.zoncircle.com/invest/">Invest</a>
+                    <Link className="nav-link" to="https://docs.zoncircle.com/invest/">Invest</Link>
                 </Nav>
                 <Nav>
                     <NavDropdown title="About">
@@ -258,7 +262,7 @@ function MyInner(props: {
             />
             <Route
                 path="/personhood"
-                element={<Person/>}
+                element={<Suspense fallback={<div>Loading...</div>}><Person/></Suspense>}
             />
             <Route
                 path="/prefs"

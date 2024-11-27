@@ -16,6 +16,7 @@ import { BusyContext } from "./busy";
 import { Actor, Agent } from "@dfinity/agent";
 import { ErrorContext } from "./ErrorContext";
 import { MainContext, MainContextType } from "./MainContext";
+import { useBlockTabClose } from '../util/blockClose';
 
 export default function EditFolder(props: {
     super?: boolean,
@@ -23,6 +24,7 @@ export default function EditFolder(props: {
     superFolderId?: string,
     defaultAgent: Agent | undefined,
 }) {
+    const _blockClose = useBlockTabClose();
     const navigate = useNavigate();
     const {fetchUserScore} = useContext<MainContextType>(MainContext);
     const [superFolder, setSuperFolder] = useState<string | undefined>();
@@ -40,7 +42,7 @@ export default function EditFolder(props: {
         if (props.folderId !== undefined) {
             const folderId = parseItemRef(props.folderId);
             const actor: CanDBPartition = Actor.createActor(canDBPartitionIdlFactory, {canisterId: folderId.canister, agent: props.defaultAgent});
-            actor.getItem(BigInt(folderId.id))
+            actor.getItemComposite(BigInt(folderId.id))
                 .then((itemx) => {
                     const item = itemx ? itemx!.data.item : undefined;
                     const communal = itemx[0]?.communal; // TODO: Simplify.
@@ -103,7 +105,7 @@ export default function EditFolder(props: {
                                 }
                             }
                             navigate("/item/"+ref);
-                            await fetchUserScore!(); // TODO: `!`
+                            fetchUserScore && await fetchUserScore(); // TODO: wrong thing if `!fetchUserScore`?
                         }
                         catch (e) {
                             if (/Canister trapped explicitly: spam/.test(e)) {
@@ -126,7 +128,7 @@ export default function EditFolder(props: {
                 }
                 return <>
                     <Helmet>
-                        <meta name="canonical" content="https://zoncircle.com/create"/>
+                        <link rel="canonical" href="https://zoncircle.com/create"/>
                         <title>Zon Social Media - create a new folder</title>
                     </Helmet>
                     <h1>{props.folderId !== undefined ? `Edit folder` :
