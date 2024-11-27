@@ -198,7 +198,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
         </Helmet>
         <OnpageNavigation startPage={startItemsPage} page={itemsPage}/>
         <h1>{data !== undefined && <ItemType item={data}/>}{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h1>
-        <p>Creator: <small>{creator !== undefined && creator.toString()}</small>
+        <p data-nosnippet="true">Creator: <small>{creator !== undefined && creator.toString()}</small>
             {creator !== undefined && principal !== undefined && creator.compareTo(principal) === 'eq' &&
                 <>
                     {" "}
