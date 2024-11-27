@@ -198,14 +198,16 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
         </Helmet>
         <OnpageNavigation startPage={startItemsPage} page={itemsPage}/>
         <h1>{data !== undefined && <ItemType item={data}/>}{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h1>
-        <p data-nosnippet="true">Creator: <small>{creator !== undefined && creator.toString()}</small>
-            {creator !== undefined && principal !== undefined && creator.compareTo(principal) === 'eq' &&
-                <>
-                    {" "}
-                    <Button href={`/edit/${isFolder ? 'folder' : 'item'}/${serializeItemRef(id)}`}>Edit</Button>
-                </>
-            }
-        </p>
+        <div data-nosnippet="true">
+            <p>Creator: <small>{creator !== undefined && creator.toString()}</small>
+                {creator !== undefined && principal !== undefined && creator.compareTo(principal) === 'eq' &&
+                    <>
+                        {" "}
+                        <Button href={`/edit/${isFolder ? 'folder' : 'item'}/${serializeItemRef(id)}`}>Edit</Button>
+                    </>
+                }
+            </p>
+        </div>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         {postText !== "" ? <p lang={locale} style={{whiteSpace: 'break-spaces'}}>{postText}</p> : ""}
         <p>Sort by:{" "}
