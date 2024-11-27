@@ -26,8 +26,9 @@ deploy: compile-candbpart compile-nacdbpart
 	  dfx deploy personhood && \
 	  python3 node_modules/passport_client_dfinity/scripts/update-canisters.py && \
 	  dfx deploy --yes --network $(NETWORK) -v frontend && \
-	  npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
-	  npx ts-node scripts/upgrade-nacdb.ts $(NETWORK)
+	  export DFX_NETWORK=$(NETWORK) && \
+	    npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
+	    npx ts-node scripts/upgrade-nacdb.ts $(NETWORK)
 
 .PHONY: generate
 generate:
