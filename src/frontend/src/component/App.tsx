@@ -45,11 +45,13 @@ export default function App() {
             </Helmet>
             <Container>
                 <header>
-                    <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
-                        It is a preliminary beta version. Some features are missing, notably
-                        images/media, communal items (collective editing) and monetization.
-                        Neither security of your data, nor any quality of service is warranted.
-                    </p>
+                    <div data-nosnippet="true">
+                        <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
+                            It is a preliminary beta version. Some features are missing, notably
+                            images/media, communal items (collective editing) and monetization.
+                            Neither security of your data, nor any quality of service is warranted.
+                        </p>
+                    </div>
                 </header>
                 <div style={{fontSize: '200%'}}>Zon Social Network</div>
                 <AuthProvider options={{loginOptions: {
