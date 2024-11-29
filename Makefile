@@ -7,12 +7,14 @@ NETWORK = local
 
 FOUNDER = $(shell dfx identity --network $(NETWORK) get-principal)
 
+deploy:
+
 .PHONY: all
 all: deploy init
 
 .PHONY: deploy
 deploy: compile-candbpart compile-nacdbpart
-	test "$(NETWORK)" != local && git checkout stable
+	if test "$(NETWORK)" != local; then git checkout stable; fi
 	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && cp -f .env .env.$(NETWORK); } && \
 	  trap "cleanup" EXIT && \
 	  mkdir -p src/libs/configs/stage && \

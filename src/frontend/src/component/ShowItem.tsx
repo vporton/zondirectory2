@@ -210,21 +210,23 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
         </div>
         {description !== null ? <p lang={locale}>{description}</p> : ""}
         {postText !== "" ? <p lang={locale} style={{whiteSpace: 'break-spaces'}}>{postText}</p> : ""}
-        <p>Sort by:{" "}
-            <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
-            <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
-        </p>
+        <div data-nosnippet="true">
+            <p>Sort by:{" "}
+                <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
+                <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
+            </p>
+        </div>
         <Tabs>
             <TabList>
-                <Tab>Main content</Tab>
-                <Tab>Comments</Tab>
+                <Tab><span data-nosnippet="true">Main content</span></Tab>
+                <Tab><span data-nosnippet="true">Comments</span></Tab>
             </TabList>
             <TabPanel>
                 <Container>
                     <Row>
                     {!isFolder ? "" : <>
                         <Col>
-                            <h3>Sub-folders</h3>
+                            <h3><span data-nosnippet="true">Sub-folders</span></h3>
                             {subfolders === undefined ? <p>Loading...</p> :
                             <ul>
                                 {subfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
@@ -255,8 +257,8 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                         </Col>
                     </>}
                         <Col>
-                            <h3>Super-folders</h3>
-                            <p><small>Voting in this stream not yet implemented.</small></p>
+                            <h3><span data-nosnippet="true">Super-folders</span></h3>
+                            <p><small><span data-nosnippet="true">Voting in this stream not yet implemented.</span></small></p>
                             {superfolders === undefined ? <p>Loading...</p> :
                             <ul>
                                 {superfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
@@ -292,7 +294,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                         </Col>
                     {!isFolder ? "" : <>
                         <Col>
-                            <h3>Items</h3>
+                            <h3><span data-nosnippet="true">Items</span></h3>
                             {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) => 
                                 <div key={serializeItemRef(x.id)}>
                                     <p lang={x.item.data.item.locale}>
@@ -369,7 +371,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                         </Col>
                         <Col>
                             <h3>Comment on</h3>
-                            <p><small>Voting in this stream not yet implemented.</small></p>
+                            <p><small><span data-nosnippet="true">Voting in this stream not yet implemented.</span></small></p>
                             {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: ItemTransfer}) => 
                                 <div key={serializeItemRef(item.id)}>
                                     <p lang={item.item.data.item.locale}>
