@@ -7,6 +7,8 @@ NETWORK = local
 
 FOUNDER = $(shell dfx identity --network $(NETWORK) get-principal)
 
+deploy:
+
 .PHONY: all
 all: deploy init
 
