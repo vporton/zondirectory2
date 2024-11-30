@@ -194,6 +194,12 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             <link rel="canonical" href={`https://zoncircle.com/item/${idParam!}`}/>
             <title>{isFolder ? `${title} (folder) - Zon` : `${title} - Zon`}</title>
             <meta name="description" content={description}/>
+            <meta property="og:title" content={isFolder ? `${title} (folder)` : `${title}`}/>
+            <meta property="og:author" content={creator?.toText()}/>
+            <meta property="og:url" content={`https://zoncircle.com/item/${idParam!}`}/>
+            <meta property="og:description" content={description}/>
+            <meta property="og:locale" content={locale}/>
+            <meta property="og:site_name" content="Zon Social Network"/>
             {/*(!superfolders || superfolders.length === 0 ? <meta name="robots" content="noindex"/>)*/} {/* anti-search-spam measure */}
         </Helmet>
         <OnpageNavigation startPage={startItemsPage} page={itemsPage}/>
