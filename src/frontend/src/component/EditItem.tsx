@@ -170,8 +170,8 @@ export default function EditItem(props: {
                             </TabPanel>
                         </Tabs>
                         <EditFoldersList
-                            defaultFolders={!(props.comment === true) && mainFolder !== undefined ? [[mainFolder, 'beginning']] : []}
-                            defaultAntiComments={props.comment === true && mainFolder !== undefined ? [[mainFolder, 'beginning']] : []}
+                            defaultFolders={!(props.comment === true) && mainFolder !== undefined ? [[mainFolder, 'beginning']] : undefined}
+                            defaultAntiComments={props.comment === true && mainFolder !== undefined ? [[mainFolder, 'beginning']] : undefined}
                             onChangeFolders={setFoldersList}
                             onChangeAntiComments={setAntiCommentsList}
                         />
