@@ -15,8 +15,13 @@ all: deploy init
 .PHONY: deploy
 deploy: compile-candbpart compile-nacdbpart
 	if test "$(NETWORK)" != local; then git checkout stable; fi
-	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && cp -f .env .env.$(NETWORK); } && \
+	cleanup() { rm -f src/libs/configs/stage/* src/frontend/assets/.well-known/ii-alternative-origins; test -e .env && cp -f .env .env.$(NETWORK); } && \
 	  trap "cleanup" EXIT && \
+	  if test "$(NETWORK)" = local; then \
+	    rm -f src/frontend/assets/.well-known/ii-alternative-origins; \
+	  else \
+	    cp -f src/frontend/ii-alternative-origins src/frontend/assets/.well-known/; \
+	  fi
 	  mkdir -p src/libs/configs/stage && \
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
 	  cp .env.$(NETWORK) .env && \
