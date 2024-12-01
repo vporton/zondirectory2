@@ -191,7 +191,7 @@ function MyInner(props: {
                     <Link className="nav-link" to="https://docs.zoncircle.com">Our site</Link>
                 </Nav>
                 <Nav>
-                    <Link className="nav-link" to="https://docs.zoncircle.com/invest/">Invest</Link>
+                    <Link className="nav-link" to="https://docs.zoncircle.com/invest/" title="Invest into this site">Invest</Link>
                 </Nav>
                 <Nav>
                     <NavDropdown title="About">
