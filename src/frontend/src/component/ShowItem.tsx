@@ -257,9 +257,11 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         }
                                     </li>)}
                             </ul>}
-                            <p>
-                                <Link to="#" onClick={e => moreSubfolders(e)}>More...</Link> <Link to={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</Link>
-                            </p>
+                            <nav>
+                                <p>
+                                    <Link to="#" onClick={e => moreSubfolders(e)}>More...</Link> <Link to={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</Link>
+                                </p>
+                            </nav>
                         </Col>
                     </>}
                         <Col>
@@ -296,7 +298,9 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                     </li>)}
                             </ul>}
                             {/* TODO: Create super-folder */}
-                            <p><Link to="#" onClick={e => moreSuperfolders(e)}>More...</Link> <Link to={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
+                            <nav>
+                                <p><Link to="#" onClick={e => moreSuperfolders(e)}>More...</Link> <Link to={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
+                            </nav>
                         </Col>
                     {!isFolder ? "" : <>
                         <Col>
@@ -331,8 +335,10 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
+                            <nav>
+                                <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
                                 <Link to={`/create/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
+                            </nav>
                         </Col>
                     </>}
                     </Row>
@@ -372,8 +378,10 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><Link to="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
-                                <Link to={`/create/comment/${serializeItemRef(id)}`}>Create</Link></p>
+                            <nav>
+                                <p><Link to="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
+                                    <Link to={`/create/comment/${serializeItemRef(id)}`}>Create</Link></p>
+                            </nav>
                         </Col>
                         <Col>
                             <h3>Comment on</h3>
@@ -393,7 +401,9 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                     <p lang={item.item.data.item.locale} style={{marginLeft: '1em'}}>{item.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><Link to="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}</p>
+                            <nav>
+                                <p><Link to="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}</p>
+                            </nav>
                         </Col>
                     </Row>
                 </Container>

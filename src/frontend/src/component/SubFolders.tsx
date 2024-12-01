@@ -100,8 +100,10 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
                         {x.item.data.item.description ? <p lang={x.item.data.item.locale}><small>{x.item.data.item.description}</small></p> : ""}
                     </li>)}
             </ul>
-            <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
-                <Link to={`/create/for-folder/${id}`}>Create</Link></p>
+            <nav>
+                <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
+                    <Link to={`/create/for-folder/${id}`}>Create</Link></p>
+            </nav>
         </>
     );
 }
