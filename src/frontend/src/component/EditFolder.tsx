@@ -152,7 +152,7 @@ export default function EditFolder(props: {
                     <p>Title: <input type="text" required={true} value={title} onChange={e => setTitle(e.target.value)}/></p>
                     <p>Short (meta) description: <textarea value={shortDescription} onChange={e => setShortDescription(e.target.value)}/></p>
                     <EditFoldersList
-                        defaultFolders={superFolder === undefined ? [] : [[superFolder, 'beginning']]}
+                        defaultFolders={superFolder === undefined ? undefined : [[superFolder, 'beginning']]}
                         onChangeFolders={setFoldersList}
                         onChangeAntiComments={setAntiCommentsList}
                         reverse={props.super === true}
