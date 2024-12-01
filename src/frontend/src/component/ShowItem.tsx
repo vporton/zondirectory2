@@ -253,7 +253,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>
                                         {" "}
                                         {principal && x.item.data.creator.compareTo(principal) === 'eq' &&
-                                            <Button href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
+                                            <Button className="edit" href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
                                         }
                                     </li>)}
                             </ul>}
@@ -292,7 +292,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         {principal !== undefined && x.item.data.creator.compareTo(principal) === 'eq' &&
                                             <>
                                                 {" "}
-                                                <Button href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
+                                                <Button className="edit" href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
                                             </>
                                         }
                                     </li>)}
@@ -329,7 +329,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                             <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>}
                                         {" "}
                                         {principal !== undefined && x.item.data.creator.compareTo(principal) === 'eq' &&
-                                            <Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
+                                            <Nav.Link className="edit" href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
                                         }
                                     </p>
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
