@@ -172,10 +172,10 @@ function MyInner(props: {
             </p>
             <Navbar collapseOnSelect className="bg-body-secondary" style={{width: "auto"}}>
                 <Nav>
-                    <Link className="nav-link" to={"/item/"+root}>Main folder</Link>{" "}
+                    <Link className="nav-link" to={"/item/"+root} title="Start browsing here">Main folder</Link>{" "}
                 </Nav>
                 <Nav>
-                    <Link className="nav-link" to="/latest">Latest posts</Link>{" "}
+                    <Link className="nav-link" to="/latest" title="Everything at this site, recent first">Latest posts</Link>{" "}
                 </Nav>
                 <Nav>
                     <NavDropdown title="User">
@@ -188,18 +188,18 @@ function MyInner(props: {
                     </NavDropdown>
                 </Nav>
                 <Nav>
-                    <Link className="nav-link" to="https://docs.zoncircle.com">Our site</Link>
+                    <Link className="nav-link" to="https://docs.zoncircle.com" title="Help and company info">Our site</Link>
                 </Nav>
                 <Nav>
                     <Link className="nav-link" to="https://docs.zoncircle.com/invest/" title="Invest into this site">Invest</Link>
                 </Nav>
                 <Nav>
                     <NavDropdown title="About">
-                        <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/">Blog</NavDropdown.Item>
-                        <NavDropdown.Item href="https://docs.zoncircle.com/about-us/">About Us</NavDropdown.Item>
-                        <NavDropdown.Item href="https://docs.zoncircle.com/our-partners/">Our Partners</NavDropdown.Item>
-                        <NavDropdown.Item href="https://docs.zoncircle.com/#team">The Team</NavDropdown.Item>
-                        <NavDropdown.Item href="https://docs.zoncircle.com/carbon-pledge/">Carbon Pledge</NavDropdown.Item>
+                        <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/" title="Blog related to this site">Blog</NavDropdown.Item>
+                        <NavDropdown.Item href="https://docs.zoncircle.com/about-us/" title="About our company">About Us</NavDropdown.Item>
+                        <NavDropdown.Item href="https://docs.zoncircle.com/our-partners/" title="Who help to earn money">Our Partners</NavDropdown.Item>
+                        <NavDropdown.Item href="https://docs.zoncircle.com/#team" title="Developers and other personnel">The Team</NavDropdown.Item>
+                        <NavDropdown.Item href="https://docs.zoncircle.com/carbon-pledge/" title="We will save the world from carbon">Carbon Pledge</NavDropdown.Item>
                     </NavDropdown>
                 </Nav>
                 <Nav>
@@ -210,7 +210,7 @@ function MyInner(props: {
                     </NavDropdown>
                 </Nav>
                 <Nav>
-                    <Link className="nav-link" to="https://services.zoncircle.com">Services For Your Business</Link>
+                    <Link className="nav-link" to="https://services.zoncircle.com" title="Miscelaneous services for business and HR services">Services For Your Business</Link>
                 </Nav>
             </Navbar>
         </nav>
