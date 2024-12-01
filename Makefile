@@ -21,7 +21,7 @@ deploy: compile-candbpart compile-nacdbpart
 	    rm -f src/frontend/assets/.well-known/ii-alternative-origins; \
 	  else \
 	    cp -f src/frontend/ii-alternative-origins src/frontend/assets/.well-known/; \
-	  fi
+	  fi; \
 	  mkdir -p src/libs/configs/stage && \
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
 	  cp .env.$(NETWORK) .env && \
