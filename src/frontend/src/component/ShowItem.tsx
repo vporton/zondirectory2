@@ -214,7 +214,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 }
             </p>
         </div>
-        {description !== null ? <p lang={locale}>{description}</p> : ""}
+        {description !== null ? <p lang={locale}><em>{description}</em></p> : ""}
         {postText !== "" ? <p lang={locale} style={{whiteSpace: 'break-spaces'}}>{postText}</p> : ""}
         <div data-nosnippet="true">
             <p>Sort by:{" "}
