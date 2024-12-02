@@ -14,9 +14,10 @@ all: deploy init
 
 .PHONY: deploy
 deploy: compile-candbpart compile-nacdbpart
-	if test "$(NETWORK)" != local; then git checkout stable; fi
 	cleanup() { rm -f src/libs/configs/stage/* src/frontend/assets/.well-known/ii-alternative-origins; test -e .env && cp -f .env .env.$(NETWORK); } && \
 	  trap "cleanup" EXIT && \
+	  current="$(git branch --show-current)"; \
+	  if test "$(NETWORK)" != local; then git checkout stable; fi; \
 	  if test "$(NETWORK)" = local; then \
 	    rm -f src/frontend/assets/.well-known/ii-alternative-origins; \
 	  else \
@@ -36,7 +37,9 @@ deploy: compile-candbpart compile-nacdbpart
 	  dfx deploy --yes --network $(NETWORK) -v frontend && \
 	  export DFX_NETWORK=$(NETWORK) && \
 	    npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
-	    npx ts-node scripts/upgrade-nacdb.ts $(NETWORK)
+	    npx ts-node scripts/upgrade-nacdb.ts $(NETWORK); \
+	  git checkout "$current"; \
+	  echo "!!!UPDATED FROM stable BRANCH!!!"
 
 .PHONY: generate
 generate:
