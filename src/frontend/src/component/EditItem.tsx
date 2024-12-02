@@ -66,7 +66,6 @@ export default function EditItem(props: {
                     setLocale(item!.locale);
                     setTitle(item!.title);
                     setShortDescription(item!.description);
-                    console.log(item!.details);
                     if ('post' in item!.details) {
                         setSelectedTab(SelectedTab.selectedOther);
                         const t = (await actor.getAttribute({sk: "i/" + itemId.id}, "t") as any)[0]; // TODO: error handling
@@ -110,7 +109,6 @@ export default function EditItem(props: {
                                 let part, n;
                                 if (routeParams.item !== undefined) {
                                     const folder = parseItemRef(routeParams.item); // TODO: not here
-                                    console.log("QQ", item);
                                     await backend.setItemData(folder.canister, BigInt(folder.id), item, 't'+post);
                                     part = folder.canister;
                                     n = BigInt(folder.id);
