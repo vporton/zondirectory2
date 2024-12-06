@@ -193,7 +193,7 @@ module {
     item: ItemDataWithoutOwner,
   ) {
     buf.add(#int (switch (item.details) {
-      case (#link v) { ITEM_TYPE_LINK };
+      case (#link _v) { ITEM_TYPE_LINK };
       case (#message) { ITEM_TYPE_MESSAGE };
       case (#post _) { ITEM_TYPE_POST };
       case (#folder) { ITEM_TYPE_FOLDER };

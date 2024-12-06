@@ -1,4 +1,4 @@
-import Nac "mo:nacdb/NacDB";
+//import _Nac "mo:nacdb/NacDB";
 import Principal "mo:base/Principal";
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
@@ -297,12 +297,20 @@ shared({caller = initialOwner}) actor class Items() = this {
       Debug.trap("not a folder");
     };
     let links = await* getStreamLinks(itemId, comment);
-    await* addToStreams(catId, itemId, comment, links, itemId1, "st", "rst", #beginning);
+
+    //await* addToStreams(catId, itemId, comment, links, itemId1, "st", "rst", #beginning);
+    //if (lib.isFolder(folderItem)) {
+    //  await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rsv", side);
+    //} else {
+    //  await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rsv", #end);
+    //};
+    
+    await* addToStreams(catId, itemId, links, itemId1, "st", "rst", #beginning);
     if (lib.isFolder(folderItem)) {
-      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rsv", side);
+      await* addToStreams(catId, itemId, links, itemId1, "sv", "rsv", side);
     } else {
-      await* addToStreams(catId, itemId, comment, links, itemId1, "sv", "rsv", #end);
-    };
+      await* addToStreams(catId, itemId, links, itemId1, "sv", "rsv", #end);
+    };    
 
     let userSK = "u/" # Principal.toText(caller);
     let (hint1, n) = switch (await CanDBIndex.getAttributeByHint("user", null, {sk = userSK; subkey = "p"})) { // : add hint
@@ -327,7 +335,7 @@ shared({caller = initialOwner}) actor class Items() = this {
   func addToStreams(
     catId: (Principal, Nat),
     itemId: (Principal, Nat),
-    comment: Bool, // TODO: unused
+    //comment: Bool, // TODO: unused
     links: lib.StreamsLinks,
     itemId1: CanDBPartition.CanDBPartition,
     key1: Text,
@@ -763,7 +771,7 @@ shared({caller = initialOwner}) actor class Items() = this {
   /// System ///
 
   system func inspect({
-    arg : Blob;
+    //arg : Blob;
     caller : Principal;
     msg :
       {

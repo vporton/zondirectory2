@@ -19,7 +19,7 @@ actor Personhood {
         // TODO: race:
         let pa = await CanDBIndex.getFirstAttribute("user", { sk = address; subkey = "p" });
         switch (pa) {
-            case (?(p, ?#text a)) {
+            case (?(_p, ?#text a)) {
                 if (a != callerText) {
                     Debug.trap("attempt to use other's Ethereum address");
                 }

@@ -138,7 +138,7 @@ function PersonInner(props: {agent: Agent | undefined, isAuthenticated: Boolean}
       setRecalculateScoreLoading(true);
       let localMessage = message;
       let localNonce = nonce;
-      const personhood: Personhood = Actor.createActor(personhoodIdl, {canisterId: process.env.CANISTER_ID_CANDBINDEX!, agent: props.agent}); // TODO: duplicate code
+      const personhood: Personhood = Actor.createActor(personhoodIdl, {canisterId: process.env.CANISTER_ID_PERSONHOOD!, agent: props.agent}); // TODO: duplicate code
       if (nonce === undefined) {
         const {message, nonce} = await personhood.getEthereumSigningMessage();
         localMessage = message;
