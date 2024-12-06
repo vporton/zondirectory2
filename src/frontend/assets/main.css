@@ -49,3 +49,10 @@ Button.thumbs.active {
     width: 100% !important;
     max-width: 100% !important;
 }
+
+.edit {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+}

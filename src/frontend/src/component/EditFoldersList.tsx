@@ -28,12 +28,12 @@ export default function EditFoldersList(props: {
         _setAntiComments(data);
     }
     useEffect(() => {
-        if (folders === undefined && props.defaultFolders?.length !== 0) {
+        if (folders === undefined && props.defaultFolders !== undefined) {
             setFolders(props.defaultFolders ?? []);
         }
     }, [props.defaultFolders])
     useEffect(() => {
-        if (antiComments === undefined && props.defaultAntiComments?.length !== 0) {
+        if (antiComments === undefined && props.defaultAntiComments !== undefined) {
             setAntiComments(props.defaultAntiComments ?? []);
         }
     }, [props.defaultAntiComments])
@@ -50,6 +50,10 @@ export default function EditFoldersList(props: {
     useEffect(updateFolders, [folders]);
     useEffect(updateAntiComments, [antiComments]);
     function updateFoldersList() {
+        if (props.defaultFolders !== undefined) {
+            return;
+        }
+
         const list: string[] = [];
         // TODO: validation
         for (const e of document.querySelectorAll('#foldersList input[class=form-control]') as any) {
@@ -70,6 +74,10 @@ export default function EditFoldersList(props: {
         setFolders(list3);
     }
     function updateAntiCommentsList() {
+        if (props.defaultAntiComments !== undefined) {
+            return;
+        }
+
         const list: string[] = [];
         // TODO: validation
         for (const e of document.querySelectorAll('#antiCommentsList input[class=form-control]') as any) {
@@ -117,7 +125,7 @@ export default function EditFoldersList(props: {
                             })}
                         </ul>
                         <p>
-                            <Button disabled={folders === undefined} onClick={() => setFolders(folders!.concat([["", 'beginning']]))}>
+                            <Button onClick={() => setFolders((folders ?? []).concat([["", 'beginning']]))}>
                                 Add
                             </Button>
                         </p>
@@ -136,7 +144,7 @@ export default function EditFoldersList(props: {
                             })}
                         </ul>
                         <p>
-                            <Button disabled={antiComments === undefined} onClick={() => setAntiComments(antiComments!.concat([["", 'beginning']]))}>
+                            <Button onClick={() => setAntiComments((antiComments ?? []).concat([["", 'beginning']]))}>
                                 Add
                             </Button>
                         </p>

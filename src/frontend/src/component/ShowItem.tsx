@@ -194,35 +194,45 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             <link rel="canonical" href={`https://zoncircle.com/item/${idParam!}`}/>
             <title>{isFolder ? `${title} (folder) - Zon` : `${title} - Zon`}</title>
             <meta name="description" content={description}/>
+            <meta property="og:title" content={isFolder ? `${title} (folder)` : `${title}`}/>
+            <meta property="og:author" content={creator?.toText()}/>
+            <meta property="og:url" content={`https://zoncircle.com/item/${idParam!}`}/>
+            <meta property="og:description" content={description}/>
+            <meta property="og:locale" content={locale}/>
+            <meta property="og:site_name" content="Zon Social Network"/>
             {/*(!superfolders || superfolders.length === 0 ? <meta name="robots" content="noindex"/>)*/} {/* anti-search-spam measure */}
         </Helmet>
         <OnpageNavigation startPage={startItemsPage} page={itemsPage}/>
         <h1>{data !== undefined && <ItemType item={data}/>}{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h1>
-        <p>Creator: <small>{creator !== undefined && creator.toString()}</small>
-            {creator !== undefined && principal !== undefined && creator.compareTo(principal) === 'eq' &&
-                <>
-                    {" "}
-                    <Button href={`/edit/${isFolder ? 'folder' : 'item'}/${serializeItemRef(id)}`}>Edit</Button>
-                </>
-            }
-        </p>
-        {description !== null ? <p lang={locale}>{description}</p> : ""}
+        <div data-nosnippet="true">
+            <p>Creator: <small>{creator !== undefined && creator.toString()}</small>
+                {creator !== undefined && principal !== undefined && creator.compareTo(principal) === 'eq' &&
+                    <>
+                        {" "}
+                        <Button href={`/edit/${isFolder ? 'folder' : 'item'}/${serializeItemRef(id)}`}>Edit</Button>
+                    </>
+                }
+            </p>
+        </div>
+        {description !== null ? <p lang={locale}><em>{description}</em></p> : ""}
         {postText !== "" ? <p lang={locale} style={{whiteSpace: 'break-spaces'}}>{postText}</p> : ""}
-        <p>Sort by:{" "}
-            <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
-            <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
-        </p>
+        <div data-nosnippet="true">
+            <p>Sort by:{" "}
+                <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
+                <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
+            </p>
+        </div>
         <Tabs>
             <TabList>
-                <Tab>Main content</Tab>
-                <Tab>Comments</Tab>
+                <Tab><span data-nosnippet="true">Main content</span></Tab>
+                <Tab><span data-nosnippet="true">Comments</span></Tab>
             </TabList>
             <TabPanel>
                 <Container>
                     <Row>
                     {!isFolder ? "" : <>
                         <Col>
-                            <h3>Sub-folders</h3>
+                            <h3><span data-nosnippet="true">Sub-folders</span></h3>
                             {subfolders === undefined ? <p>Loading...</p> :
                             <ul>
                                 {subfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
@@ -243,18 +253,20 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>
                                         {" "}
                                         {principal && x.item.data.creator.compareTo(principal) === 'eq' &&
-                                            <Button href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
+                                            <Button className="edit" href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
                                         }
                                     </li>)}
                             </ul>}
-                            <p>
-                                <Link to="#" onClick={e => moreSubfolders(e)}>More...</Link> <Link to={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</Link>
-                            </p>
+                            <nav>
+                                <p>
+                                    <Link to="#" onClick={e => moreSubfolders(e)}>More...</Link> <Link to={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</Link>
+                                </p>
+                            </nav>
                         </Col>
                     </>}
                         <Col>
-                            <h3>Super-folders</h3>
-                            <p><small>Voting in this stream not yet implemented.</small></p>
+                            <h3><span data-nosnippet="true">Super-folders</span></h3>
+                            <p><small><span data-nosnippet="true">Voting in this stream not yet implemented.</span></small></p>
                             {superfolders === undefined ? <p>Loading...</p> :
                             <ul>
                                 {superfolders.map((x: {order: string, id: ItemRef, item: ItemTransfer}) =>
@@ -280,17 +292,19 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                         {principal !== undefined && x.item.data.creator.compareTo(principal) === 'eq' &&
                                             <>
                                                 {" "}
-                                                <Button href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
+                                                <Button className="edit" href={`/edit/folder/${serializeItemRef(x.id)}`}>Edit</Button>
                                             </>
                                         }
                                     </li>)}
                             </ul>}
                             {/* TODO: Create super-folder */}
-                            <p><Link to="#" onClick={e => moreSuperfolders(e)}>More...</Link> <Link to={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
+                            <nav>
+                                <p><Link to="#" onClick={e => moreSuperfolders(e)}>More...</Link> <Link to={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
+                            </nav>
                         </Col>
                     {!isFolder ? "" : <>
                         <Col>
-                            <h3>Items</h3>
+                            <h3><span data-nosnippet="true">Items</span></h3>
                             {items === undefined ? <p>Loading...</p> : items.map((x: {order: string, id: ItemRef, item: ItemTransfer}) => 
                                 <div key={serializeItemRef(x.id)}>
                                     <p lang={x.item.data.item.locale}>
@@ -315,14 +329,16 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                             <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>}
                                         {" "}
                                         {principal !== undefined && x.item.data.creator.compareTo(principal) === 'eq' &&
-                                            <Nav.Link href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
+                                            <Nav.Link className="edit" href={`/edit/item/${serializeItemRef(x.id)}`} style={{display: 'inline'}}><Button>Edit</Button></Nav.Link>
                                         }
                                     </p>
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
+                            <nav>
+                                <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
                                 <Link to={`/create/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
+                            </nav>
                         </Col>
                     </>}
                     </Row>
@@ -362,12 +378,14 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                     <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><Link to="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
-                                <Link to={`/create/comment/${serializeItemRef(id)}`}>Create</Link></p>
+                            <nav>
+                                <p><Link to="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
+                                    <Link to={`/create/comment/${serializeItemRef(id)}`}>Create</Link></p>
+                            </nav>
                         </Col>
                         <Col>
                             <h3>Comment on</h3>
-                            <p><small>Voting in this stream not yet implemented.</small></p>
+                            <p><small><span data-nosnippet="true">Voting in this stream not yet implemented.</span></small></p>
                             {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: ItemTransfer}) => 
                                 <div key={serializeItemRef(item.id)}>
                                     <p lang={item.item.data.item.locale}>
@@ -383,7 +401,9 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                                     <p lang={item.item.data.item.locale} style={{marginLeft: '1em'}}>{item.item.data.item.description}</p>
                                 </div>
                             )}
-                            <p><Link to="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}</p>
+                            <nav>
+                                <p><Link to="#" onClick={e => moreAntiComments(e)} style={{visibility: antiCommentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}</p>
+                            </nav>
                         </Col>
                     </Row>
                 </Container>

@@ -84,10 +84,12 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
             </Helmet>
             <OnpageNavigation startPage={startFoldersPage} page={foldersPage}/>
             <h1>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: <Link className="nav-item" to={`/item/`+id}>{title}</Link></h1>
-            <p>Sort by:{" "}
-                <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
-                <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
-            </p>
+            <div data-nosnippet="true">
+                <p>Sort by:{" "}
+                    <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
+                    <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
+                </p>
+            </div>
            <ul>
                 {folders !== undefined && folders.map(x =>
                     <li key={serializeItemRef(x.id as any)}>
@@ -98,8 +100,10 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
                         {x.item.data.item.description ? <p lang={x.item.data.item.locale}><small>{x.item.data.item.description}</small></p> : ""}
                     </li>)}
             </ul>
-            <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
-                <Link to={`/create/for-folder/${id}`}>Create</Link></p>
+            <nav>
+                <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
+                    <Link to={`/create/for-folder/${id}`}>Create</Link></p>
+            </nav>
         </>
     );
 }

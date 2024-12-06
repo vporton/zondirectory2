@@ -48,7 +48,7 @@ export const BusyWidget: React.FC<{children: React.ReactNode}> = (props: { child
         });
     }, [])
     return <>
-        <div id="overlay" style={{display: (busy ? 'flex' : 'none')}}>
+        <div id="overlay" style={{display: (busy ? 'flex' : 'none')}} data-nosnippet="true">
             <div id="overlayInside">
                 Wait...<br/>
                 Creating a post can take awhile, because we check it for spam and store it in a blockchain.

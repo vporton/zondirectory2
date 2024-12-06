@@ -7,28 +7,40 @@ NETWORK = local
 
 FOUNDER = $(shell dfx identity --network $(NETWORK) get-principal)
 
+deploy:
+
 .PHONY: all
 all: deploy init
 
 .PHONY: deploy
-deploy: compile-candbpart compile-nacdbpart 
-	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && cp -f .env .env.$(NETWORK); } && \
+deploy: compile-candbpart compile-nacdbpart
+	cleanup() { rm -f src/libs/configs/stage/* src/frontend/assets/.well-known/ii-alternative-origins; test -e .env && cp -f .env .env.$(NETWORK); } && \
 	  trap "cleanup" EXIT && \
+	  current="$(git branch --show-current)"; \
+	  if test "$(NETWORK)" != local; then git checkout stable; fi; \
+	  if test "$(NETWORK)" = local; then \
+	    rm -f src/frontend/assets/.well-known/ii-alternative-origins; \
+	  else \
+	    cp -f src/frontend/ii-alternative-origins src/frontend/assets/.well-known/; \
+	  fi; \
 	  mkdir -p src/libs/configs/stage && \
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
 	  cp .env.$(NETWORK) .env && \
-	  dfx deploy ic_eth && \
-	  dfx deploy internet_identity && \
+	  dfx deploy --yes --network $(NETWORK) ic_eth && \
+	  dfx deploy --yes --network internet_identity && \
 	  dfx generate -v CanDBPartition && \
 	  dfx generate -v NacDBPartition && \
 	  dfx generate -v main && \
 	  dfx generate -v items && \
 	  dfx generate -v personhood && \
-	  dfx deploy personhood && \
+	  dfx deploy --yes --network $(NETWORK) personhood && \
 	  python3 node_modules/passport_client_dfinity/scripts/update-canisters.py && \
 	  dfx deploy --yes --network $(NETWORK) -v frontend && \
-	  npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
-	  npx ts-node scripts/upgrade-nacdb.ts $(NETWORK)
+	  export DFX_NETWORK=$(NETWORK) && \
+	    npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
+	    npx ts-node scripts/upgrade-nacdb.ts $(NETWORK); \
+	  git checkout "$current"; \
+	  echo "!!!UPDATED FROM stable BRANCH!!!"
 
 .PHONY: generate
 generate:
