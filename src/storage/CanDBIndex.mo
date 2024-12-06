@@ -65,7 +65,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
   /// Get all canisters for an specific PK
   ///
   /// This method is called often by the candb-client query & update methods. 
-  public shared query({caller}) func getCanistersByPK(pk: Text): async [Text] {
+  public shared query({}) func getCanistersByPK(pk: Text): async [Text] {
     getCanisterIdsIfExists(pk);
   };
   
@@ -146,7 +146,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
 
   // Private functions for getting canisters //
 
-  func lastCanister(pk: Entity.PK): async* CanDBPartition.CanDBPartition {
+  func _lastCanister(pk: Entity.PK): async* CanDBPartition.CanDBPartition {
     let canisterIds = getCanisterIdsIfExists(pk);
     let part0 = if (canisterIds == []) {
       await* createStorageCanister(pk, ownersOrSelf());
@@ -156,7 +156,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     actor(part0);
   };
 
-  func getExistingCanister(pk: Entity.PK, options: CanDB.GetOptions, hint: ?Principal): async* ?CanDBPartition.CanDBPartition {
+  func _getExistingCanister(pk: Entity.PK, options: CanDB.GetOptions, hint: ?Principal): async* ?CanDBPartition.CanDBPartition {
     switch (hint) {
       case (?hint) {
         let canister: CanDBPartition.CanDBPartition = actor(Principal.toText(hint));
@@ -209,7 +209,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
 
   // CanDBMulti //
 
-  public shared({caller}) func getFirstAttribute(
+  public shared({}) func getFirstAttribute(
     pk: Text,
     options: { sk: Entity.SK; subkey: Entity.AttributeKey }
   ) : async ?(Principal, ?Entity.AttributeValue) {
@@ -235,7 +235,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     await* Multi.putAttributeWithPossibleDuplicate(pkToCanisterMap, pk, options);
   };
 
-  public shared({caller}) func getAttributeByHint(pk : Text, hint : ?Principal, options : {
+  public shared({}) func getAttributeByHint(pk : Text, hint : ?Principal, options : {
     sk : Entity.SK;
     subkey : Entity.AttributeKey;
   }): async ?(Principal, ?Entity.AttributeValue) {
@@ -296,7 +296,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     if (PassportConfig.skipSybil) {
       return;
     };
-    let (allowed, score) = await* sybilScoreImpl(user);
+    let (allowed, _score) = await* sybilScoreImpl(user);
     if (not allowed) {
       Debug.trap("Sybil check failed");
     };

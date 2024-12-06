@@ -18,6 +18,7 @@ deploy: compile-candbpart compile-nacdbpart
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
 	  cp .env.$(NETWORK) .env && \
 	  dfx deploy ic_eth && \
+	  dfx deploy internet_identity && \
 	  dfx generate -v CanDBPartition && \
 	  dfx generate -v NacDBPartition && \
 	  dfx generate -v main && \

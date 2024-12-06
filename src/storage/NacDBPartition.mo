@@ -37,7 +37,7 @@ shared({caller}) actor class Partition(
     //     Buffer.toArray(buf);
     // };
     
-    stable let index: Nac.IndexCanister = actor(Principal.toText(caller));
+    stable let _index: Nac.IndexCanister = actor(Principal.toText(caller));
 
     stable let superDB = Nac.createSuperDB(DBConfig.dbOptions);
 

@@ -35,6 +35,7 @@ import { BusyContext, BusyProvider, BusyWidget } from "./busy";
 
 export default function App() {
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
+    const frontendCanister = process.env.CANISTER_ID_FRONTEND;
     const identityProvider = getIsLocal() ? `http://${identityCanister}.localhost:8000` : `https://identity.ic0.app`;
     const [busy, setBusy] = useState(false);
     return (
@@ -62,7 +63,7 @@ export default function App() {
                     onError: (error) => {
                         console.error('Login Failed: ', error);
                     },
-                    derivationOrigin: "https://zoncircle.com",
+                    derivationOrigin: getIsLocal() ?  `http://${frontendCanister}.localhost:8000` : "https://zoncircle.com" ,
                 }}}>
                     <BusyProvider>
                         <BusyWidget>
@@ -140,9 +141,11 @@ function MyInner(props: {
         const MainCanister: ZonBackend = Actor.createActor(mainIdlFactory, {canisterId: process.env.CANISTER_ID_MAIN!, agent: props.defaultAgent})
         const data0 = await MainCanister.getRootItem();
         const [data] = data0; // TODO: We assume that it's initialized.
-        let [part, id] = data! as [Principal, bigint];
-        let item = { canister: part, id: Number(id) };
-        setRoot(serializeItemRef(item));
+        if (data != undefined) {
+            let [part, id] = data! as [Principal, bigint];
+            let item = { canister: part, id: Number(id) };
+            setRoot(serializeItemRef(item));
+        }
     }
     useEffect(() => {
         fetchRootItem().then(() => {});

@@ -18,6 +18,18 @@ If you want to test our project locally:
 
 Copy `config.mo.example` to `config.mo` and edit it accordingly to your settings.
 
+Copy `metaconfig.mk.example` to `metaconfig.mk` and edit it accordingly to your settings.
+
+Copy `src/libs/configs/misc.config.mo.example` to `src/libs/configs/misc.config.mo` and edit it accordingly to your settings.
+
+Copy `src/libs/configs/db-config.mo.example` to `src/libs/configs/db-config.mo` and edit it accordingly to your settings.
+
+As an interim arrangement, manually update the line entry corresponding to `JSON_FILE` in the `node_modules\passport_client_dfinity\scripts\update-canisters.py` file to `JSON_FILE = "src/our-canisters.json"`. This will be fixed later in the reference repository: https://github.com/vporton/passport-client-dfinity
+
+Create a directory  `../zondirectory-config` - additional files need to be added to this directory - to be listed later - (contact repository owner(s) for now)
+
+Copy `.env.local` to `.env`
+
 Set `REACT_APP_IS_LOCAL=1` in `.env`.
 
 Use the following commands:
@@ -28,14 +40,18 @@ nvm install v18.19.1
 nvm use v18.19.1
 npm i
 
-# Starts the replica, running in the background
+# Start the replica with the following command to run it in the background
 dfx start --background
 
-# Build the first time: (6 min)
-make deploy-backend && make deploy-frontend && make init
+# ... For first time local setup, start the replica with the following command to run it in the background with a clean setup
+dfx start --background --clean
+
+# Build the first time: (30 min)
+make deploy && make init
 
 # ... Build again:
-make deploy-backend && make deploy-frontend
+make deploy
+
 ```
 
 Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.

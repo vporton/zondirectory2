@@ -201,7 +201,7 @@ module {
                 ])
             ),
         ]));
-        let jsonRes = await* obtainSuccessfulJSONResponse(
+        let _jsonRes = await* obtainSuccessfulJSONResponse(
             Config.pineconeUrlBase # "vectors/upsert",
             headers,
             body,
@@ -257,7 +257,7 @@ module {
         let ?similar = await* queryVectorDBForSimilar(ourEmbedding, numResults) else {
             return; // OK, because nothing similar
         };
-        let (closestId, closestScore) = if (?(similar[0].0) == ourId) {
+        let (_closestId, closestScore) = if (?(similar[0].0) == ourId) {
             if (Array.size(similar) <= 1) {
                 return;
             };

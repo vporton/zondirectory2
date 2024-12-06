@@ -57,7 +57,7 @@ shared({caller = initialOwner}) actor class Users() = this {
   };
 
   system func inspect({
-      arg : Blob;
+      //arg : Blob;
       caller : Principal;
       msg :
         {
