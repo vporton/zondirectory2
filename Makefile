@@ -27,7 +27,7 @@ deploy: compile-candbpart compile-nacdbpart
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
 	  cp .env.$(NETWORK) .env && \
 	  dfx deploy --yes --network $(NETWORK) ic_eth && \
-	  dfx deploy --yes --network internet_identity && \
+	  dfx deploy --yes --network $(NETWORK) internet_identity && \
 	  dfx generate -v CanDBPartition && \
 	  dfx generate -v NacDBPartition && \
 	  dfx generate -v main && \
@@ -39,8 +39,8 @@ deploy: compile-candbpart compile-nacdbpart
 	  export DFX_NETWORK=$(NETWORK) && \
 	    npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
 	    npx ts-node scripts/upgrade-nacdb.ts $(NETWORK); \
-	  git checkout "$current"; \
-	  echo "!!!UPDATED FROM stable BRANCH!!!"
+	  git checkout "$$current"; \
+	  if test "$(NETWORK)" != local; then echo "!!!UPDATED FROM stable BRANCH!!!"; fi
 
 .PHONY: generate
 generate:
