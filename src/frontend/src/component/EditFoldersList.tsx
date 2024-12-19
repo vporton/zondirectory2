@@ -114,7 +114,7 @@ export default function EditFoldersList(props: {
                             {(folders ?? []).map((folder, i) => {
                                 return (
                                     <li key={i}>
-                                        <Form.Control value={folder[0]} onChange={updateFoldersList} style={{display: 'inline', width: '15em'}}/>{" "}
+                                        <Form.Control defaultValue={folder[0]} onChange={updateFoldersList} style={{display: 'inline', width: '15em'}}/>{" "}
                                         <Button onClick={() => setFolders(folders!.filter((item) => item !== folder))}>Delete</Button>{" "}
                                         <label><input type="radio" name={`side-f${i}`} checked={side[i] === 'beginning' || side[i] === undefined}
                                             onChange={e => onSideChanged(e, i)} value="beginning"/>&#160;beginning</label>{" "}
@@ -137,7 +137,7 @@ export default function EditFoldersList(props: {
                             {(antiComments ?? []).map((folder, i) => {
                                 return (
                                     <li key={i}>
-                                        <Form.Control value={folder[0]} onChange={updateAntiCommentsList} style={{display: 'inline', width: '15em'}}/>{" "}
+                                        <Form.Control defaultValue={folder[0]} onChange={updateAntiCommentsList} style={{display: 'inline', width: '15em'}}/>{" "}
                                         <Button onClick={() => setAntiComments(antiComments!.filter((item) => item !== folder))}>Delete</Button>
                                     </li>
                                 );
