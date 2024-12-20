@@ -50,9 +50,9 @@ export default function EditFoldersList(props: {
     useEffect(updateFolders, [folders]);
     useEffect(updateAntiComments, [antiComments]);
     function updateFoldersList() {
-        if (props.defaultFolders !== undefined) {
-            return;
-        }
+        // if (props.defaultFolders !== undefined) {
+        //     return;
+        // }
 
         const list: string[] = [];
         // TODO: validation
