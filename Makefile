@@ -14,7 +14,7 @@ all: deploy init
 
 .PHONY: deploy
 deploy: compile-candbpart compile-nacdbpart
-	current="$(git branch --show-current)"; \
+	current="$$(git branch --show-current)"; \
 	  cleanup() { \
 	    rm -f src/libs/configs/stage/* src/frontend/assets/.well-known/ii-alternative-origins; \
 	    test -e .env && cp -f .env .env.$(NETWORK); \
