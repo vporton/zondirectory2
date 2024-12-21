@@ -47,6 +47,15 @@ export default function App() {
             <Container>
                 <header>
                     <div data-nosnippet="true">
+                        <Nav style={{marginBottom: '1ex'}}>
+                                <a
+                                    className="d-block mx-auto"
+                                    href="https://services.zoncircle.com"
+                                    title="Miscelaneous SERVICES FOR BUSINESS and EMPLOYMENT services"
+                                >
+                                    <img src="/banner-services.jpeg" alt="Services For Your Business" style={{maxWidth: '100%'}}/>
+                                </a>
+                        </Nav>
                         <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
                             It is a preliminary beta version. Some features are missing, notably
                             images/media, communal items (collective editing) and monetization.
@@ -211,9 +220,6 @@ function MyInner(props: {
                         <NavDropdown.Item href="https://docs.zoncircle.com/author/user/">CEO's posts</NavDropdown.Item>
                         <NavDropdown.Item href="https://docs.zoncircle.com/social-media/">Social Media</NavDropdown.Item>
                     </NavDropdown>
-                </Nav>
-                <Nav>
-                    <Link className="nav-link" to="https://services.zoncircle.com" title="Miscelaneous services for business and HR services">Services For Your Business</Link>
                 </Nav>
             </Navbar>
         </nav>
