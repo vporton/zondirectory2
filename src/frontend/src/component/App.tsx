@@ -56,7 +56,7 @@ export default function App() {
                                     <img
                                         src="/banner-services.jpeg"
                                         alt="Services For Your Business"
-                                        // When specifying width and height, it does not preserve dimensions ratio on resize.
+                                        // When width and height is specified, it does not preserve dimensions ratio on resize.
                                         // width="768"
                                         // height="320"
                                         style={{maxWidth: '100%'}}/>
