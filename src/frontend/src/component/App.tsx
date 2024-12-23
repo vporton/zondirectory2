@@ -1,7 +1,7 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Component, ErrorInfo, ReactNode, Suspense, createContext, useContext, useEffect, useMemo, useState } from "react";
-import { Button, Container, Nav, NavDropdown, Navbar } from 'react-bootstrap';
+import { Button, Container, Nav, NavDropdown, Navbar, Offcanvas } from 'react-bootstrap';
 import ShowItem from "./ShowItem";
 import {
     BrowserRouter as Router,
@@ -56,8 +56,9 @@ export default function App() {
                                     <img
                                         src="/banner-services.jpeg"
                                         alt="Services For Your Business"
-                                        width="768"
-                                        height="320"
+                                        // When specifying width and height, it does not preserve dimensions ratio on resize.
+                                        // width="768"
+                                        // height="320"
                                         style={{maxWidth: '100%'}}/>
                                 </a>
                         </Nav>
@@ -187,46 +188,80 @@ function MyInner(props: {
                     ? <><Button onClick={signout}>Logout</Button> Your score: {userScore}</>
                     : <Button onClick={signin}>Login/Register</Button>}
             </p>
-            <Navbar collapseOnSelect className="bg-body-secondary" style={{width: "auto"}}>
-                <Nav>
-                    <Link className="nav-link" to={"/item/"+root} title="Start browsing here">Main folder</Link>{" "}
-                </Nav>
-                <Nav>
-                    <Link className="nav-link" to="/latest" title="Everything at this site, recent first">Latest posts</Link>{" "}
-                </Nav>
-                <Nav>
-                    <NavDropdown title="User">
-                        <Link className="nav-link" to="/personhood">
-                            Verify Your Account
-                        </Link>
-                        <Link className="nav-link" to="/prefs">
-                            Settings
-                        </Link>
-                    </NavDropdown>
-                </Nav>
-                <Nav>
-                    <Link className="nav-link" to="https://docs.zoncircle.com" title="Help and company info">Our site</Link>
-                </Nav>
-                <Nav>
-                    <Link className="nav-link" to="https://docs.zoncircle.com/invest/" title="Invest into this site">Invest</Link>
-                </Nav>
-                <Nav>
-                    <NavDropdown title="About">
-                        <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/" title="Blog related to this site">Blog</NavDropdown.Item>
-                        <NavDropdown.Item href="https://docs.zoncircle.com/about-us/" title="About our company">About Us</NavDropdown.Item>
-                        <NavDropdown.Item href="https://docs.zoncircle.com/our-partners/" title="Who help to earn money">Our Partners</NavDropdown.Item>
-                        <NavDropdown.Item href="https://docs.zoncircle.com/#team" title="Developers and other personnel">The Team</NavDropdown.Item>
-                        <NavDropdown.Item href="https://docs.zoncircle.com/carbon-pledge/" title="We will save the world from carbon">Carbon Pledge</NavDropdown.Item>
-                    </NavDropdown>
-                </Nav>
-                <Nav>
-                    <NavDropdown title="Blog">
-                        <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/">All posts</NavDropdown.Item>
-                        <NavDropdown.Item href="https://docs.zoncircle.com/author/user/">CEO's posts</NavDropdown.Item>
-                        <NavDropdown.Item href="https://docs.zoncircle.com/social-media/">Social Media</NavDropdown.Item>
-                    </NavDropdown>
-                </Nav>
-            </Navbar>
+            <Navbar bg="body-secondary" expand="lg" collapseOnSelect>
+      <Container>
+        <Navbar.Toggle aria-controls="offcanvasNavbar" />
+        <Navbar.Offcanvas
+          id="offcanvasNavbar"
+          aria-labelledby="offcanvasNavbarLabel"
+          placement="end"
+        >
+          <Offcanvas.Header closeButton>
+            <Offcanvas.Title id="offcanvasNavbarLabel">Menu</Offcanvas.Title>
+          </Offcanvas.Header>
+          <Offcanvas.Body>
+            <Nav className="flex-grow-1">
+              <Nav.Item>
+                <Link className="nav-link" to={`/item/${root}`} title="Start browsing here">
+                  Main folder
+                </Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Link className="nav-link" to="/latest" title="Everything at this site, recent first">
+                  Latest posts
+                </Link>
+              </Nav.Item>
+              <NavDropdown title="User" id="user-nav-dropdown">
+                <Link className="dropdown-item" to="/personhood">
+                  Verify Your Account
+                </Link>
+                <Link className="dropdown-item" to="/prefs">
+                  Settings
+                </Link>
+              </NavDropdown>
+              <Nav.Item>
+                <Link className="nav-link" to="https://docs.zoncircle.com" title="Help and company info">
+                  Our site
+                </Link>
+              </Nav.Item>
+              <Nav.Item>
+                <Link className="nav-link" to="https://docs.zoncircle.com/invest/" title="Invest into this site">
+                  Invest
+                </Link>
+              </Nav.Item>
+              <NavDropdown title="About" id="about-nav-dropdown">
+                <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/" title="Blog related to this site">
+                  Blog
+                </NavDropdown.Item>
+                <NavDropdown.Item href="https://docs.zoncircle.com/about-us/" title="About our company">
+                  About Us
+                </NavDropdown.Item>
+                <NavDropdown.Item href="https://docs.zoncircle.com/our-partners/" title="Who help to earn money">
+                  Our Partners
+                </NavDropdown.Item>
+                <NavDropdown.Item href="https://docs.zoncircle.com/#team" title="Developers and other personnel">
+                  The Team
+                </NavDropdown.Item>
+                <NavDropdown.Item href="https://docs.zoncircle.com/carbon-pledge/" title="We will save the world from carbon">
+                  Carbon Pledge
+                </NavDropdown.Item>
+              </NavDropdown>
+              <NavDropdown title="Blog" id="blog-nav-dropdown">
+                <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/">
+                  All posts
+                </NavDropdown.Item>
+                <NavDropdown.Item href="https://docs.zoncircle.com/author/user/">
+                  CEO's posts
+                </NavDropdown.Item>
+                <NavDropdown.Item href="https://docs.zoncircle.com/social-media/">
+                  Social Media
+                </NavDropdown.Item>
+              </NavDropdown>
+            </Nav>
+          </Offcanvas.Body>
+        </Navbar.Offcanvas>
+      </Container>
+    </Navbar>
         </nav>
         <Routes>
             <Route
