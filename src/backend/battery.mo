@@ -2,7 +2,9 @@ import Timer "mo:base/Timer";
 import Debug "mo:base/Debug";
 import Principal "mo:base/Principal";
 import Array "mo:base/Array";
+import Iter "mo:base/Iter";
 import CyclesSimple "mo:cycles-simple";
+import StableHashMap "mo:stablehashmap/FunctionalStableHashMap";
 
 shared({caller = initialOwner}) actor class Battery() = this {
     stable var owners = [initialOwner];
@@ -56,12 +58,18 @@ shared({caller = initialOwner}) actor class Battery() = this {
 
     stable var timer: ?Timer.TimerId = null;
 
-    public shared func addCanDBPartition(principal: Principal) {
+    public shared({caller}) func addCanDBPartition(principal: Principal) {
+        checkCaller(caller);
         CyclesSimple.addCanister(battery, principal, "can");
     };
 
-    public shared func addNacDBPartition(principal: Principal) {
+    public shared({caller}) func addNacDBPartition(principal: Principal) {
+        checkCaller(caller);
         CyclesSimple.addCanister(battery, principal, "nac");
+    };
+
+    public query func getCanistersMap(): async [Principal] {
+        Iter.toArray(StableHashMap.keys(battery.canisterMap));
     };
 
     private func topUpAllCanisters(): async () {
