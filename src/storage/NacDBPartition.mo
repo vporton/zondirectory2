@@ -7,6 +7,7 @@ import Text "mo:base/Text";
 import Debug "mo:base/Debug";
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
+import ICE "mo:base/ExperimentalCycles";
 import DBConfig "../libs/configs/db-config";
 
 shared({caller}) actor class Partition(
@@ -235,4 +236,8 @@ shared({caller}) actor class Partition(
     };
 
     // TODO: Remove superfluous functions from above.
+
+    public query func cycles_simple_availableCycles(): async Nat {
+        ICE.balance();
+    };
 }

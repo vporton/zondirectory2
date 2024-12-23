@@ -9,6 +9,7 @@ import Bool "mo:base/Bool";
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
+import ICE "mo:base/ExperimentalCycles";
 import lib "../backend/lib";
 import NacDBPartition "NacDBPartition";
 
@@ -228,5 +229,9 @@ shared actor class CanDBPartition(options: {
   {
     checkCaller(caller);
     await* Multi.putExistingAttribute(db, options);
+  };
+
+  public query func cycles_simple_availableCycles(): async Nat {
+    ICE.balance();
   };
 }
