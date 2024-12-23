@@ -5,7 +5,6 @@ import Array "mo:base/Array";
 import Iter "mo:base/Iter";
 import CyclesSimple "mo:cycles-simple";
 import StableHashMap "mo:stablehashmap/FunctionalStableHashMap";
-
 shared({caller = initialOwner}) actor class Battery() = this {
     stable var owners = [initialOwner];
 
