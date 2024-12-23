@@ -52,14 +52,14 @@ export default function App() {
                                     className="d-block mx-auto"
                                     href="https://services.zoncircle.com"
                                     title="Miscelaneous SERVICES FOR BUSINESS and EMPLOYMENT services"
+                                    style={{maxWidth: '100%'}}
                                 >
                                     <img
                                         src="/banner-services.jpeg"
                                         alt="Services For Your Business"
-                                        // When width and height is specified, it does not preserve dimensions ratio on resize.
-                                        // width="768"
-                                        // height="320"
-                                        style={{maxWidth: '100%'}}/>
+                                        width="768"
+                                        height="320"
+                                        style={{width: '100%', height: '100%'}}/>
                                 </a>
                         </Nav>
                         <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
