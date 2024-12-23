@@ -68,7 +68,7 @@ shared({caller = initialOwner}) actor class Battery() = this {
         CyclesSimple.addCanister(battery, principal, "nac");
     };
 
-    public query func getCanistersMap(): async [Principal] {
+    public query func getCanistersList(): async [Principal] {
         Iter.toArray(StableHashMap.keys(battery.canisterMap));
     };
 
