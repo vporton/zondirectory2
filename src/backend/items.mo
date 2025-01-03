@@ -198,8 +198,6 @@ shared({caller = initialOwner}) actor class Items() = this {
 
   /// I don't remove voting data, as it is a supposedly rare occurence of removing an item.
   func _removeItem(caller: Principal, canisterId: Principal, itemId: Nat): async* () {
-    // We first remove links, then the item itself, in order to avoid race conditions when displaying.
-    await* removeItemLinks((canisterId, itemId));
     var db: CanDBPartition.CanDBPartition = actor(Principal.toText(canisterId));
     let key = "i/" # Nat.toText(itemId);
     let ?oldItemRepr = await db.getAttribute({sk = key}, "i") else {
@@ -213,6 +211,8 @@ shared({caller = initialOwner}) actor class Items() = this {
       case _ {};
     };
     lib.onlyItemOwner(caller, oldItem);
+    // We first remove links, then the item itself, in order to avoid race conditions when displaying.
+    await* removeItemLinks((canisterId, itemId));
     await db.delete({sk = key});
   };
 
