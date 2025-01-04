@@ -39,7 +39,7 @@
     "react-tabs": "^6.0.2",
     "style-loader": "^3.3.3",
     "svg-react-loader": "^0.4.6",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@dfinity/candid": "^0.19.3",
