@@ -1,7 +1,7 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Component, ErrorInfo, ReactNode, Suspense, createContext, useContext, useEffect, useMemo, useState } from "react";
-import { Button, Container, Nav, NavDropdown, Navbar, Offcanvas } from 'react-bootstrap';
+import { Button, Col, Container, Nav, NavDropdown, Navbar, Offcanvas, Row } from 'react-bootstrap'; // TODO: selective imports
 import ShowItem from "./ShowItem";
 import {
     BrowserRouter as Router,
@@ -47,20 +47,31 @@ export default function App() {
             <Container>
                 <header>
                     <div data-nosnippet="true">
-                        <Nav style={{marginBottom: '1ex'}}>
-                                <a
-                                    className="d-block mx-auto"
-                                    href="https://services.zoncircle.com"
-                                    title="Miscelaneous SERVICES FOR BUSINESS and EMPLOYMENT services"
-                                    style={{maxWidth: '100%'}}
-                                >
-                                    <img
-                                        src="/banner-services.jpeg"
-                                        alt="Services For Your Business"
-                                        width="768"
-                                        height="320"
-                                        style={{width: '100%', height: '100%'}}/>
-                                </a>
+                        <Nav style={{marginBottom: '1ex', textAlign: 'center'}}>
+                            <Container>
+                                <div className="ad">
+                                    <a href="https://services.zoncircle.com/what-is-explainer-video/">Explainer Videos</a>
+                                </div>
+                                <div className="ad">
+                                    Freelancers: <a rel="sponsored" href="https://go.fiverr.com/visit/?bta=983331&nci=17044">PRO</a> or{" "}
+                                    <a rel="sponsored" href="https://go.fiverr.com/visit/?bta=983331&brand=fiverrmarketplace">utterly cheap</a>
+                                </div>
+                                <div className="ad">
+                                    <a rel="sponsored" href="https://brex.com/signup?rc=Twimner">Corporate Banking</a>
+                                </div>
+                                <div className="ad">
+                                    <a rel="sponsored" href="https://services.zoncircle.com/job-matching-services/">Job Services</a> (for programmers and employers)
+                                </div>
+                                <div className="ad">
+                                    <a rel="sponsored" href="https://get.firstbase.io/wpspq4cqutoe">US companies, legal addresses, automated taxes, etc.</a>
+                                </div>
+                                <div className="ad">
+                                    <a rel="sponsored" href="https://nas.io/?referral=VICTOR_13">Online Communities</a> (with monetization)
+                                </div>
+                                <div className="ad">
+                                    <a rel="sponsored" href="https://www.minds.com/?referrer=zonsocial">Another Social Network</a>
+                                </div>
+                            </Container>
                         </Nav>
                         <p style={{width: '100%', background: 'red', color: 'white', padding: '4px'}}>
                             It is a preliminary beta version. Some features are missing, notably

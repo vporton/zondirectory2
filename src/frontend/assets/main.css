@@ -56,3 +56,5 @@ Button.thumbs.active {
     padding-left: 3px !important;
     padding-right: 3px !important;
 }
+
+.ad { border: 1px solid gray; border-radius: 15px; margin: 2px }
