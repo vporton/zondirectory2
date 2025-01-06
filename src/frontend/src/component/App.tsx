@@ -32,8 +32,19 @@ import { ErrorProvider } from "./ErrorContext";
 import Prefs from "./Prefs";
 import { MainContext, MainContextType, MainProvider } from './MainContext';
 import { BusyContext, BusyProvider, BusyWidget } from "./busy";
+import ReactGA from 'react-ga4';
+import { createBrowserHistory } from 'history';
 
 export default function App() {
+    var history = createBrowserHistory();
+    useEffect(() => {
+        ReactGA.initialize("G-PDPFZKZ3R6");
+    }, [])
+    history.listen((update) => {
+        // TODO: (Not an easy task) watch also for page title.
+        ReactGA.send({ hitType: "pageview", page: update.location.pathname + update.location.search/*, title: "Landing Page"*/ });
+    });
+
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
     const frontendCanister = process.env.CANISTER_ID_FRONTEND;
     const identityProvider = getIsLocal() ? `http://${identityCanister}.localhost:8000` : `https://identity.ic0.app`;
@@ -95,7 +106,7 @@ export default function App() {
                 }}}>
                     <BusyProvider>
                         <BusyWidget>
-                            <BrowserRouter>
+                            <BrowserRouter history={history}>
                                 <ErrorProvider>
                                     <ErrorBoundary>
                                         <MainProvider>
