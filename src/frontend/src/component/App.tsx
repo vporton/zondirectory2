@@ -40,9 +40,11 @@ export default function App() {
     useEffect(() => {
         if (!getIsLocal()) {
             ReactGA.initialize("G-PDPFZKZ3R6");
+            ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
         }
     }, [])
     history.listen(update => {
+        console.log("Page view", update.location.pathname + update.location.search);
         // TODO: (Not an easy task) watch also for page title.
         ReactGA.send({ hitType: "pageview", page: update.location.pathname + update.location.search/*, title: "Landing Page"*/ });
     });
