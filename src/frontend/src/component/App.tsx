@@ -108,7 +108,7 @@ export default function App() {
                 }}}>
                     <BusyProvider>
                         <BusyWidget>
-                            <BrowserRouter history={history}>
+                            <BrowserRouter>
                                 <ErrorProvider>
                                     <ErrorBoundary>
                                         <MainProvider>
