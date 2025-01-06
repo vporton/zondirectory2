@@ -43,6 +43,7 @@ export default function App() {
         }
     }, [])
     history.listen(update => {
+        console.log("Page view", update.location.pathname + update.location.search);
         // TODO: (Not an easy task) watch also for page title.
         ReactGA.send({ hitType: "pageview", page: update.location.pathname + update.location.search/*, title: "Landing Page"*/ });
     });
