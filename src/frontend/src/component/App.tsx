@@ -40,7 +40,7 @@ export default function App() {
     useEffect(() => {
         if (!getIsLocal()) {
             ReactGA.initialize("G-PDPFZKZ3R6");
-            ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
+            // ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
         }
     }, [])
     history.listen(update => {
