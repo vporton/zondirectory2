@@ -1,19 +1,21 @@
 import * as React from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Component, ErrorInfo, ReactNode, Suspense, createContext, useContext, useEffect, useMemo, useState } from "react";
-import { Button, Col, Container, Nav, NavDropdown, Navbar, Offcanvas, Row } from 'react-bootstrap'; // TODO: selective imports
+import { Suspense, useContext, useEffect, useState } from "react";
+import Button from 'react-bootstrap/Button';
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import NavDropdown from 'react-bootstrap/NavDropdown';
+import Navbar from 'react-bootstrap/Navbar';
+import Offcanvas from 'react-bootstrap/Offcanvas';
 import ShowItem from "./ShowItem";
 import {
     BrowserRouter as Router,
     Route,
     Routes,
-    NavLink,
     useNavigate,
-    HashRouter,
     useParams,
     Link,
     BrowserRouter,
-    useLocation,
 } from "react-router-dom";
 import { Actor, Agent, getDefaultAgent } from '@dfinity/agent';
 import SubFolders from "./SubFolders";
@@ -31,7 +33,7 @@ import { ErrorBoundary, ErrorHandler } from "./ErrorBoundary";
 import { ErrorProvider } from "./ErrorContext";
 import Prefs from "./Prefs";
 import { MainContext, MainContextType, MainProvider } from './MainContext';
-import { BusyContext, BusyProvider, BusyWidget } from "./busy";
+import { BusyProvider, BusyWidget } from "./busy";
 import ReactGA from 'react-ga4';
 import { createBrowserHistory } from 'history';
 
