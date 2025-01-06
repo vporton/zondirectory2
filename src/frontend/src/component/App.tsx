@@ -38,9 +38,11 @@ import { createBrowserHistory } from 'history';
 export default function App() {
     var history = createBrowserHistory();
     useEffect(() => {
-        ReactGA.initialize("G-PDPFZKZ3R6");
+        if (!getIsLocal()) {
+            ReactGA.initialize("G-PDPFZKZ3R6");
+        }
     }, [])
-    history.listen((update) => {
+    history.listen(update => {
         // TODO: (Not an easy task) watch also for page title.
         ReactGA.send({ hitType: "pageview", page: update.location.pathname + update.location.search/*, title: "Landing Page"*/ });
     });
