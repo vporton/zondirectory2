@@ -45,12 +45,12 @@ export default function App() {
             ReactGA.initialize("G-PDPFZKZ3R6");
             // ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
         }
-        useEffect(() => {
-            console.log("Page view", location.pathname + location.search);
-            // TODO: (Not an easy task) watch also for page title.
-            ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
-        }, [location]);
     }, [])
+    useEffect(() => {
+        console.log("Page view", location.pathname + location.search);
+        // TODO: (Not an easy task) watch also for page title.
+        ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
+    }, [location]);
 
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
     const frontendCanister = process.env.CANISTER_ID_FRONTEND;
