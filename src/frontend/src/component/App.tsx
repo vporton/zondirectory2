@@ -39,19 +39,6 @@ import ReactGA from 'react-ga4';
 import { createBrowserHistory } from 'history';
 
 export default function App() {
-    var location = useLocation();
-    useEffect(() => {
-        if (!getIsLocal()) {
-            ReactGA.initialize("G-PDPFZKZ3R6");
-            // ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
-        }
-    }, [])
-    useEffect(() => {
-        console.log("Page view", location.pathname + location.search);
-        // TODO: (Not an easy task) watch also for page title.
-        ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
-    }, [location]);
-
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
     const frontendCanister = process.env.CANISTER_ID_FRONTEND;
     const identityProvider = getIsLocal() ? `http://${identityCanister}.localhost:8000` : `https://identity.ic0.app`;
@@ -151,7 +138,19 @@ function Edit3(props: {defaultAgent: Agent | undefined}) {
 }
 
 function MyRouted(props: {defaultAgent: Agent | undefined}) {
-    const contextValue = useAuth();
+    var location = useLocation();
+    useEffect(() => {
+        if (!getIsLocal()) {
+            ReactGA.initialize("G-PDPFZKZ3R6");
+            // ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
+        }
+    }, [])
+    useEffect(() => {
+        console.log("Page view", location.pathname + location.search);
+        // TODO: (Not an easy task) watch also for page title.
+        ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
+    }, [location]);
+
     return (
         <AuthContext.Consumer>
             {({isAuthenticated, principal, authClient, defaultAgent, options, login, logout}) =>
