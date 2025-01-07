@@ -16,6 +16,7 @@ import {
     useParams,
     Link,
     BrowserRouter,
+    useLocation,
 } from "react-router-dom";
 import { Actor, Agent, getDefaultAgent } from '@dfinity/agent';
 import SubFolders from "./SubFolders";
@@ -38,18 +39,17 @@ import ReactGA from 'react-ga4';
 import { createBrowserHistory } from 'history';
 
 export default function App() {
-    var history = createBrowserHistory();
+    var location = useLocation();
     useEffect(() => {
         if (!getIsLocal()) {
             ReactGA.initialize("G-PDPFZKZ3R6");
             // ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
         }
-        const unlisten = history.listen(update => { // FIXME: It seems doesn't work.
-            console.log("Page view", update.location.pathname + update.location.search);
+        useEffect(() => {
+            console.log("Page view", location.pathname + location.search);
             // TODO: (Not an easy task) watch also for page title.
-            ReactGA.send({ hitType: "pageview", page: update.location.pathname + update.location.search/*, title: "Landing Page"*/ });
-        });
-        return unlisten;
+            ReactGA.send({ hitType: "pageview", page: location.pathname + location.search/*, title: "Landing Page"*/ });
+        }, [location]);
     }, [])
 
     const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
