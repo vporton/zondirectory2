@@ -36,8 +36,8 @@ deploy: compile-candbpart compile-nacdbpart
 	  dfx generate -v NacDBPartition && \
 	  dfx generate -v main && \
 	  dfx generate -v items && \
-	  dfx generate -v personhood && \
 	  dfx deploy --yes --network $(NETWORK) personhood && \
+	  dfx generate -v personhood && \
 	  python3 node_modules/passport_client_dfinity/scripts/update-canisters.py && \
 	  dfx deploy --yes --network $(NETWORK) -v frontend && \
 	  export DFX_NETWORK=$(NETWORK) && \
