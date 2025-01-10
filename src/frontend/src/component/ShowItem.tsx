@@ -13,6 +13,7 @@ import { Helmet } from 'react-helmet';
 import { Agent } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { OnpageNavigation } from "./OnpageNavigation";
+import { ErrorContext } from "./ErrorContext";
 
 export default function ShowItem() {
     return (
@@ -27,8 +28,17 @@ export default function ShowItem() {
 }
 
 function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
+    const { setError } = useContext(ErrorContext)!;
     const { id: idParam } = useParams();
-    const [id, setId] = useState(parseItemRef(idParam!));
+    let idParam2;
+    try {
+        idParam2 = parseItemRef(idParam!)
+    }
+    catch(_) {
+        setError("404 page not found");
+        return;
+    }
+    const [id, setId] = useState(idParam2);
     useEffect(() => {
         setId(parseItemRef(idParam!))
     }, [idParam]);
@@ -91,40 +101,48 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     useEffect(() => {
         if (id !== undefined && props.defaultAgent !== undefined) {
             console.log("Loading from AppData");
-            AppData.create(props.defaultAgent, serializeItemRef(id), streamKind).then(data => {
-                setXData(data);
-                setData(data.item);
-                data.locale().then(x => setLocale(x));
-                data.title().then(x => setTitle(x));
-                data.description().then(x => setDescription(x));
-                data.postText().then(x => setPostText(x !== undefined ? x.substring(1) : "")); // strip `t` denoting that it's a text
-                data.creator().then(x => setCreator(x));
-                data.subFolders().then(x => setSubfolders(x));
-                data.superFolders().then(x => {
-                    setSuperfolders(x);
-                });
-                data.items({limit: startItemsPage.get("nitems")}).then(x => {
-                    setItems(x);
-                    if (x.length !== 0) {
-                        setItemsLast(x[x.length - 1].order); // duplicate code
-                    }
-                });
-                data.comments().then(x => {
-                    setComments(x);
-                    if (x.length !== 0) {
-                        setCommentsLast(x[x.length - 1].order); // duplicate code
-                    }
-                });
-                data.antiComments().then(x => {
-                    setAntiComments(x);
-                    if (x.length !== 0) {
-                        setAntiCommentsLast(x[x.length - 1].order); // duplicate code
-                    }
-                });
-                data.details().then((x) => {
-                    setType(Object.keys(x)[0]);
-                });
-            });
+            try {
+                AppData.create(props.defaultAgent, serializeItemRef(id), streamKind).then(data => {
+                    setXData(data);
+                    setData(data.item);
+                    data.locale().then(x => setLocale(x));
+                    data.title().then(x => setTitle(x));
+                    data.description().then(x => setDescription(x));
+                    data.postText().then(x => setPostText(x !== undefined ? x.substring(1) : "")); // strip `t` denoting that it's a text
+                    data.creator().then(x => setCreator(x));
+                    data.subFolders().then(x => setSubfolders(x));
+                    data.superFolders().then(x => {
+                        setSuperfolders(x);
+                    });
+                    data.items({limit: startItemsPage.get("nitems")}).then(x => {
+                        setItems(x);
+                        if (x.length !== 0) {
+                            setItemsLast(x[x.length - 1].order); // duplicate code
+                        }
+                    });
+                    data.comments().then(x => {
+                        setComments(x);
+                        if (x.length !== 0) {
+                            setCommentsLast(x[x.length - 1].order); // duplicate code
+                        }
+                    });
+                    data.antiComments().then(x => {
+                        setAntiComments(x);
+                        if (x.length !== 0) {
+                            setAntiCommentsLast(x[x.length - 1].order); // duplicate code
+                        }
+                    });
+                    data.details().then((x) => {
+                        setType(Object.keys(x)[0]);
+                    });
+                })
+                    .catch(_ => { // TODO: check error
+                        setError("404 page not found"); // duplicate code
+                    });
+            }
+            catch(_) { // TODO: check error
+                    setError("404 page not found"); // duplicate code
+            };
         }
     }, [id, props.defaultAgent, streamKind]);
     function moreSubfolders(event: any) {

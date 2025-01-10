@@ -348,7 +348,7 @@ function MyInner(props: {
                 path="/prefs"
                 element={<Prefs/>}
             />
-            <Route path="*" element={<ErrorHandler error={"No such page"}/>}/>
+            <Route path="*" element={<ErrorHandler error={"404 page not found"}/>}/>
         </Routes>
     </>
 }
