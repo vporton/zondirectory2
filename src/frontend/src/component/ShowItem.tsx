@@ -209,12 +209,12 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     const isFolder = type === 'folder';
     return <>
         <Helmet>
-            <link rel="canonical" href={`https://zoncircle.com/item/${idParam!}`}/>
+            {idParam && <link rel="canonical" href={`https://zoncircle.com/item/${idParam}`}/>}
             <title>{isFolder ? `${title} (folder) - Zon` : `${title} - Zon`}</title>
             <meta name="description" content={description}/>
             <meta property="og:title" content={isFolder ? `${title} (folder)` : `${title}`}/>
             <meta property="og:author" content={creator?.toText()}/>
-            <meta property="og:url" content={`https://zoncircle.com/item/${idParam!}`}/>
+            {idParam && <meta property="og:url" content={`https://zoncircle.com/item/${idParam}`}/>}
             <meta property="og:description" content={description}/>
             <meta property="og:locale" content={locale}/>
             <meta property="og:site_name" content="Zon Social Network"/>
@@ -227,7 +227,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                 {creator !== undefined && principal !== undefined && creator.compareTo(principal) === 'eq' &&
                     <>
                         {" "}
-                        <Button href={`/edit/${isFolder ? 'folder' : 'item'}/${serializeItemRef(id)}`}>Edit</Button>
+                        {id && <Button href={`/edit/${isFolder ? 'folder' : 'item'}/${serializeItemRef(id)}`}>Edit</Button>}
                     </>
                 }
             </p>
@@ -277,7 +277,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             </ul>}
                             <nav>
                                 <p>
-                                    <Link to="#" onClick={e => moreSubfolders(e)}>More...</Link> <Link to={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</Link>
+                                    <Link to="#" onClick={e => moreSubfolders(e)}>More...</Link> {id && <Link to={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</Link>}
                                 </p>
                             </nav>
                         </Col>
@@ -317,7 +317,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             </ul>}
                             {/* TODO: Create super-folder */}
                             <nav>
-                                <p><Link to="#" onClick={e => moreSuperfolders(e)}>More...</Link> <Link to={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
+                                <p><Link to="#" onClick={e => moreSuperfolders(e)}>More...</Link> {id && <Link to={`/create-superfolder/for-folder/${serializeItemRef(id)}`}>Create</Link>}</p>
                             </nav>
                         </Col>
                     {!isFolder ? "" : <>
@@ -355,7 +355,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             )}
                             <nav>
                                 <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
-                                <Link to={`/create/for-folder/${serializeItemRef(id)}`}>Create</Link></p>
+                                {id && <Link to={`/create/for-folder/${serializeItemRef(id)}`}>Create</Link>}</p>
                             </nav>
                         </Col>
                     </>}
@@ -398,25 +398,24 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             )}
                             <nav>
                                 <p><Link to="#" onClick={e => moreComments(e)} style={{visibility: commentsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
-                                    <Link to={`/create/comment/${serializeItemRef(id)}`}>Create</Link></p>
+                                    {id && <Link to={`/create/comment/${serializeItemRef(id)}`}>Create</Link>}</p>
                             </nav>
                         </Col>
                         <Col>
                             <h3>Comment on</h3>
                             <p><small><span data-nosnippet="true">Voting in this stream not yet implemented.</span></small></p>
-                            {antiComments === undefined ? <p>Loading...</p> : antiComments.map((item: {order: string, id: ItemRef, item: ItemTransfer}) => 
-                                <div key={serializeItemRef(item.id)}>
-                                    <p lang={item.item.data.item.locale}>
-                                        {item.item.data.item.price ? <>({item.item.data.item.price} ICP) </> : ""}
-                                        {(item.item.data.item.details as any).link ?
+                            {antiComments === undefined ? <p>Loading...</p> : antiComments.map((x: {order: string, id: ItemRef, item: ItemTransfer}) => 
+                                <div key={serializeItemRef(x.id)}>
+                                    <p lang={x.item.data.item.locale}>
+                                        {x.item.data.item.price ? <>({x.item.data.item.price} ICP) </> : ""}
+                                        {(x.item.data.item.details as any).link ?
                                             <>
-                                                <Link to={(item.item.data.item.details as any).link}>{item.item.data.item.title}</Link>{" "}
-                                                <Link to={`/item/${serializeItemRef(item.id)}`}>[H]</Link>
+                                                <Link to={(x.item.data.item.details as any).link}>{x.item.data.item.title}</Link>{" "}
+                                                <Link to={`/item/${serializeItemRef(x.id)}`}>[H]</Link>
                                             </> :
-                                            <Link to={`/item/${serializeItemRef(item.id)}`}>{item.item.data.item.title}</Link>}
-                                        
+                                            <Link to={`/item/${serializeItemRef(x.id)}`}>{x.item.data.item.title}</Link>}
                                     </p>
-                                    <p lang={item.item.data.item.locale} style={{marginLeft: '1em'}}>{item.item.data.item.description}</p>
+                                    <p lang={x.item.data.item.locale} style={{marginLeft: '1em'}}>{x.item.data.item.description}</p>
                                 </div>
                             )}
                             <nav>

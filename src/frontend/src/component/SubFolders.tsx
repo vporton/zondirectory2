@@ -102,7 +102,7 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
             </ul>
             <nav>
                 <p><Link to="#" onClick={e => moreItems(e)} style={{visibility: itemsReachedEnd ? 'hidden' : 'visible'}}>More...</Link>{" "}
-                    <Link to={`/create/for-folder/${id}`}>Create</Link></p>
+                    {id && <Link to={`/create/for-folder/${id}`}>Create</Link>}</p>
             </nav>
         </>
     );

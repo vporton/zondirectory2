@@ -230,7 +230,7 @@ function MyInner(props: {
                     <Offcanvas.Body>
                         <Nav className="flex-grow-1">
                             <Nav.Item>
-                                <Link className="nav-link" to={`/item/${root}`} title="Start browsing here">
+                                <Link className="nav-link" to={root != "" ? `/item/${root}` : ""} title="Start browsing here">
                                 Main folder
                                 </Link>
                             </Nav.Item>
