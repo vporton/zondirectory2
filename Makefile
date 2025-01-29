@@ -1,19 +1,25 @@
 #!/usr/bin/make -f
 
 SHELL = /bin/bash
+
+deploy:
+
 include metaconfig.mk
+include deps.mk
 
 NETWORK = local
 
 FOUNDER = $(shell dfx identity --network $(NETWORK) get-principal)
 
-deploy:
+.PHONY: deps
+deps:
+	dfx rules -o deps.mk
 
 .PHONY: all
 all: deploy init
 
 .PHONY: deploy
-deploy: compile-candbpart compile-nacdbpart
+deploy: canister@CanDBPartition canister@NacDBPartition
 	current="$$(git branch --show-current)"; \
 	  cleanup() { \
 	    rm -f src/libs/configs/stage/* src/frontend/assets/.well-known/ii-alternative-origins; \
@@ -30,43 +36,11 @@ deploy: compile-candbpart compile-nacdbpart
 	  mkdir -p src/libs/configs/stage && \
 	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
 	  cp .env.$(NETWORK) .env && \
-	  dfx deploy --yes --network $(NETWORK) ic_eth && \
-	  dfx deploy --yes --network $(NETWORK) internet_identity && \
-	  dfx generate -v CanDBPartition && \
-	  dfx generate -v NacDBPartition && \
-	  dfx generate -v main && \
-	  dfx generate -v items && \
-	  dfx deploy --yes --network $(NETWORK) personhood && \
-	  dfx generate -v personhood && \
-	  python3 node_modules/passport_client_dfinity/scripts/update-canisters.py && \
-	  dfx deploy --yes --network $(NETWORK) -v frontend && \
+	  make deploy@frontend && \
 	  export DFX_NETWORK=$(NETWORK) && \
 	    npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
 	    npx ts-node scripts/upgrade-nacdb.ts $(NETWORK); \
 	  if test "$(NETWORK)" != local; then echo "!!!UPDATED FROM stable BRANCH!!!"; fi
-
-.PHONY: generate
-generate:
-	cleanup() { rm -f src/libs/configs/stage/*; test -e .env && cp -f .env .env.$(NETWORK); } && \
-	  trap "cleanup" EXIT && \
-	  mkdir -p src/libs/configs/stage && \
-	  cp -f $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
-	  cp .env.$(NETWORK) .env && \
-	  dfx generate -v CanDBPartition && \
-	  dfx generate -v NacDBPartition && \
-	  dfx generate --network $(NETWORK) -v
-
-.PHONY: compile-candbpart
-compile-candbpart:
-	mkdir -p .dfx/$(NETWORK)/canisters/CanDBPartition
-	`dfx cache show`/moc -o .dfx/$(NETWORK)/canisters/CanDBPartition/CanDBPartition.wasm \
-	  `mops sources` src/storage/CanDBPartition.mo
-
-.PHONY: compile-nacdbpart
-compile-nacdbpart:
-	mkdir -p .dfx/$(NETWORK)/canisters/NacDBPartition
-	`dfx cache show`/moc -o .dfx/$(NETWORK)/canisters/NacDBPartition/NacDBPartition.wasm \
-	  `mops sources` src/storage/NacDBPartition.mo
 
 .PHONY: fabricate-cycles
 	test "$(NETWORK)" = local && dfx ledger fabricate-cycles --amount 100000000 --canister main

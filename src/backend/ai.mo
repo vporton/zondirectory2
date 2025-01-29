@@ -87,7 +87,7 @@ module {
             },
             params,
         );
-        let ?body = Text.decodeUtf8(res.body) else {
+        let ?body = Text.decodeUtf8(Blob.fromArray(res.body)) else {
             Debug.trap("non UTF-8 response");
         };
         if (res.status != 200) {
