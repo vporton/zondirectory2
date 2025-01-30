@@ -197,91 +197,6 @@ $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/users/users.wasm $(ROOT_DIR)/.dfx/$(NETWOR
 $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/users/users.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/users/users.did: $(ROOT_DIR)/src/storage/CanDBPartition.mo
 $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/users/users.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/users/users.did: $(ROOT_DIR)/src/backend/rateLimit.mo
 $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/users/users.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/users/users.did: $(ROOT_DIR)/src/backend/lib.mo
-$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/main/main.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/main/main.did:
-	dfx canister create --network $(NETWORK) main
-	dfx build --no-deps --network $(NETWORK) main
-
-
-deploy-self@main: canister@main
-	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.main) main
-
-deploy@main: deploy@items deploy@users deploy@CanDBIndex deploy@NacDBIndex deploy@personhood deploy@internet_identity \
-  deploy-self@main
-
-
-deploy-self@internet_identity: canister@internet_identity
-	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.internet_identity) internet_identity
-
-deploy@internet_identity: deploy-self@internet_identity
-
-$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/users/users.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/users/users.did:
-	dfx canister create --network $(NETWORK) users
-	dfx build --no-deps --network $(NETWORK) users
-
-
-deploy-self@users: canister@users
-	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.users) users
-
-deploy@users: deploy@CanDBIndex deploy@NacDBIndex \
-  deploy-self@users
-
-$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/NacDBPartition/NacDBPartition.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/NacDBPartition/NacDBPartition.did:
-	dfx canister create --network $(NETWORK) NacDBPartition
-	dfx build --no-deps --network $(NETWORK) NacDBPartition
-
-
-deploy-self@NacDBPartition: canister@NacDBPartition
-	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.NacDBPartition) NacDBPartition
-
-deploy@NacDBPartition: deploy@NacDBIndex \
-  deploy-self@NacDBPartition
-
-$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/NacDBIndex/NacDBIndex.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/NacDBIndex/NacDBIndex.did:
-	dfx canister create --network $(NETWORK) NacDBIndex
-	dfx build --no-deps --network $(NETWORK) NacDBIndex
-
-
-deploy-self@NacDBIndex: canister@NacDBIndex
-	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.NacDBIndex) NacDBIndex
-
-deploy@NacDBIndex: deploy@battery \
-  deploy-self@NacDBIndex
-
-$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/call/call.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/call/call.did:
-	dfx canister create --network $(NETWORK) call
-	dfx build --no-deps --network $(NETWORK) call
-
-
-deploy-self@call: canister@call
-	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.call) call
-
-deploy@call: deploy-self@call
-
-$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/battery/battery.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/battery/battery.did:
-	dfx canister create --network $(NETWORK) battery
-	dfx build --no-deps --network $(NETWORK) battery
-
-
-deploy-self@battery: canister@battery
-	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.battery) battery
-
-deploy@battery: deploy-self@battery
-
-.PHONY: $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/frontend/assetstorage.wasm.gz
-$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/frontend/assetstorage.wasm.gz:
-	dfx canister create --network $(NETWORK) frontend
-	dfx build --no-deps --network $(NETWORK) frontend
-
-
-deploy-self@frontend: canister@frontend
-	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.frontend) frontend
-
-
-canister@frontend: \
-  generate@main
-deploy@frontend: deploy@main \
-  deploy-self@frontend
-
 $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/payments/payments.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/payments/payments.did:
 	dfx canister create --network $(NETWORK) payments
 	dfx build --no-deps --network $(NETWORK) payments
@@ -304,6 +219,37 @@ deploy-self@CanDBIndex: canister@CanDBIndex
 deploy@CanDBIndex: deploy@battery \
   deploy-self@CanDBIndex
 
+$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/users/users.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/users/users.did:
+	dfx canister create --network $(NETWORK) users
+	dfx build --no-deps --network $(NETWORK) users
+
+
+deploy-self@users: canister@users
+	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.users) users
+
+deploy@users: deploy@CanDBIndex deploy@NacDBIndex \
+  deploy-self@users
+
+$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/CanDBPartition/CanDBPartition.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/CanDBPartition/CanDBPartition.did:
+	dfx canister create --network $(NETWORK) CanDBPartition
+	dfx build --no-deps --network $(NETWORK) CanDBPartition
+
+
+deploy-self@CanDBPartition: canister@CanDBPartition
+	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.CanDBPartition) CanDBPartition
+
+deploy@CanDBPartition: deploy-self@CanDBPartition
+
+$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/call/call.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/call/call.did:
+	dfx canister create --network $(NETWORK) call
+	dfx build --no-deps --network $(NETWORK) call
+
+
+deploy-self@call: canister@call
+	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.call) call
+
+deploy@call: deploy-self@call
+
 $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/personhood/personhood.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/personhood/personhood.did:
 	dfx canister create --network $(NETWORK) personhood
 	dfx build --no-deps --network $(NETWORK) personhood
@@ -315,15 +261,76 @@ deploy-self@personhood: canister@personhood
 deploy@personhood: deploy@ic_eth deploy@CanDBIndex \
   deploy-self@personhood
 
-$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/CanDBPartition/CanDBPartition.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/CanDBPartition/CanDBPartition.did:
-	dfx canister create --network $(NETWORK) CanDBPartition
-	dfx build --no-deps --network $(NETWORK) CanDBPartition
+.PHONY: $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/frontend/assetstorage.wasm.gz
+$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/frontend/assetstorage.wasm.gz:
+	dfx canister create --network $(NETWORK) frontend
+	dfx build --no-deps --network $(NETWORK) frontend
 
 
-deploy-self@CanDBPartition: canister@CanDBPartition
-	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.CanDBPartition) CanDBPartition
+deploy-self@frontend: canister@frontend
+	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.frontend) frontend
 
-deploy@CanDBPartition: deploy-self@CanDBPartition
+
+canister@frontend: \
+  generate@main
+deploy@frontend: deploy@main \
+  deploy-self@frontend
+
+
+deploy-self@internet_identity: canister@internet_identitydeploy@internet_identity: deploy-self@internet_identity
+
+$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/NacDBPartition/NacDBPartition.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/NacDBPartition/NacDBPartition.did:
+	dfx canister create --network $(NETWORK) NacDBPartition
+	dfx build --no-deps --network $(NETWORK) NacDBPartition
+
+
+deploy-self@NacDBPartition: canister@NacDBPartition
+	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.NacDBPartition) NacDBPartition
+
+deploy@NacDBPartition: deploy@NacDBIndex \
+  deploy-self@NacDBPartition
+
+$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/main/main.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/main/main.did:
+	dfx canister create --network $(NETWORK) main
+	dfx build --no-deps --network $(NETWORK) main
+
+
+deploy-self@main: canister@main
+	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.main) main
+
+deploy@main: deploy@items deploy@users deploy@CanDBIndex deploy@NacDBIndex deploy@personhood deploy@internet_identity \
+  deploy-self@main
+
+$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/battery/battery.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/battery/battery.did:
+	dfx canister create --network $(NETWORK) battery
+	dfx build --no-deps --network $(NETWORK) battery
+
+
+deploy-self@battery: canister@battery
+	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.battery) battery
+
+deploy@battery: deploy-self@battery
+
+$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/NacDBIndex/NacDBIndex.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/NacDBIndex/NacDBIndex.did:
+	dfx canister create --network $(NETWORK) NacDBIndex
+	dfx build --no-deps --network $(NETWORK) NacDBIndex
+
+
+deploy-self@NacDBIndex: canister@NacDBIndex
+	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.NacDBIndex) NacDBIndex
+
+deploy@NacDBIndex: deploy@battery \
+  deploy-self@NacDBIndex
+
+$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/ic_eth/ic_eth.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/ic_eth/ic_eth.did:
+	dfx canister create --network $(NETWORK) ic_eth
+	dfx build --no-deps --network $(NETWORK) ic_eth
+
+
+deploy-self@ic_eth: canister@ic_eth
+	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.ic_eth) ic_eth
+
+deploy@ic_eth: deploy-self@ic_eth
 
 $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/items/items.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/items/items.did:
 	dfx canister create --network $(NETWORK) items
@@ -345,14 +352,4 @@ deploy-self@pst: canister@pst
 	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.pst) pst
 
 deploy@pst: deploy-self@pst
-
-$(ROOT_DIR)/.dfx/$(NETWORK)/canisters/ic_eth/ic_eth.wasm $(ROOT_DIR)/.dfx/$(NETWORK)/canisters/ic_eth/ic_eth.did:
-	dfx canister create --network $(NETWORK) ic_eth
-	dfx build --no-deps --network $(NETWORK) ic_eth
-
-
-deploy-self@ic_eth: canister@ic_eth
-	dfx deploy --no-compile --network $(NETWORK) $(DEPLOY_FLAGS) $(DEPLOY_FLAGS.ic_eth) ic_eth
-
-deploy@ic_eth: deploy-self@ic_eth
 
