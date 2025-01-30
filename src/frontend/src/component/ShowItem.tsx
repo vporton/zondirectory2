@@ -73,12 +73,14 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     const [userVoteComments, setUserVoteComments] = useState<{[key: string]: number}>({});
     const [totalVotesCommentsOn, setTotalVotesCommentsOn] = useState<{[key: string]: {up: number, down: number}}>({});
     const [userVoteCommentsOn, setUserVoteCommentsOn] = useState<{[key: string]: number}>({});
-    const [startItemsPage, setStartItemsPage] = useState(new Map([
-        ["nitems", 5],
-    ]));
     const url = new URL(window.location.href);
-    const nitems = parseInt((url.searchParams.get('nitems') ?? startItemsPage.get('nitems')) as string);
-    const [itemsPage, setItemsPage] = useState(new Map());
+    const nitems = parseInt(url.searchParams.get('nitems') ?? '5'); // TODO: constant 5 repeated two times
+    const startItemsPage = new Map([
+        ["nitems", 5], // TODO: constant 5 repeated two times
+    ]);
+    const [itemsPage, setItemsPage] = useState(new Map([
+        ["nitems", nitems],
+    ]));
 
     const navigate = useNavigate();
     useEffect(() => {

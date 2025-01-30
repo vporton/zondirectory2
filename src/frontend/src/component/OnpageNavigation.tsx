@@ -51,6 +51,7 @@ export function OnpageNavigation(props: {
     if (differences !== 0) { // It replaces the state too early when going to folder list, so this check.
         history.replaceState({}, "", url);
     }
+    console.log("U:", url); 
 
     return (
         <Helmet>

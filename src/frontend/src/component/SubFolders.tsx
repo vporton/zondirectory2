@@ -14,16 +14,18 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
     const { id } = useParams();
     const [xdata, setXData] = useState<any>(undefined);
     const [title, setTitle] = useState("");
-    const [folders, setFolders] = useState<{order: string, id: ItemRef, item: ItemTransfer}[] | undefined>([]);
+    const [folders, setFolders] = useState<{order: string, id: ItemRef, item: ItemTransfer}[]>([]);
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
     const [streamKind, setStreamKind] = useState<"t" | "v">("v"); // time, votes
-    const startFoldersPage = new Map([
-        ["nfolders", 5],
-    ]);
     const url = new URL(window.location.href);
-    const nfolders = parseInt((url.searchParams.get('nfolders') ?? startFoldersPage.get('nfolders')) as string);
-    const [foldersPage, setFoldersPage] = useState(new Map());
+    const nfolders = parseInt(url.searchParams.get('nfolders') ?? '5'); // TODO: constant 5 repeated two times
+    const startFoldersPage = new Map([
+        ["nfolders", 5], // TODO: constant 5 repeated two times
+    ]);
+    const [foldersPage, setFoldersPage] = useState(new Map([
+        ["nfolders", nfolders],
+    ]));
     function updateStreamKind(e) {
         setStreamKind(e.currentTarget.value);
     }
@@ -64,7 +66,7 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
         const promise = props['data-dir'] == 'super'
             ? xdata.superFolders({lowerBound, limit: 10}) : xdata.subFolders({lowerBound, limit: 10});
         promise.then(x => {
-            const newFolders = folders?.concat(x);
+            const newFolders = folders.concat(x);
             if (!newFolders) {
                 return;
             }
