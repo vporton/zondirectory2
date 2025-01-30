@@ -9,7 +9,7 @@ FOUNDER = $(shell dfx identity --network $(NETWORK) get-principal)
 deploy:
 
 include metaconfig.mk
-# include deps.$(NETWORK).mk
+include deps.$(NETWORK).mk
 
 .PHONY: deps
 deps:
@@ -36,7 +36,7 @@ deploy: #canister@CanDBPartition canister@NacDBPartition
 	  mkdir -p src/libs/configs/stage && \
 	  cp -fa $(CONFIGS_REPO)/$(NETWORK)/* src/libs/configs/stage/ && \
 	  cp -a .env.$(NETWORK) .env && \
-	  make deploy@frontend && \
+	  make $(MAKEFLAGS) deploy@frontend && \
 	  export DFX_NETWORK=$(NETWORK) && \
 	    npx ts-node scripts/upgrade-candb.ts $(NETWORK) && \
 	    npx ts-node scripts/upgrade-nacdb.ts $(NETWORK); \
