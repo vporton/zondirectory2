@@ -2,18 +2,18 @@
 
 SHELL = /bin/bash
 
-deploy:
-
-include metaconfig.mk
-include deps.mk
-
 NETWORK = local
 
 FOUNDER = $(shell dfx identity --network $(NETWORK) get-principal)
 
+deploy:
+
+include metaconfig.mk
+# include deps.$(NETWORK).mk
+
 .PHONY: deps
 deps:
-	dfx rules -o deps.mk
+	dfx rules --network $(NETWORK) -o deps.$(NETWORK).mk
 
 .PHONY: all
 all: deploy init
