@@ -95,5 +95,5 @@ init-createItemData:
 	cleanup() { test -e .env && cp -fa .env .env.$(NETWORK); } && \
 	cp -fa .env.$(NETWORK) .env && \
 	mainItem=`dfx canister call --network $(NETWORK) items createItemData \
-	  '(record { data = record{price = 0.0; locale = "en"; title = "The homepage"; description = ""; details = variant { folder = null }}; communal = true }, "")'`; \
+	  '(record { data = record{price = 0.0; locale = "en"; title = "The homepage"; description = ""; details = variant { folder = null }}; communal = true }, "")'` && \
 	  dfx canister call --network $(NETWORK) main setRootItem "$$mainItem"
