@@ -32,30 +32,36 @@ export function OnpageNavigation(props: {
             </Helmet>
         );
     }
-    const url = new URL(href);
+    const realUrl = new URL(href);
 
-    // TODO: Hack to prevent `Failed to execute 'replaceState' on 'History'`:
-    // deep copy:   
-    url.host = (new String(window.location.host)) as string;
-    url.protocol = (new String(window.location.protocol)) as string;
-
-    const params = url.searchParams;
-    while (params.size !== 0) {
-        params.delete(params.keys().next().value); // to normalize canonical URL // FIXME: normalizes wrong
-    }
-    for (const k of props.page.keys()) {
-        if (props.page.get(k) !== undefined && props.page.get(k) !== props.startPage.get(k)) {
-            params.set(k, props.page.get(k)!.toString());
+    // const canonicalLink = document.querySelector('link[rel="canonical"]'); // mistakenly retrieves old link before navigate()
+    // const link = canonicalLink?.getAttribute('href');
+    const link = window.location.href;
+    let canonicalUrl, url;
+    if (link) {
+        canonicalUrl = new URL(link);
+        canonicalUrl.protocol = 'https:';
+        canonicalUrl.host = "zoncircle.com"; // Why doesn't `.hostname` instead of this does not work
+        canonicalUrl.port = "";
+        const params = canonicalUrl.searchParams;
+        while (params.size !== 0) {
+            params.delete(params.keys().next().value); // to normalize canonical URL // FIXME: normalizes wrong
+        }
+        for (const k of props.page.keys()) {
+            if (props.page.get(k) !== undefined && props.page.get(k) !== props.startPage.get(k)) {
+                params.set(k, props.page.get(k)!.toString());
+            }
+        }
+        url = new URL(canonicalUrl); // deep copy
+        url.host = realUrl.host; // avoid `SecurityError: Failed to execute 'replaceState' on 'History'`
+        url.protocol = realUrl.protocol;
+        if (differences !== 0) { // It replaces the state too early when going to folder list, so this check.
+            history.replaceState({}, "", url);
         }
     }
-    if (differences !== 0) { // It replaces the state too early when going to folder list, so this check.
-        history.replaceState({}, "", url);
-    }
-    console.log("U:", url); 
-
     return (
         <Helmet>
-            <link rel="canonical" href={url.toString()}/>
+            {link && <link rel="canonical" href={canonicalUrl.toString()}/>}
             {
                 /* Save crawl budget by ignoring navigation by more than one list: */
                 differences > 1 ? <meta name="robots" content="noindex,nofollow"/> :
