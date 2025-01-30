@@ -19,7 +19,7 @@ deps:
 all: deploy init
 
 .PHONY: deploy
-deploy: canister@CanDBPartition canister@NacDBPartition
+deploy: #canister@CanDBPartition canister@NacDBPartition
 	current="$$(git branch --show-current)"; \
 	  cleanup() { \
 	    rm -f src/libs/configs/stage/* src/frontend/assets/.well-known/ii-alternative-origins; \
