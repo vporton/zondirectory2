@@ -9,6 +9,7 @@ import { Agent } from "@dfinity/agent";
 import { Helmet } from "react-helmet";
 import { OnpageNavigation } from "./OnpageNavigation";
 
+// FIXME: If itemsReachedEnd, eternally reloads the page.
 export default function SubFolders(props: {defaultAgent: Agent | undefined, 'data-dir': 'sub' | 'super'}) {
     const { id } = useParams();
     const [xdata, setXData] = useState<any>(undefined);
@@ -65,13 +66,14 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
             if (!newFolders) {
                 return;
             }
-            setFolders(newFolders); // TODO: ?
             if (x.length !== 0) {
+                setFolders(newFolders); // TODO: ?
                 setItemsLast(x[x.length - 1].order); // duplicate code
+                foldersPage.set("nfolders", newFolders.length);
+                setFoldersPage(foldersPage);
             } else {
                 setItemsReachedEnd(true);
             }
-            setFoldersPage((old) => old.set("nfolders", newFolders.length));
         });
     }
 
