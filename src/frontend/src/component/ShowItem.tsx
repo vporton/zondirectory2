@@ -76,6 +76,8 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
     const [startItemsPage, setStartItemsPage] = useState(new Map([
         ["nitems", 5],
     ]));
+    const url = new URL(window.location.href);
+    const nitems = parseInt((url.searchParams.get('nitems') ?? startItemsPage.get('nitems')) as string);
     const [itemsPage, setItemsPage] = useState(new Map());
 
     const navigate = useNavigate();
@@ -114,7 +116,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                     data.superFolders().then(x => {
                         setSuperfolders(x);
                     });
-                    data.items({limit: startItemsPage.get("nitems")}).then(x => {
+                    data.items({limit: nitems}).then(x => {
                         setItems(x);
                         if (x.length !== 0) {
                             setItemsLast(x[x.length - 1].order); // duplicate code
@@ -170,8 +172,9 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             } else {
                 setItemsReachedEnd(true);
             }
-            setItemsPage((old) => old.set("nitems", newItems.length));
-        });
+            itemsPage.set("nitems", newItems.length);
+            setItemsPage(itemsPage);
+    });
     }
     function moreComments(event: any) {
         event.preventDefault();
