@@ -18,9 +18,11 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
     const [itemsLast, setItemsLast] = useState("");
     const [itemsReachedEnd, setItemsReachedEnd] = useState(false);
     const [streamKind, setStreamKind] = useState<"t" | "v">("v"); // time, votes
-    const [startFoldersPage, setStartFoldersPage] = useState(new Map([
+    const startFoldersPage = new Map([
         ["nfolders", 5],
-    ]));
+    ]);
+    const url = new URL(window.location.href);
+    const nfolders = parseInt((url.searchParams.get('nfolders') ?? startFoldersPage.get('nfolders')) as string);
     const [foldersPage, setFoldersPage] = useState(new Map());
     function updateStreamKind(e) {
         setStreamKind(e.currentTarget.value);
@@ -39,7 +41,7 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
                         }
                     });
                 } else {
-                    data.subFolders({limit: startFoldersPage.get("nfolders")}).then(x => {
+                    data.subFolders({limit: nfolders}).then(x => {
                         setFolders(x);
                         // TODO: duplicate code
                         if (x.length !== 0) {

@@ -35,12 +35,13 @@ export function OnpageNavigation(props: {
     const url = new URL(href);
 
     // TODO: Hack to prevent `Failed to execute 'replaceState' on 'History'`:
-    url.host = window.location.host;
-    url.protocol = window.location.protocol;
+    // deep copy:   
+    url.host = (new String(window.location.host)) as string;
+    url.protocol = (new String(window.location.protocol)) as string;
 
     const params = url.searchParams;
     while (params.size !== 0) {
-        params.delete(params.keys()[0]); // to normalize canonical URL
+        params.delete(params.keys().next().value); // to normalize canonical URL // FIXME: normalizes wrong
     }
     for (const k of props.page.keys()) {
         if (props.page.get(k) !== undefined && props.page.get(k) !== props.startPage.get(k)) {
