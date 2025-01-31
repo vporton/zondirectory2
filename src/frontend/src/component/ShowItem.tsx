@@ -223,7 +223,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
             <meta property="og:description" content={description}/>
             <meta property="og:locale" content={locale}/>
             <meta property="og:site_name" content="Zon Social Network"/>
-            {/*(!superfolders || superfolders.length === 0 ? <meta name="robots" content="noindex"/>)*/} {/* anti-search-spam measure */}
+            {/*(!superfolders || superfolders.length === 0 ? <meta name="robots" content="noindex,follow"/>)*/} {/* anti-search-spam measure */}
         </Helmet>
         <OnpageNavigation startPage={startItemsPage} page={itemsPage}/>
         <h1>{data !== undefined && <ItemType item={data}/>}{isFolder ? "Folder: " : " "}<span lang={locale}>{title}</span></h1>

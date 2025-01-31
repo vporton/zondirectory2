@@ -65,7 +65,7 @@ export function OnpageNavigation(props: {
             {
                 /* Save crawl budget by ignoring navigation by more than one list: */
                 differences > 1 ? <meta name="robots" content="noindex,nofollow"/> :
-                differences === 1 ? <meta name="robots" content="noindex"/> : ""
+                differences === 1 ? <meta name="robots" content="noindex,follow"/> : ""
             }
         </Helmet>
     );

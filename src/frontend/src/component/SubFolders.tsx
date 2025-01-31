@@ -86,7 +86,7 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
             <Helmet>
                 <link rel="canonical" href={`https://zoncircle.com${props['data-dir'] == 'super' ? "/superfolders-of/" : "/subfolders-of/"}` + id}/>
                 <title>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: {title}</title>
-                <meta name="robots" content="noindex"/>
+                <meta name="robots" content="noindex,follow"/>
             </Helmet>
             <OnpageNavigation startPage={startFoldersPage} page={foldersPage}/>
             <h1>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: <Link className="nav-item" to={`/item/`+id}>{title}</Link></h1>
