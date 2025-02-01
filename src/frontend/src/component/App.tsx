@@ -51,7 +51,7 @@ export default function App() {
             </Helmet>
             <Container>
                 <header>
-                    <div data-nosnippet="true">
+                    <div data-nosnippet>
                         <Nav style={{marginBottom: '1ex', textAlign: 'center'}}>
                             <Container>
                                 <div className="ad">

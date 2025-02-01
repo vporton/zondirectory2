@@ -90,7 +90,7 @@ export default function SubFolders(props: {defaultAgent: Agent | undefined, 'dat
             </Helmet>
             <OnpageNavigation startPage={startFoldersPage} page={foldersPage}/>
             <h1>{props['data-dir'] == 'super' ? "Super-folders" : "Subfolders"} of: <Link className="nav-item" to={`/item/`+id}>{title}</Link></h1>
-            <div data-nosnippet="true">
+            <div data-nosnippet>
                 <p>Sort by:{" "}
                     <label><input type="radio" name="stream" value="t" onChange={updateStreamKind} checked={streamKind == "t"}/> time</label>{" "}
                     <label><input type="radio" name="stream" value="v" onChange={updateStreamKind} checked={streamKind == "v"}/> votes</label>{" "}
