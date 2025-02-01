@@ -239,7 +239,7 @@ function MyInner(props: {
                                 Latest posts
                                 </Link>
                             </Nav.Item>
-                            <NavDropdown title="User" id="user-nav-dropdown">
+                            <NavDropdown title="User" id="user-nav-dropdown" autoClose>
                                 <Link className="dropdown-item" to="/personhood">
                                 Verify Your Account
                                 </Link>
@@ -257,7 +257,7 @@ function MyInner(props: {
                                 Invest
                                 </Link>
                             </Nav.Item>
-                            <NavDropdown title="About" id="about-nav-dropdown">
+                            <NavDropdown title="About" id="about-nav-dropdown" autoClose>
                                 <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/" title="Blog related to this site">
                                 Blog
                                 </NavDropdown.Item>
@@ -274,7 +274,7 @@ function MyInner(props: {
                                 Carbon Pledge
                                 </NavDropdown.Item>
                             </NavDropdown>
-                            <NavDropdown title="Blog" id="blog-nav-dropdown">
+                            <NavDropdown title="Blog" id="blog-nav-dropdown" autoClose>
                                 <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/">
                                 All posts
                                 </NavDropdown.Item>
