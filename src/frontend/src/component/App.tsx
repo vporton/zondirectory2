@@ -231,58 +231,58 @@ function MyInner(props: {
                         <Nav className="flex-grow-1">
                             <Nav.Item>
                                 <Link className="nav-link" to={root != "" ? `/item/${root}` : ""} title="Start browsing here">
-                                Main folder
+                                    Main folder
                                 </Link>
                             </Nav.Item>
                             <Nav.Item>
                                 <Link className="nav-link" to="/latest" title="Everything at this site, recent first">
-                                Latest posts
+                                    Latest posts
                                 </Link>
                             </Nav.Item>
                             <NavDropdown title="User" id="user-nav-dropdown" autoClose>
                                 <Link className="dropdown-item" to="/personhood">
-                                Verify Your Account
+                                    Verify Your Account
                                 </Link>
                                 <Link className="dropdown-item" to="/prefs">
-                                Settings
+                                    Settings
                                 </Link>
                             </NavDropdown>
                             <Nav.Item>
                                 <Link className="nav-link" to="https://docs.zoncircle.com" title="Help and company info">
-                                Our site
+                                    Our site
                                 </Link>
                             </Nav.Item>
                             <Nav.Item>
                                 <Link className="nav-link" to="https://docs.zoncircle.com/invest/" title="Invest into this site">
-                                Invest
+                                    Invest
                                 </Link>
                             </Nav.Item>
                             <NavDropdown title="About" id="about-nav-dropdown" autoClose>
                                 <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/" title="Blog related to this site">
-                                Blog
+                                    Blog
                                 </NavDropdown.Item>
                                 <NavDropdown.Item href="https://docs.zoncircle.com/about-us/" title="About our company">
-                                About Us
+                                    About Us
                                 </NavDropdown.Item>
                                 <NavDropdown.Item href="https://docs.zoncircle.com/our-partners/" title="Who help to earn money">
-                                Our Partners
+                                    Our Partners
                                 </NavDropdown.Item>
                                 <NavDropdown.Item href="https://docs.zoncircle.com/#team" title="Developers and other personnel">
-                                The Team
+                                    The Team
                                 </NavDropdown.Item>
                                 <NavDropdown.Item href="https://docs.zoncircle.com/carbon-pledge/" title="We will save the world from carbon">
-                                Carbon Pledge
+                                    Carbon Pledge
                                 </NavDropdown.Item>
                             </NavDropdown>
                             <NavDropdown title="Blog" id="blog-nav-dropdown" autoClose>
                                 <NavDropdown.Item href="https://docs.zoncircle.com/blog-archive/">
-                                All posts
+                                    All posts
                                 </NavDropdown.Item>
                                 <NavDropdown.Item href="https://docs.zoncircle.com/author/user/">
-                                CEO's posts
+                                    CEO's posts
                                 </NavDropdown.Item>
                                 <NavDropdown.Item href="https://docs.zoncircle.com/social-media/">
-                                Social Media
+                                    Social Media
                                 </NavDropdown.Item>
                             </NavDropdown>
                         </Nav>
