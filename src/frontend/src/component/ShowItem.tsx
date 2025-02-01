@@ -286,7 +286,7 @@ function ShowItemContent(props: {defaultAgent: Agent | undefined}) {
                             </ul>}
                             <nav>
                                 <p>
-                                    <div data-nosnippet><Link to="#" onClick={e => moreSubfolders(e)}>More...</Link> {id && <Link to={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</Link>}</span>
+                                    <span data-nosnippet><Link to="#" onClick={e => moreSubfolders(e)}>More...</Link> {id && <Link to={`/create-subfolder/for-folder/${serializeItemRef(id)}`}>Create subfolder</Link>}</span>
                                 </p>
                             </nav>
                         </Col>
