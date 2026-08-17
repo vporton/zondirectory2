@@ -34,3 +34,4 @@ dist/
 metaconfig.mk
 config.mo
 src/frontend/assets/.well-known/ii-alternative-origins
+.qodo
